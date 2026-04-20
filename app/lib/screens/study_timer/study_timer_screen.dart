@@ -168,7 +168,7 @@ class _StudyTimerScreenState extends State<StudyTimerScreen> with TickerProvider
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final loc = AppLocalizations.of(context)!;
-    final courses = context.select((CourseProvider p) => p.courses);
+    final courses = context.select((CourseProvider p) => p.uniqueCourses);
 
     return Scaffold(
       appBar: AppBar(

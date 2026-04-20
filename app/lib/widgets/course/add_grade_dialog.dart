@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import '../../models/grade.dart';
 import '../../widgets/common/common_widgets.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 
 class AddGradeDialog extends StatefulWidget {
   final Function(String name, double score, double maxScore, double weight) onSave;
+  final Grade? gradeToEdit;
 
   const AddGradeDialog({
     super.key,
     required this.onSave,
+    this.gradeToEdit,
   });
 
   @override
@@ -22,6 +25,26 @@ class _AddGradeDialogState extends State<AddGradeDialog> {
   final _weightController = TextEditingController();
 
   bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.gradeToEdit != null) {
+      _nameController.text = widget.gradeToEdit!.name;
+      _scoreController.text = widget.gradeToEdit!.score.toString();
+      _maxScoreController.text = widget.gradeToEdit!.maxScore.toString();
+      _weightController.text = widget.gradeToEdit!.weight.toString();
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _scoreController.dispose();
+    _maxScoreController.dispose();
+    _weightController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +76,7 @@ class _AddGradeDialogState extends State<AddGradeDialog> {
             ),
             const SizedBox(height: 24),
             Text(
-              AppLocalizations.of(context)!.addGrade,
+              widget.gradeToEdit != null ? 'Edit Grade' : AppLocalizations.of(context)!.addGrade,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -134,7 +157,7 @@ class _AddGradeDialogState extends State<AddGradeDialog> {
             const SizedBox(height: 24),
 
             PrimaryButton(
-              text: AppLocalizations.of(context)!.saveGrade,
+              text: widget.gradeToEdit != null ? 'Update Grade' : AppLocalizations.of(context)!.saveGrade,
               icon: Icons.check,
               isLoading: _isSaving,
               onPressed: _save,
@@ -147,15 +170,21 @@ class _AddGradeDialogState extends State<AddGradeDialog> {
   }
 
   void _save() {
+    if (_isSaving) return;
     final name = _nameController.text.trim();
     final score = double.tryParse(_scoreController.text.trim());
     final maxScore = double.tryParse(_maxScoreController.text.trim());
     final weight = double.tryParse(_weightController.text.trim());
 
     if (name.isEmpty || score == null || maxScore == null || weight == null) {
-      // Show error? For now just return
-       // We should ideally show a snackbar or error text
-       return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.fillAllFields),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
     }
 
     setState(() => _isSaving = true);

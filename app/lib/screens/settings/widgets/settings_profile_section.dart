@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/services/e2e_key_service.dart';
 import '../../../providers/auth_provider.dart';
 
 class SettingsProfileSection extends StatelessWidget {
@@ -18,30 +19,37 @@ class SettingsProfileSection extends StatelessWidget {
         String initials = 'G';
         String displayName = 'Guest User';
         String email = 'Sign in to sync data';
-        
+
         if (user != null && !auth.isGuest) {
           displayName = user.displayName ?? 'User';
           email = user.email ?? '';
           if (displayName.isNotEmpty) {
-            initials = displayName.trim().split(' ').map((l) => l[0]).take(2).join().toUpperCase();
+            initials = displayName
+                .trim()
+                .split(' ')
+                .map((l) => l[0])
+                .take(2)
+                .join()
+                .toUpperCase();
           } else {
             initials = 'U';
           }
         } else if (auth.isGuest) {
-           displayName = 'Guest Mode';
-           initials = 'G';
+          displayName = 'Guest Mode';
+          initials = 'G';
         }
 
         return GestureDetector(
           onTap: () {
-             if (user != null && !auth.isGuest) {
-               showModalBottomSheet(
-                 context: context,
-                 isScrollControlled: true,
-                 backgroundColor: Colors.transparent,
-                 builder: (context) => _EditProfileSheet(auth: auth, currentName: displayName),
-               );
-             }
+            if (user != null && !auth.isGuest) {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) =>
+                    _EditProfileSheet(auth: auth, currentName: displayName),
+              );
+            }
           },
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 24),
@@ -82,14 +90,18 @@ class SettingsProfileSection extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                          color: isDark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimaryLight,
                         ),
                       ),
                       Text(
                         email,
                         style: TextStyle(
                           fontSize: 14,
-                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight,
                         ),
                       ),
                       if (user != null && !auth.isGuest)
@@ -108,13 +120,15 @@ class SettingsProfileSection extends StatelessWidget {
                   Icon(
                     Icons.edit,
                     size: 20,
-                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                    color: isDark
+                        ? AppColors.textSecondaryDark
+                        : AppColors.textSecondaryLight,
                   ),
               ],
             ),
           ),
         );
-      }
+      },
     );
   }
 }
@@ -132,9 +146,11 @@ class _EditProfileSheet extends StatefulWidget {
 class _EditProfileSheetState extends State<_EditProfileSheet> {
   late TextEditingController _nameController;
   late TextEditingController _emailController;
-  final TextEditingController _currentPasswordController = TextEditingController();
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool _isLoading = false;
   bool _showPasswordSection = false;
@@ -144,7 +160,9 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.currentName);
-    _emailController = TextEditingController(text: widget.auth.user?.email ?? '');
+    _emailController = TextEditingController(
+      text: widget.auth.user?.email ?? '',
+    );
   }
 
   @override
@@ -161,13 +179,19 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
     final newName = _nameController.text.trim();
     if (newName.isEmpty || newName == widget.currentName) return;
 
-    setState(() { _isLoading = true; _error = null; });
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     final success = await widget.auth.updateUserProfile(newName);
     if (mounted) {
       setState(() => _isLoading = false);
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.profileUpdated), backgroundColor: AppColors.primary),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.profileUpdated),
+            backgroundColor: AppColors.primary,
+          ),
         );
       } else {
         setState(() => _error = widget.auth.error);
@@ -179,13 +203,19 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
     final newEmail = _emailController.text.trim();
     if (newEmail.isEmpty || newEmail == widget.auth.user?.email) return;
 
-    setState(() { _isLoading = true; _error = null; });
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     final success = await widget.auth.updateUserEmail(newEmail);
     if (mounted) {
       setState(() => _isLoading = false);
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.emailVerificationSent), backgroundColor: AppColors.primary),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.emailVerificationSent),
+            backgroundColor: AppColors.primary,
+          ),
         );
       } else {
         setState(() => _error = widget.auth.error);
@@ -208,21 +238,36 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
       return;
     }
 
-    setState(() { _isLoading = true; _error = null; });
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     final success = await widget.auth.updateUserPassword(current, newPass);
     if (mounted) {
-      setState(() => _isLoading = false);
       if (success) {
+        try {
+          final e2eEnabled = await E2EKeyService().isE2EEnabled();
+          if (e2eEnabled) {
+            await E2EKeyService().changePassword(current, newPass);
+          }
+        } catch (e) {
+          debugPrint('E2E key change warning: $e');
+        }
+
         _currentPasswordController.clear();
         _newPasswordController.clear();
         _confirmPasswordController.clear();
         setState(() => _showPasswordSection = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(loc.passwordChanged), backgroundColor: AppColors.primary),
+          SnackBar(
+            content: Text(loc.passwordChanged),
+            backgroundColor: AppColors.primary,
+          ),
         );
       } else {
         setState(() => _error = widget.auth.error);
       }
+      setState(() => _isLoading = false);
     }
   }
 
@@ -232,7 +277,12 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
     final loc = AppLocalizations.of(context)!;
 
     return Container(
-      padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
+      padding: EdgeInsets.fromLTRB(
+        24,
+        24,
+        24,
+        MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
@@ -261,7 +311,9 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                color: isDark
+                    ? AppColors.textPrimaryDark
+                    : AppColors.textPrimaryLight,
               ),
             ),
             const SizedBox(height: 24),
@@ -272,15 +324,27 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [AppColors.primary, AppColors.primaryDark]),
+                  gradient: LinearGradient(
+                    colors: [AppColors.primary, AppColors.primaryDark],
+                  ),
                   shape: BoxShape.circle,
                 ),
                 child: Center(
                   child: Text(
                     _nameController.text.trim().isNotEmpty
-                        ? _nameController.text.trim().split(' ').map((l) => l.isNotEmpty ? l[0] : '').take(2).join().toUpperCase()
+                        ? _nameController.text
+                              .trim()
+                              .split(' ')
+                              .map((l) => l.isNotEmpty ? l[0] : '')
+                              .take(2)
+                              .join()
+                              .toUpperCase()
                         : 'U',
-                    style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white),
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
@@ -297,9 +361,21 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.error_outline, color: AppColors.red, size: 20),
+                    const Icon(
+                      Icons.error_outline,
+                      color: AppColors.red,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
-                    Expanded(child: Text(_error!, style: const TextStyle(color: AppColors.red, fontSize: 13))),
+                    Expanded(
+                      child: Text(
+                        _error!,
+                        style: const TextStyle(
+                          color: AppColors.red,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -318,7 +394,13 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
               alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: _isLoading ? null : _saveName,
-                child: Text(loc.save, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
+                child: Text(
+                  loc.save,
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
 
@@ -337,17 +419,26 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
               alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: _isLoading ? null : _saveEmail,
-                child: Text(loc.save, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
+                child: Text(
+                  loc.save,
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
 
             const SizedBox(height: 8),
-            Divider(color: isDark ? Colors.grey.shade800 : Colors.grey.shade200),
+            Divider(
+              color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+            ),
             const SizedBox(height: 8),
 
             // Password Section toggle
             GestureDetector(
-              onTap: () => setState(() => _showPasswordSection = !_showPasswordSection),
+              onTap: () =>
+                  setState(() => _showPasswordSection = !_showPasswordSection),
               child: Row(
                 children: [
                   Container(
@@ -357,7 +448,11 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
                       color: AppColors.orange.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.lock_outline, color: AppColors.orange, size: 20),
+                    child: const Icon(
+                      Icons.lock_outline,
+                      color: AppColors.orange,
+                      size: 20,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -366,13 +461,19 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                        color: isDark
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textPrimaryLight,
                       ),
                     ),
                   ),
                   Icon(
-                    _showPasswordSection ? Icons.expand_less : Icons.expand_more,
-                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                    _showPasswordSection
+                        ? Icons.expand_less
+                        : Icons.expand_more,
+                    color: isDark
+                        ? AppColors.textSecondaryDark
+                        : AppColors.textSecondaryLight,
                   ),
                 ],
               ),
@@ -412,11 +513,23 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                   child: _isLoading
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : Text(loc.changePassword, style: const TextStyle(fontWeight: FontWeight.w600)),
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          loc.changePassword,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
                 ),
               ),
             ],
@@ -424,7 +537,9 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
             if (_isLoading && !_showPasswordSection)
               const Padding(
                 padding: EdgeInsets.only(top: 16),
-                child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+                child: Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                ),
               ),
 
             const SizedBox(height: 16),
@@ -446,13 +561,27 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
-      style: TextStyle(color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
+      style: TextStyle(
+        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+      ),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
-        prefixIcon: Icon(icon, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight, size: 20),
+        labelStyle: TextStyle(
+          color: isDark
+              ? AppColors.textSecondaryDark
+              : AppColors.textSecondaryLight,
+        ),
+        prefixIcon: Icon(
+          icon,
+          color: isDark
+              ? AppColors.textSecondaryDark
+              : AppColors.textSecondaryLight,
+          size: 20,
+        ),
         filled: true,
-        fillColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        fillColor: isDark
+            ? AppColors.backgroundDark
+            : AppColors.backgroundLight,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide.none,
@@ -461,7 +590,10 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
       ),
     );
   }

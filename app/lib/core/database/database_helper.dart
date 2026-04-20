@@ -1,9 +1,17 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite/sqflite.dart'
+    show getDatabasesPath, openDatabase, Database;
+import 'package:sqflite_sqlcipher/sqflite.dart' as sqlcipher;
 import 'package:path/path.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
 
-import '../../models/note.dart'; // Needed for Migration
+import '../../models/note.dart';
+
+const String _keyDbEncryptionKey = 'db_encryption_key';
+const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
 /// SQLite veritabanı yönetimi (Web için in-memory fallback)
 class DatabaseHelper {
@@ -11,8 +19,11 @@ class DatabaseHelper {
   factory DatabaseHelper() => _instance;
   DatabaseHelper._internal();
 
+  static String dbName = 'lesson_tracker.db';
+
   static Database? _database;
-  
+  static Completer<Database>? _initCompleter;
+
   bool get isWeb => kIsWeb;
 
   final List<VoidCallback> _webClearCaches = [];
@@ -26,17 +37,50 @@ class DatabaseHelper {
       throw UnsupportedError('SQLite is not supported on web');
     }
     if (_database != null) return _database!;
-    _database = await _initDatabase();
-    return _database!;
+    if (_initCompleter != null) return _initCompleter!.future;
+    _initCompleter = Completer<Database>();
+    try {
+      final db = await _initDatabase();
+      _database = db;
+      _initCompleter!.complete(db);
+      return db;
+    } catch (e) {
+      _initCompleter!.completeError(e);
+      _initCompleter = null;
+      rethrow;
+    }
   }
 
   Future<Database> _initDatabase() async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'lesson_tracker.db');
+    final path = join(dbPath, dbName);
 
-    return await openDatabase(
+    String? encryptionKey = await _secureStorage.read(key: _keyDbEncryptionKey);
+    if (encryptionKey == null) {
+      final key = encrypt.Key.fromSecureRandom(32);
+      await _secureStorage.write(key: _keyDbEncryptionKey, value: key.base64);
+      encryptionKey = key.base64;
+    }
+
+    if (isWeb) {
+      return await openDatabase(
+        path,
+        version: 17,
+        onConfigure: (db) async {
+          await db.execute('PRAGMA foreign_keys = ON');
+        },
+        onCreate: _onCreate,
+        onUpgrade: _onUpgrade,
+      );
+    }
+
+    return await sqlcipher.openDatabase(
       path,
-      version: 11, // Version 11: relative file paths migration
+      version: 17,
+      password: encryptionKey,
+      onConfigure: (db) async {
+        await db.execute('PRAGMA foreign_keys = ON');
+      },
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -67,7 +111,12 @@ class DatabaseHelper {
         status TEXT DEFAULT 'active',
         latitude REAL,
         longitude REAL,
-        updatedAt TEXT
+        updatedAt TEXT,
+        professorEmail TEXT,
+        professorPhone TEXT,
+        professorOffice TEXT,
+        officeHours TEXT,
+        assistantName TEXT
       )
     ''');
 
@@ -112,6 +161,7 @@ class DatabaseHelper {
         id TEXT PRIMARY KEY,
         courseId TEXT NOT NULL,
         date TEXT NOT NULL,
+        reason TEXT DEFAULT 'unexcused',
         FOREIGN KEY (courseId) REFERENCES courses (id) ON DELETE CASCADE
       )
     ''');
@@ -125,10 +175,11 @@ class DatabaseHelper {
         name TEXT NOT NULL,
         type TEXT NOT NULL,
         createdAt TEXT NOT NULL,
+        url TEXT,
         FOREIGN KEY (courseId) REFERENCES courses (id) ON DELETE CASCADE
       )
     ''');
-    
+
     // Deadline tablosu
     await db.execute('''
       CREATE TABLE deadlines (
@@ -145,11 +196,22 @@ class DatabaseHelper {
     // İndeksler
     await db.execute('CREATE INDEX idx_notes_courseId ON notes (courseId)');
     await db.execute('CREATE INDEX idx_notes_type ON notes (type)');
+    await db.execute('CREATE INDEX idx_notes_createdAt ON notes (createdAt)');
+    await db.execute(
+      'CREATE INDEX idx_notes_isBookmarked ON notes (isBookmarked)',
+    );
     await db.execute('CREATE INDEX idx_grades_courseId ON grades (courseId)');
-    await db.execute('CREATE INDEX idx_absences_courseId ON absences (courseId)');
+    await db.execute(
+      'CREATE INDEX idx_absences_courseId ON absences (courseId)',
+    );
     await db.execute('CREATE INDEX idx_courses_status ON courses (status)');
-    await db.execute('CREATE INDEX idx_files_courseId ON course_files (courseId)');
-    await db.execute('CREATE INDEX idx_deadlines_courseId ON deadlines (courseId)');
+    await db.execute(
+      'CREATE INDEX idx_files_courseId ON course_files (courseId)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_deadlines_courseId ON deadlines (courseId)',
+    );
+    await db.execute('CREATE INDEX idx_deadlines_date ON deadlines (date)');
 
     // Pending Changes tablosu — offline-first sync için
     await db.execute('''
@@ -162,7 +224,9 @@ class DatabaseHelper {
         synced INTEGER DEFAULT 0
       )
     ''');
-    await db.execute('CREATE INDEX idx_pending_synced ON pending_changes (synced)');
+    await db.execute(
+      'CREATE INDEX idx_pending_synced ON pending_changes (synced)',
+    );
 
     // Study Sessions tablosu
     await db.execute('''
@@ -176,8 +240,58 @@ class DatabaseHelper {
         FOREIGN KEY (courseId) REFERENCES courses (id) ON DELETE SET NULL
       )
     ''');
-    await db.execute('CREATE INDEX idx_study_sessions_courseId ON study_sessions (courseId)');
-    await db.execute('CREATE INDEX idx_study_sessions_startedAt ON study_sessions (startedAt)');
+    await db.execute(
+      'CREATE INDEX idx_study_sessions_courseId ON study_sessions (courseId)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_study_sessions_startedAt ON study_sessions (startedAt)',
+    );
+
+    // Planner Events tablosu (v13)
+    await db.execute('''
+      CREATE TABLE planner_events (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        type INTEGER NOT NULL,
+        startTime TEXT NOT NULL,
+        endTime TEXT NOT NULL,
+        color INTEGER NOT NULL,
+        notes TEXT
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX idx_planner_events_startTime ON planner_events (startTime)',
+    );
+
+    // Moodle hesapları (v14)
+    await db.execute('''
+      CREATE TABLE moodle_accounts (
+        id TEXT PRIMARY KEY,
+        baseUrl TEXT NOT NULL,
+        siteTitle TEXT NOT NULL,
+        username TEXT NOT NULL,
+        fullName TEXT NOT NULL,
+        avatarUrl TEXT,
+        lastSynced TEXT NOT NULL,
+        isActive INTEGER DEFAULT 1
+      )
+    ''');
+
+    // Moodle önbelleği (v14) — JSON payload olarak API yanıtları
+    await db.execute('''
+      CREATE TABLE moodle_cache (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        accountId TEXT NOT NULL,
+        dataType TEXT NOT NULL,
+        payload TEXT NOT NULL,
+        cachedAt TEXT NOT NULL,
+        accessedAt TEXT NOT NULL,
+        FOREIGN KEY (accountId) REFERENCES moodle_accounts (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX idx_moodle_cache_account ON moodle_cache (accountId, dataType)',
+    );
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -205,7 +319,9 @@ class DatabaseHelper {
           FOREIGN KEY (courseId) REFERENCES courses (id) ON DELETE CASCADE
         )
       ''');
-      await db.execute('CREATE INDEX idx_absences_courseId ON absences (courseId)');
+      await db.execute(
+        'CREATE INDEX idx_absences_courseId ON absences (courseId)',
+      );
     }
     if (oldVersion < 4) {
       await db.execute('''
@@ -219,7 +335,9 @@ class DatabaseHelper {
           FOREIGN KEY (courseId) REFERENCES courses (id) ON DELETE CASCADE
         )
       ''');
-      await db.execute('CREATE INDEX idx_files_courseId ON course_files (courseId)');
+      await db.execute(
+        'CREATE INDEX idx_files_courseId ON course_files (courseId)',
+      );
     }
     if (oldVersion < 5) {
       await db.execute('''
@@ -233,7 +351,9 @@ class DatabaseHelper {
           FOREIGN KEY (courseId) REFERENCES courses (id) ON DELETE CASCADE
         )
       ''');
-      await db.execute('CREATE INDEX idx_deadlines_courseId ON deadlines (courseId)');
+      await db.execute(
+        'CREATE INDEX idx_deadlines_courseId ON deadlines (courseId)',
+      );
     }
     if (oldVersion < 6) {
       await db.execute('ALTER TABLE notes ADD COLUMN bookmarks TEXT');
@@ -245,16 +365,18 @@ class DatabaseHelper {
     if (oldVersion < 8) {
       await db.execute('ALTER TABLE notes ADD COLUMN searchContent TEXT');
       final notes = await db.query('notes');
+      final batch = db.batch();
       for (final noteMap in notes) {
         final note = Note.fromMap(noteMap);
         final searchContent = _generateSearchContent(note);
-        await db.update(
+        batch.update(
           'notes',
           {'searchContent': searchContent},
           where: 'id = ?',
           whereArgs: [note.id],
         );
       }
+      await batch.commit(noResult: true);
     }
     if (oldVersion < 9) {
       await db.execute('ALTER TABLE courses ADD COLUMN updatedAt TEXT');
@@ -268,7 +390,9 @@ class DatabaseHelper {
           synced INTEGER DEFAULT 0
         )
       ''');
-      await db.execute('CREATE INDEX IF NOT EXISTS idx_pending_synced ON pending_changes (synced)');
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_pending_synced ON pending_changes (synced)',
+      );
       final now = DateTime.now().toIso8601String();
       await db.update('courses', {'updatedAt': now});
     }
@@ -284,23 +408,37 @@ class DatabaseHelper {
           FOREIGN KEY (courseId) REFERENCES courses (id) ON DELETE SET NULL
         )
       ''');
-      await db.execute('CREATE INDEX IF NOT EXISTS idx_study_sessions_courseId ON study_sessions (courseId)');
-      await db.execute('CREATE INDEX IF NOT EXISTS idx_study_sessions_startedAt ON study_sessions (startedAt)');
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_study_sessions_courseId ON study_sessions (courseId)',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_study_sessions_startedAt ON study_sessions (startedAt)',
+      );
     }
     if (oldVersion < 11) {
-      debugPrint('[DB Migration v11] Converting absolute paths to relative paths...');
-      final knownDirs = ['images/', 'audio/', 'course_materials/', 'restored_notes/'];
-      
-      final notes = await db.query('notes', columns: ['id', 'filePath', 'thumbnailPath']);
+      debugPrint(
+        '[DB Migration v11] Converting absolute paths to relative paths...',
+      );
+      final knownDirs = [
+        'images/',
+        'audio/',
+        'course_materials/',
+        'restored_notes/',
+      ];
+
+      final notes = await db.query(
+        'notes',
+        columns: ['id', 'filePath', 'thumbnailPath'],
+      );
       for (final noteRow in notes) {
         final id = noteRow['id'] as String;
         final filePath = noteRow['filePath'] as String?;
         final thumbnailPath = noteRow['thumbnailPath'] as String?;
-        
+
         String? newFilePath = filePath;
         String? newThumbPath = thumbnailPath;
         bool needsUpdate = false;
-        
+
         if (filePath != null && filePath.startsWith('/')) {
           for (final dir in knownDirs) {
             final idx = filePath.indexOf(dir);
@@ -311,7 +449,7 @@ class DatabaseHelper {
             }
           }
         }
-        
+
         if (thumbnailPath != null && thumbnailPath.startsWith('/')) {
           for (final dir in knownDirs) {
             final idx = thumbnailPath.indexOf(dir);
@@ -322,7 +460,7 @@ class DatabaseHelper {
             }
           }
         }
-        
+
         if (needsUpdate) {
           await db.update(
             'notes',
@@ -332,12 +470,12 @@ class DatabaseHelper {
           );
         }
       }
-      
+
       final files = await db.query('course_files', columns: ['id', 'path']);
       for (final fileRow in files) {
         final id = fileRow['id'] as String;
         final filePath = fileRow['path'] as String?;
-        
+
         if (filePath != null && filePath.startsWith('/')) {
           for (final dir in knownDirs) {
             final idx = filePath.indexOf(dir);
@@ -355,6 +493,90 @@ class DatabaseHelper {
         }
       }
       debugPrint('[DB Migration v11] Migration completed.');
+    }
+    if (oldVersion < 12) {
+      await db.execute(
+        "ALTER TABLE absences ADD COLUMN reason TEXT DEFAULT 'unexcused'",
+      );
+      await db.execute('ALTER TABLE courses ADD COLUMN professorEmail TEXT');
+      await db.execute('ALTER TABLE courses ADD COLUMN professorPhone TEXT');
+      await db.execute('ALTER TABLE courses ADD COLUMN professorOffice TEXT');
+      await db.execute('ALTER TABLE courses ADD COLUMN officeHours TEXT');
+      await db.execute('ALTER TABLE courses ADD COLUMN assistantName TEXT');
+      await db.execute('ALTER TABLE course_files ADD COLUMN url TEXT');
+    }
+    if (oldVersion < 13) {
+      await db.execute('''
+        CREATE TABLE planner_events (
+          id TEXT PRIMARY KEY,
+          title TEXT NOT NULL,
+          type INTEGER NOT NULL,
+          startTime TEXT NOT NULL,
+          endTime TEXT NOT NULL,
+          color INTEGER NOT NULL,
+          notes TEXT
+        )
+      ''');
+      await db.execute(
+        'CREATE INDEX idx_planner_events_startTime ON planner_events (startTime)',
+      );
+    }
+    if (oldVersion < 14) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS moodle_accounts (
+          id TEXT PRIMARY KEY,
+          baseUrl TEXT NOT NULL,
+          siteTitle TEXT NOT NULL,
+          username TEXT NOT NULL,
+          fullName TEXT NOT NULL,
+          avatarUrl TEXT,
+          lastSynced TEXT NOT NULL,
+          isActive INTEGER DEFAULT 1
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS moodle_cache (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          accountId TEXT NOT NULL,
+          dataType TEXT NOT NULL,
+          payload TEXT NOT NULL,
+          cachedAt TEXT NOT NULL,
+          accessedAt TEXT NOT NULL,
+          FOREIGN KEY (accountId) REFERENCES moodle_accounts (id) ON DELETE CASCADE
+        )
+      ''');
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_moodle_cache_account ON moodle_cache (accountId, dataType)',
+      );
+      debugPrint('[DB Migration v14] Moodle tables created.');
+    }
+    if (oldVersion < 15) {
+      await db.execute("ALTER TABLE notes ADD COLUMN drawingData TEXT");
+      debugPrint(
+        '[DB Migration v15] Drawing data column added to notes table.',
+      );
+    }
+    if (oldVersion < 16) {
+      debugPrint('[DB Migration v16] Database encryption enabled.');
+    }
+    if (oldVersion < 17) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS e2e_metadata (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_key_salt TEXT,
+          encrypted_key TEXT,
+          security_questions_hash TEXT,
+          created_at TEXT NOT NULL,
+          key_version INTEGER DEFAULT 1,
+          last_key_change TEXT
+        )
+      ''');
+      await db.execute('ALTER TABLE notes ADD COLUMN cloud_path TEXT');
+      await db.execute(
+        'ALTER TABLE notes ADD COLUMN thumbnail_cloud_path TEXT',
+      );
+      await db.execute('ALTER TABLE course_files ADD COLUMN cloud_path TEXT');
+      debugPrint('[DB Migration v17] E2E encryption tables added.');
     }
   }
 
@@ -408,8 +630,6 @@ class DatabaseHelper {
     return 0;
   }
 
-
-
   /// Tüm kullanıcı verilerini temizle — hesap çıkışında çağrılır
   Future<void> clearAllData() async {
     if (isWeb) {
@@ -419,75 +639,27 @@ class DatabaseHelper {
       return;
     }
     final db = await database;
-    await db.delete('courses');
-    await db.delete('notes');
-    await db.delete('grades');
-    await db.delete('absences');
-    await db.delete('course_files');
-    await db.delete('deadlines');
-    await db.delete('pending_changes');
-    await db.delete('study_sessions');
+    await db.transaction((txn) async {
+      await txn.delete('study_sessions');
+      await txn.delete('pending_changes');
+      await txn.delete('deadlines');
+      await txn.delete('course_files');
+      await txn.delete('absences');
+      await txn.delete('grades');
+      await txn.delete('notes');
+      await txn.delete('courses');
+      await txn.delete('planner_events');
+      await txn.delete('moodle_cache');
+      await txn.delete('moodle_accounts');
+    });
     debugPrint('DatabaseHelper: All user data cleared.');
-  }
-
-  // ==================== PENDING CHANGES (Offline-First Sync) ====================
-
-  Future<void> recordChange(String tableName, String recordId, String operation) async {
-    if (isWeb) return;
-    try {
-      final db = await database;
-      await db.insert('pending_changes', {
-        'tableName': tableName,
-        'recordId': recordId,
-        'operation': operation,
-        'timestamp': DateTime.now().toIso8601String(),
-        'synced': 0,
-      });
-    } catch (e) {
-      debugPrint('Error recording change: $e');
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> getPendingChanges() async {
-    if (isWeb) return [];
-    final db = await database;
-    return await db.query(
-      'pending_changes',
-      where: 'synced = ?',
-      whereArgs: [0],
-      orderBy: 'timestamp ASC',
-    );
-  }
-
-  Future<void> markChangesSynced(List<int> ids) async {
-    if (isWeb || ids.isEmpty) return;
-    final db = await database;
-    final batch = db.batch();
-    for (final id in ids) {
-      batch.update(
-        'pending_changes',
-        {'synced': 1},
-        where: 'id = ?',
-        whereArgs: [id],
-      );
-    }
-    await batch.commit(noResult: true);
-  }
-
-  Future<void> clearSyncedChanges() async {
-    if (isWeb) return;
-    final db = await database;
-    await db.delete(
-      'pending_changes',
-      where: 'synced = ?',
-      whereArgs: [1],
-    );
   }
 
   Future<void> close() async {
     if (isWeb) return;
-    final db = await database;
-    await db.close();
+    if (_database == null) return;
+    await _database!.close();
     _database = null;
+    _initCompleter = null;
   }
 }

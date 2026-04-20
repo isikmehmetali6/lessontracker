@@ -8,6 +8,7 @@ import 'widgets/settings_profile_section.dart';
 import 'widgets/settings_preferences_section.dart';
 import 'widgets/settings_data_section.dart';
 import 'widgets/settings_about_section.dart';
+import 'widgets/settings_e2e_section.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -18,16 +19,18 @@ class SettingsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        backgroundColor: isDark
+            ? AppColors.backgroundDark
+            : AppColors.backgroundLight,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
-          onPressed: () => Navigator.pop(context),
-        ),
+        automaticallyImplyLeading:
+            false, // AppBar'da otomatik geri tuşu çıkmasın
         title: Text(
           AppLocalizations.of(context)!.settingsParams,
           style: TextStyle(
-            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+            color: isDark
+                ? AppColors.textPrimaryDark
+                : AppColors.textPrimaryLight,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -47,7 +50,9 @@ class SettingsScreen extends StatelessWidget {
                         AppLocalizations.of(context)!.settingsSubHeader,
                         style: TextStyle(
                           fontSize: 14,
-                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight,
                         ),
                       ),
                     ],
@@ -58,13 +63,16 @@ class SettingsScreen extends StatelessWidget {
               // Sections
               const SliverToBoxAdapter(child: SettingsProfileSection()),
               const SliverToBoxAdapter(child: SizedBox(height: 24)),
-              
+
               const SliverToBoxAdapter(child: SettingsPreferencesSection()),
               const SliverToBoxAdapter(child: SizedBox(height: 16)),
-              
+
               const SliverToBoxAdapter(child: SettingsDataSection()),
               const SliverToBoxAdapter(child: SizedBox(height: 16)),
-              
+
+              const SliverToBoxAdapter(child: SettingsE2ESection()),
+              const SliverToBoxAdapter(child: SizedBox(height: 16)),
+
               const SliverToBoxAdapter(child: SettingsAboutSection()),
               const SliverToBoxAdapter(child: SizedBox(height: 60)),
             ],

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../search/search_screen.dart';
-
+import 'package:blur/blur.dart';
 class HomeSearchBar extends StatelessWidget {
   const HomeSearchBar({super.key});
 
@@ -48,9 +48,10 @@ class HomeSearchBar extends StatelessWidget {
                     decoration: InputDecoration(
                       hintText: AppLocalizations.of(context)!.searchPlaceholder, 
                       hintStyle: TextStyle(
+                        fontSize: 15,
                         color: isDark 
-                            ? AppColors.textSecondaryDark.withValues(alpha: 0.7) 
-                            : AppColors.textSecondaryLight.withValues(alpha: 0.7),
+                            ? AppColors.textPrimaryDark.withValues(alpha: 0.5) 
+                            : AppColors.textPrimaryLight.withValues(alpha: 0.5),
                       ),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.zero,
@@ -60,6 +61,10 @@ class HomeSearchBar extends StatelessWidget {
               ),
             ],
           ),
+        ).frosted(
+          blur: 15,
+          frostColor: isDark ? AppColors.surfaceDark.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(24),
         ),
       ),
     );

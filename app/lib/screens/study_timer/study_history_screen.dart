@@ -80,205 +80,228 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Range selector
-                  Row(
-                    children: [
-                      _buildRangeChip('7D', 7, isDark),
-                      const SizedBox(width: 8),
-                      _buildRangeChip('14D', 14, isDark),
-                      const SizedBox(width: 8),
-                      _buildRangeChip('30D', 30, isDark),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Summary cards
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildStatCard(
-                          '${totalHours.toStringAsFixed(1)}h',
-                          'Total Study',
-                          Icons.timer,
-                          AppColors.primary,
-                          isDark,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildStatCard(
-                          '${workSessions.length}',
-                          'Sessions',
-                          Icons.repeat,
-                          AppColors.orange,
-                          isDark,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildStatCard(
-                          '${avgPerDay.toStringAsFixed(0)}m',
-                          'Avg/Day',
-                          Icons.trending_up,
-                          AppColors.green,
-                          isDark,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Daily chart
-                  _buildSectionTitle('Daily Study Time', isDark),
-                  const SizedBox(height: 12),
-                  Container(
-                    height: 200,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: isDark ? AppColors.surfaceDark : Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: dailyData.isEmpty
-                        ? const Center(child: Text('No data yet'))
-                        : BarChart(
-                            BarChartData(
-                              alignment: BarChartAlignment.spaceAround,
-                              maxY: (dailyData.values.isEmpty ? 60 : dailyData.values.reduce((a, b) => a > b ? a : b).toDouble()) * 1.2,
-                              barTouchData: BarTouchData(
-                                touchTooltipData: BarTouchTooltipData(
-                                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                                    return BarTooltipItem(
-                                      '${rod.toY.toInt()}m',
-                                      const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-                                    );
-                                  },
-                                ),
-                              ),
-                              titlesData: FlTitlesData(
-                                show: true,
-                                bottomTitles: AxisTitles(
-                                  sideTitles: SideTitles(
-                                    showTitles: true,
-                                    getTitlesWidget: (value, meta) {
-                                      final keys = dailyData.keys.toList();
-                                      if (value.toInt() < keys.length) {
-                                        // Show every nth label to avoid crowding
-                                        final step = keys.length > 10 ? 3 : (keys.length > 5 ? 2 : 1);
-                                        if (value.toInt() % step != 0) return const SizedBox();
-                                        return Padding(
-                                          padding: const EdgeInsets.only(top: 8),
-                                          child: Text(
-                                            keys[value.toInt()],
-                                            style: TextStyle(
-                                              fontSize: 10,
-                                              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                      return const SizedBox();
-                                    },
-                                  ),
-                                ),
-                                leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                              ),
-                              borderData: FlBorderData(show: false),
-                              gridData: const FlGridData(show: false),
-                              barGroups: dailyData.entries.toList().asMap().entries.map((e) {
-                                return BarChartGroupData(
-                                  x: e.key,
-                                  barRods: [
-                                    BarChartRodData(
-                                      toY: e.value.value.toDouble(),
-                                      color: AppColors.primary,
-                                      width: _selectedRange > 14 ? 6 : 12,
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                  ],
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Course breakdown
-                  if (courseMinutes.isNotEmpty) ...[
-                    _buildSectionTitle('By Course', isDark),
-                    const SizedBox(height: 12),
-                    ...courseMinutes.entries.map((entry) {
-                      final course = entry.key != null
-                          ? courses.cast<dynamic>().firstWhere(
-                                (c) => c.id == entry.key,
-                                orElse: () => null,
-                              )
-                          : null;
-                      final name = course?.name ?? 'General';
-                      final color = course?.color ?? Colors.grey;
-                      final mins = entry.value;
-                      final pct = totalMinutes > 0 ? (mins / totalMinutes * 100) : 0.0;
-
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: isDark ? AppColors.surfaceDark : Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
+          : CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Range selector
+                        Row(
                           children: [
-                            Container(
-                              width: 12,
-                              height: 12,
-                              decoration: BoxDecoration(
-                                color: color,
-                                shape: BoxShape.circle,
+                            _buildRangeChip('7D', 7, isDark),
+                            const SizedBox(width: 8),
+                            _buildRangeChip('14D', 14, isDark),
+                            const SizedBox(width: 8),
+                            _buildRangeChip('30D', 30, isDark),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+      
+                        // Summary cards
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildStatCard(
+                                '${totalHours.toStringAsFixed(1)}h',
+                                'Total Study',
+                                Icons.timer,
+                                AppColors.primary,
+                                isDark,
                               ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
-                              child: Text(
-                                name,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-                                ),
+                              child: _buildStatCard(
+                                '${workSessions.length}',
+                                'Sessions',
+                                Icons.repeat,
+                                AppColors.orange,
+                                isDark,
                               ),
                             ),
-                            Text(
-                              '${mins}m',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '${pct.toStringAsFixed(0)}%',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildStatCard(
+                                '${avgPerDay.toStringAsFixed(0)}m',
+                                'Avg/Day',
+                                Icons.trending_up,
+                                AppColors.green,
+                                isDark,
                               ),
                             ),
                           ],
                         ),
-                      );
-                    }),
-                  ],
+                      ],
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Daily chart
+                        _buildSectionTitle('Daily Study Time', isDark),
+                        const SizedBox(height: 12),
+                        Container(
+                          height: 200,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: isDark ? AppColors.surfaceDark : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: dailyData.isEmpty
+                              ? const Center(child: Text('No data yet'))
+                              : BarChart(
+                                  BarChartData(
+                                    alignment: BarChartAlignment.spaceAround,
+                                    maxY: (dailyData.values.isEmpty ? 60 : dailyData.values.reduce((a, b) => a > b ? a : b).toDouble()) * 1.2,
+                                    barTouchData: BarTouchData(
+                                      touchTooltipData: BarTouchTooltipData(
+                                        getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                                          return BarTooltipItem(
+                                            '${rod.toY.toInt()}m',
+                                            const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    titlesData: FlTitlesData(
+                                      show: true,
+                                      bottomTitles: AxisTitles(
+                                        sideTitles: SideTitles(
+                                          showTitles: true,
+                                          getTitlesWidget: (value, meta) {
+                                            final keys = dailyData.keys.toList();
+                                            if (value.toInt() < keys.length) {
+                                              // Show every nth label to avoid crowding
+                                              final step = keys.length > 10 ? 3 : (keys.length > 5 ? 2 : 1);
+                                              if (value.toInt() % step != 0) return const SizedBox();
+                                              return Padding(
+                                                padding: const EdgeInsets.only(top: 8),
+                                                child: Text(
+                                                  keys[value.toInt()],
+                                                  style: TextStyle(
+                                                    fontSize: 10,
+                                                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                            return const SizedBox();
+                                          },
+                                        ),
+                                      ),
+                                      leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                    ),
+                                    borderData: FlBorderData(show: false),
+                                    gridData: const FlGridData(show: false),
+                                    barGroups: dailyData.entries.toList().asMap().entries.map((e) {
+                                      return BarChartGroupData(
+                                        x: e.key,
+                                        barRods: [
+                                          BarChartRodData(
+                                            toY: e.value.value.toDouble(),
+                                            color: AppColors.primary,
+                                            width: _selectedRange > 14 ? 6 : 12,
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                        ],
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (courseMinutes.isNotEmpty) ...[
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+                    sliver: SliverToBoxAdapter(
+                      child: _buildSectionTitle('By Course', isDark),
+                    ),
+                  ),
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    sliver: SliverList.builder(
+                      itemCount: courseMinutes.entries.length,
+                      itemBuilder: (context, index) {
+                        final entry = courseMinutes.entries.elementAt(index);
+                        final course = entry.key != null
+                            ? courses.where((c) => c.id == entry.key).firstOrNull
+                            : null;
+                        final name = course?.name ?? 'General';
+                        final color = course?.color ?? Colors.grey;
+                        final mins = entry.value;
+                        final pct = totalMinutes > 0 ? (mins / totalMinutes * 100) : 0.0;
+  
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: isDark ? AppColors.surfaceDark : Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 12,
+                                height: 12,
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  name,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                '${mins}m',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '${pct.toStringAsFixed(0)}%',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
 
-                  // Recent sessions
-                  const SizedBox(height: 24),
-                  _buildSectionTitle('Recent Sessions', isDark),
-                  const SizedBox(height: 12),
-                  if (workSessions.isEmpty)
-                    Center(
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+                  sliver: SliverToBoxAdapter(
+                    child: _buildSectionTitle('Recent Sessions', isDark),
+                  ),
+                ),
+                if (workSessions.isEmpty)
+                  SliverToBoxAdapter(
+                    child: Center(
                       child: Padding(
                         padding: const EdgeInsets.all(32),
                         child: Column(
@@ -294,53 +317,104 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
                         ),
                       ),
                     ),
-                  ...workSessions.take(20).map((s) {
-                    final course = s.courseId != null
-                        ? courses.cast<dynamic>().firstWhere((c) => c.id == s.courseId, orElse: () => null)
-                        : null;
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 6),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: isDark ? AppColors.surfaceDark : Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.auto_stories, size: 20, color: course?.color ?? Colors.grey),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              course?.name ?? 'General',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-                              ),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                    sliver: SliverList.builder(
+                      itemCount: workSessions.length > 20 ? 20 : workSessions.length,
+                      itemBuilder: (context, index) {
+                        final s = workSessions[index];
+                        final course = s.courseId != null
+                            ? courses.where((c) => c.id == s.courseId).firstOrNull
+                            : null;
+                        return Dismissible(
+                          key: ValueKey(s.id),
+                          direction: DismissDirection.endToStart,
+                          background: Container(
+                            margin: const EdgeInsets.only(bottom: 6),
+                            padding: const EdgeInsets.only(right: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            alignment: Alignment.centerRight,
+                            child: const Icon(Icons.delete, color: Colors.white),
+                          ),
+                          confirmDismiss: (_) => _confirmDeleteSession(context, s),
+                          onDismissed: (_) {},
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: isDark ? AppColors.surfaceDark : Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.auto_stories, size: 20, color: course?.color ?? Colors.grey),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    course?.name ?? 'General',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  '${s.durationMinutes}m',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  '${s.startedAt.month}/${s.startedAt.day} ${s.startedAt.hour.toString().padLeft(2, '0')}:${s.startedAt.minute.toString().padLeft(2, '0')}',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          Text(
-                            '${s.durationMinutes}m',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            '${s.startedAt.month}/${s.startedAt.day} ${s.startedAt.hour.toString().padLeft(2, '0')}:${s.startedAt.minute.toString().padLeft(2, '0')}',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-                ],
-              ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
             ),
     );
+  }
+
+  Future<bool> _confirmDeleteSession(BuildContext context, StudySession session) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Session'),
+        content: Text('Delete this ${session.durationMinutes}m study session?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await _sessionRepo.deleteStudySession(session.id);
+      _loadData();
+      return true;
+    }
+    return false;
   }
 
   Widget _buildRangeChip(String label, int days, bool isDark) {

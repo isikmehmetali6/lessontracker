@@ -9,6 +9,7 @@
     "quickCapture": "Quick Capture",
     "recentNotes": "Recent Notes",
     "noNotesYet": "No notes yet. Start capturing!",
+    "noNotesDescription": "Use the tools below to capture your first note!",
     "goodMorning": "Good Morning,",
     "goodAfternoon": "Good Afternoon,",
     "goodEvening": "Good Evening,",
@@ -136,6 +137,8 @@
         }
     },
     "addDeadlineTitle": "Add Deadline",
+    "editDeadline": "Edit Deadline",
+    "updateDeadline": "Update Deadline",
     "fillAllFields": "Please fill all required fields",
     "titleHint": "Title (e.g. Midterm, Project)",
     "selectCourse": "Select Course",
@@ -263,5 +266,76 @@
 
     "quickActions": "Quick Actions",
     "studyTimerDesc": "Pomodoro Timer",
-    "gpaCalcDesc": "GPA Calculator"
+    "gpaCalcDesc": "GPA Calculator",
+
+    "absenceCalendar": "Absence Calendar",
+    "viewAbsenceCalendar": "View Absence Calendar",
+    "noAbsencesOnDay": "No absences on this day",
+    "unexcused": "Unexcused",
+    "medical": "Medical",
+    "excused": "Excused",
+    "personal": "Personal",
+    "absencePredictionWarning": "At this rate, you'll exceed the limit in {weeks} weeks",
+    "@absencePredictionWarning": {
+        "placeholders": {
+            "weeks": {"type": "String"}
+        }
+    },
+
+    "professorDetails": "Professor Details",
+    "emailLabel": "Email",
+    "phoneLabel": "Phone",
+    "officeRoom": "Office Room",
+    "officeHoursLabel": "Office Hours",
+    "teachingAssistant": "Teaching Assistant",
+    "emailCopied": "Email copied",
+    "phoneCopied": "Phone copied",
+
+    "addLink": "Add Link",
+    "linkName": "Link Name",
+    "linkAdded": "Link added",
+    "webLink": "Web Link",
+
+    "templateCornellNotes": "Cornell Notes",
+    "templateLectureSummary": "Lecture Summary",
+    "templateExamNotes": "Exam Notes",
+    "startFromTemplate": "Start from Template",
+
+    "transcript": "Transcript",
+    "inProgress": "In Progress",
+    "semesterReport": "Semester Report",
+    "generatePdfReport": "Generate PDF report",
+    "exportDataCsv": "Export Data (CSV)",
+    "exportData": "Export Data",
+    "gradesCsv": "Grades (CSV)",
+    "absencesCsv": "Absences (CSV)",
+    "studySessionsCsv": "Study Sessions (CSV)",
+
+    "selectAbsenceReason": "Select absence reason",
+    "editCourse": "Edit Course",
+    "saveChanges": "Save Changes",
+    "setLocationGeofence": "Set Location (Geofence)",
+
+    "absenceUnexcused": "Unexcused",
+    "absenceMedical": "Medical",
+    "absenceExcused": "Excused",
+    "absencePersonal": "Personal",
+    "absenceOverview": "Attendance Overview",
+    "absencesUsed": "absences used",
+    "totalAbsences": "total absences",
+    "editAbsence": "Edit Absence",
+    "deleteAbsence": "Delete Absence",
+    "selectReason": "Select reason:",
+
+    "convertToPdf": "Convert to PDF",
+    "allNotesToPdf": "All Notes → PDF",
+    "photosToPdf": "Photos → PDF",
+    "courseReportPdf": "Course Report → PDF",
+
+    "appLock": "App Lock",
+    "appLockDisabled": "Disabled",
+    "appLockAuthReason": "Authenticate to enable app lock",
+
+    "shareNotes": "View Notes",
+    "archiveCourse": "Archive Course"
 }

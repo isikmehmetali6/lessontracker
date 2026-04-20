@@ -26,7 +26,20 @@ class OcrService {
           fullText: '',
           blocks: [],
           success: false,
-          error: 'Image file not found at path: $imagePath',
+          error: 'Image file not found',
+        );
+      }
+
+      // Validate image format
+      final ext = imagePath.split('.').last.toLowerCase();
+      final supportedFormats = ['jpg', 'jpeg', 'png', 'bmp', 'gif'];
+      if (!supportedFormats.contains(ext)) {
+        debugPrint('[OcrService] ⚠️ Unsupported format: $ext');
+        return OcrResult(
+          fullText: '',
+          blocks: [],
+          success: false,
+          error: 'Unsupported image format (.$ext). Please use JPG, PNG, or BMP.',
         );
       }
       
@@ -50,17 +63,35 @@ class OcrService {
         ));
       }
 
+      if (recognizedText.text.trim().isEmpty) {
+        return OcrResult(
+          fullText: '',
+          blocks: [],
+          success: false,
+          error: 'No text found in image. Make sure the text is clear and well-lit.',
+        );
+      }
+
       return OcrResult(
         fullText: recognizedText.text,
         blocks: blocks,
         success: true,
       );
     } catch (e) {
+      final errorMsg = e.toString().toLowerCase();
+      String userMessage;
+      if (errorMsg.contains('format') || errorMsg.contains('decode')) {
+        userMessage = 'Image format not supported. Please use JPG or PNG.';
+      } else if (errorMsg.contains('memory') || errorMsg.contains('size')) {
+        userMessage = 'Image is too large. Try with a smaller resolution.';
+      } else {
+        userMessage = 'OCR processing failed. Please try again.';
+      }
       return OcrResult(
         fullText: '',
         blocks: [],
         success: false,
-        error: e.toString(),
+        error: userMessage,
       );
     }
   }
@@ -98,7 +129,11 @@ class OcrResult {
   bool get hasText => fullText.trim().isNotEmpty;
 
   /// Kelime sayısı
-  int get wordCount => fullText.split(RegExp(r'\s+')).length;
+  int get wordCount {
+    final trimmed = fullText.trim();
+    if (trimmed.isEmpty) return 0;
+    return trimmed.split(RegExp(r'\s+')).length;
+  }
 }
 
 /// OCR blok

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../core/theme/app_colors.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 
 class HelpSupportScreen extends StatelessWidget {
+  static const String appVersion = 'v1.0.0';
+
   const HelpSupportScreen({super.key});
 
   @override
@@ -62,6 +65,12 @@ class HelpSupportScreen extends StatelessWidget {
                   AppColors.primary,
                   loc.emailSupport,
                   'support@lessontracker.app',
+                  onTap: () {
+                    Clipboard.setData(const ClipboardData(text: 'support@lessontracker.app'));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Email copied: support@lessontracker.app')),
+                    );
+                  },
                 ),
                 Divider(height: 24, color: isDark ? Colors.grey.shade800 : Colors.grey.shade200),
                 _buildContactTile(
@@ -71,6 +80,11 @@ class HelpSupportScreen extends StatelessWidget {
                   AppColors.orange,
                   loc.reportBug,
                   loc.reportBugDescription,
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(loc.reportBugDescription)),
+                    );
+                  },
                 ),
                 Divider(height: 24, color: isDark ? Colors.grey.shade800 : Colors.grey.shade200),
                 _buildContactTile(
@@ -80,6 +94,11 @@ class HelpSupportScreen extends StatelessWidget {
                   AppColors.purple,
                   loc.featureRequest,
                   loc.featureRequestDescription,
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(loc.featureRequestDescription)),
+                    );
+                  },
                 ),
               ],
             ),
@@ -119,7 +138,7 @@ class HelpSupportScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'v1.0.0',
+                  appVersion,
                   style: TextStyle(
                     fontSize: 14,
                     color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
@@ -139,9 +158,23 @@ class HelpSupportScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildInfoChip(isDark, loc.privacyPolicy),
+                    GestureDetector(
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('${loc.privacyPolicy} - Coming soon')),
+                        );
+                      },
+                      child: _buildInfoChip(isDark, loc.privacyPolicy),
+                    ),
                     const SizedBox(width: 12),
-                    _buildInfoChip(isDark, loc.termsOfService),
+                    GestureDetector(
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('${loc.termsOfService} - Coming soon')),
+                        );
+                      },
+                      child: _buildInfoChip(isDark, loc.termsOfService),
+                    ),
                   ],
                 ),
               ],
@@ -210,47 +243,54 @@ class HelpSupportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildContactTile(BuildContext context, bool isDark, IconData icon, Color color, String title, String subtitle) {
-    return Row(
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: color, size: 22),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-                ),
+  Widget _buildContactTile(BuildContext context, bool isDark, IconData icon, Color color, String title, String subtitle, {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                ),
+              child: Icon(icon, color: color, size: 22),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+            ),
+          ],
         ),
-        Icon(
-          Icons.chevron_right,
-          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-        ),
-      ],
+      ),
     );
   }
 

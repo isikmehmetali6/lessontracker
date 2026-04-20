@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import '../core/database/database_helper.dart';
+import '../core/services/auto_sync_service.dart';
 import '../models/grade.dart';
 
 class GradeRepository {
@@ -47,7 +48,7 @@ class GradeRepository {
       grade.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    await _dbHelper.recordChange('grades', grade.id, 'insert');
+    AutoSyncService().triggerBackup();
   }
 
   /// Puan sil
@@ -62,7 +63,26 @@ class GradeRepository {
       where: 'id = ?',
       whereArgs: [id],
     );
-    await _dbHelper.recordChange('grades', id, 'delete');
+    AutoSyncService().triggerBackup();
+  }
+
+  /// Puan güncelle
+  Future<void> updateGrade(Grade grade) async {
+    if (_dbHelper.isWeb) {
+      final index = _gradesInMemory.indexWhere((g) => g.id == grade.id);
+      if (index != -1) {
+        _gradesInMemory[index] = grade;
+      }
+      return;
+    }
+    final db = await _dbHelper.database;
+    await db.update(
+      'grades',
+      grade.toMap(),
+      where: 'id = ?',
+      whereArgs: [grade.id],
+    );
+    AutoSyncService().triggerBackup();
   }
 
   Future<int> getCount() async {

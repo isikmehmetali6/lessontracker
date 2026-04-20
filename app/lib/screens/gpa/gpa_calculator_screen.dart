@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../models/course.dart';
 import '../../models/grade.dart';
 import '../../providers/course_provider.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
@@ -70,8 +71,9 @@ class _GPACalculatorScreenState extends State<GPACalculatorScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final loc = AppLocalizations.of(context)!;
-    final courses = context.select((CourseProvider p) => p.courses);
+    final courses = context.select((CourseProvider p) => p.uniqueCourses);
     final courseProvider = context.read<CourseProvider>();
+    final originalCourses = courseProvider.courses;
 
     // Calculate overall GPA
     double totalWeightedGPA = 0;
@@ -79,21 +81,28 @@ class _GPACalculatorScreenState extends State<GPACalculatorScreen> {
     final List<_CourseGPAInfo> courseInfos = [];
 
     for (final course in courses) {
-      final grades = _allGrades[course.id] ?? [];
-      final avg = courseProvider.calculateWeightedAverage(grades);
+      // Bütün aynı isimli derslerin notlarını topla
+      final matchingCourseIds = originalCourses.where((c) => c.name == course.name).map((c) => c.id).toList();
+      List<Grade> allMatchingGrades = [];
+      for (final id in matchingCourseIds) {
+        allMatchingGrades.addAll(_allGrades[id] ?? []);
+      }
+
+      final avg = courseProvider.calculateWeightedAverage(allMatchingGrades);
       final gpa = _scoreToGPA(avg);
       final letter = _scoreToLetterGrade(avg);
-      final credits = course.credits;
+      // Determine max credits across the matching courses
+      final credits = originalCourses.where((c) => c.name == course.name).map((c) => c.credits).fold(0, (max, current) => current > max ? current : max);
 
       courseInfos.add(_CourseGPAInfo(
-        course: course,
+        course: course.copyWith(credits: credits),
         average: avg,
         gpa: gpa,
         letterGrade: letter,
-        gradeCount: grades.length,
+        gradeCount: allMatchingGrades.length,
       ));
 
-      if (grades.isNotEmpty) {
+      if (allMatchingGrades.isNotEmpty) {
         totalWeightedGPA += gpa * credits;
         totalCredits += credits;
       }
@@ -120,121 +129,131 @@ class _GPACalculatorScreenState extends State<GPACalculatorScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
-          : ListView(
-              padding: const EdgeInsets.all(24),
-              children: [
-                // Overall GPA Card
-                Container(
-                  padding: const EdgeInsets.all(28),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        overallColor,
-                        overallColor.withValues(alpha: 0.7),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+          : CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
+                  sliver: SliverToBoxAdapter(
+                    child: Container(
+                      padding: const EdgeInsets.all(28),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            overallColor,
+                            overallColor.withValues(alpha: 0.7),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: overallColor.withValues(alpha: 0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            loc.overallGPA,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white.withValues(alpha: 0.9),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            overallGPA.toStringAsFixed(2),
+                            style: const TextStyle(
+                              fontSize: 56,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            '/ 4.00',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.white.withValues(alpha: 0.7),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _buildMiniStat(loc.totalCredits, '$totalCredits', Colors.white),
+                              const SizedBox(width: 24),
+                              _buildMiniStat(loc.totalCourses, '${courses.length}', Colors.white),
+                              const SizedBox(width: 24),
+                              _buildMiniStat(loc.letterGrade, _scoreToLetterGrade(totalCredits > 0 ? (overallGPA / 4.0 * 100) : 0), Colors.white),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: overallColor.withValues(alpha: 0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
                   ),
-                  child: Column(
-                    children: [
-                      Text(
-                        loc.overallGPA,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white.withValues(alpha: 0.9),
-                        ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  sliver: SliverToBoxAdapter(
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: isDark ? AppColors.surfaceDark : Colors.white,
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        overallGPA.toStringAsFixed(2),
-                        style: const TextStyle(
-                          fontSize: 56,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Text(
-                        '/ 4.00',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white.withValues(alpha: 0.7),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildMiniStat(loc.totalCredits, '$totalCredits', Colors.white),
-                          const SizedBox(width: 24),
-                          _buildMiniStat(loc.totalCourses, '${courses.length}', Colors.white),
-                          const SizedBox(width: 24),
-                          _buildMiniStat(loc.letterGrade, _scoreToLetterGrade(totalCredits > 0 ? (overallGPA / 4.0 * 100) : 0), Colors.white),
+                          Text(
+                            loc.gpaScale,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              _buildScaleItem('A', '90-100', '4.0', AppColors.green, isDark),
+                              _buildScaleItem('B', '75-89', '3.0', AppColors.primary, isDark),
+                              _buildScaleItem('C', '60-74', '2.0', AppColors.orange, isDark),
+                              _buildScaleItem('F', '0-49', '0.0', AppColors.red, isDark),
+                            ],
+                          ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-
-                const SizedBox(height: 28),
-
-                // GPA Scale Legend
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: isDark ? AppColors.surfaceDark : Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        loc.gpaScale,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-                        ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 12),
+                  sliver: SliverToBoxAdapter(
+                    child: Text(
+                      loc.courseBreakdown.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.2,
+                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                       ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          _buildScaleItem('A', '90-100', '4.0', AppColors.green, isDark),
-                          _buildScaleItem('B', '75-89', '3.0', AppColors.primary, isDark),
-                          _buildScaleItem('C', '60-74', '2.0', AppColors.orange, isDark),
-                          _buildScaleItem('F', '0-49', '0.0', AppColors.red, isDark),
-                        ],
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-
-                const SizedBox(height: 28),
-
-                // Course Breakdown
-                Text(
-                  loc.courseBreakdown.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
-                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  sliver: SliverList.builder(
+                    itemCount: courseInfos.length,
+                    itemBuilder: (context, index) {
+                      return _buildCourseCard(courseInfos[index], isDark, loc);
+                    },
                   ),
                 ),
-                const SizedBox(height: 12),
-
-                ...courseInfos.map((info) => _buildCourseCard(info, isDark, loc)),
-
-                const SizedBox(height: 60),
+                const SliverPadding(padding: EdgeInsets.only(bottom: 60)),
               ],
             ),
     );
@@ -364,7 +383,7 @@ class _GPACalculatorScreenState extends State<GPACalculatorScreen> {
 }
 
 class _CourseGPAInfo {
-  final dynamic course;
+  final Course course;
   final double average;
   final double gpa;
   final String letterGrade;

@@ -1,5 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import '../core/database/database_helper.dart';
+import '../core/services/auto_sync_service.dart';
+import '../core/services/sync_service.dart';
 import '../models/course.dart';
 
 class CourseRepository {
@@ -16,11 +19,20 @@ class CourseRepository {
 
   // ==================== DERS İŞLEMLERİ ====================
 
-  /// Tüm dersleri getir
-  Future<List<Course>> getAllCourses() async {
-    if (_dbHelper.isWeb) return List.from(_coursesInMemory);
+  /// Tüm dersleri getir (paginated)
+  Future<List<Course>> getAllCourses({int limit = 50, int offset = 0}) async {
+    if (_dbHelper.isWeb) {
+      final start = offset.clamp(0, _coursesInMemory.length);
+      final end = (offset + limit).clamp(0, _coursesInMemory.length);
+      return List<Course>.from(_coursesInMemory).sublist(start, end);
+    }
     final db = await _dbHelper.database;
-    final maps = await db.query('courses', orderBy: 'createdAt DESC');
+    final maps = await db.query(
+      'courses',
+      orderBy: 'createdAt DESC',
+      limit: limit,
+      offset: offset,
+    );
     return maps.map((map) => Course.fromMap(map)).toList();
   }
 
@@ -59,15 +71,11 @@ class CourseRepository {
       return;
     }
     final db = await _dbHelper.database;
-    await db.insert(
-      'courses',
-      {
-        ...course.toMap(),
-        'updatedAt': DateTime.now().toIso8601String(),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-    await _dbHelper.recordChange('courses', course.id, 'insert');
+    await db.insert('courses', {
+      ...course.toMap(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+    AutoSyncService().triggerBackup();
   }
 
   /// Ders güncelle
@@ -82,29 +90,27 @@ class CourseRepository {
     final db = await _dbHelper.database;
     await db.update(
       'courses',
-      {
-        ...course.toMap(),
-        'updatedAt': DateTime.now().toIso8601String(),
-      },
+      {...course.toMap(), 'updatedAt': DateTime.now().toIso8601String()},
       where: 'id = ?',
       whereArgs: [course.id],
     );
-    await _dbHelper.recordChange('courses', course.id, 'update');
+    AutoSyncService().triggerBackup();
   }
 
-  /// Ders sil
   Future<void> deleteCourse(String id) async {
     if (_dbHelper.isWeb) {
       _coursesInMemory.removeWhere((c) => c.id == id);
+      try {
+        final syncService = SyncService();
+        await syncService.deleteCourseCloud(id);
+      } catch (e) {
+        debugPrint('Error deleting course $id from cloud: $e');
+      }
       return;
     }
     final db = await _dbHelper.database;
-    await db.delete(
-      'courses',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-    await _dbHelper.recordChange('courses', id, 'delete');
+    await db.delete('courses', where: 'id = ?', whereArgs: [id]);
+    AutoSyncService().triggerBackup();
   }
 
   /// Ders getir
@@ -112,7 +118,10 @@ class CourseRepository {
     if (_dbHelper.isWeb) {
       try {
         return _coursesInMemory.firstWhere((c) => c.id == id);
-      } catch (_) {
+      } catch (e, stackTrace) {
+        debugPrint(
+          'Error finding course $id in memory: $e\nStack: $stackTrace',
+        );
         return null;
       }
     }
@@ -133,15 +142,6 @@ class CourseRepository {
     }
     final db = await _dbHelper.database;
     final result = await db.rawQuery('SELECT COUNT(*) as count FROM courses');
-    return Sqflite.firstIntValue(result) ?? 0;
-  }
-
-  Future<int> getCount() async {
-    if (_dbHelper.isWeb) {
-      return _coursesInMemory.length;
-    }
-    final db = await _dbHelper.database;
-    final result = await db.rawQuery('SELECT COUNT(*) FROM courses');
     return Sqflite.firstIntValue(result) ?? 0;
   }
 }

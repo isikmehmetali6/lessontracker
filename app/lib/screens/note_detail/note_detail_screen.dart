@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -8,7 +9,6 @@ import '../../models/note.dart';
 import '../../models/course.dart';
 import '../../providers/note_provider.dart';
 import '../../providers/course_provider.dart';
-import '../../core/services/export_service.dart';
 import '../../core/services/file_service.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 
@@ -16,11 +16,7 @@ class NoteDetailScreen extends StatefulWidget {
   final Note note;
   final String? courseName;
 
-  const NoteDetailScreen({
-    super.key,
-    required this.note,
-    this.courseName,
-  });
+  const NoteDetailScreen({super.key, required this.note, this.courseName});
 
   @override
   State<NoteDetailScreen> createState() => _NoteDetailScreenState();
@@ -30,12 +26,14 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   late TextEditingController _titleController;
   late TextEditingController _contentController;
   bool _isEditing = false;
+  late bool _isBookmarked;
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.note.title);
     _contentController = TextEditingController(text: widget.note.content);
+    _isBookmarked = widget.note.isBookmarked;
   }
 
   @override
@@ -48,211 +46,447 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final hasImage = widget.note.thumbnailPath != null;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_new,
-            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              _isEditing ? Icons.check : Icons.edit,
-              color: AppColors.primary,
-            ),
-            onPressed: _toggleEditing,
-          ),
-          // Share/Export menüsü
-          PopupMenuButton<String>(
-            icon: Icon(
-              Icons.more_vert,
-              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-            ),
-            onSelected: (value) async {
-              try {
-                switch (value) {
-                  case 'text':
-                    await ExportService.shareNoteAsText(widget.note, courseName: widget.courseName);
-                    break;
-                  case 'pdf_share':
-                    await ExportService.shareNoteAsPdf(widget.note, courseName: widget.courseName);
-                    break;
-                  case 'pdf_print':
-                    await ExportService.exportNoteToPdf(widget.note, courseName: widget.courseName);
-                    break;
-                  case 'share_file':
-                    await ExportService.shareNoteFile(widget.note);
-                    break;
-                  case 'move':
-                    _moveNoteToCourse();
-                  break;
-              }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Error: ${e.toString().replaceAll('Exception: ', '')}'),
-                      behavior: SnackBarBehavior.floating,
-                      backgroundColor: AppColors.red,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      backgroundColor: isDark
+          ? AppColors.backgroundDark
+          : AppColors.backgroundLight,
+      body: CustomScrollView(
+        slivers: [
+          _buildSliverAppBar(isDark, hasImage),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 16.0,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildMetaTags(isDark),
+                  const SizedBox(height: 16),
+
+                  // Title Editor
+                  TextField(
+                    controller: _titleController,
+                    enabled: _isEditing,
+                    maxLines: null,
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                      color: isDark
+                          ? AppColors.textPrimaryDark
+                          : AppColors.textPrimaryLight,
                     ),
-                  );
-                }
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(value: 'text', child: ListTile(leading: Icon(Icons.text_snippet), title: Text('Share as Text'))),
-              const PopupMenuItem(value: 'pdf_share', child: ListTile(leading: Icon(Icons.picture_as_pdf), title: Text('Share as PDF'))),
-              const PopupMenuItem(value: 'pdf_print', child: ListTile(leading: Icon(Icons.print), title: Text('Print / Export PDF'))),
-              // Show share file option for image/audio notes
-              if (widget.note.filePath != null && (widget.note.type == NoteType.image || widget.note.type == NoteType.ocr))
-                const PopupMenuItem(value: 'share_file', child: ListTile(leading: Icon(Icons.image), title: Text('Share Image'))),
-              if (widget.note.filePath != null && widget.note.type == NoteType.audio)
-                const PopupMenuItem(value: 'share_file', child: ListTile(leading: Icon(Icons.audiotrack), title: Text('Share Audio File'))),
-              const PopupMenuDivider(),
-              const PopupMenuItem(value: 'move', child: ListTile(leading: Icon(Icons.drive_file_move_outline), title: Text('Move to Course'))),
-            ],
-          ),
-          IconButton(
-            icon: Icon(
-              widget.note.isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-              color: widget.note.isBookmarked 
-                  ? AppColors.primary 
-                  : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: AppLocalizations.of(context)!.title,
+                      contentPadding: EdgeInsets.zero,
+                      isDense: true,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Meta Info (Date)
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.access_time_rounded,
+                        size: 16,
+                        color: isDark
+                            ? AppColors.textSecondaryDark
+                            : AppColors.textSecondaryLight,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        DateFormat(
+                          'MMMM d, yyyy • h:mm a',
+                          Localizations.localeOf(context).toString(),
+                        ).format(widget.note.createdAt ?? DateTime.now()),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Audio Player
+                  if (widget.note.isAudio) ...[
+                    _AudioPlayerWidget(note: widget.note, isDark: isDark),
+                    const SizedBox(height: 32),
+                  ],
+
+                  // Content
+                  if (_contentController.text.isNotEmpty || _isEditing) ...[
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 24,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF1E1E2C) : Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(
+                              alpha: isDark ? 0.2 : 0.04,
+                            ),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                        border: Border.all(
+                          color: _isEditing
+                              ? AppColors.primary.withValues(alpha: 0.5)
+                              : (isDark
+                                    ? Colors.white.withValues(alpha: 0.05)
+                                    : Colors.grey.shade100),
+                          width: _isEditing ? 2 : 1,
+                        ),
+                      ),
+                      child: TextField(
+                        controller: _contentController,
+                        enabled: _isEditing,
+                        maxLines: null,
+                        style: TextStyle(
+                          fontSize: 16,
+                          height: _isEditing ? 1.6 : 1.8,
+                          letterSpacing: 0.2,
+                          color: isDark
+                              ? AppColors.textPrimaryDark.withValues(
+                                  alpha: 0.95,
+                                )
+                              : AppColors.textPrimaryLight.withValues(
+                                  alpha: 0.95,
+                                ),
+                        ),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: AppLocalizations.of(context)!.writeYourNote,
+                          hintStyle: TextStyle(
+                            color: isDark
+                                ? Colors.grey.shade600
+                                : Colors.grey.shade400,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 80),
+                  ],
+                ],
+              ),
             ),
-            onPressed: () {
-              context.read<NoteProvider>().toggleBookmark(widget.note);
-              setState(() {}); // Rebuild for icon update
-            },
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.delete_outline,
-              color: AppColors.red,
-            ),
-            onPressed: _deleteNote,
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Title
-            TextField(
-              controller: _titleController,
-              enabled: _isEditing,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-              ),
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: AppLocalizations.of(context)!.title,
-              ),
+    );
+  }
+
+  Widget _buildSliverAppBar(bool isDark, bool hasImage) {
+    return SliverAppBar(
+      expandedHeight: hasImage ? 320.0 : 100.0,
+      pinned: true,
+      stretch: true,
+      backgroundColor: isDark
+          ? AppColors.backgroundDark
+          : AppColors.backgroundLight,
+      elevation: 0,
+      systemOverlayStyle: hasImage
+          ? SystemUiOverlayStyle.light
+          : (isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark),
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 12.0, top: 8.0, bottom: 8.0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: hasImage
+                ? Colors.black.withValues(alpha: 0.3)
+                : (isDark
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : Colors.black.withValues(alpha: 0.05)),
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 20,
+              color: hasImage
+                  ? Colors.white
+                  : (isDark ? Colors.white : Colors.black),
             ),
-            const SizedBox(height: 8),
-            
-            // Meta Info
-            Text(
-              // Using DateFormat from intl directly but locale should be passed
-              DateFormat('MMMM d, yyyy • h:mm a', Localizations.localeOf(context).toString()).format(widget.note.createdAt!),
-              style: TextStyle(
-                fontSize: 14,
-                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-              ),
-            ),
-            const SizedBox(height: 24),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+      ),
+      actions: [
+        _buildAppbarAction(
+          icon: _isEditing ? Icons.check_rounded : Icons.edit_rounded,
+          onPressed: _toggleEditing,
+          hasImage: hasImage,
+          isDark: isDark,
+          color: _isEditing ? AppColors.primary : null,
+        ),
+        _buildAppbarAction(
+          icon: _isBookmarked
+              ? Icons.bookmark_rounded
+              : Icons.bookmark_border_rounded,
+          onPressed: () {
+            context.read<NoteProvider>().toggleBookmark(widget.note);
+            setState(() {
+              _isBookmarked = !_isBookmarked;
+            });
+          },
+          hasImage: hasImage,
+          isDark: isDark,
+          color: _isBookmarked ? AppColors.amber : null,
+        ),
+        _buildPopupMenu(hasImage, isDark),
+        const SizedBox(width: 8),
+      ],
+      flexibleSpace: FlexibleSpaceBar(
+        stretchModes: const [
+          StretchMode.zoomBackground,
+          StretchMode.blurBackground,
+        ],
+        background: hasImage ? _buildImageHeader(isDark) : null,
+      ),
+    );
+  }
 
-            // Image Preview (if any)
-            if (widget.note.thumbnailPath != null) ...[
-              FutureBuilder<String?>(
-                future: FileService().resolveFilePath(widget.note.thumbnailPath),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Container(
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Center(child: CircularProgressIndicator()),
-                    );
-                  }
-                  final resolvedPath = snapshot.data;
-                  if (resolvedPath != null && File(resolvedPath).existsSync()) {
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.file(
-                        File(resolvedPath),
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _buildImageError(isDark),
-                      ),
-                    );
-                  }
-                  return _buildImageError(isDark);
-                },
-              ),
-              const SizedBox(height: 24),
-            ],
+  Widget _buildAppbarAction({
+    required IconData icon,
+    required VoidCallback onPressed,
+    required bool hasImage,
+    required bool isDark,
+    Color? color,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: hasImage
+              ? Colors.black.withValues(alpha: 0.3)
+              : (isDark
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.black.withValues(alpha: 0.05)),
+          shape: BoxShape.circle,
+        ),
+        child: IconButton(
+          icon: Icon(
+            icon,
+            size: 22,
+            color:
+                color ??
+                (hasImage
+                    ? Colors.white
+                    : (isDark ? Colors.white : Colors.black)),
+          ),
+          onPressed: onPressed,
+        ),
+      ),
+    );
+  }
 
-            // Audio Player
-            if (widget.note.isAudio) ...[
-              _AudioPlayerWidget(
-                note: widget.note,
-                isDark: isDark,
-              ),
-              const SizedBox(height: 24),
-            ],
-
-            // Content
-            if (_contentController.text.isNotEmpty || _isEditing) ...[
-              Text(
-                AppLocalizations.of(context)!.notesHeader,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _contentController,
-                enabled: _isEditing,
-                maxLines: null,
-                style: TextStyle(
-                  fontSize: 16,
-                  height: 1.6,
-                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                ),
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: AppLocalizations.of(context)!.writeYourNote,
-                  hintStyle: TextStyle(
-                    color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+  Widget _buildPopupMenu(bool hasImage, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: hasImage
+              ? Colors.black.withValues(alpha: 0.3)
+              : (isDark
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.black.withValues(alpha: 0.05)),
+          shape: BoxShape.circle,
+        ),
+        child: PopupMenuButton<String>(
+          icon: Icon(
+            Icons.more_vert_rounded,
+            size: 22,
+            color: hasImage
+                ? Colors.white
+                : (isDark ? Colors.white : Colors.black),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          color: isDark ? AppColors.surfaceDark : Colors.white,
+          onSelected: (value) async {
+            try {
+              switch (value) {
+                case 'move':
+                  _moveNoteToCourse();
+                  break;
+                case 'delete':
+                  _deleteNote();
+                  break;
+              }
+            } catch (e) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Error: ${e.toString().replaceAll('Exception: ', '')}',
+                    ),
+                    behavior: SnackBarBehavior.floating,
+                    backgroundColor: AppColors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
+                );
+              }
+            }
+          },
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: 'move',
+              child: ListTile(
+                leading: Icon(Icons.drive_file_move_outline),
+                title: Text('Move to Course'),
+              ),
+            ),
+            PopupMenuItem(
+              value: 'delete',
+              child: ListTile(
+                leading: Icon(Icons.delete_outline, color: AppColors.red),
+                title: Text(
+                  'Delete Note',
+                  style: TextStyle(color: AppColors.red),
                 ),
               ),
-            ],
+            ),
           ],
         ),
       ),
     );
   }
 
+  Widget _buildImageHeader(bool isDark) {
+    return FutureBuilder<String?>(
+      future: FileService().resolveFilePath(widget.note.thumbnailPath),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            color: isDark ? Colors.grey.shade900 : Colors.grey.shade200,
+            child: const Center(child: CircularProgressIndicator()),
+          );
+        }
+        final resolvedPath = snapshot.data;
+        if (resolvedPath != null && File(resolvedPath).existsSync()) {
+          return GestureDetector(
+            onTap: () => _openFullScreenImage(context, resolvedPath),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.file(File(resolvedPath), fit: BoxFit.cover),
+                Positioned(
+                  bottom: -1,
+                  left: 0,
+                  right: 0,
+                  height: 120,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          isDark
+                              ? AppColors.backgroundDark
+                              : AppColors.backgroundLight,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 16,
+                  right: 16,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.zoom_in,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        return _buildImageError(isDark);
+      },
+    );
+  }
+
+  void _openFullScreenImage(BuildContext context, String imagePath) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => _FullScreenImageViewer(imagePath: imagePath),
+      ),
+    );
+  }
+
+  Widget _buildMetaTags(bool isDark) {
+    return Wrap(
+      spacing: 8,
+      children: [
+        if (widget.courseName != null && widget.courseName!.isNotEmpty)
+          _buildTag(
+            widget.courseName!,
+            Icons.school_rounded,
+            AppColors.primary,
+            isDark,
+          ),
+        if (widget.note.tags.isNotEmpty)
+          ...widget.note.tags.map(
+            (tag) =>
+                _buildTag('#$tag', Icons.tag_rounded, AppColors.amber, isDark),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildTag(String label, IconData icon, Color color, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _toggleEditing() async {
     if (_isEditing) {
-      // Save changes
       if (_titleController.text.isNotEmpty) {
         final updatedNote = widget.note.copyWith(
           title: _titleController.text,
@@ -268,22 +502,28 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
   Widget _buildImageError(bool isDark) {
     return Container(
-      height: 200,
-      decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(16),
-      ),
+      color: isDark ? Colors.grey.shade900 : Colors.grey.shade200,
       child: Center(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.broken_image, size: 48,
-              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
-            const SizedBox(height: 8),
-            Text('Image unavailable',
+            Icon(
+              Icons.broken_image_rounded,
+              size: 48,
+              color: isDark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Image unavailable',
               style: TextStyle(
-                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-              )),
+                fontWeight: FontWeight.w600,
+                color: isDark
+                    ? AppColors.textSecondaryDark
+                    : AppColors.textSecondaryLight,
+              ),
+            ),
           ],
         ),
       ),
@@ -303,7 +543,10 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: AppColors.red)),
+            child: Text(
+              AppLocalizations.of(context)!.delete,
+              style: const TextStyle(color: AppColors.red),
+            ),
           ),
         ],
       ),
@@ -317,7 +560,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   }
 
   void _moveNoteToCourse() async {
-    final courses = context.read<CourseProvider>().courses
+    final courses = context
+        .read<CourseProvider>()
+        .courses
         .where((c) => c.id != widget.note.courseId)
         .toList();
 
@@ -326,7 +571,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         SnackBar(
           content: const Text('No other courses available'),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
       return;
@@ -349,7 +596,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
             children: [
               Center(
                 child: Container(
-                  width: 40, height: 4,
+                  width: 40,
+                  height: 4,
                   decoration: BoxDecoration(
                     color: Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(2),
@@ -362,7 +610,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                  color: isDark
+                      ? AppColors.textPrimaryDark
+                      : AppColors.textPrimaryLight,
                 ),
               ),
               const SizedBox(height: 4),
@@ -370,7 +620,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                 'Select destination course',
                 style: TextStyle(
                   fontSize: 14,
-                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : AppColors.textSecondaryLight,
                 ),
               ),
               const SizedBox(height: 16),
@@ -386,32 +638,49 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       decoration: BoxDecoration(
-                        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade50,
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.05)
+                            : Colors.grey.shade50,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade200,
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.1)
+                              : Colors.grey.shade200,
                         ),
                       ),
                       child: ListTile(
                         leading: Container(
-                          width: 40, height: 40,
+                          width: 40,
+                          height: 40,
                           decoration: BoxDecoration(
                             color: course.color.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Icon(Icons.school, color: course.color, size: 20),
+                          child: Icon(
+                            Icons.school,
+                            color: course.color,
+                            size: 20,
+                          ),
                         ),
                         title: Text(
                           course.name,
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                            color: isDark
+                                ? AppColors.textPrimaryDark
+                                : AppColors.textPrimaryLight,
                           ),
                         ),
-                        trailing: Icon(Icons.chevron_right,
-                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+                        trailing: Icon(
+                          Icons.chevron_right,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight,
+                        ),
                         onTap: () => Navigator.pop(ctx, course.id),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     );
                   },
@@ -433,21 +702,29 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
     if (!mounted) return;
     if (success) {
-      final courseName = context.read<CourseProvider>().courses
-          .firstWhere((c) => c.id == selectedCourseId,
+      final courseName = context
+          .read<CourseProvider>()
+          .courses
+          .firstWhere(
+            (c) => c.id == selectedCourseId,
             orElse: () => Course(
-              id: '', name: 'Unknown', color: AppColors.primary,
+              id: '',
+              name: 'Unknown',
+              color: AppColors.primary,
               scheduleDays: [],
               startTime: const TimeOfDay(hour: 0, minute: 0),
               endTime: const TimeOfDay(hour: 0, minute: 0),
             ),
-          ).name;
+          )
+          .name;
       HapticFeedback.mediumImpact();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Moved to $courseName'),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
       Navigator.pop(context); // Return to course detail
@@ -459,10 +736,7 @@ class _AudioPlayerWidget extends StatefulWidget {
   final Note note;
   final bool isDark;
 
-  const _AudioPlayerWidget({
-    required this.note,
-    required this.isDark,
-  });
+  const _AudioPlayerWidget({required this.note, required this.isDark});
 
   @override
   State<_AudioPlayerWidget> createState() => _AudioPlayerWidgetState();
@@ -470,18 +744,40 @@ class _AudioPlayerWidget extends StatefulWidget {
 
 class _AudioPlayerWidgetState extends State<_AudioPlayerWidget> {
   bool _isPlaying = false;
-  final Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
+
+  late final StreamSubscription _stateSub;
+  late final StreamSubscription _completeSub;
 
   @override
   void initState() {
     super.initState();
     _duration = Duration(seconds: widget.note.audioDuration ?? 0);
-    
-    // Listen to streams
-    // Note: We should probably manage player state better in a real app
-    // e.g. checking if THIS note is the one playing.
-    // For MVP we assume one player.
+
+    _stateSub = context.read<NoteProvider>().onPlayerStateChanged.listen((
+      state,
+    ) {
+      if (mounted) {
+        setState(() {
+          _isPlaying = state.toString().contains('playing');
+        });
+      }
+    });
+
+    _completeSub = context.read<NoteProvider>().onPlayerComplete.listen((_) {
+      if (mounted) {
+        setState(() {
+          _isPlaying = false;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _stateSub.cancel();
+    _completeSub.cancel();
+    super.dispose();
   }
 
   @override
@@ -497,7 +793,9 @@ class _AudioPlayerWidgetState extends State<_AudioPlayerWidget> {
           Row(
             children: [
               IconButton(
-                icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
+                icon: Icon(
+                  _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                ),
                 color: AppColors.primary,
                 iconSize: 32,
                 onPressed: () {
@@ -522,24 +820,22 @@ class _AudioPlayerWidgetState extends State<_AudioPlayerWidget> {
                       AppLocalizations.of(context)!.voiceMemo,
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: widget.isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                        color: widget.isDark
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textPrimaryLight,
                       ),
                     ),
                     StreamBuilder<Duration>(
                       stream: context.read<NoteProvider>().onPositionChanged,
                       builder: (context, snapshot) {
                         final pos = snapshot.data ?? Duration.zero;
-                         // Hacky update for local state to sync slider
-                         // Ideally use a better state management for player
-                        if (_isPlaying && pos.inSeconds != _position.inSeconds) {
-                           // Use microtask to avoid build error or just rely on rebuild
-                           // _position = pos; 
-                        }
                         return Text(
                           '${_formatDuration(pos)} / ${widget.note.formattedDuration}',
                           style: TextStyle(
                             fontSize: 12,
-                            color: widget.isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                            color: widget.isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondaryLight,
                           ),
                         );
                       },
@@ -557,13 +853,17 @@ class _AudioPlayerWidgetState extends State<_AudioPlayerWidget> {
               final pos = snapshot.data ?? Duration.zero;
               final max = _duration.inMilliseconds.toDouble();
               final value = pos.inMilliseconds.toDouble().clamp(0.0, max);
-              
+
               return Column(
                 children: [
-                   SliderTheme(
+                  SliderTheme(
                     data: SliderTheme.of(context).copyWith(
-                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                      overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+                      thumbShape: const RoundSliderThumbShape(
+                        enabledThumbRadius: 6,
+                      ),
+                      overlayShape: const RoundSliderOverlayShape(
+                        overlayRadius: 12,
+                      ),
                       trackHeight: 4,
                     ),
                     child: Slider(
@@ -572,32 +872,42 @@ class _AudioPlayerWidgetState extends State<_AudioPlayerWidget> {
                       activeColor: AppColors.primary,
                       inactiveColor: Colors.grey.shade300,
                       onChanged: (val) {
-                         context.read<NoteProvider>().seekAudio(Duration(milliseconds: val.toInt()));
+                        context.read<NoteProvider>().seekAudio(
+                          Duration(milliseconds: val.toInt()),
+                        );
                       },
                     ),
                   ),
 
-                   // Bookmark List Chips
-                   if (widget.note.bookmarks.isNotEmpty)
-                     Wrap(
-                       spacing: 8,
-                       children: widget.note.bookmarks.asMap().entries.map((entry) {
-                         final index = entry.key;
-                         final bm = entry.value;
-                         return ActionChip(
-                           label: Text(
-                             '#${index + 1} ${_formatDuration(bm)}',
-                             style: const TextStyle(fontSize: 12),
-                           ),
-                           avatar: const Icon(Icons.flag, size: 14, color: AppColors.primary),
-                           onPressed: () {
-                             context.read<NoteProvider>().seekAudio(bm);
-                           },
-                           backgroundColor: widget.isDark ? Colors.grey.shade700 : Colors.white,
-                           side: BorderSide(color: Colors.grey.shade300),
-                         );
-                       }).toList(),
-                     ),
+                  // Bookmark List Chips
+                  if (widget.note.bookmarks.isNotEmpty)
+                    Wrap(
+                      spacing: 8,
+                      children: widget.note.bookmarks.asMap().entries.map((
+                        entry,
+                      ) {
+                        final index = entry.key;
+                        final bm = entry.value;
+                        return ActionChip(
+                          label: Text(
+                            '#${index + 1} ${_formatDuration(bm)}',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          avatar: const Icon(
+                            Icons.flag,
+                            size: 14,
+                            color: AppColors.primary,
+                          ),
+                          onPressed: () {
+                            context.read<NoteProvider>().seekAudio(bm);
+                          },
+                          backgroundColor: widget.isDark
+                              ? Colors.grey.shade700
+                              : Colors.white,
+                          side: BorderSide(color: Colors.grey.shade300),
+                        );
+                      }).toList(),
+                    ),
                 ],
               );
             },
@@ -613,3 +923,34 @@ class _AudioPlayerWidgetState extends State<_AudioPlayerWidget> {
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 }
+
+class _FullScreenImageViewer extends StatelessWidget {
+  final String imagePath;
+
+  const _FullScreenImageViewer({required this.imagePath});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Scaffold(
+      backgroundColor: isDark ? Colors.black : Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      extendBodyBehindAppBar: true,
+      body: Center(
+        child: InteractiveViewer(
+          minScale: 0.5,
+          maxScale: 4.0,
+          child: Image.file(File(imagePath), fit: BoxFit.contain),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+

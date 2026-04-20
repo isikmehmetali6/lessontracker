@@ -1,11 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Tema yönetimi provider
 class ThemeProvider extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;
 
   ThemeMode get themeMode => _themeMode;
+
+  ThemeProvider() {
+    _loadTheme();
+  }
+
+  Future<void> _loadTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    final modeIndex = prefs.getInt('theme_mode');
+    if (modeIndex != null && modeIndex >= 0 && modeIndex < ThemeMode.values.length) {
+      _themeMode = ThemeMode.values[modeIndex];
+      notifyListeners();
+    }
+  }
+
+  Future<void> _saveTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('theme_mode', _themeMode.index);
+  }
 
   bool get isDarkMode {
     if (_themeMode == ThemeMode.system) {
@@ -19,6 +38,7 @@ class ThemeProvider extends ChangeNotifier {
   void setThemeMode(ThemeMode mode) {
     _themeMode = mode;
     notifyListeners();
+    _saveTheme();
   }
 
   /// Karanlık/aydınlık temayı değiştir
@@ -32,11 +52,13 @@ class ThemeProvider extends ChangeNotifier {
       _themeMode = isDarkMode ? ThemeMode.light : ThemeMode.dark;
     }
     notifyListeners();
+    _saveTheme();
   }
 
   /// Sistem temasını kullan
   void useSystemTheme() {
     _themeMode = ThemeMode.system;
     notifyListeners();
+    _saveTheme();
   }
 }

@@ -9,9 +9,11 @@ class DeadlineProvider with ChangeNotifier {
   
   List<Deadline> _deadlines = [];
   bool _isLoading = false;
+  String? _error;
 
-  List<Deadline> get deadlines => _deadlines;
+  List<Deadline> get deadlines => List.unmodifiable(_deadlines);
   bool get isLoading => _isLoading;
+  String? get error => _error;
 
   List<Deadline> get upcomingDeadlines {
     final now = DateTime.now();
@@ -26,6 +28,7 @@ class DeadlineProvider with ChangeNotifier {
     try {
       _deadlines = await _deadlineRepo.getAllDeadlines();
     } catch (e) {
+      _error = e.toString();
       debugPrint('Error loading deadlines: $e');
     } finally {
       _isLoading = false;
@@ -40,7 +43,21 @@ class DeadlineProvider with ChangeNotifier {
       _deadlines.sort((a, b) => a.date.compareTo(b.date));
       notifyListeners();
     } catch (e) {
+      _error = e.toString();
       debugPrint('Error adding deadline: $e');
+    }
+  }
+
+  Future<bool> updateDeadline(Deadline deadline) async {
+    try {
+      await _deadlineRepo.updateDeadline(deadline);
+      await loadDeadlines();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      debugPrint('Error updating deadline: $e');
+      notifyListeners();
+      return false;
     }
   }
 
@@ -90,15 +107,18 @@ class DeadlineProvider with ChangeNotifier {
     await addDeadline(deadline);
 
     if (addToCalendar) {
-      // Determine end date (e.g. 1 hour event)
-      final endDate = date.add(const Duration(hours: 1));
-      await _calendarService.addEvent(
-        title: '${type.name.toUpperCase()}: $title',
-        description: 'Deadline for course',
-        startDate: date,
-        endDate: endDate,
-        allDay: false, // Deadlines usually have specific times, or if 00:00 then maybe allDay
-      );
+      try {
+        final endDate = date.add(const Duration(hours: 1));
+        await _calendarService.addEvent(
+          title: '${type.name.toUpperCase()}: $title',
+          description: 'Deadline for course',
+          startDate: date,
+          endDate: endDate,
+          allDay: false,
+        );
+      } catch (e) {
+        debugPrint('Error adding to calendar: $e');
+      }
     }
     
     return true;

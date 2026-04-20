@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "926597238864",
+    "project_id": "lessontracker-1beeb",
+    "storage_bucket": "lessontracker-1beeb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:926597238864:android:6ae151857b69d6c2c28155",
+        "android_client_info": {
+          "package_name": "com.lessontracker.lesson_tracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMkQjW8-2kDqVgIz-u0fRREIVJmxkM1Y0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

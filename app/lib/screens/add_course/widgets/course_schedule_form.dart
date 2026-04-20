@@ -109,6 +109,7 @@ class CourseScheduleForm extends StatelessWidget {
             final item = entry.value;
             
             return Container(
+              key: ObjectKey(item),
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(

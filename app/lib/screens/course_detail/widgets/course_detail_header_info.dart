@@ -6,6 +6,8 @@ import '../../../../models/course.dart';
 import '../../../../providers/course_provider.dart';
 import '../../../../widgets/common/common_widgets.dart';
 import '../../../../widgets/course/absence_tracker_card.dart';
+import '../../../../widgets/course/professor_card.dart';
+import '../tabs/absence_calendar_tab.dart';
 
 class CourseDetailHeaderInfo extends StatelessWidget {
   final Course course;
@@ -33,6 +35,8 @@ class CourseDetailHeaderInfo extends StatelessWidget {
               ),
               child: Text(
                 '${AppLocalizations.of(context)!.semesterDefault} • ${course.professor ?? AppLocalizations.of(context)!.noProfessor}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -90,9 +94,82 @@ class CourseDetailHeaderInfo extends StatelessWidget {
                    }
                 },
               ),
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => Scaffold(
+                          appBar: AppBar(
+                            title: Text(AppLocalizations.of(context)?.absenceCalendar ?? 'Absence Calendar'),
+                            backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+                            foregroundColor: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                          ),
+                          body: AbsenceCalendarTab(
+                            courseId: course.id,
+                            isDark: isDark,
+                            course: course,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDark ? Colors.white10 : Colors.grey.shade200,
+                        width: 1,
+                      ),
+                      boxShadow: isDark ? [] : [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.02),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(Icons.calendar_month_outlined, color: AppColors.primary, size: 20),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            AppLocalizations.of(context)?.viewAbsenceCalendar ?? 'View Absence Calendar',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white : AppColors.textPrimaryLight,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          size: 14,
+                          color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
+        ProfessorCard(course: course, isDark: isDark),
       ],
     );
   }

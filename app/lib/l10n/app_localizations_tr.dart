@@ -39,6 +39,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get noNotesYet => 'Henüz not yok. Kaydetmeye başla!';
 
   @override
+  String get noNotesDescription => 'İlk notunuzu almak için aşağıdaki araçları kullanın!';
+
+  @override
   String get goodMorning => 'Günaydın,';
 
   @override
@@ -386,6 +389,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get addDeadlineTitle => 'Teslim Tarihi Ekle';
 
   @override
+  String get editDeadline => 'Teslim Tarihini Düzenle';
+
+  @override
+  String get updateDeadline => 'Teslim Tarihini Güncelle';
+
+  @override
   String get fillAllFields => 'Lütfen tüm alanları doldurun';
 
   @override
@@ -719,4 +728,174 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get gpaCalcDesc => 'GPA Hesaplayıcı';
+
+  @override
+  String get absenceCalendar => 'Devamsızlık Takvimi';
+
+  @override
+  String get viewAbsenceCalendar => 'Devamsızlık Takvimini Gör';
+
+  @override
+  String get noAbsencesOnDay => 'Bu günde devamsızlık yok';
+
+  @override
+  String get unexcused => 'Mazeretsiz';
+
+  @override
+  String get medical => 'Sağlık';
+
+  @override
+  String get excused => 'İzinli';
+
+  @override
+  String get personal => 'Kişisel';
+
+  @override
+  String absencePredictionWarning(String weeks) {
+    return 'Bu hızla $weeks hafta sonra limiti aşarsın';
+  }
+
+  @override
+  String get professorDetails => 'Profesör Detayları';
+
+  @override
+  String get emailLabel => 'E-posta';
+
+  @override
+  String get phoneLabel => 'Telefon';
+
+  @override
+  String get officeRoom => 'Ofis Odası';
+
+  @override
+  String get officeHoursLabel => 'Ofis Saatleri';
+
+  @override
+  String get teachingAssistant => 'Asistan';
+
+  @override
+  String get emailCopied => 'E-posta kopyalandı';
+
+  @override
+  String get phoneCopied => 'Telefon kopyalandı';
+
+  @override
+  String get addLink => 'Link Ekle';
+
+  @override
+  String get linkName => 'Link Adı';
+
+  @override
+  String get linkAdded => 'Link eklendi';
+
+  @override
+  String get webLink => 'Web Linki';
+
+  @override
+  String get templateCornellNotes => 'Cornell Notları';
+
+  @override
+  String get templateLectureSummary => 'Ders Özeti';
+
+  @override
+  String get templateExamNotes => 'Sınav Notları';
+
+  @override
+  String get startFromTemplate => 'Şablondan Başla';
+
+  @override
+  String get transcript => 'Transkript';
+
+  @override
+  String get inProgress => 'Devam Ediyor';
+
+  @override
+  String get semesterReport => 'Dönem Sonu Raporu';
+
+  @override
+  String get generatePdfReport => 'PDF raporu oluştur';
+
+  @override
+  String get exportDataCsv => 'Verileri Dışa Aktar (CSV)';
+
+  @override
+  String get exportData => 'Verileri Dışa Aktar';
+
+  @override
+  String get gradesCsv => 'Notlar (CSV)';
+
+  @override
+  String get absencesCsv => 'Devamsızlıklar (CSV)';
+
+  @override
+  String get studySessionsCsv => 'Çalışma Süreleri (CSV)';
+
+  @override
+  String get selectAbsenceReason => 'Devamsızlık sebebini seç';
+
+  @override
+  String get editCourse => 'Dersi Düzenle';
+
+  @override
+  String get saveChanges => 'Değişiklikleri Kaydet';
+
+  @override
+  String get setLocationGeofence => 'Konum Belirle (Geofence)';
+
+  @override
+  String get absenceUnexcused => 'Mazeretsiz';
+
+  @override
+  String get absenceMedical => 'Sağlık Raporu';
+
+  @override
+  String get absenceExcused => 'İzinli';
+
+  @override
+  String get absencePersonal => 'Kişisel';
+
+  @override
+  String get absenceOverview => 'Devamsızlık Durumu';
+
+  @override
+  String get absencesUsed => 'devamsızlık kullanıldı';
+
+  @override
+  String get totalAbsences => 'toplam devamsızlık';
+
+  @override
+  String get editAbsence => 'Devamsızlığı Düzenle';
+
+  @override
+  String get deleteAbsence => 'Devamsızlığı Sil';
+
+  @override
+  String get selectReason => 'Sebep seçin:';
+
+  @override
+  String get convertToPdf => 'PDF\'e Çevir';
+
+  @override
+  String get allNotesToPdf => 'Tüm Notlar → PDF';
+
+  @override
+  String get photosToPdf => 'Fotoğraflar → PDF';
+
+  @override
+  String get courseReportPdf => 'Ders Raporu → PDF';
+
+  @override
+  String get appLock => 'Uygulama Kilidi';
+
+  @override
+  String get appLockDisabled => 'Kapalı';
+
+  @override
+  String get appLockAuthReason => 'Uygulama kilidini etkinleştirmek için doğrulayın';
+
+  @override
+  String get shareNotes => 'Notlarını Görüntüle';
+
+  @override
+  String get archiveCourse => 'Dersi Arşivle';
 }

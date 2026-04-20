@@ -29,6 +29,11 @@ abstract class Course with _$Course {
     @Default([]) List<DateTime> absenceDates,
     double? latitude,
     double? longitude,
+    String? professorEmail,
+    String? professorPhone,
+    String? professorOffice,
+    String? officeHours,
+    String? assistantName,
   }) = _Course;
 
   /// Bugün bu ders var mı?
@@ -74,7 +79,11 @@ abstract class Course with _$Course {
       'status': status,
       'latitude': latitude,
       'longitude': longitude,
-      // absenceDates is stored in separate table, not here
+      'professorEmail': professorEmail,
+      'professorPhone': professorPhone,
+      'professorOffice': professorOffice,
+      'officeHours': officeHours,
+      'assistantName': assistantName,
     };
   }
 
@@ -110,9 +119,14 @@ abstract class Course with _$Course {
           : null,
       credits: map['credits'] as int,
       status: map['status'] as String,
-      absenceDates: const [], // Populated separately or via join
+      absenceDates: const [],
       latitude: map['latitude'] as double?,
       longitude: map['longitude'] as double?,
+      professorEmail: map['professorEmail'] as String?,
+      professorPhone: map['professorPhone'] as String?,
+      professorOffice: map['professorOffice'] as String?,
+      officeHours: map['officeHours'] as String?,
+      assistantName: map['assistantName'] as String?,
     );
   }
 }

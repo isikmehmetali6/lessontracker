@@ -120,7 +120,7 @@ class AudioService {
         }
       }
     } catch (e) {
-      // Hata yoksay
+      debugPrint('[AudioService] Cancel recording error: $e');
     } finally {
       _currentRecordingPath = null;
       _recordingStartTime = null;

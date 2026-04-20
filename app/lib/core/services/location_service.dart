@@ -1,4 +1,5 @@
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/course.dart';
 
 class LocationService {
@@ -78,5 +79,57 @@ class LocationService {
       course.latitude!,
       course.longitude!,
     );
+  }
+
+  // --- Global University Location ---
+
+  static const String _prefLatKey = 'university_lat';
+  static const String _prefLngKey = 'university_lng';
+  static const String _prefRadiusKey = 'university_radius';
+
+  /// Üniversite konumunu kaydet
+  Future<void> saveUniversityLocation(double lat, double lng, {double radius = 500.0}) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_prefLatKey, lat);
+    await prefs.setDouble(_prefLngKey, lng);
+    await prefs.setDouble(_prefRadiusKey, radius);
+  }
+
+  /// Kayıtlı üniversite konumunu getir
+  /// [lat, lng, radius] döner. Konum yoksa null döner.
+  Future<List<double>?> getUniversityLocation() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lat = prefs.getDouble(_prefLatKey);
+    final lng = prefs.getDouble(_prefLngKey);
+    final radius = prefs.getDouble(_prefRadiusKey) ?? 500.0;
+
+    if (lat == null || lng == null) return null;
+    return [lat, lng, radius];
+  }
+
+  /// Sil
+  Future<void> clearUniversityLocation() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_prefLatKey);
+    await prefs.remove(_prefLngKey);
+    await prefs.remove(_prefRadiusKey);
+  }
+
+  /// Üniversitede mi? kontrol et
+  Future<bool> isAtUniversity() async {
+    final uniLoc = await getUniversityLocation();
+    if (uniLoc == null) return false;
+
+    final currentPosition = await getCurrentLocation();
+    if (currentPosition == null) return false;
+
+    final distance = Geolocator.distanceBetween(
+      currentPosition.latitude,
+      currentPosition.longitude,
+      uniLoc[0],
+      uniLoc[1],
+    );
+
+    return distance <= uniLoc[2]; // yarıçaptan küçük eşitese üniversitededir.
   }
 }

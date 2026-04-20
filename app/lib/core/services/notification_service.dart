@@ -1,7 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
-import 'package:flutter/foundation.dart';
 
 class NotificationService {
   static NotificationService _instance = NotificationService._internal();
@@ -17,6 +17,7 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   bool _isInitialized = false;
+  final Map<String, DateTime> _mutedCourses = {};
 
   Future<void> init() async {
     if (_isInitialized) return;
@@ -30,16 +31,17 @@ class NotificationService {
     // iOS/macOS Init
     final DarwinInitializationSettings initializationSettingsDarwin =
         DarwinInitializationSettings(
-      requestAlertPermission: false,
-      requestBadgePermission: false,
-      requestSoundPermission: false,
-    );
+          requestAlertPermission: false,
+          requestBadgePermission: false,
+          requestSoundPermission: false,
+        );
 
-    final InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsDarwin,
-      macOS: initializationSettingsDarwin,
-    );
+    final InitializationSettings initializationSettings =
+        InitializationSettings(
+          android: initializationSettingsAndroid,
+          iOS: initializationSettingsDarwin,
+          macOS: initializationSettingsDarwin,
+        );
 
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
@@ -55,44 +57,52 @@ class NotificationService {
   }
 
   Future<bool> requestPermissions() async {
-    bool? granted = false;
-    
+    bool granted = false;
+
     // Android 13+
     final androidImplementation = flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     if (androidImplementation != null) {
-      granted = await androidImplementation.requestNotificationsPermission();
+      granted =
+          await androidImplementation.requestNotificationsPermission() ?? false;
     }
 
     // iOS
     final iosImplementation = flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>();
+          IOSFlutterLocalNotificationsPlugin
+        >();
     if (iosImplementation != null) {
-      await iosImplementation.requestPermissions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+      granted =
+          await iosImplementation.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+          ) ??
+          false;
     }
-    
+
     // macOS
     final macosImplementation = flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-            MacOSFlutterLocalNotificationsPlugin>();
+          MacOSFlutterLocalNotificationsPlugin
+        >();
     if (macosImplementation != null) {
-      await macosImplementation.requestPermissions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+      granted =
+          await macosImplementation.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+          ) ??
+          false;
     }
-    
-    return granted ?? false;
+
+    return granted;
   }
 
-  /// Schedule a notification 1 hour before the class start time
+  /// Schedule a notification before the class start time
   Future<void> scheduleClassNotification({
     required String courseId,
     required String courseName,
@@ -100,17 +110,19 @@ class NotificationService {
     required int dayOfWeek, // 0 = Mon, 6 = Sun
     required int hour,
     required int minute,
+    int reminderMinutes = 60,
   }) async {
-    // Unique ID based on course and day
-    final int notificationId = (courseId + dayOfWeek.toString()).hashCode;
-    
-    // Calculate notification time (1 hour before)
-    // We want it to repeat weekly
-    
+    final int notificationId =
+        (courseId + dayOfWeek.toString()).hashCode.abs() % 900000;
+
+    final String timeText = reminderMinutes >= 60
+        ? '${reminderMinutes ~/ 60} hour${reminderMinutes ~/ 60 > 1 ? 's' : ''}'
+        : '$reminderMinutes minutes';
+
     await flutterLocalNotificationsPlugin.zonedSchedule(
       notificationId,
       'Upcoming Class: $courseName',
-      'Starts in 1 hour${location != null ? ' at $location' : ''}',
+      'Starts in $timeText${location != null ? ' at $location' : ''}',
       _nextInstanceOfTime(dayOfWeek, hour, minute),
       const NotificationDetails(
         android: AndroidNotificationDetails(
@@ -130,8 +142,41 @@ class NotificationService {
   }
 
   Future<void> cancelClassNotification(String courseId, int dayOfWeek) async {
-    final int notificationId = (courseId + dayOfWeek.toString()).hashCode;
+    final int notificationId =
+        (courseId + dayOfWeek.toString()).hashCode.abs() % 900000;
     await flutterLocalNotificationsPlugin.cancel(notificationId);
+  }
+
+  /// Bir dersin bildirimlerini geçici olarak kapat
+  Future<void> muteCourseNotifications(
+    String courseId, {
+    Duration? duration,
+  }) async {
+    if (duration != null) {
+      _mutedCourses[courseId] = DateTime.now().add(duration);
+    } else {
+      _mutedCourses[courseId] = DateTime.now().add(const Duration(days: 365));
+    }
+    debugPrint(
+      'NotificationService: Course $courseId muted until ${_mutedCourses[courseId]}',
+    );
+  }
+
+  /// Bir dersin bildirimlerini yeniden aç
+  Future<void> unmuteCourseNotifications(String courseId) async {
+    _mutedCourses.remove(courseId);
+    debugPrint('NotificationService: Course $courseId unmuted');
+  }
+
+  /// Bir dersin bildirimleri muted mi?
+  bool isCourseMuted(String courseId) {
+    final muteUntil = _mutedCourses[courseId];
+    if (muteUntil == null) return false;
+    if (DateTime.now().isAfter(muteUntil)) {
+      _mutedCourses.remove(courseId);
+      return false;
+    }
+    return true;
   }
 
   Future<void> cancelAllNotifications() async {
@@ -146,7 +191,14 @@ class NotificationService {
 
     // Pazar = 7 (DateTime), saat 20:00
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate = tz.TZDateTime(tz.local, now.year, now.month, now.day, 20, 0);
+    tz.TZDateTime scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      20,
+      0,
+    );
 
     // Önce pazar gününü bul
     while (scheduledDate.weekday != DateTime.sunday) {
@@ -235,48 +287,46 @@ class NotificationService {
       payload: 'weekly_report',
     );
 
-    debugPrint('NotificationService: Weekly report sent — ${buffer.toString()}');
+    debugPrint(
+      'NotificationService: Weekly report sent — ${buffer.toString()}',
+    );
   }
 
   tz.TZDateTime _nextInstanceOfTime(int dayOfWeek, int hour, int minute) {
     // 0 = Monday in our app model, but DateTime.monday = 1.
     // Our app: 0=Mon, 6=Sun
     // DateTime: 1=Mon, 7=Sun
-    // timezone may vary, usually standard DateTime.
-    
-    // Map our 0-6 to DateTime 1-7
     final int targetWeekday = dayOfWeek + 1;
 
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    
 
-    
-    // Logic to find next instance
-    // We calculate "Class Time" first, then subtract 1 hour.
-    
-    tz.TZDateTime scheduledDate = _nextInstanceOfWeekday(targetWeekday, hour, minute, now);
-    scheduledDate = scheduledDate.subtract(const Duration(hours: 1));
-    
-    return scheduledDate;
+    // hour/minute are already the desired notification time
+    // (caller subtracts reminderMinutes from class start time)
+    return _nextInstanceOfWeekday(targetWeekday, hour, minute, now);
   }
-  
-  tz.TZDateTime _nextInstanceOfWeekday(int weekday, int hour, int minute, tz.TZDateTime now) {
-      tz.TZDateTime scheduledDate = tz.TZDateTime(
-        tz.local, 
-        now.year, 
-        now.month, 
-        now.day, 
-        hour, 
-        minute
-      );
-      
-      while (scheduledDate.weekday != weekday) {
-        scheduledDate = scheduledDate.add(const Duration(days: 1));
-      }
-      
-      if (scheduledDate.isBefore(now)) {
-        scheduledDate = scheduledDate.add(const Duration(days: 7));
-      }
-      return scheduledDate;
+
+  tz.TZDateTime _nextInstanceOfWeekday(
+    int weekday,
+    int hour,
+    int minute,
+    tz.TZDateTime now,
+  ) {
+    tz.TZDateTime scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
+
+    while (scheduledDate.weekday != weekday) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 7));
+    }
+    return scheduledDate;
   }
 }

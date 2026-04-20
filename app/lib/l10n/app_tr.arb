@@ -9,6 +9,7 @@
     "quickCapture": "Hızlı Kayıt",
     "recentNotes": "Son Notlar",
     "noNotesYet": "Henüz not yok. Kaydetmeye başla!",
+    "noNotesDescription": "İlk notunuzu almak için aşağıdaki araçları kullanın!",
     "goodMorning": "Günaydın,",
     "goodAfternoon": "Tünaydın,",
     "goodEvening": "İyi Akşamlar,",
@@ -122,6 +123,8 @@
     "deadlineToday": "Bugün",
     "daysLeft": "{days} gün kaldı",
     "addDeadlineTitle": "Teslim Tarihi Ekle",
+    "editDeadline": "Teslim Tarihini Düzenle",
+    "updateDeadline": "Teslim Tarihini Güncelle",
     "fillAllFields": "Lütfen tüm alanları doldurun",
     "titleHint": "Başlık (örn. Vize, Proje)",
     "selectCourse": "Ders Seç",
@@ -249,5 +252,76 @@
 
     "quickActions": "Hızlı İşlemler",
     "studyTimerDesc": "Pomodoro Zamanlayıcı",
-    "gpaCalcDesc": "GPA Hesaplayıcı"
+    "gpaCalcDesc": "GPA Hesaplayıcı",
+
+    "absenceCalendar": "Devamsızlık Takvimi",
+    "viewAbsenceCalendar": "Devamsızlık Takvimini Gör",
+    "noAbsencesOnDay": "Bu günde devamsızlık yok",
+    "unexcused": "Mazeretsiz",
+    "medical": "Sağlık",
+    "excused": "İzinli",
+    "personal": "Kişisel",
+    "absencePredictionWarning": "Bu hızla {weeks} hafta sonra limiti aşarsın",
+    "@absencePredictionWarning": {
+        "placeholders": {
+            "weeks": {"type": "String"}
+        }
+    },
+
+    "professorDetails": "Profesör Detayları",
+    "emailLabel": "E-posta",
+    "phoneLabel": "Telefon",
+    "officeRoom": "Ofis Odası",
+    "officeHoursLabel": "Ofis Saatleri",
+    "teachingAssistant": "Asistan",
+    "emailCopied": "E-posta kopyalandı",
+    "phoneCopied": "Telefon kopyalandı",
+
+    "addLink": "Link Ekle",
+    "linkName": "Link Adı",
+    "linkAdded": "Link eklendi",
+    "webLink": "Web Linki",
+
+    "templateCornellNotes": "Cornell Notları",
+    "templateLectureSummary": "Ders Özeti",
+    "templateExamNotes": "Sınav Notları",
+    "startFromTemplate": "Şablondan Başla",
+
+    "transcript": "Transkript",
+    "inProgress": "Devam Ediyor",
+    "semesterReport": "Dönem Sonu Raporu",
+    "generatePdfReport": "PDF raporu oluştur",
+    "exportDataCsv": "Verileri Dışa Aktar (CSV)",
+    "exportData": "Verileri Dışa Aktar",
+    "gradesCsv": "Notlar (CSV)",
+    "absencesCsv": "Devamsızlıklar (CSV)",
+    "studySessionsCsv": "Çalışma Süreleri (CSV)",
+
+    "selectAbsenceReason": "Devamsızlık sebebini seç",
+    "editCourse": "Dersi Düzenle",
+    "saveChanges": "Değişiklikleri Kaydet",
+    "setLocationGeofence": "Konum Belirle (Geofence)",
+
+    "absenceUnexcused": "Mazeretsiz",
+    "absenceMedical": "Sağlık Raporu",
+    "absenceExcused": "İzinli",
+    "absencePersonal": "Kişisel",
+    "absenceOverview": "Devamsızlık Durumu",
+    "absencesUsed": "devamsızlık kullanıldı",
+    "totalAbsences": "toplam devamsızlık",
+    "editAbsence": "Devamsızlığı Düzenle",
+    "deleteAbsence": "Devamsızlığı Sil",
+    "selectReason": "Sebep seçin:",
+
+    "convertToPdf": "PDF'e Çevir",
+    "allNotesToPdf": "Tüm Notlar → PDF",
+    "photosToPdf": "Fotoğraflar → PDF",
+    "courseReportPdf": "Ders Raporu → PDF",
+
+    "appLock": "Uygulama Kilidi",
+    "appLockDisabled": "Kapalı",
+    "appLockAuthReason": "Uygulama kilidini etkinleştirmek için doğrulayın",
+
+    "shareNotes": "Notlarını Görüntüle",
+    "archiveCourse": "Dersi Arşivle"
 }

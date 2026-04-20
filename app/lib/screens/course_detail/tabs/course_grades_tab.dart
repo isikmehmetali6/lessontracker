@@ -12,6 +12,7 @@ class CourseGradesTab extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onAddGrade;
   final Function(String) onDeleteGrade;
+  final Function(Grade)? onEditGrade;
 
   const CourseGradesTab({
     super.key,
@@ -20,91 +21,206 @@ class CourseGradesTab extends StatelessWidget {
     required this.isLoading,
     required this.onAddGrade,
     required this.onDeleteGrade,
+    this.onEditGrade,
   });
+
+  Color _getScoreColor(double percentage) {
+    if (percentage >= 85) return AppColors.emerald;
+    if (percentage >= 70) return AppColors.primary;
+    if (percentage >= 50) return AppColors.orange;
+    return AppColors.red;
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
+    final weightedAvg = context.read<CourseProvider>().calculateWeightedAverage(grades);
+    final totalWeight = grades.fold<double>(0, (sum, g) => sum + g.weight);
 
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        // Grades & GPA
+        // Average summary card
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.surfaceDark : Colors.white,
+            gradient: LinearGradient(
+              colors: [
+                AppColors.primary.withValues(alpha: 0.12),
+                AppColors.primary.withValues(alpha: 0.04),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
             borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    AppLocalizations.of(context)!.gradesTab,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.averageShort,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        grades.isEmpty ? '—' : '${weightedAvg.toStringAsFixed(1)}%',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w700,
+                          color: grades.isEmpty
+                              ? (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)
+                              : _getScoreColor(weightedAvg),
+                        ),
+                      ),
+                    ],
                   ),
+                  // Total weight indicator
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${AppLocalizations.of(context)!.averageShort}: ${context.read<CourseProvider>().calculateWeightedAverage(grades).toStringAsFixed(1)}',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primary,
+                      color: totalWeight > 100
+                          ? AppColors.red.withValues(alpha: 0.15)
+                          : (isDark ? AppColors.surfaceDark : Colors.white),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: totalWeight > 100
+                            ? AppColors.red.withValues(alpha: 0.5)
+                            : (isDark ? Colors.grey.shade700 : Colors.grey.shade300),
                       ),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          l10n.weight,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                          ),
+                        ),
+                        Text(
+                          '${totalWeight.toStringAsFixed(0)}%',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: totalWeight > 100 ? AppColors.red : AppColors.primary,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              
-              // Grade List
-              if (isLoading)
-                const Center(child: CircularProgressIndicator())
-              else if (grades.isEmpty)
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Text(
-                      AppLocalizations.of(context)!.noGradesYet,
-                      style: TextStyle(
-                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                        fontSize: 13,
-                      ),
-                    ),
+              // Visual progress bar
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: LinearProgressIndicator(
+                  value: grades.isEmpty ? 0 : (weightedAvg / 100).clamp(0.0, 1.0),
+                  minHeight: 10,
+                  backgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                  color: grades.isEmpty ? Colors.grey : _getScoreColor(weightedAvg),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        // Grades header
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              l10n.gradesTab,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+              ),
+            ),
+            Text(
+              '${grades.length}',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // Grade List
+        if (isLoading)
+          const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator()))
+        else if (grades.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.surfaceDark : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              children: [
+                Icon(Icons.assessment_outlined, size: 48, color: isDark ? Colors.grey.shade700 : Colors.grey.shade300),
+                const SizedBox(height: 12),
+                Text(
+                  l10n.noGradesYet,
+                  style: TextStyle(
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                    fontSize: 14,
                   ),
-                )
-              else
-                ...grades.map((grade) => Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isDark ? AppColors.backgroundDark : Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
-                    ),
-                  ),
-                  child: Row(
+                ),
+              ],
+            ),
+          )
+        else
+          ...grades.map((grade) {
+            final pct = grade.maxScore > 0 ? (grade.score / grade.maxScore * 100) : 0.0;
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.surfaceDark : Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
+                ),
+              ),
+              child: Column(
+                children: [
+                  Row(
                     children: [
+                      // Score circle
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _getScoreColor(pct).withValues(alpha: 0.12),
+                        ),
+                        child: Center(
+                          child: Text(
+                            pct.toStringAsFixed(0),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: _getScoreColor(pct),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +233,7 @@ class CourseGradesTab extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              '${AppLocalizations.of(context)!.weight}: ${grade.weight.toStringAsFixed(0)}%',
+                              '${grade.score.toStringAsFixed(1)} / ${grade.maxScore.toStringAsFixed(0)}  •  ${l10n.weight}: ${grade.weight.toStringAsFixed(0)}%',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
@@ -126,45 +242,59 @@ class CourseGradesTab extends StatelessWidget {
                           ],
                         ),
                       ),
-                      Text(
-                        '${grade.score.toStringAsFixed(1)} / ${grade.maxScore.toStringAsFixed(0)}',
-                         style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                      if (onEditGrade != null) ...[
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
+                          onPressed: () => onEditGrade!(grade),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
                         ),
-                      ),
-                      const SizedBox(width: 8),
+                        const SizedBox(width: 4),
+                      ],
                       IconButton(
-                        icon: const Icon(Icons.delete_outline, size: 20, color: AppColors.red),
+                        icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.red),
                         onPressed: () => onDeleteGrade(grade.id),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
                       ),
                     ],
                   ),
-                )),
-
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: onAddGrade,
-                  icon: const Icon(Icons.add),
-                  label: Text(AppLocalizations.of(context)!.addGrade),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  const SizedBox(height: 8),
+                  // Individual score bar
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: (pct / 100).clamp(0.0, 1.0),
+                      minHeight: 5,
+                      backgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                      color: _getScoreColor(pct),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
+            );
+          }),
+
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: onAddGrade,
+            icon: const Icon(Icons.add),
+            label: Text(l10n.addGrade),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.primary,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              side: BorderSide(color: AppColors.primary.withValues(alpha: 0.5)),
+            ),
           ),
         ),
 
         const SizedBox(height: 8),
         if (course.nextExamDate != null)
           Text(
-            AppLocalizations.of(context)!.nextExamIn(course.nextExamDate!.difference(DateTime.now()).inDays),
+            l10n.nextExamIn(course.nextExamDate!.difference(DateTime.now()).inDays),
             style: TextStyle(
               fontSize: 12,
               color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,

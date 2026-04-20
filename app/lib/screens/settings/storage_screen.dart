@@ -10,6 +10,8 @@ import '../../repositories/deadline_repository.dart';
 import '../../repositories/absence_repository.dart';
 import '../../repositories/file_repository.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import '../../core/utils/error_handler.dart';
 
 class StorageScreen extends StatefulWidget {
   const StorageScreen({super.key});
@@ -20,7 +22,7 @@ class StorageScreen extends StatefulWidget {
 
 class _StorageScreenState extends State<StorageScreen> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
-  
+
   bool _isLoading = true;
   int _dbSize = 0;
   int _mediaSize = 0;
@@ -35,32 +37,36 @@ class _StorageScreenState extends State<StorageScreen> {
 
   Future<void> _loadStorageInfo() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final dbSize = await _dbHelper.getDatabaseSize();
       final stats = <String, int>{
-        'courses': await CourseRepository().getCount(),
-        'notes': await NoteRepository().getCount(),
+        'courses': await CourseRepository().getCourseCount(),
+        'notes': await NoteRepository().getNoteCount(),
         'grades': await GradeRepository().getCount(),
         'course_files': await FileRepository().getCount(),
         'deadlines': await DeadlineRepository().getCount(),
         'absences': await AbsenceRepository().getCount(),
       };
-      
+
       // Calculate media files size
       int mediaSize = 0;
       try {
         final appDir = await getApplicationDocumentsDirectory();
         mediaSize = await _getDirectorySize(appDir);
-      } catch (_) {}
-      
+      } catch (e, stackTrace) {
+        debugPrint('Error calculating media size: $e\nStack: $stackTrace');
+      }
+
       // Calculate cache size
       int cacheSize = 0;
       try {
         final tempDir = await getTemporaryDirectory();
         cacheSize = await _getDirectorySize(tempDir);
-      } catch (_) {}
-      
+      } catch (e, stackTrace) {
+        debugPrint('Error calculating cache size: $e\nStack: $stackTrace');
+      }
+
       if (mounted) {
         setState(() {
           _dbSize = dbSize;
@@ -81,24 +87,33 @@ class _StorageScreenState extends State<StorageScreen> {
     int size = 0;
     try {
       if (await dir.exists()) {
-        await for (var entity in dir.list(recursive: true, followLinks: false)) {
+        await for (var entity in dir.list(
+          recursive: true,
+          followLinks: false,
+        )) {
           if (entity is File) {
             size += await entity.length();
           }
         }
       }
-    } catch (_) {}
+    } catch (e, stackTrace) {
+      debugPrint(
+        'Error getting directory size for ${dir.path}: $e\nStack: $stackTrace',
+      );
+    }
     return size;
   }
 
   String _formatBytes(int bytes) {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    if (bytes < 1024 * 1024 * 1024)
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
     return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
   }
 
   Future<void> _clearCache() async {
+    setState(() => _isLoading = true);
     try {
       final tempDir = await getTemporaryDirectory();
       if (await tempDir.exists()) {
@@ -106,31 +121,293 @@ class _StorageScreenState extends State<StorageScreen> {
           try {
             if (entity is File) {
               await entity.delete();
-            } else if (entity is Directory) {
+            } else if (entity is Directory)
               await entity.delete(recursive: true);
-            }
-          } catch (_) {}
+          } catch (e, stackTrace) {
+            debugPrint('Error deleting temp entity: $e\nStack: $stackTrace');
+          }
         }
       }
+
+      // Resim cache temizliği
+      PaintingBinding.instance.imageCache.clear();
+      PaintingBinding.instance.imageCache.clearLiveImages();
+
+      await Future.delayed(
+        const Duration(milliseconds: 800),
+      ); // Animasyon için süre
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.cacheCleared),
-            backgroundColor: AppColors.primary,
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Text(AppLocalizations.of(context)!.cacheCleared),
+              ],
+            ),
+            backgroundColor: AppColors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
         _loadStorageInfo();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: AppColors.red,
-          ),
-        );
+        setState(() => _isLoading = false);
+        ErrorHandler.handleError(context, e);
       }
     }
+  }
+
+  Future<void> _deepClean() async {
+    setState(() => _isLoading = true);
+    try {
+      // Inline cache clearing without showing its own snackbar
+      final tempDir = await getTemporaryDirectory();
+      if (await tempDir.exists()) {
+        await for (var entity in tempDir.list()) {
+          try {
+            if (entity is File) {
+              await entity.delete();
+            } else if (entity is Directory)
+              await entity.delete(recursive: true);
+          } catch (e, stackTrace) {
+            debugPrint(
+              'Error deleting temp entity in deep clean: $e\nStack: $stackTrace',
+            );
+          }
+        }
+      }
+      PaintingBinding.instance.imageCache.clear();
+      PaintingBinding.instance.imageCache.clearLiveImages();
+
+      // Cached network image disk cache temizliği
+      try {
+        await DefaultCacheManager().emptyCache();
+      } catch (e, stackTrace) {
+        debugPrint('Error clearing image cache: $e\nStack: $stackTrace');
+      }
+
+      await Future.delayed(const Duration(milliseconds: 1500));
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.rocket_launch_rounded, color: Colors.white),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Derin hafıza optimizasyonu tamamlandı! Cihaz rahatlatıldı.',
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: AppColors.purple,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+        _loadStorageInfo();
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _showOptimizationMenu() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceDark : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.cleaning_services_rounded,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Akıllı Depolama Yönetimi',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: isDark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimaryLight,
+                        ),
+                      ),
+                      Text(
+                        'Cihazınızda yer açmak için seçenekler',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+
+            // Seçenek 1
+            GestureDetector(
+              onTap: () {
+                Navigator.pop(ctx);
+                _clearCache();
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.orange.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AppColors.orange.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.auto_delete_outlined,
+                      color: AppColors.orange,
+                      size: 28,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Standart Temizlik',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? Colors.white : Colors.black87,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Geçici dosyaları siler. (${_formatBytes(_cacheSize)})',
+                            style: TextStyle(
+                              color: isDark
+                                  ? Colors.grey.shade400
+                                  : Colors.grey.shade600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Seçenek 2
+            GestureDetector(
+              onTap: () {
+                Navigator.pop(ctx);
+                _deepClean();
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.purple.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AppColors.purple.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.memory_rounded,
+                      color: AppColors.purple,
+                      size: 28,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Derinlemesine Optimizasyon',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? Colors.white : Colors.black87,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Resim kalıntılarını ve bellek sızıntılarını boşaltır, cihazı hızlandırır.',
+                            style: TextStyle(
+                              color: isDark
+                                  ? Colors.grey.shade400
+                                  : Colors.grey.shade600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -144,19 +421,28 @@ class _StorageScreenState extends State<StorageScreen> {
         title: Text(
           loc.storage,
           style: TextStyle(
-            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+            color: isDark
+                ? AppColors.textPrimaryDark
+                : AppColors.textPrimaryLight,
             fontWeight: FontWeight.w700,
           ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            color: isDark
+                ? AppColors.textSecondaryDark
+                : AppColors.textSecondaryLight,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
           : ListView(
               padding: const EdgeInsets.all(24),
               children: [
@@ -208,11 +494,32 @@ class _StorageScreenState extends State<StorageScreen> {
                   ),
                   child: Column(
                     children: [
-                      _buildStorageRow(isDark, Icons.data_usage, AppColors.primary, loc.database, _dbSize, totalSize),
+                      _buildStorageRow(
+                        isDark,
+                        Icons.data_usage,
+                        AppColors.primary,
+                        loc.database,
+                        _dbSize,
+                        totalSize,
+                      ),
                       const SizedBox(height: 16),
-                      _buildStorageRow(isDark, Icons.perm_media, AppColors.purple, loc.mediaFiles, _mediaSize, totalSize),
+                      _buildStorageRow(
+                        isDark,
+                        Icons.perm_media,
+                        AppColors.purple,
+                        loc.mediaFiles,
+                        _mediaSize,
+                        totalSize,
+                      ),
                       const SizedBox(height: 16),
-                      _buildStorageRow(isDark, Icons.cached, AppColors.orange, loc.cache, _cacheSize, totalSize),
+                      _buildStorageRow(
+                        isDark,
+                        Icons.cached,
+                        AppColors.orange,
+                        loc.cache,
+                        _cacheSize,
+                        totalSize,
+                      ),
                     ],
                   ),
                 ),
@@ -230,72 +537,119 @@ class _StorageScreenState extends State<StorageScreen> {
                   ),
                   child: Column(
                     children: [
-                      _buildStatRow(isDark, Icons.school, AppColors.primary, loc.totalCourses, _stats['courses'] ?? 0),
-                      Divider(height: 20, color: isDark ? Colors.grey.shade800 : Colors.grey.shade200),
-                      _buildStatRow(isDark, Icons.note, AppColors.blue, loc.totalNotes, _stats['notes'] ?? 0),
-                      Divider(height: 20, color: isDark ? Colors.grey.shade800 : Colors.grey.shade200),
-                      _buildStatRow(isDark, Icons.grade, AppColors.orange, loc.gradesTab, _stats['grades'] ?? 0),
-                      Divider(height: 20, color: isDark ? Colors.grey.shade800 : Colors.grey.shade200),
-                      _buildStatRow(isDark, Icons.insert_drive_file, AppColors.purple, loc.filesTab, _stats['course_files'] ?? 0),
-                      Divider(height: 20, color: isDark ? Colors.grey.shade800 : Colors.grey.shade200),
-                      _buildStatRow(isDark, Icons.event, AppColors.pink, loc.deadlinesHeader, _stats['deadlines'] ?? 0),
-                      Divider(height: 20, color: isDark ? Colors.grey.shade800 : Colors.grey.shade200),
-                      _buildStatRow(isDark, Icons.event_busy, AppColors.red, loc.absenceLabel, _stats['absences'] ?? 0),
+                      _buildStatRow(
+                        isDark,
+                        Icons.school,
+                        AppColors.primary,
+                        loc.totalCourses,
+                        _stats['courses'] ?? 0,
+                      ),
+                      Divider(
+                        height: 20,
+                        color: isDark
+                            ? Colors.grey.shade800
+                            : Colors.grey.shade200,
+                      ),
+                      _buildStatRow(
+                        isDark,
+                        Icons.note,
+                        AppColors.blue,
+                        loc.totalNotes,
+                        _stats['notes'] ?? 0,
+                      ),
+                      Divider(
+                        height: 20,
+                        color: isDark
+                            ? Colors.grey.shade800
+                            : Colors.grey.shade200,
+                      ),
+                      _buildStatRow(
+                        isDark,
+                        Icons.grade,
+                        AppColors.orange,
+                        loc.gradesTab,
+                        _stats['grades'] ?? 0,
+                      ),
+                      Divider(
+                        height: 20,
+                        color: isDark
+                            ? Colors.grey.shade800
+                            : Colors.grey.shade200,
+                      ),
+                      _buildStatRow(
+                        isDark,
+                        Icons.insert_drive_file,
+                        AppColors.purple,
+                        loc.filesTab,
+                        _stats['course_files'] ?? 0,
+                      ),
+                      Divider(
+                        height: 20,
+                        color: isDark
+                            ? Colors.grey.shade800
+                            : Colors.grey.shade200,
+                      ),
+                      _buildStatRow(
+                        isDark,
+                        Icons.event,
+                        AppColors.pink,
+                        loc.deadlinesHeader,
+                        _stats['deadlines'] ?? 0,
+                      ),
+                      Divider(
+                        height: 20,
+                        color: isDark
+                            ? Colors.grey.shade800
+                            : Colors.grey.shade200,
+                      ),
+                      _buildStatRow(
+                        isDark,
+                        Icons.event_busy,
+                        AppColors.red,
+                        loc.absenceLabel,
+                        _stats['absences'] ?? 0,
+                      ),
                     ],
                   ),
                 ),
 
                 const SizedBox(height: 24),
 
-                // Clear Cache Button
+                // Enhanced Optimization Button
                 GestureDetector(
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
-                        title: Text(
-                          loc.clearCache,
-                          style: TextStyle(color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
-                        ),
-                        content: Text(
-                          loc.clearCacheConfirmation,
-                          style: TextStyle(color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(ctx),
-                            child: Text(loc.cancel),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(ctx);
-                              _clearCache();
-                            },
-                            child: Text(loc.clearCache, style: const TextStyle(color: AppColors.red)),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                  onTap: _showOptimizationMenu,
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.red.withValues(alpha: 0.1),
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.primary.withValues(alpha: 0.8),
+                          AppColors.primaryDark,
+                        ],
+                      ),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.red.withValues(alpha: 0.3)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.delete_sweep, color: AppColors.red),
+                        const Icon(
+                          Icons.rocket_launch_rounded,
+                          color: Colors.white,
+                        ),
                         const SizedBox(width: 12),
-                        Text(
-                          loc.clearCache,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
+                        const Text(
+                          'Depolamayı Optimize Et',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
                             fontSize: 16,
-                            color: AppColors.red,
+                            color: Colors.white,
                           ),
                         ),
                       ],
@@ -316,12 +670,21 @@ class _StorageScreenState extends State<StorageScreen> {
         fontSize: 13,
         fontWeight: FontWeight.w700,
         letterSpacing: 1.2,
-        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+        color: isDark
+            ? AppColors.textSecondaryDark
+            : AppColors.textSecondaryLight,
       ),
     );
   }
 
-  Widget _buildStorageRow(bool isDark, IconData icon, Color color, String label, int bytes, int total) {
+  Widget _buildStorageRow(
+    bool isDark,
+    IconData icon,
+    Color color,
+    String label,
+    int bytes,
+    int total,
+  ) {
     final fraction = total > 0 ? bytes / total : 0.0;
     return Row(
       children: [
@@ -347,7 +710,9 @@ class _StorageScreenState extends State<StorageScreen> {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                      color: isDark
+                          ? AppColors.textPrimaryDark
+                          : AppColors.textPrimaryLight,
                     ),
                   ),
                   Text(
@@ -355,7 +720,9 @@ class _StorageScreenState extends State<StorageScreen> {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                      color: isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondaryLight,
                     ),
                   ),
                 ],
@@ -365,7 +732,9 @@ class _StorageScreenState extends State<StorageScreen> {
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
                   value: fraction,
-                  backgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                  backgroundColor: isDark
+                      ? Colors.grey.shade800
+                      : Colors.grey.shade200,
                   color: color,
                   minHeight: 6,
                 ),
@@ -377,7 +746,13 @@ class _StorageScreenState extends State<StorageScreen> {
     );
   }
 
-  Widget _buildStatRow(bool isDark, IconData icon, Color color, String label, int count) {
+  Widget _buildStatRow(
+    bool isDark,
+    IconData icon,
+    Color color,
+    String label,
+    int count,
+  ) {
     return Row(
       children: [
         Container(
@@ -396,7 +771,9 @@ class _StorageScreenState extends State<StorageScreen> {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
-              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+              color: isDark
+                  ? AppColors.textPrimaryDark
+                  : AppColors.textPrimaryLight,
             ),
           ),
         ),

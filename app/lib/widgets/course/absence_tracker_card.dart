@@ -33,7 +33,7 @@ class AbsenceTrackerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final double percentage = (course.currentAbsences / course.absenceLimit).clamp(0.0, 1.0);
+    final double percentage = course.absenceLimit > 0 ? (course.currentAbsences / course.absenceLimit).clamp(0.0, 1.0) : 0.0;
     final int remaining = course.absenceLimit - course.currentAbsences;
     final Color statusColor = _getStatusColor(percentage);
 
@@ -180,6 +180,8 @@ class AbsenceTrackerCard extends StatelessWidget {
               fontSize: 14,
             ),
           ),
+          if (_buildPredictionWarning(context, remaining) != null)
+            _buildPredictionWarning(context, remaining)!,
           if (course.absenceDates.isNotEmpty)
             GestureDetector(
                onTap: () {
@@ -217,6 +219,54 @@ class AbsenceTrackerCard extends StatelessWidget {
                  ),
                ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget? _buildPredictionWarning(BuildContext context, int remaining) {
+    if (course.absenceDates.isEmpty || remaining <= 0) return null;
+
+    final sortedDates = [...course.absenceDates]..sort();
+    final firstAbsence = sortedDates.first;
+    final weeksSinceFirst = DateTime.now().difference(firstAbsence).inDays / 7.0;
+    if (weeksSinceFirst < 1) return null;
+
+    final weeklyRate = course.currentAbsences / weeksSinceFirst;
+    if (weeklyRate <= 0) return null;
+
+    final weeksUntilLimit = remaining / weeklyRate;
+
+    if (remaining > 3 || weeksUntilLimit > 12) return null;
+
+    final locale = Localizations.localeOf(context).languageCode;
+    final warningText = locale == 'tr'
+        ? 'Bu hızla ${weeksUntilLimit.ceil()} hafta sonra limiti aşarsın'
+        : 'At this rate, you\'ll exceed the limit in ${weeksUntilLimit.ceil()} weeks';
+
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.orange.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.orange.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.warning_amber_rounded, size: 18, color: AppColors.orange),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              warningText,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.orange,
+              ),
+            ),
+          ),
         ],
       ),
     );

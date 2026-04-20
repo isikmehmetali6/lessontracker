@@ -7,12 +7,18 @@ import '../models/course.dart';
 import '../models/grade.dart';
 import '../core/theme/app_colors.dart';
 import '../core/services/notification_service.dart';
+import '../core/services/file_service.dart';
 import 'package:uuid/uuid.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import '../repositories/note_repository.dart';
+import '../core/services/sync_service.dart';
+import '../core/services/auto_sync_service.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/course_file.dart';
 
 /// Ders yönetimi provider
@@ -29,11 +35,33 @@ class CourseProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   String? _warning;
+  Set<String> _mutedCourseIds = {};
 
   // Getters
-  List<Course> get courses => _courses;
-  List<Course> get todayCourses => _todayCourses;
-  List<Course> get priorityCourses => _priorityCourses;
+  List<Course> get courses => List.unmodifiable(_courses);
+
+  /// İsim bazlı gruplandırılmış dersler (Aynı isimli dersleri tek bir dersmiş gibi gösterir)
+  List<Course> get uniqueCourses {
+    final Map<String, Course> courseMap = {};
+    for (var course in _courses) {
+      if (!courseMap.containsKey(course.name)) {
+        courseMap[course.name] = course;
+      } else {
+        final existing = courseMap[course.name]!;
+        courseMap[course.name] = existing.copyWith(
+          scheduleDays: {
+            ...existing.scheduleDays,
+            ...course.scheduleDays,
+          }.toList(),
+          currentAbsences: existing.currentAbsences + course.currentAbsences,
+        );
+      }
+    }
+    return courseMap.values.toList();
+  }
+
+  List<Course> get todayCourses => List.unmodifiable(_todayCourses);
+  List<Course> get priorityCourses => List.unmodifiable(_priorityCourses);
   bool get isLoading => _isLoading;
 
   String? get error => _error;
@@ -44,28 +72,51 @@ class CourseProvider extends ChangeNotifier {
     _warning = null;
     notifyListeners();
   }
-  
+
+  bool isCourseMuted(String courseId) => _mutedCourseIds.contains(courseId);
+
+  Future<void> toggleCourseMute(String courseId) async {
+    if (_mutedCourseIds.contains(courseId)) {
+      _mutedCourseIds.remove(courseId);
+    } else {
+      _mutedCourseIds.add(courseId);
+    }
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('muted_course_ids', _mutedCourseIds.toList());
+
+    // Cancel or reschedule notifications for this course
+    final course = _courses.where((c) => c.id == courseId).firstOrNull;
+    if (course != null) {
+      if (_mutedCourseIds.contains(courseId)) {
+        await _cancelForCourse(course);
+      } else {
+        await _scheduleForCourse(course);
+      }
+    }
+  }
+
   bool _notificationsEnabled = true;
   bool get notificationsEnabled => _notificationsEnabled;
 
   int _reminderMinutes = 15;
   int get reminderMinutes => _reminderMinutes;
 
-  void setReminderMinutes(int minutes) {
+  Future<void> setReminderMinutes(int minutes) async {
     _reminderMinutes = minutes;
-    // Reschedule all with new time
     if (_notificationsEnabled) {
-      _rescheduleAllNotifications();
+      await _rescheduleAllNotifications();
     }
     notifyListeners();
   }
 
-  void toggleNotifications(bool unabled) {
-    _notificationsEnabled = unabled;
+  Future<void> toggleNotifications(bool enabled) async {
+    _notificationsEnabled = enabled;
     if (_notificationsEnabled) {
-      _rescheduleAllNotifications();
+      await _rescheduleAllNotifications();
     } else {
-      NotificationService().cancelAllNotifications();
+      await NotificationService().cancelAllNotifications();
     }
     notifyListeners();
   }
@@ -79,18 +130,19 @@ class CourseProvider extends ChangeNotifier {
 
   Future<void> _scheduleForCourse(Course course) async {
     if (!_notificationsEnabled) return;
-    
+    if (_mutedCourseIds.contains(course.id)) return;
+
     // We want to notify BEFORE the class.
     // Logic: If class is at 10:00 and reminder is 15 mins, notify at 09:45.
-    
+
     for (var day in course.scheduleDays) {
       // Calculate notification time
       // This is basic calculation assuming same day.
       // NotificationService usually takes hour/minute.
-      
+
       int notifyHour = course.startTime.hour;
       int notifyMinute = course.startTime.minute - _reminderMinutes;
-      
+
       // Handle underflow (e.g. 10:00 - 15m = 09:45)
       while (notifyMinute < 0) {
         notifyMinute += 60;
@@ -98,10 +150,10 @@ class CourseProvider extends ChangeNotifier {
       }
       // Handle day wrap backward? (e.g. 00:10 - 20m = 23:50 prev day)
       // NotificationService typically schedules repeating weekly.
-      // Complex logic needed if wrapping to previous day. 
+      // Complex logic needed if wrapping to previous day.
       // For MVP, if hour < 0, we might skip or handle if service supports "dayOffset".
       // Assuming simple case for now or just clamp to 00:00 if needed, but wrapping is better.
-      // If hour < 0, it means previous day. 
+      // If hour < 0, it means previous day.
       int notifyDay = day;
       if (notifyHour < 0) {
         notifyHour += 24;
@@ -115,6 +167,7 @@ class CourseProvider extends ChangeNotifier {
         dayOfWeek: notifyDay,
         hour: notifyHour,
         minute: notifyMinute,
+        reminderMinutes: _reminderMinutes,
       );
     }
   }
@@ -144,11 +197,14 @@ class CourseProvider extends ChangeNotifier {
       if (excludeId != null && course.id == excludeId) continue;
 
       // Ortak gün var mı?
-      final commonDays = days.where((d) => course.scheduleDays.contains(d)).toList();
+      final commonDays = days
+          .where((d) => course.scheduleDays.contains(d))
+          .toList();
       if (commonDays.isEmpty) continue;
 
       // Saat çakışması kontrolü
-      final existingStartMin = course.startTime.hour * 60 + course.startTime.minute;
+      final existingStartMin =
+          course.startTime.hour * 60 + course.startTime.minute;
       final existingEndMin = course.endTime.hour * 60 + course.endTime.minute;
 
       // Overlap: newStart < existingEnd && newEnd > existingStart
@@ -162,30 +218,32 @@ class CourseProvider extends ChangeNotifier {
   /// Sıradaki (veya şu anki) dersi bul
   Course? findUpcomingCourse() {
     if (_courses.isEmpty) return null;
-    
+
     final now = DateTime.now();
     final todayWeekday = now.weekday - 1; // 0=Mon
     final currentTime = TimeOfDay.fromDateTime(now);
-    
+
     // 1. Check classes for today that haven't ended yet
-    final todayCourses = _courses.where((c) => c.scheduleDays.contains(todayWeekday)).toList();
+    final todayCourses = _courses
+        .where((c) => c.scheduleDays.contains(todayWeekday))
+        .toList();
     todayCourses.sort((a, b) {
       final aMin = a.startTime.hour * 60 + a.startTime.minute;
       final bMin = b.startTime.hour * 60 + b.startTime.minute;
       return aMin.compareTo(bMin);
     });
-    
+
     final currentMinutes = currentTime.hour * 60 + currentTime.minute;
-    
+
     for (var course in todayCourses) {
       final endMinutes = course.endTime.hour * 60 + course.endTime.minute;
       if (endMinutes > currentMinutes) {
         return course; // Return the first one that ends in the future (could be ongoing or slightly upcoming)
       }
     }
-    
-    // 2. If no more classes today, find first class tomorrow? 
-    // Usually widgets show "No upcoming classes" or "See you tomorrow", but let's return null for now 
+
+    // 2. If no more classes today, find first class tomorrow?
+    // Usually widgets show "No upcoming classes" or "See you tomorrow", but let's return null for now
     // or maybe the first class of tomorrow if we want to be smart.
     return null;
   }
@@ -197,19 +255,26 @@ class CourseProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final prefs = await SharedPreferences.getInstance();
+      _mutedCourseIds = (prefs.getStringList('muted_course_ids') ?? []).toSet();
+
       final activeCourses = await _courseRepo.getActiveCourses();
       _courses = activeCourses;
-      
-      // Populate absences
+
+      final allAbsences = await _absenceRepo.getAllAbsences();
       for (int i = 0; i < _courses.length; i++) {
-        final absences = await _absenceRepo.getAbsencesByCourse(_courses[i].id);
-        _courses[i] = _courses[i].copyWith(absenceDates: absences, currentAbsences: absences.length);
+        final absences = allAbsences[_courses[i].id] ?? [];
+        _courses[i] = _courses[i].copyWith(
+          absenceDates: absences,
+          currentAbsences: absences.length,
+        );
       }
 
       // Re-filter for today and priority based on updated course data
       _todayCourses = _courses.where((c) => c.isScheduledToday).toList();
-      _priorityCourses = _courses.where((c) => c.hasUpcomingExam || c.isBehind).toList();
-      
+      _priorityCourses = _courses
+          .where((c) => c.hasUpcomingExam || c.isBehind)
+          .toList();
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -231,6 +296,11 @@ class CourseProvider extends ChangeNotifier {
     int absenceLimit = 3,
     int credits = 3,
     DateTime? nextExamDate,
+    String? professorEmail,
+    String? professorPhone,
+    String? professorOffice,
+    String? officeHours,
+    String? assistantName,
   }) async {
     _error = null;
     try {
@@ -259,14 +329,19 @@ class CourseProvider extends ChangeNotifier {
         absenceLimit: absenceLimit,
         credits: credits,
         nextExamDate: nextExamDate,
+        professorEmail: professorEmail,
+        professorPhone: professorPhone,
+        professorOffice: professorOffice,
+        officeHours: officeHours,
+        assistantName: assistantName,
       );
 
       await _courseRepo.insertCourse(course);
       await loadCourses();
-      
+
       // Schedule Notification
       await _scheduleForCourse(course);
-      
+
       return true;
     } catch (e) {
       _error = e.toString();
@@ -292,15 +367,18 @@ class CourseProvider extends ChangeNotifier {
         return false;
       }
 
-      // Cancel old notifications first (days/times might change)
-      await _cancelForCourse(course);
-      
+      // Cancel old notifications (use old course data for correct days)
+      final oldCourse = _courses.where((c) => c.id == course.id).firstOrNull;
+      if (oldCourse != null) {
+        await _cancelForCourse(oldCourse);
+      }
+
       await _courseRepo.updateCourse(course);
       await loadCourses();
-      
+
       // Schedule new
       await _scheduleForCourse(course);
-      
+
       return true;
     } catch (e) {
       _error = e.toString();
@@ -312,22 +390,75 @@ class CourseProvider extends ChangeNotifier {
   /// Ders sil
   Future<bool> deleteCourse(String id) async {
     try {
-      // Find course to get ID/Days for cancellation? 
+      // Find course to get ID/Days for cancellation?
       // Actually we have ID. But we need days to generate IDs.
       // We should fetch course first or rely on loadCourses having it?
       // Better to get it from _courses list before deleting.
-      
+
       // Safer:
       Course? course;
       try {
         course = _courses.firstWhere((c) => c.id == id);
-      } catch (_) {}
-      
+      } catch (e, stackTrace) {
+        debugPrint('Error finding course $id: $e\nStack: $stackTrace');
+      }
+
       if (course != null) {
         await _cancelForCourse(course);
       }
 
+      // 1. Delete local media files to prevent device storage leaks
+      try {
+        final fileService = FileService();
+        final NoteRepository noteRepo = NoteRepository();
+        final FileRepository fileRepo = FileRepository();
+
+        final courseNotes = await noteRepo.getNotesByCourse(id);
+        for (final note in courseNotes) {
+          if (note.filePath != null) {
+            final path = await fileService.resolveFilePath(note.filePath!);
+            if (path != null) {
+              final f = File(path);
+              if (await f.exists()) await f.delete();
+            }
+          }
+          if (note.thumbnailPath != null) {
+            final path = await fileService.resolveFilePath(note.thumbnailPath!);
+            if (path != null) {
+              final f = File(path);
+              if (await f.exists()) await f.delete();
+            }
+          }
+        }
+
+        final courseFiles = await fileRepo.getFilesByCourse(id);
+        for (final file in courseFiles) {
+          if (file.path.isNotEmpty) {
+            final path = await fileService.resolveFilePath(file.path);
+            if (path != null) {
+              final f = File(path);
+              if (await f.exists()) await f.delete();
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('Error cleaning up local files for course $id: $e');
+      }
+
+      // 2. Delete local DB record (cascades)
       await _courseRepo.deleteCourse(id);
+
+      // 3. Buluttan da sil (tamamen)
+      try {
+        final SyncService syncService = SyncService();
+        await syncService.deleteCourseCloud(id);
+      } catch (e) {
+        debugPrint('Error triggering cloud delete for course $id: $e');
+        await AutoSyncService().recordPendingChange('courses', id, 'delete');
+        _warning =
+            'Silme işlemi yerel olarak tamamlandı. Bulut senkronizasyonu daha sonra tamamlanacak.';
+      }
+
       await loadCourses();
       return true;
     } catch (e) {
@@ -339,7 +470,12 @@ class CourseProvider extends ChangeNotifier {
 
   /// Ders getir
   Future<Course?> getCourseById(String id) async {
-    return await _courseRepo.getCourseById(id);
+    try {
+      return _courses.firstWhere((c) => c.id == id);
+    } catch (e, stackTrace) {
+      debugPrint('Error getting course from memory: $e\nStack: $stackTrace');
+      return await _courseRepo.getCourseById(id);
+    }
   }
 
   /// İlerlemeyi güncelle
@@ -351,17 +487,26 @@ class CourseProvider extends ChangeNotifier {
   }
 
   /// Devamsızlık ekle
-  Future<void> addAbsence(String courseId) async {
+  Future<void> addAbsence(
+    String courseId, {
+    String reason = 'unexcused',
+  }) async {
     final courseIndex = _courses.indexWhere((c) => c.id == courseId);
     if (courseIndex != -1) {
       final course = _courses[courseIndex];
       final newDate = DateTime.now();
-      
+
       // DB Insert
-      await _absenceRepo.insertAbsence(_uuid.v4(), courseId, newDate);
-      
+      await _absenceRepo.insertAbsence(
+        _uuid.v4(),
+        courseId,
+        newDate,
+        reason: reason,
+      );
+
       // Local Update
-      final updatedDates = List<DateTime>.from(course.absenceDates)..add(newDate);
+      final updatedDates = List<DateTime>.from(course.absenceDates)
+        ..add(newDate);
       // Sort: Newest first usually better for history, but typically lists are oldest first?
       // Let's keep internal list sorted by date if needed, but DB query does DESC.
       // Let's stick to what DB returns or valid logic.
@@ -371,10 +516,10 @@ class CourseProvider extends ChangeNotifier {
         absenceDates: updatedDates,
         currentAbsences: updatedDates.length, // Always sync count with list
       );
-      
+
       // Also update course record for legacy support / redundancy if needed, or just rely on list.
       // We still update the course record in DB to keep 'currentAbsences' column in sync just in case
-      await _courseRepo.updateCourse(updatedCourse); 
+      await _courseRepo.updateCourse(updatedCourse);
 
       _courses[courseIndex] = updatedCourse;
       notifyListeners();
@@ -396,9 +541,9 @@ class CourseProvider extends ChangeNotifier {
       // Locally we should remove the Max date.
       final updatedDates = List<DateTime>.from(course.absenceDates);
       if (updatedDates.isNotEmpty) {
-         // Sort descending to find latest
-         updatedDates.sort((a, b) => b.compareTo(a));
-         updatedDates.removeAt(0); // Remove latest
+        // Sort descending to find latest
+        updatedDates.sort((a, b) => b.compareTo(a));
+        updatedDates.removeAt(0); // Remove latest
       }
 
       final updatedCourse = course.copyWith(
@@ -407,7 +552,7 @@ class CourseProvider extends ChangeNotifier {
       );
 
       await _courseRepo.updateCourse(updatedCourse);
-      
+
       _courses[courseIndex] = updatedCourse;
       notifyListeners();
     }
@@ -468,7 +613,8 @@ class CourseProvider extends ChangeNotifier {
       await _gradeRepo.insertGrade(grade);
 
       if (newTotal > 100) {
-        _warning = 'Total weight is ${newTotal.toStringAsFixed(0)}% (exceeds 100%). '
+        _warning =
+            'Total weight is ${newTotal.toStringAsFixed(0)}% (exceeds 100%). '
             'This may affect weighted average calculation.';
       }
 
@@ -478,6 +624,20 @@ class CourseProvider extends ChangeNotifier {
       _error = e.toString();
       notifyListeners();
       return null;
+    }
+  }
+
+  /// Puan güncelle
+  Future<bool> updateGrade(Grade grade) async {
+    _error = null;
+    try {
+      await _gradeRepo.updateGrade(grade);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return false;
     }
   }
 
@@ -496,6 +656,7 @@ class CourseProvider extends ChangeNotifier {
 
   /// Ağırlıklı ortalama hesapla
   /// Puanlar 100 tabanına normalize edilir, sonra ağırlıklarla çarpılarak ortalaması alınır.
+  /// Weight 100% aştığında normalize edilir.
   double calculateWeightedAverage(List<Grade> grades) {
     if (grades.isEmpty) return 0.0;
 
@@ -510,6 +671,12 @@ class CourseProvider extends ChangeNotifier {
 
     if (totalWeight == 0) return 0.0;
 
+    if (totalWeight > 100) {
+      final factor = 100.0 / totalWeight;
+      totalWeightedScore *= factor;
+      totalWeight = 100.0;
+    }
+
     return totalWeightedScore / totalWeight;
   }
 
@@ -521,37 +688,57 @@ class CourseProvider extends ChangeNotifier {
   }
 
   /// Dosya ekle (Picker açar)
+  /// Göreceli yol kullanır — iOS sandbox değişince dosyalar kaybolmasın
   Future<bool> addFile(String courseId) async {
     try {
       final result = await FilePicker.platform.pickFiles();
-      
+
       if (result != null && result.files.single.path != null) {
         final originalPath = result.files.single.path!;
-        final fileName = result.files.single.name;
-        
-        // App Documents Directory
+        final originalName = result.files.single.name;
+        final ext = p.extension(originalName);
+        final uniqueFileName =
+            '${DateTime.now().millisecondsSinceEpoch}_${_uuid.v4().substring(0, 8)}$ext';
+
         final appDir = await getApplicationDocumentsDirectory();
-        final courseDir = Directory(p.join(appDir.path, 'course_materials', courseId));
-        
+        final courseDir = Directory(
+          p.join(appDir.path, 'course_materials', courseId),
+        );
+
         if (!await courseDir.exists()) {
           await courseDir.create(recursive: true);
         }
-        
-        final destinationPath = p.join(courseDir.path, fileName);
-        await File(originalPath).copy(destinationPath);
-        
-        // Determine type (simple extension check)
-        final ext = p.extension(fileName).toLowerCase();
+
+        final destinationPath = p.join(courseDir.path, uniqueFileName);
+        final sourceFile = File(originalPath);
+        if (!await sourceFile.exists()) {
+          _error = 'Source file no longer available';
+          notifyListeners();
+          return false;
+        }
+        await sourceFile.copy(destinationPath);
+
+        final destFile = File(destinationPath);
+        if (!await destFile.exists()) {
+          _error = 'Failed to save file';
+          notifyListeners();
+          return false;
+        }
+
+        final extLower = ext.toLowerCase();
         String type = 'other';
-        if (['.pdf'].contains(ext)) type = 'pdf';
-        if (['.jpg', '.jpeg', '.png'].contains(ext)) type = 'image';
-        if (['.doc', '.docx', '.txt'].contains(ext)) type = 'doc';
-        
+        if (['.pdf'].contains(extLower)) type = 'pdf';
+        if (['.jpg', '.jpeg', '.png', '.heic', '.webp'].contains(extLower))
+          type = 'image';
+        if (['.doc', '.docx', '.txt'].contains(extLower)) type = 'doc';
+
+        final relativePath = 'course_materials/$courseId/$uniqueFileName';
+
         final courseFile = CourseFile(
           id: _uuid.v4(),
           courseId: courseId,
-          path: destinationPath,
-          name: fileName,
+          path: relativePath,
+          name: originalName,
           type: type,
           createdAt: DateTime.now(),
         );
@@ -568,18 +755,49 @@ class CourseProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> addLink(String courseId, String name, String url) async {
+    try {
+      final fileId = _uuid.v4();
+      String type = 'link';
+      if (url.endsWith('.pdf')) {
+        type = 'pdf';
+      } else if (url.contains('youtube') || url.contains('vimeo'))
+        type = 'video';
+
+      final courseFile = CourseFile(
+        id: fileId,
+        courseId: courseId,
+        path: '',
+        name: name,
+        type: type,
+        createdAt: DateTime.now(),
+        url: url,
+      );
+      await _fileRepo.insertFile(courseFile);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = 'Failed to add link: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// Dosya sil
   Future<bool> deleteFile(CourseFile file) async {
     try {
-      // 1. Delete from DB
       await _fileRepo.deleteFile(file.id);
-      
-      // 2. Delete from Filesystem
-      final fileObj = File(file.path);
-      if (await fileObj.exists()) {
-        await fileObj.delete();
+
+      if (file.path.isNotEmpty && file.url == null) {
+        final resolvedPath = await FileService().resolveFilePath(file.path);
+        if (resolvedPath != null) {
+          final fileObj = File(resolvedPath);
+          if (await fileObj.exists()) {
+            await fileObj.delete();
+          }
+        }
       }
-      
+
       notifyListeners();
       return true;
     } catch (e) {
@@ -591,7 +809,34 @@ class CourseProvider extends ChangeNotifier {
 
   /// Dosyayı aç
   Future<void> openFile(CourseFile file) async {
-    await OpenFilex.open(file.path);
+    try {
+      if (file.url != null && file.url!.isNotEmpty) {
+        // Auto-prepend https:// if scheme is missing
+        var urlStr = file.url!;
+        if (!urlStr.startsWith('http://') && !urlStr.startsWith('https://')) {
+          urlStr = 'https://$urlStr';
+        }
+        final uri = Uri.tryParse(urlStr);
+        if (uri != null) {
+          // Use launchUrl directly — canLaunchUrl is unreliable on iOS
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } else {
+          _error = 'Could not open link: ${file.name}';
+          notifyListeners();
+        }
+        return;
+      }
+      final resolvedPath = await FileService().resolveFilePath(file.path);
+      if (resolvedPath != null) {
+        await OpenFilex.open(resolvedPath);
+      } else {
+        _error = 'File not found: ${file.name}';
+        notifyListeners();
+      }
+    } catch (e) {
+      _error = 'Could not open file: ${file.name}';
+      notifyListeners();
+    }
   }
 
   /// Örnek veriler ekle
@@ -664,8 +909,15 @@ class CourseProvider extends ChangeNotifier {
     _courses = [];
     _todayCourses = [];
     _priorityCourses = [];
+    _mutedCourseIds = {};
     _error = null;
     _isLoading = false;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    NotificationService().cancelAllNotifications();
+    super.dispose();
   }
 }

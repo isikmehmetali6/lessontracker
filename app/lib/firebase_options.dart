@@ -3,6 +3,7 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -43,39 +44,39 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCYAaEdhQY_jNmCo8jTQty7cWCIBsRm6Oc',
-    appId: '1:926597238864:web:02c3bf5141f46b09c28155',
-    messagingSenderId: '926597238864',
-    projectId: 'lessontracker-1beeb',
-    authDomain: 'lessontracker-1beeb.firebaseapp.com',
-    storageBucket: 'lessontracker-1beeb.firebasestorage.app',
-    measurementId: 'G-R7WCR2WL9W',
+  static FirebaseOptions get web => FirebaseOptions(
+    apiKey: dotenv.env['FIREBASE_WEB_API_KEY'] ?? '',
+    appId: dotenv.env['FIREBASE_WEB_APP_ID'] ?? '',
+    messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID'] ?? '',
+    projectId: dotenv.env['FIREBASE_PROJECT_ID'] ?? '',
+    authDomain: dotenv.env['FIREBASE_AUTH_DOMAIN'] ?? '',
+    storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'] ?? '',
+    measurementId: dotenv.env['FIREBASE_WEB_MEASUREMENT_ID'],
   );
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCMkQjW8-2kDqVgIz-u0fRREIVJmxkM1Y0',
-    appId: '1:926597238864:android:6ae151857b69d6c2c28155',
-    messagingSenderId: '926597238864',
-    projectId: 'lessontracker-1beeb',
-    storageBucket: 'lessontracker-1beeb.firebasestorage.app',
+  static FirebaseOptions get android => FirebaseOptions(
+    apiKey: dotenv.env['FIREBASE_ANDROID_API_KEY'] ?? '',
+    appId: dotenv.env['FIREBASE_ANDROID_APP_ID'] ?? '',
+    messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID'] ?? '',
+    projectId: dotenv.env['FIREBASE_PROJECT_ID'] ?? '',
+    storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'] ?? '',
   );
 
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCyglEW9d8aJvlO9gGi4wNT_e8l4mBoriM',
-    appId: '1:926597238864:ios:34f92c1d1ae50facc28155',
-    messagingSenderId: '926597238864',
-    projectId: 'lessontracker-1beeb',
-    storageBucket: 'lessontracker-1beeb.firebasestorage.app',
+  static FirebaseOptions get ios => FirebaseOptions(
+    apiKey: dotenv.env['FIREBASE_IOS_API_KEY'] ?? '',
+    appId: dotenv.env['FIREBASE_IOS_APP_ID'] ?? '',
+    messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID'] ?? '',
+    projectId: dotenv.env['FIREBASE_PROJECT_ID'] ?? '',
+    storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'] ?? '',
     iosBundleId: 'com.lessontracker.lessonTracker',
   );
 
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCyglEW9d8aJvlO9gGi4wNT_e8l4mBoriM',
-    appId: '1:926597238864:ios:34f92c1d1ae50facc28155',
-    messagingSenderId: '926597238864',
-    projectId: 'lessontracker-1beeb',
-    storageBucket: 'lessontracker-1beeb.firebasestorage.app',
+  static FirebaseOptions get macos => FirebaseOptions(
+    apiKey: dotenv.env['FIREBASE_MACOS_API_KEY'] ?? '',
+    appId: dotenv.env['FIREBASE_MACOS_APP_ID'] ?? '',
+    messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID'] ?? '',
+    projectId: dotenv.env['FIREBASE_PROJECT_ID'] ?? '',
+    storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'] ?? '',
     iosBundleId: 'com.lessontracker.lessonTracker',
   );
 }

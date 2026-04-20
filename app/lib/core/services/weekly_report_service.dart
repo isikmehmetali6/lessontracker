@@ -19,13 +19,12 @@ class WeeklyReportService {
   Future<void> checkAndSendReport() async {
     final now = DateTime.now();
 
-    // Sadece Pazar günü gönder (veya test için her gün)
-    // if (now.weekday != DateTime.sunday) return;
+    if (now.weekday != DateTime.sunday) return;
 
     try {
       // 1. Bu haftanın çalışma verileri
       final weekStart = DateTime(now.year, now.month, now.day)
-          .subtract(Duration(days: now.weekday)); // Pazartesi
+          .subtract(Duration(days: now.weekday - 1));
       final sessions = await _sessionRepo.getStudySessionsBetween(weekStart, now);
       final workSessions = sessions.where((s) => s.sessionType == 'work').toList();
       final totalMinutes = workSessions.fold<int>(0, (sum, s) => sum + s.durationMinutes);

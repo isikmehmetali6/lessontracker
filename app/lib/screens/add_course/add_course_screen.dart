@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../providers/course_provider.dart';
 import '../../widgets/common/common_widgets.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
+import '../../core/utils/error_handler.dart';
 
 import '../../models/course.dart';
 import 'widgets/course_basic_info_form.dart';
@@ -26,6 +27,11 @@ class AddCourseScreen extends StatefulWidget {
 
 class _AddCourseScreenState extends State<AddCourseScreen> {
   final _nameController = TextEditingController();
+  final _profEmailController = TextEditingController();
+  final _profPhoneController = TextEditingController();
+  final _profOfficeController = TextEditingController();
+  final _officeHoursController = TextEditingController();
+  final _assistantController = TextEditingController();
 
   // Çoklu zaman çizelgesi listesi
   final List<ScheduleItemData> _scheduleItems = [
@@ -46,6 +52,11 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
     if (widget.courseToEdit != null) {
       final course = widget.courseToEdit!;
       _nameController.text = course.name;
+      _profEmailController.text = course.professorEmail ?? '';
+      _profPhoneController.text = course.professorPhone ?? '';
+      _profOfficeController.text = course.professorOffice ?? '';
+      _officeHoursController.text = course.officeHours ?? '';
+      _assistantController.text = course.assistantName ?? '';
       _absenceLimit = course.absenceLimit;
       
       // Find color index
@@ -68,6 +79,11 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _profEmailController.dispose();
+    _profPhoneController.dispose();
+    _profOfficeController.dispose();
+    _officeHoursController.dispose();
+    _assistantController.dispose();
     super.dispose();
   }
 
@@ -141,6 +157,11 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                       absenceLimit: _absenceLimit,
                       isDark: isDark,
                       selectedColorIndex: _selectedColorIndex,
+                      professorEmailController: _profEmailController,
+                      professorPhoneController: _profPhoneController,
+                      professorOfficeController: _profOfficeController,
+                      officeHoursController: _officeHoursController,
+                      assistantNameController: _assistantController,
                       onColorSelected: (index) {
                         setState(() => _selectedColorIndex = index);
                       },
@@ -250,14 +271,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       final startMin = item.startTime.hour * 60 + item.startTime.minute;
       final endMin = item.endTime.hour * 60 + item.endTime.minute;
       if (endMin <= startMin) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('End time must be after start time.'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        );
+        ErrorHandler.handleError(context, 'End time must be after start time.');
         return;
       }
     }
@@ -282,6 +296,11 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
               startTime: item.startTime,
               endTime: item.endTime,
               absenceLimit: _absenceLimit,
+              professorEmail: _profEmailController.text.isNotEmpty ? _profEmailController.text : null,
+              professorPhone: _profPhoneController.text.isNotEmpty ? _profPhoneController.text : null,
+              professorOffice: _profOfficeController.text.isNotEmpty ? _profOfficeController.text : null,
+              officeHours: _officeHoursController.text.isNotEmpty ? _officeHoursController.text : null,
+              assistantName: _assistantController.text.isNotEmpty ? _assistantController.text : null,
            );
            
            final success = await provider.updateCourse(updatedCourse);
@@ -290,14 +309,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
 
            if (!success) {
              // Çakışma hatası göster
-             ScaffoldMessenger.of(context).showSnackBar(
-               SnackBar(
-                 content: Text(provider.error ?? 'Failed to update course.'),
-                 backgroundColor: Colors.red,
-                 behavior: SnackBarBehavior.floating,
-                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-               ),
-             );
+             ErrorHandler.handleError(context, provider.error ?? 'Failed to update course.');
              return;
            }
 
@@ -314,16 +326,14 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                 startTime: newItem.startTime,
                 endTime: newItem.endTime,
                 absenceLimit: _absenceLimit,
+                professorEmail: _profEmailController.text.isNotEmpty ? _profEmailController.text : null,
+                professorPhone: _profPhoneController.text.isNotEmpty ? _profPhoneController.text : null,
+                professorOffice: _profOfficeController.text.isNotEmpty ? _profOfficeController.text : null,
+                officeHours: _officeHoursController.text.isNotEmpty ? _officeHoursController.text : null,
+                assistantName: _assistantController.text.isNotEmpty ? _assistantController.text : null,
              );
              if (!addSuccess && mounted) {
-               ScaffoldMessenger.of(context).showSnackBar(
-                 SnackBar(
-                   content: Text(provider.error ?? 'Schedule conflict detected.'),
-                   backgroundColor: Colors.red,
-                   behavior: SnackBarBehavior.floating,
-                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                 ),
-               );
+               ErrorHandler.handleError(context, provider.error ?? 'Schedule conflict detected.');
                return;
              }
            }
@@ -348,20 +358,18 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
             startTime: item.startTime,
             endTime: item.endTime,
             absenceLimit: _absenceLimit,
+            professorEmail: _profEmailController.text.isNotEmpty ? _profEmailController.text : null,
+            professorPhone: _profPhoneController.text.isNotEmpty ? _profPhoneController.text : null,
+            professorOffice: _profOfficeController.text.isNotEmpty ? _profOfficeController.text : null,
+            officeHours: _officeHoursController.text.isNotEmpty ? _officeHoursController.text : null,
+            assistantName: _assistantController.text.isNotEmpty ? _assistantController.text : null,
           );
           if (success) {
             successCount++;
           } else {
             // Çakışma veya hata — kullanıcıya göster ve dur
             if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(provider.error ?? 'Failed to create course.'),
-                  backgroundColor: Colors.red,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              );
+              ErrorHandler.handleError(context, provider.error ?? 'Failed to create course.');
             }
             return;
           }
@@ -376,14 +384,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('An error occurred: $e'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+      ErrorHandler.handleError(context, e, customMessage: 'An error occurred: $e');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);

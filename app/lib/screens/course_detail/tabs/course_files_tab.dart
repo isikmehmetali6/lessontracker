@@ -13,6 +13,7 @@ class CourseFilesTab extends StatelessWidget {
   final VoidCallback onAddFile;
   final Function(CourseFile) onDeleteFile;
   final Function(CourseFile) onOpenFile;
+  final VoidCallback? onAddLink;
 
   const CourseFilesTab({
     super.key,
@@ -22,6 +23,7 @@ class CourseFilesTab extends StatelessWidget {
     required this.onAddFile,
     required this.onDeleteFile,
     required this.onOpenFile,
+    this.onAddLink,
   });
 
   @override
@@ -57,6 +59,12 @@ class CourseFilesTab extends StatelessWidget {
               icon: const Icon(Icons.upload_file),
               label: Text(AppLocalizations.of(context)!.uploadFile),
             ),
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: onAddLink,
+              icon: const Icon(Icons.link),
+              label: Text(AppLocalizations.of(context)!.addLink),
+            ),
           ],
         ),
       );
@@ -69,14 +77,32 @@ class CourseFilesTab extends StatelessWidget {
         if (index == files.length) {
           return Padding(
             padding: const EdgeInsets.only(top: 16),
-            child: OutlinedButton.icon(
-              onPressed: onAddFile,
-              icon: const Icon(Icons.add),
-              label: Text(AppLocalizations.of(context)!.addFile),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onAddFile,
+                    icon: const Icon(Icons.add),
+                    label: Text(AppLocalizations.of(context)!.addFile),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onAddLink,
+                    icon: const Icon(Icons.link),
+                    label: Text(AppLocalizations.of(context)!.addLink),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+              ],
             ),
           );
         }
@@ -91,6 +117,19 @@ class CourseFilesTab extends StatelessWidget {
         } else if (file.type == 'image') {
           icon = Icons.image;
           color = AppColors.blue;
+        }
+
+        if (file.url != null) {
+          if (file.url!.contains('youtube') || file.url!.contains('vimeo')) {
+            icon = Icons.videocam;
+            color = AppColors.red;
+          } else if (file.url!.endsWith('.pdf')) {
+            icon = Icons.picture_as_pdf;
+            color = AppColors.red;
+          } else {
+            icon = Icons.link;
+            color = AppColors.primary;
+          }
         }
 
         return Container(
@@ -124,6 +163,7 @@ class CourseFilesTab extends StatelessWidget {
                             child: Image.file(
                               File(resolvedPath),
                               fit: BoxFit.cover,
+                              cacheWidth: 200, // Optimize memory footprint
                               errorBuilder: (_, __, ___) => Icon(icon, color: color),
                             ),
                           );
@@ -143,7 +183,7 @@ class CourseFilesTab extends StatelessWidget {
               ),
             ),
             subtitle: Text(
-              'Added ${file.createdAt.year}-${file.createdAt.month}-${file.createdAt.day}',
+              file.url != null ? file.url! : 'Added ${file.createdAt.year}-${file.createdAt.month}-${file.createdAt.day}',
               style: TextStyle(
                 fontSize: 12,
                 color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,

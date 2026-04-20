@@ -55,7 +55,7 @@ class NoteCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      _formatDate(note.createdAt!),
+                      _formatDate(note.createdAt ?? DateTime.now()),
                       style: TextStyle(
                         fontSize: 12,
                         color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
@@ -218,22 +218,19 @@ class NoteCard extends StatelessWidget {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final diff = now.difference(date);
-
     if (diff.inMinutes < 60) {
-      return '${diff.inMinutes}m ago';
+      return '${diff.inMinutes}m';
     } else if (diff.inHours < 24) {
-      return '${diff.inHours}h ago';
-    } else if (diff.inDays == 1) {
-      return 'Yesterday';
+      return '${diff.inHours}h';
     } else if (diff.inDays < 7) {
-      return '${diff.inDays}d ago';
+      return '${diff.inDays}d';
     } else {
       return DateFormat('MMM d').format(date);
     }
   }
 }
 
-/// Ders detay sayfası için not kartı (büyük)
+/// Ders detay sayfası için not kartı (büyük) — Premium Redesign
 class CourseNoteCard extends StatelessWidget {
   final Note note;
   final VoidCallback? onTap;
@@ -255,367 +252,527 @@ class CourseNoteCard extends StatelessWidget {
     if (note.isAudio) {
       return _buildAudioCard(context, isDark);
     } else if (note.isOcr || note.isImage) {
-      return _buildOcrCard(context, isDark);
+      return _buildImageCard(context, isDark);
     } else {
       return _buildTextCard(context, isDark);
     }
   }
 
-  /// Ses kaydı kartı
-  Widget _buildAudioCard(BuildContext context, bool isDark) {
-    return GlassCard(
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  // ───────────────────── COMMON HELPERS ─────────────────────
+
+  Widget _buildTypeBadge(String label, IconData icon, Color color, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Üst kısım
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.mic,
-                      color: AppColors.primary,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        note.title,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-                        ),
-                      ),
-                      Text(
-                        'Lecture 12 • ${DateFormat('MMM d').format(note.createdAt!)}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  note.formattedDuration,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // Dalga formu görsel
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(17, (index) {
-              final heights = [12.0, 20.0, 32.0, 24.0, 16.0, 12.0, 24.0, 8.0, 20.0, 12.0, 16.0, 8.0, 20.0, 12.0, 8.0, 8.0, 8.0];
-              final isActive = index < 4;
-              return Container(
-                width: 4,
-                height: heights[index % heights.length],
-                decoration: BoxDecoration(
-                  color: isActive 
-                      ? AppColors.primary.withValues(alpha: index < 2 ? 1 : 0.7)
-                      : (isDark ? Colors.grey.shade600 : Colors.grey.shade400).withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              );
-            }),
-          ),
-          const SizedBox(height: 16),
-          // Butonlar
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'Transcript',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.4),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: IconButton(
-                  onPressed: onPlayTap,
-                  icon: const Icon(Icons.play_arrow, color: Colors.white),
-                ),
-              ),
-            ],
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
+              color: color,
+            ),
           ),
         ],
       ),
     );
   }
 
-  /// OCR/Resim kartı
-  Widget _buildOcrCard(BuildContext context, bool isDark) {
-    return GlassCard(
-      onTap: onTap,
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Resim
-          Container(
-            width: 96,
-            height: 96,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: note.thumbnailPath != null
-                  ? FutureBuilder<String?>(
-                      future: FileService().resolveFilePath(note.thumbnailPath),
-                      builder: (context, snapshot) {
-                        final resolvedPath = snapshot.data;
-                        final fileExists = resolvedPath != null && File(resolvedPath).existsSync();
-                        if (!fileExists) {
-                          return Center(
-                            child: Icon(
-                              Icons.broken_image,
-                              size: 32,
-                              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                            ),
-                          );
-                        }
-                        return Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            Image.file(
-                              File(resolvedPath),
-                              fit: BoxFit.cover,
-                            ),
-                            Positioned(
-                              bottom: 4,
-                              right: 4,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: 0.6),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: const Text(
-                                  'IMG',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    )
-                  : const Icon(Icons.image, size: 32),
-            ),
+  Widget _buildBookmarkButton(bool isDark) {
+    return GestureDetector(
+      onTap: onBookmarkTap,
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: note.isBookmarked
+              ? AppColors.amber.withValues(alpha: 0.15)
+              : (isDark ? Colors.white.withValues(alpha: 0.06) : Colors.grey.shade100),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(
+          note.isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+          size: 18,
+          color: note.isBookmarked
+              ? AppColors.amber
+              : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+        ),
+      ),
+    );
+  }
+
+  String _formatSmartDate(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date);
+    if (diff.inMinutes < 1) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    if (diff.inDays == 1) return 'Yesterday';
+    if (diff.inDays < 7) return '${diff.inDays}d ago';
+    return DateFormat('MMM d, yyyy').format(date);
+  }
+
+  // ───────────────────── AUDIO CARD ─────────────────────
+
+  Widget _buildAudioCard(BuildContext context, bool isDark) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? [const Color(0xFF1A1A2E), const Color(0xFF16213E)]
+              : [const Color(0xFFF0F4FF), const Color(0xFFE8EEFF)],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: (isDark ? AppColors.primary : AppColors.blue).withValues(alpha: 0.12),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
-          const SizedBox(width: 16),
-          // Bilgiler
-          Expanded(
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Top row: badge + duration + bookmark
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
+                    _buildTypeBadge('Voice Memo', Icons.mic_rounded, AppColors.primary, isDark),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                       child: Text(
-                        note.title,
+                        note.formattedDuration.isNotEmpty ? note.formattedDuration : '--:--',
                         style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          fontFeatures: const [FontFeature.tabularFigures()],
                           color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
                         ),
                       ),
                     ),
-                    Text(
-                      'TODAY',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
-                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                      ),
-                    ),
+                    const SizedBox(width: 8),
+                    _buildBookmarkButton(isDark),
                   ],
                 ),
+                const SizedBox(height: 16),
+                // Title
                 Text(
-                  DateFormat('MMM d • h:mm a').format(note.createdAt!),
+                  note.title,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _formatSmartDate(note.createdAt ?? DateTime.now()),
                   style: TextStyle(
                     fontSize: 12,
                     color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                   ),
                 ),
-                const SizedBox(height: 8),
-                // OCR içerik önizleme
-                if (note.content != null && note.content!.isNotEmpty)
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey.shade800.withValues(alpha: 0.5) : Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
+                const SizedBox(height: 20),
+                // Waveform
+                SizedBox(
+                  height: 40,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: List.generate(28, (index) {
+                      final heights = [8, 14, 24, 18, 10, 6, 20, 32, 26, 12, 8, 18, 28, 14, 10, 22, 16, 8, 12, 20, 30, 18, 10, 14, 22, 8, 16, 12];
+                      final h = heights[index % heights.length].toDouble();
+                      final isActive = index < 7;
+                      return Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 1),
+                          height: h,
+                          decoration: BoxDecoration(
+                            color: isActive
+                                ? AppColors.primary.withValues(alpha: 0.5 + (index * 0.07).clamp(0, 0.5))
+                                : (isDark ? Colors.white.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.08)),
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Play button row
+                Row(
+                  children: [
+                    // Play button
+                    GestureDetector(
+                      onTap: onPlayTap,
+                      child: Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.4),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 28),
                       ),
                     ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            'OCR',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primary,
-                            ),
+                    const SizedBox(width: 16),
+                    // Transcript button
+                    Expanded(
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white.withValues(alpha: 0.06) : Colors.white.withValues(alpha: 0.7),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            note.content!,
+                        child: TextButton.icon(
+                          onPressed: onTap,
+                          icon: Icon(Icons.text_snippet_outlined, size: 16,
+                              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+                          label: Text(
+                            'View Details',
                             style: TextStyle(
-                              fontSize: 12,
-                              fontFamily: 'monospace',
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
                               color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
+                ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 
-  /// Metin notu kartı
-  Widget _buildTextCard(BuildContext context, bool isDark) {
-    return GlassCard(
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  // ───────────────────── IMAGE / OCR CARD ─────────────────────
+
+  Widget _buildImageCard(BuildContext context, bool isDark) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.edit_note,
-                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    note.title,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-                    ),
-                  ),
-                ],
+              // Full-width image preview
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                child: SizedBox(
+                  height: 160,
+                  width: double.infinity,
+                  child: note.thumbnailPath != null
+                      ? FutureBuilder<String?>(
+                          future: FileService().resolveFilePath(note.thumbnailPath),
+                          builder: (context, snapshot) {
+                            final resolvedPath = snapshot.data;
+                            final fileExists = resolvedPath != null && File(resolvedPath).existsSync();
+                            if (!fileExists) {
+                              return Container(
+                                color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                                child: Center(
+                                  child: Icon(
+                                    Icons.broken_image_rounded,
+                                    size: 40,
+                                    color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+                                  ),
+                                ),
+                              );
+                            }
+                            return Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Image.file(
+                                  File(resolvedPath),
+                                  fit: BoxFit.cover,
+                                  cacheWidth: 800,
+                                ),
+                                // Gradient overlay
+                                Positioned.fill(
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          Colors.transparent,
+                                          Colors.black.withValues(alpha: 0.5),
+                                        ],
+                                        stops: const [0.4, 1.0],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                // Type badge — top left
+                                Positioned(
+                                  top: 12,
+                                  left: 12,
+                                  child: _buildTypeBadge(
+                                    note.isOcr ? 'OCR Scan' : 'Photo',
+                                    note.isOcr ? Icons.document_scanner_rounded : Icons.camera_alt_rounded,
+                                    Colors.white,
+                                    true,
+                                  ),
+                                ),
+                                // Bookmark — top right
+                                Positioned(
+                                  top: 12,
+                                  right: 12,
+                                  child: _buildBookmarkButton(true),
+                                ),
+                                // Title overlay — bottom
+                                Positioned(
+                                  bottom: 12,
+                                  left: 16,
+                                  right: 16,
+                                  child: Text(
+                                    note.title,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                      shadows: [
+                                        Shadow(blurRadius: 8, color: Colors.black54),
+                                      ],
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        )
+                      : Container(
+                          color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                          child: Center(
+                            child: Icon(
+                              Icons.image_rounded,
+                              size: 40,
+                              color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+                            ),
+                          ),
+                        ),
+                ),
               ),
-              IconButton(
-                onPressed: onBookmarkTap,
-                icon: Icon(
-                  note.isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                  color: note.isBookmarked 
-                      ? AppColors.primary 
-                      : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+              // Bottom info section
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Date
+                    Text(
+                      _formatSmartDate(note.createdAt ?? DateTime.now()),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                      ),
+                    ),
+                    // OCR content preview
+                    if (note.content != null && note.content!.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDark ? Colors.white.withValues(alpha: 0.06) : Colors.grey.shade200,
+                          ),
+                        ),
+                        child: Text(
+                          note.content!,
+                          style: TextStyle(
+                            fontSize: 13,
+                            height: 1.5,
+                            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                    // Tags
+                    if (note.tags.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: note.tags.map((tag) => TagChip(
+                          label: '#$tag',
+                          color: AppColors.primary,
+                          isSmall: true,
+                        )).toList(),
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ],
           ),
-          if (note.content != null && note.content!.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(
-              note.content!,
-              style: TextStyle(
-                fontSize: 14,
-                height: 1.5,
-                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-              ),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-          if (note.tags.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              children: note.tags.map((tag) => TagChip(
-                label: '#$tag',
-                color: tag.contains('exam') ? AppColors.amber : AppColors.textSecondaryLight,
-              )).toList(),
-            ),
-          ],
+        ),
+      ),
+    );
+  }
+
+  // ───────────────────── TEXT CARD ─────────────────────
+
+  Widget _buildTextCard(BuildContext context, bool isDark) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
         ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: IntrinsicHeight(
+            child: Row(
+              children: [
+                // Left accent stripe
+                Container(
+                  width: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: const BorderRadius.horizontal(left: Radius.circular(20)),
+                  ),
+                ),
+                // Content
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Top row: badge + date + bookmark
+                        Row(
+                          children: [
+                            _buildTypeBadge('Note', Icons.edit_note_rounded, AppColors.primary, isDark),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _formatSmartDate(note.createdAt ?? DateTime.now()),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                                ),
+                                textAlign: TextAlign.right,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            _buildBookmarkButton(isDark),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        // Title
+                        Text(
+                          note.title,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        // Content preview
+                        if (note.content != null && note.content!.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            note.content!,
+                            style: TextStyle(
+                              fontSize: 14,
+                              height: 1.6,
+                              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                        // Tags
+                        if (note.tags.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
+                            children: note.tags.map((tag) => TagChip(
+                              label: '#$tag',
+                              color: tag.contains('exam') ? AppColors.amber : AppColors.primary,
+                              isSmall: true,
+                            )).toList(),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

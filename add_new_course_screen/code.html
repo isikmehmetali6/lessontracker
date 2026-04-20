@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add New Course</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#40df20",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#142111",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1c2e18",
+                        "text-main": "#121711",
+                        "text-secondary": "#6a8764",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem", 
+                        "lg": "1.5rem", 
+                        "xl": "2rem", 
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 15px rgba(64, 223, 32, 0.3)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+        /* Custom scrollbar hiding */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-text-main dark:text-white antialiased selection:bg-primary selection:text-black">
+<div class="relative mx-auto flex h-full min-h-screen w-full max-w-md flex-col overflow-hidden bg-background-light dark:bg-background-dark shadow-2xl">
+<!-- Header -->
+<header class="sticky top-0 z-20 flex items-center justify-between bg-background-light/80 dark:bg-background-dark/80 px-6 py-4 backdrop-blur-md">
+<button class="flex size-10 items-center justify-center rounded-full bg-white dark:bg-surface-dark shadow-soft transition-transform hover:scale-105 active:scale-95 group">
+<span class="material-symbols-outlined text-text-main dark:text-white transition-colors group-hover:text-primary">arrow_back</span>
+</button>
+<h1 class="text-lg font-bold tracking-tight text-text-main dark:text-white">Add New Course</h1>
+<div class="size-10"></div> <!-- Spacer for visual balance -->
+</header>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto px-6 pb-32 pt-2 no-scrollbar">
+<!-- Course Name Input -->
+<div class="mb-8">
+<label class="mb-3 block text-sm font-medium text-text-secondary dark:text-gray-400" for="course-name">Course Name</label>
+<div class="group relative flex items-center rounded-xl bg-surface-light dark:bg-surface-dark shadow-soft transition-all focus-within:ring-2 focus-within:ring-primary/50">
+<div class="pointer-events-none absolute left-4 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined filled">school</span>
+</div>
+<input class="h-16 w-full border-none bg-transparent pl-12 pr-4 text-lg font-medium text-text-main placeholder-gray-300 focus:ring-0 dark:text-white dark:placeholder-gray-600" id="course-name" placeholder="e.g. History 101" type="text"/>
+</div>
+</div>
+<!-- Schedule Section -->
+<section class="mb-8 rounded-2xl bg-white dark:bg-surface-dark p-6 shadow-soft">
+<div class="mb-5 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">calendar_month</span>
+<h3 class="text-lg font-bold text-text-main dark:text-white">Schedule</h3>
+</div>
+<!-- Day Selector -->
+<div class="mb-6">
+<p class="mb-3 text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-gray-400">Repeat on</p>
+<div class="flex justify-between gap-1">
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-black shadow-glow font-semibold transition-transform hover:scale-105">M</button>
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-background-light dark:bg-background-dark text-text-secondary transition-colors hover:bg-gray-200 dark:hover:bg-gray-700">T</button>
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-black shadow-glow font-semibold transition-transform hover:scale-105">W</button>
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-background-light dark:bg-background-dark text-text-secondary transition-colors hover:bg-gray-200 dark:hover:bg-gray-700">T</button>
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-background-light dark:bg-background-dark text-text-secondary transition-colors hover:bg-gray-200 dark:hover:bg-gray-700">F</button>
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-background-light dark:bg-background-dark text-text-secondary transition-colors hover:bg-gray-200 dark:hover:bg-gray-700">S</button>
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-background-light dark:bg-background-dark text-text-secondary transition-colors hover:bg-gray-200 dark:hover:bg-gray-700">S</button>
+</div>
+</div>
+<!-- Time Pickers -->
+<div class="grid grid-cols-2 gap-4">
+<div class="flex flex-col">
+<label class="mb-2 text-xs font-medium text-text-secondary dark:text-gray-400">Start Time</label>
+<div class="flex h-12 w-full items-center rounded-xl bg-background-light dark:bg-background-dark px-3 outline-none focus-within:ring-1 focus-within:ring-primary">
+<input class="w-full bg-transparent p-0 text-center text-base font-semibold text-text-main focus:ring-0 border-none dark:text-white dark:[color-scheme:dark]" type="time" value="09:00"/>
+</div>
+</div>
+<div class="flex flex-col">
+<label class="mb-2 text-xs font-medium text-text-secondary dark:text-gray-400">End Time</label>
+<div class="flex h-12 w-full items-center rounded-xl bg-background-light dark:bg-background-dark px-3 outline-none focus-within:ring-1 focus-within:ring-primary">
+<input class="w-full bg-transparent p-0 text-center text-base font-semibold text-text-main focus:ring-0 border-none dark:text-white dark:[color-scheme:dark]" type="time" value="10:30"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Location & Details -->
+<div class="mb-8 space-y-4">
+<div>
+<label class="mb-2 block text-sm font-medium text-text-secondary dark:text-gray-400">Classroom / Location</label>
+<div class="flex items-center rounded-xl bg-white dark:bg-surface-dark px-4 py-3 shadow-soft transition-all focus-within:ring-2 focus-within:ring-primary/50">
+<span class="material-symbols-outlined mr-3 text-gray-400 dark:text-gray-500">location_on</span>
+<input class="w-full border-none bg-transparent p-0 text-base text-text-main placeholder-gray-300 focus:ring-0 dark:text-white dark:placeholder-gray-600" placeholder="e.g. Science Hall 304" type="text"/>
+</div>
+</div>
+<div>
+<label class="mb-2 block text-sm font-medium text-text-secondary dark:text-gray-400">Professor (Optional)</label>
+<div class="flex items-center rounded-xl bg-white dark:bg-surface-dark px-4 py-3 shadow-soft transition-all focus-within:ring-2 focus-within:ring-primary/50">
+<span class="material-symbols-outlined mr-3 text-gray-400 dark:text-gray-500">person</span>
+<input class="w-full border-none bg-transparent p-0 text-base text-text-main placeholder-gray-300 focus:ring-0 dark:text-white dark:placeholder-gray-600" placeholder="e.g. Dr. Smith" type="text"/>
+</div>
+</div>
+</div>
+<!-- Absence Counter -->
+<div class="mb-8 flex items-center justify-between rounded-2xl bg-white dark:bg-surface-dark p-5 shadow-soft">
+<div class="flex items-center gap-3">
+<div class="flex size-10 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20 text-red-500">
+<span class="material-symbols-outlined">event_busy</span>
+</div>
+<div class="flex flex-col">
+<span class="text-base font-bold text-text-main dark:text-white">Absence Limit</span>
+<span class="text-xs text-text-secondary dark:text-gray-400">Max allowed per semester</span>
+</div>
+</div>
+<div class="flex items-center gap-4 rounded-full bg-background-light dark:bg-background-dark p-1.5">
+<button class="flex size-8 items-center justify-center rounded-full bg-white dark:bg-surface-dark text-text-main shadow-sm transition-transform active:scale-90 hover:text-red-500 dark:text-white dark:hover:text-red-400">
+<span class="material-symbols-outlined text-[20px]">remove</span>
+</button>
+<span class="min-w-[20px] text-center text-lg font-bold text-text-main dark:text-white">3</span>
+<button class="flex size-8 items-center justify-center rounded-full bg-primary text-black shadow-glow transition-transform active:scale-90 hover:bg-primary/90">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+<!-- Color Picker -->
+<div class="mb-4">
+<label class="mb-3 block text-sm font-medium text-text-secondary dark:text-gray-400">Card Color</label>
+<div class="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+<button class="h-10 w-10 shrink-0 rounded-full border-2 border-primary bg-primary shadow-glow ring-2 ring-offset-2 ring-primary ring-offset-background-light dark:ring-offset-background-dark"></button>
+<button class="h-10 w-10 shrink-0 rounded-full bg-sky-400 hover:scale-110 transition-transform"></button>
+<button class="h-10 w-10 shrink-0 rounded-full bg-purple-400 hover:scale-110 transition-transform"></button>
+<button class="h-10 w-10 shrink-0 rounded-full bg-rose-400 hover:scale-110 transition-transform"></button>
+<button class="h-10 w-10 shrink-0 rounded-full bg-amber-400 hover:scale-110 transition-transform"></button>
+<button class="h-10 w-10 shrink-0 rounded-full bg-emerald-600 hover:scale-110 transition-transform"></button>
+</div>
+</div>
+</main>
+<!-- Floating Action Button Area -->
+<div class="fixed bottom-0 z-30 w-full max-w-md bg-gradient-to-t from-background-light via-background-light to-transparent dark:from-background-dark dark:via-background-dark px-6 pb-8 pt-12">
+<button class="flex w-full items-center justify-center gap-2 rounded-full bg-primary py-4 text-black shadow-glow transition-all hover:bg-[#3be019] active:scale-[0.98]">
+<span class="material-symbols-outlined text-[24px]">check</span>
+<span class="text-lg font-bold">Create Course</span>
+</button>
+</div>
+</div>
+</body></html>

@@ -39,6 +39,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noNotesYet => 'No notes yet. Start capturing!';
 
   @override
+  String get noNotesDescription => 'Use the tools below to capture your first note!';
+
+  @override
   String get goodMorning => 'Good Morning,';
 
   @override
@@ -386,6 +389,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addDeadlineTitle => 'Add Deadline';
 
   @override
+  String get editDeadline => 'Edit Deadline';
+
+  @override
+  String get updateDeadline => 'Update Deadline';
+
+  @override
   String get fillAllFields => 'Please fill all required fields';
 
   @override
@@ -719,4 +728,174 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gpaCalcDesc => 'GPA Calculator';
+
+  @override
+  String get absenceCalendar => 'Absence Calendar';
+
+  @override
+  String get viewAbsenceCalendar => 'View Absence Calendar';
+
+  @override
+  String get noAbsencesOnDay => 'No absences on this day';
+
+  @override
+  String get unexcused => 'Unexcused';
+
+  @override
+  String get medical => 'Medical';
+
+  @override
+  String get excused => 'Excused';
+
+  @override
+  String get personal => 'Personal';
+
+  @override
+  String absencePredictionWarning(String weeks) {
+    return 'At this rate, you\'ll exceed the limit in $weeks weeks';
+  }
+
+  @override
+  String get professorDetails => 'Professor Details';
+
+  @override
+  String get emailLabel => 'Email';
+
+  @override
+  String get phoneLabel => 'Phone';
+
+  @override
+  String get officeRoom => 'Office Room';
+
+  @override
+  String get officeHoursLabel => 'Office Hours';
+
+  @override
+  String get teachingAssistant => 'Teaching Assistant';
+
+  @override
+  String get emailCopied => 'Email copied';
+
+  @override
+  String get phoneCopied => 'Phone copied';
+
+  @override
+  String get addLink => 'Add Link';
+
+  @override
+  String get linkName => 'Link Name';
+
+  @override
+  String get linkAdded => 'Link added';
+
+  @override
+  String get webLink => 'Web Link';
+
+  @override
+  String get templateCornellNotes => 'Cornell Notes';
+
+  @override
+  String get templateLectureSummary => 'Lecture Summary';
+
+  @override
+  String get templateExamNotes => 'Exam Notes';
+
+  @override
+  String get startFromTemplate => 'Start from Template';
+
+  @override
+  String get transcript => 'Transcript';
+
+  @override
+  String get inProgress => 'In Progress';
+
+  @override
+  String get semesterReport => 'Semester Report';
+
+  @override
+  String get generatePdfReport => 'Generate PDF report';
+
+  @override
+  String get exportDataCsv => 'Export Data (CSV)';
+
+  @override
+  String get exportData => 'Export Data';
+
+  @override
+  String get gradesCsv => 'Grades (CSV)';
+
+  @override
+  String get absencesCsv => 'Absences (CSV)';
+
+  @override
+  String get studySessionsCsv => 'Study Sessions (CSV)';
+
+  @override
+  String get selectAbsenceReason => 'Select absence reason';
+
+  @override
+  String get editCourse => 'Edit Course';
+
+  @override
+  String get saveChanges => 'Save Changes';
+
+  @override
+  String get setLocationGeofence => 'Set Location (Geofence)';
+
+  @override
+  String get absenceUnexcused => 'Unexcused';
+
+  @override
+  String get absenceMedical => 'Medical';
+
+  @override
+  String get absenceExcused => 'Excused';
+
+  @override
+  String get absencePersonal => 'Personal';
+
+  @override
+  String get absenceOverview => 'Attendance Overview';
+
+  @override
+  String get absencesUsed => 'absences used';
+
+  @override
+  String get totalAbsences => 'total absences';
+
+  @override
+  String get editAbsence => 'Edit Absence';
+
+  @override
+  String get deleteAbsence => 'Delete Absence';
+
+  @override
+  String get selectReason => 'Select reason:';
+
+  @override
+  String get convertToPdf => 'Convert to PDF';
+
+  @override
+  String get allNotesToPdf => 'All Notes → PDF';
+
+  @override
+  String get photosToPdf => 'Photos → PDF';
+
+  @override
+  String get courseReportPdf => 'Course Report → PDF';
+
+  @override
+  String get appLock => 'App Lock';
+
+  @override
+  String get appLockDisabled => 'Disabled';
+
+  @override
+  String get appLockAuthReason => 'Authenticate to enable app lock';
+
+  @override
+  String get shareNotes => 'View Notes';
+
+  @override
+  String get archiveCourse => 'Archive Course';
 }

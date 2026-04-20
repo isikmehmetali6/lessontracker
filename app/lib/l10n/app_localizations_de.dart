@@ -39,6 +39,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noNotesYet => 'Noch keine Notizen. Fang an zu erfassen!';
 
   @override
+  String get noNotesDescription => 'Nutze die Tools unten, um deine erste Notiz zu erfassen!';
+
+  @override
   String get goodMorning => 'Guten Morgen,';
 
   @override
@@ -186,7 +189,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get thisActionCannotBeUndone => 'Diese Aktion kann nicht rückgängig gemacht werden.';
 
   @override
-  String get totalCourses => 'Gesamtkurse';
+  String get totalCourses => 'Kurse';
 
   @override
   String get totalNotes => 'Gesamtnotizen';
@@ -304,419 +307,595 @@ class AppLocalizationsDe extends AppLocalizations {
   String get good => 'Gut';
 
   @override
-  String get average => 'Durchschnitt';
+  String get average => 'Durchschn.';
 
   @override
   String get improvementNeeded => 'Verbesserungswürdig';
 
   @override
-  String get gradesTab => 'Grades';
+  String get gradesTab => 'Noten';
 
   @override
-  String get filesTab => 'Files';
+  String get filesTab => 'Dateien';
 
   @override
-  String get notesTab => 'Notes';
+  String get notesTab => 'Notizen';
 
   @override
-  String get addGrade => 'Add Grade';
+  String get addGrade => 'Note Hinzufügen';
 
   @override
-  String get noGradesYet => 'No grades yet';
+  String get noGradesYet => 'Noch keine Noten';
 
   @override
-  String get noFilesYet => 'No files yet';
+  String get noFilesYet => 'Noch keine Dateien';
 
   @override
-  String get uploadFile => 'Upload File';
+  String get uploadFile => 'Datei Hochladen';
 
   @override
-  String get addFile => 'Add File';
+  String get addFile => 'Datei Hinzufügen';
 
   @override
   String nextExamIn(int days) {
-    return 'Next exam in $days days';
+    return 'Nächste Prüfung in $days Tagen';
   }
 
   @override
-  String get semesterDefault => 'Spring Semester';
+  String get semesterDefault => 'Frühlingssemester';
 
   @override
-  String get noProfessor => 'No Professor';
+  String get noProfessor => 'Kein Professor';
 
   @override
-  String get weight => 'Weight';
+  String get weight => 'Gewichtung';
 
   @override
-  String get averageShort => 'Avg';
+  String get averageShort => 'Durchschn.';
 
   @override
-  String get searchHint => 'Search notes, tags (#exam)...';
+  String get searchHint => 'Notizen, Tags (#prüfung) durchsuchen...';
 
   @override
-  String get noResults => 'No matching notes found';
+  String get noResults => 'Keine passenden Notizen gefunden';
 
   @override
-  String get searchStartPrompt => 'Search by title, content or tags';
+  String get searchStartPrompt => 'Suche nach Titel, Inhalt oder Tags';
 
   @override
-  String get deadlinesHeader => 'Deadlines';
+  String get deadlinesHeader => 'Fristen';
 
   @override
-  String get deadlinesSubtitle => 'Stay on top of your tasks';
+  String get deadlinesSubtitle => 'Behalte deine Aufgaben im Blick';
 
   @override
-  String get noUpcomingDeadlines => 'No upcoming deadlines';
+  String get noUpcomingDeadlines => 'Keine anstehenden Fristen';
 
   @override
-  String get addFirstDeadline => 'Add your first deadline';
+  String get addFirstDeadline => 'Füge deine erste Frist hinzu';
 
   @override
-  String get deadlineOverdue => 'Overdue';
+  String get deadlineOverdue => 'Überfällig';
 
   @override
-  String get deadlineToday => 'Today';
+  String get deadlineToday => 'Heute';
 
   @override
   String daysLeft(int days) {
-    return '$days days left';
+    return 'Noch $days Tage';
   }
 
   @override
-  String get addDeadlineTitle => 'Add Deadline';
+  String get addDeadlineTitle => 'Frist Hinzufügen';
 
   @override
-  String get fillAllFields => 'Please fill all required fields';
+  String get editDeadline => 'Frist Bearbeiten';
 
   @override
-  String get titleHint => 'Title (e.g. Midterm, Project)';
+  String get updateDeadline => 'Frist Aktualisieren';
 
   @override
-  String get selectCourse => 'Select Course';
+  String get fillAllFields => 'Bitte fülle alle Pflichtfelder aus';
 
   @override
-  String get noCoursesAvailable => 'No courses available. Add a course first.';
+  String get titleHint => 'Titel (z.B. Klausur, Projekt)';
 
   @override
-  String get addToCalendar => 'Add to Calendar';
+  String get selectCourse => 'Kurs Auswählen';
 
   @override
-  String get saveToDeviceCalendar => 'Save to device calendar';
+  String get noCoursesAvailable => 'Keine Kurse verfügbar. Füge zuerst einen Kurs hinzu.';
 
   @override
-  String get assignmentNameHint => 'Assignment Name (e.g. Midterm)';
+  String get addToCalendar => 'Zum Kalender Hinzufügen';
 
   @override
-  String get score => 'Score';
+  String get saveToDeviceCalendar => 'Im Gerätekalender speichern';
+
+  @override
+  String get assignmentNameHint => 'Aufgabenname (z.B. Klausur)';
+
+  @override
+  String get score => 'Punktzahl';
 
   @override
   String get max => 'Max';
 
   @override
-  String get weightPercent => 'Weight (%)';
+  String get weightPercent => 'Gewichtung (%)';
 
   @override
-  String get saveGrade => 'Save Grade';
+  String get saveGrade => 'Note Speichern';
 
   @override
-  String get addNoteToImage => 'Add Note to Image';
+  String get addNoteToImage => 'Notiz zum Bild Hinzufügen';
 
   @override
-  String get titleOptional => 'Title (Optional)';
+  String get titleOptional => 'Titel (Optional)';
 
   @override
-  String get imageContentHint => 'Write something about this image...';
+  String get imageContentHint => 'Schreibe etwas zu diesem Bild...';
 
   @override
-  String get tagsHint => 'Tags (e.g. #exam, #history)';
+  String get tagsHint => 'Tags (z.B. #prüfung, #geschichte)';
 
   @override
-  String get absenceHistory => 'Absence History';
+  String get absenceHistory => 'Abwesenheitsverlauf';
 
   @override
-  String get noAbsenceHistory => 'No absence history yet.';
+  String get noAbsenceHistory => 'Noch kein Abwesenheitsverlauf.';
 
   @override
-  String get welcomeToClass => 'Welcome to class! 🎓';
+  String get welcomeToClass => 'Willkommen im Unterricht! 🎓';
 
   @override
-  String get youAreInArea => 'You are at the class location.';
+  String get youAreInArea => 'Du bist am Unterrichtsort.';
 
   @override
-  String get syncDescription => 'Backup your data to the cloud or restore it to this device.';
+  String get syncDescription => 'Sichere deine Daten in der Cloud oder stelle sie auf diesem Gerät wieder her.';
 
   @override
-  String get processing => 'Processing...';
+  String get processing => 'Verarbeitung...';
 
   @override
-  String get backupData => 'Backup Data';
+  String get backupData => 'Daten Sichern';
 
   @override
-  String get backupDescription => 'Upload local data to cloud';
+  String get backupDescription => 'Lokale Daten in die Cloud hochladen';
 
   @override
-  String get restoreData => 'Restore Data';
+  String get restoreData => 'Daten Wiederherstellen';
 
   @override
-  String get restoreDescription => 'Download from cloud (Replaces Local)';
+  String get restoreDescription => 'Aus der Cloud herunterladen (Ersetzt lokale Daten)';
 
   @override
-  String get confirmRestore => 'Confirm Restore';
+  String get confirmRestore => 'Wiederherstellung Bestätigen';
 
   @override
-  String get restoreWarning => 'This will overwrite some local data with cloud data. Continue?';
+  String get restoreWarning => 'Dies überschreibt einige lokale Daten mit Cloud-Daten. Fortfahren?';
 
   @override
-  String get restoreAction => 'Restore';
+  String get restoreAction => 'Wiederherstellen';
 
   @override
-  String get save => 'Save';
+  String get save => 'Speichern';
 
   @override
-  String get attendanceStatus => 'Attendance Status';
+  String get attendanceStatus => 'Anwesenheitsstatus';
 
   @override
-  String get perfectAttendance => 'Perfect attendance! Keep it up!';
+  String get perfectAttendance => 'Perfekte Anwesenheit! Weiter so!';
 
   @override
   String absences(int current, int limit) {
-    return '$current / $limit Absences';
+    return '$current / $limit Abwesenheiten';
   }
 
   @override
-  String get riskLabel => 'RISK';
+  String get riskLabel => 'RISIKO';
 
   @override
-  String get todaySchedule => 'Today\'s Schedule';
+  String get todaySchedule => 'Heutiger Stundenplan';
 
   @override
-  String get noClassesToday => 'No classes today — enjoy your free time! 🎉';
+  String get noClassesToday => 'Heute keine Kurse — genieße deine freie Zeit! 🎉';
 
   @override
-  String get guestUser => 'Guest';
+  String get guestUser => 'Gast';
 
   @override
-  String get searchPlaceholder => 'Find subjects, notes, or tags...';
+  String get searchPlaceholder => 'Fächer, Notizen oder Tags finden...';
 
   @override
-  String get noCourses => 'No courses yet';
+  String get noCourses => 'Noch keine Kurse';
 
   @override
-  String get addYourFirstCourse => 'Tap + to add your first course and start tracking!';
+  String get addYourFirstCourse => 'Tippe auf +, um deinen ersten Kurs hinzuzufügen!';
 
   @override
-  String get editProfile => 'Edit Profile';
+  String get editProfile => 'Profil Bearbeiten';
 
   @override
   String get name => 'Name';
 
   @override
-  String get email => 'Email';
+  String get email => 'E-Mail';
 
   @override
-  String get changePassword => 'Change Password';
+  String get changePassword => 'Passwort Ändern';
 
   @override
-  String get currentPassword => 'Current Password';
+  String get currentPassword => 'Aktuelles Passwort';
 
   @override
-  String get newPassword => 'New Password';
+  String get newPassword => 'Neues Passwort';
 
   @override
-  String get confirmPassword => 'Confirm Password';
+  String get confirmPassword => 'Passwort Bestätigen';
 
   @override
-  String get passwordsDoNotMatch => 'Passwords do not match';
+  String get passwordsDoNotMatch => 'Passwörter stimmen nicht überein';
 
   @override
-  String get passwordTooShort => 'Password must be at least 6 characters';
+  String get passwordTooShort => 'Das Passwort muss mindestens 6 Zeichen lang sein';
 
   @override
-  String get profileUpdated => 'Profile updated successfully';
+  String get profileUpdated => 'Profil erfolgreich aktualisiert';
 
   @override
-  String get emailVerificationSent => 'Verification email sent to new address';
+  String get emailVerificationSent => 'Bestätigungsmail an die neue Adresse gesendet';
 
   @override
-  String get passwordChanged => 'Password changed successfully';
+  String get passwordChanged => 'Passwort erfolgreich geändert';
 
   @override
-  String get faqTitle => 'Frequently Asked Questions';
+  String get faqTitle => 'Häufig Gestellte Fragen';
 
   @override
-  String get faqQ1 => 'How do I add a new course?';
+  String get faqQ1 => 'Wie füge ich einen neuen Kurs hinzu?';
 
   @override
-  String get faqA1 => 'Tap the + button on the home screen and fill in the course details including name, schedule, and professor info.';
+  String get faqA1 => 'Tippe auf die +-Taste auf der Startseite und gib die Kursdetails ein, einschließlich Name, Zeitplan und Professorinformationen.';
 
   @override
-  String get faqQ2 => 'How do I track my absences?';
+  String get faqQ2 => 'Wie verfolge ich meine Abwesenheiten?';
 
   @override
-  String get faqA2 => 'Open any course and use the absence counter to add or remove absences. You\'ll get warned when you approach work limit.';
+  String get faqA2 => 'Öffne einen Kurs und nutze den Abwesenheitszähler, um Abwesenheiten hinzuzufügen oder zu entfernen. Du wirst gewarnt, wenn du das Limit erreichst.';
 
   @override
-  String get faqQ3 => 'Can I backup my data?';
+  String get faqQ3 => 'Kann ich meine Daten sichern?';
 
   @override
-  String get faqA3 => 'Yes! Go to Settings > Sync & Backup to upload your data to the cloud. You need to be signed in to use this feature.';
+  String get faqA3 => 'Ja! Gehe zu Einstellungen > Sync & Backup, um deine Daten in die Cloud hochzuladen. Du musst dafür angemeldet sein.';
 
   @override
-  String get faqQ4 => 'How do I record a voice note?';
+  String get faqQ4 => 'Wie nehme ich eine Sprachnotiz auf?';
 
   @override
-  String get faqA4 => 'Open a course, tap the + button, and select the microphone icon to start recording a voice memo.';
+  String get faqA4 => 'Öffne einen Kurs, tippe auf die +-Taste und wähle das Mikrofon-Symbol, um eine Sprachnotiz aufzunehmen.';
 
   @override
-  String get faqQ5 => 'How do I change the app language?';
+  String get faqQ5 => 'Wie ändere ich die App-Sprache?';
 
   @override
-  String get faqA5 => 'Go to Settings and tap on Language. You can choose between English, Turkish, Spanish, and German.';
+  String get faqA5 => 'Gehe zu Einstellungen und tippe auf Sprache. Du kannst zwischen Englisch, Türkisch, Spanisch und Deutsch wählen.';
 
   @override
-  String get contactUs => 'Contact Us';
+  String get contactUs => 'Kontakt';
 
   @override
-  String get emailSupport => 'Email Support';
+  String get emailSupport => 'E-Mail-Support';
 
   @override
-  String get reportBug => 'Report a Bug';
+  String get reportBug => 'Fehler Melden';
 
   @override
-  String get reportBugDescription => 'Found something broken? Let us know';
+  String get reportBugDescription => 'Etwas Fehlerhaftes gefunden? Lass es uns wissen';
 
   @override
-  String get featureRequest => 'Feature Request';
+  String get featureRequest => 'Funktionswunsch';
 
   @override
-  String get featureRequestDescription => 'Suggest a new feature';
+  String get featureRequestDescription => 'Schlage eine neue Funktion vor';
 
   @override
-  String get aboutApp => 'About';
+  String get aboutApp => 'Über die App';
 
   @override
-  String get aboutDescription => 'Lesson Tracker helps students organize their courses, track attendance, capture notes, and stay on top of deadlines. Built with care for students everywhere.';
+  String get aboutDescription => 'Lektions-Tracker hilft Studierenden, ihre Kurse zu organisieren, Anwesenheit zu verfolgen, Notizen zu erfassen und Fristen im Blick zu behalten. Mit Sorgfalt für Studierende überall entwickelt.';
 
   @override
-  String get privacyPolicy => 'Privacy Policy';
+  String get privacyPolicy => 'Datenschutzrichtlinie';
 
   @override
-  String get termsOfService => 'Terms of Service';
+  String get termsOfService => 'Nutzungsbedingungen';
 
   @override
-  String get totalStorageUsed => 'Total Storage Used';
+  String get totalStorageUsed => 'Genutzter Gesamtspeicher';
 
   @override
-  String get storageBreakdown => 'Storage Breakdown';
+  String get storageBreakdown => 'Speicheraufschlüsselung';
 
   @override
-  String get database => 'Database';
+  String get database => 'Datenbank';
 
   @override
-  String get mediaFiles => 'Media Files';
+  String get mediaFiles => 'Mediendateien';
 
   @override
   String get cache => 'Cache';
 
   @override
-  String get dataStats => 'Data Statistics';
+  String get dataStats => 'Datenstatistiken';
 
   @override
-  String get clearCache => 'Clear Cache';
+  String get clearCache => 'Cache Leeren';
 
   @override
-  String get clearCacheConfirmation => 'This will remove temporary files. Your data will not be affected. Continue?';
+  String get clearCacheConfirmation => 'Dadurch werden temporäre Dateien entfernt. Deine Daten bleiben unberührt. Fortfahren?';
 
   @override
-  String get cacheCleared => 'Cache cleared successfully!';
+  String get cacheCleared => 'Cache erfolgreich geleert!';
 
   @override
-  String get signOutConfirmation => 'Are you sure you want to sign out?';
+  String get signOutConfirmation => 'Bist du sicher, dass du dich abmelden möchtest?';
 
   @override
-  String get lastBackup => 'Last backup';
+  String get lastBackup => 'Letztes Backup';
 
   @override
-  String get never => 'Never';
+  String get never => 'Nie';
 
   @override
-  String get loginRequiredForSync => 'Sign in to use sync & backup features';
+  String get loginRequiredForSync => 'Melde dich an, um Sync- & Backup-Funktionen zu nutzen';
 
   @override
-  String get autoSync => 'Auto Sync';
+  String get autoSync => 'Automatische Synchronisierung';
 
   @override
-  String get tapToEdit => 'Tap to edit profile';
+  String get tapToEdit => 'Tippe, um das Profil zu bearbeiten';
 
   @override
-  String get studyTimer => 'Study Timer';
+  String get studyTimer => 'Lern-Timer';
 
   @override
-  String get focusTime => 'Focus Time';
+  String get focusTime => 'Fokuszeit';
 
   @override
-  String get breakTime => 'Break Time';
+  String get breakTime => 'Pausenzeit';
 
   @override
-  String get session => 'Session';
+  String get session => 'Sitzung';
 
   @override
-  String get sessionComplete => 'Great job! Session complete 🎉';
+  String get sessionComplete => 'Gut gemacht! Sitzung abgeschlossen 🎉';
 
   @override
-  String get breakComplete => 'Break over! Ready to focus?';
+  String get breakComplete => 'Pause vorbei! Bereit zum Lernen?';
 
   @override
-  String get studyingFor => 'Studying for';
+  String get studyingFor => 'Lernen für';
 
   @override
-  String get noCourseSelected => 'No course selected';
+  String get noCourseSelected => 'Kein Kurs ausgewählt';
 
   @override
-  String get timerPresets => 'Duration Presets';
+  String get timerPresets => 'Zeitvorgaben';
 
   @override
-  String get short => 'Short';
+  String get short => 'Kurz';
 
   @override
-  String get classic => 'Classic';
+  String get classic => 'Klassisch';
 
   @override
-  String get long => 'Long';
+  String get long => 'Lang';
 
   @override
   String get marathon => 'Marathon';
 
   @override
-  String get completedSessions => 'Completed sessions';
+  String get completedSessions => 'Abgeschlossene Sitzungen';
 
   @override
-  String get gpaCalculator => 'GPA Calculator';
+  String get gpaCalculator => 'Notendurchschnittrechner';
 
   @override
-  String get overallGPA => 'Overall GPA';
+  String get overallGPA => 'Gesamtnotendurchschnitt';
 
   @override
-  String get totalCredits => 'Credits';
+  String get totalCredits => 'Leistungspunkte';
 
   @override
-  String get letterGrade => 'Grade';
+  String get letterGrade => 'Note';
 
   @override
-  String get gpaScale => 'GPA Scale';
+  String get gpaScale => 'Notenskala';
 
   @override
-  String get courseBreakdown => 'Course Breakdown';
+  String get courseBreakdown => 'Kursaufschlüsselung';
 
   @override
-  String get credits => 'credits';
+  String get credits => 'Leistungspunkte';
 
   @override
-  String get quickActions => 'Quick Actions';
+  String get quickActions => 'Schnellaktionen';
 
   @override
-  String get studyTimerDesc => 'Pomodoro Timer';
+  String get studyTimerDesc => 'Pomodoro-Timer';
 
   @override
-  String get gpaCalcDesc => 'GPA Calculator';
+  String get gpaCalcDesc => 'Notendurchschnittrechner';
+
+  @override
+  String get absenceCalendar => 'Abwesenheitskalender';
+
+  @override
+  String get viewAbsenceCalendar => 'Abwesenheitskalender anzeigen';
+
+  @override
+  String get noAbsencesOnDay => 'Keine Abwesenheiten an diesem Tag';
+
+  @override
+  String get unexcused => 'Unentschuldigt';
+
+  @override
+  String get medical => 'Medizinisch';
+
+  @override
+  String get excused => 'Entschuldigt';
+
+  @override
+  String get personal => 'Persönlich';
+
+  @override
+  String absencePredictionWarning(String weeks) {
+    return 'Bei diesem Tempo überschreitest du das Limit in $weeks Wochen';
+  }
+
+  @override
+  String get professorDetails => 'Professordetails';
+
+  @override
+  String get emailLabel => 'E-Mail';
+
+  @override
+  String get phoneLabel => 'Telefon';
+
+  @override
+  String get officeRoom => 'Büroraum';
+
+  @override
+  String get officeHoursLabel => 'Sprechstunden';
+
+  @override
+  String get teachingAssistant => 'Lehrassistent';
+
+  @override
+  String get emailCopied => 'E-Mail kopiert';
+
+  @override
+  String get phoneCopied => 'Telefon kopiert';
+
+  @override
+  String get addLink => 'Link hinzufügen';
+
+  @override
+  String get linkName => 'Linkname';
+
+  @override
+  String get linkAdded => 'Link hinzugefügt';
+
+  @override
+  String get webLink => 'Weblink';
+
+  @override
+  String get templateCornellNotes => 'Cornell-Notizen';
+
+  @override
+  String get templateLectureSummary => 'Vorlesungszusammenfassung';
+
+  @override
+  String get templateExamNotes => 'Prüfungsnotizen';
+
+  @override
+  String get startFromTemplate => 'Von Vorlage starten';
+
+  @override
+  String get transcript => 'Transkript';
+
+  @override
+  String get inProgress => 'In Bearbeitung';
+
+  @override
+  String get semesterReport => 'Semesterbericht';
+
+  @override
+  String get generatePdfReport => 'PDF-Bericht erstellen';
+
+  @override
+  String get exportDataCsv => 'Daten exportieren (CSV)';
+
+  @override
+  String get exportData => 'Daten exportieren';
+
+  @override
+  String get gradesCsv => 'Noten (CSV)';
+
+  @override
+  String get absencesCsv => 'Abwesenheiten (CSV)';
+
+  @override
+  String get studySessionsCsv => 'Lernsitzungen (CSV)';
+
+  @override
+  String get selectAbsenceReason => 'Abwesenheitsgrund auswählen';
+
+  @override
+  String get editCourse => 'Kurs bearbeiten';
+
+  @override
+  String get saveChanges => 'Änderungen speichern';
+
+  @override
+  String get setLocationGeofence => 'Standort festlegen (Geofence)';
+
+  @override
+  String get absenceUnexcused => 'Unentschuldigt';
+
+  @override
+  String get absenceMedical => 'Ärztliches Attest';
+
+  @override
+  String get absenceExcused => 'Entschuldigt';
+
+  @override
+  String get absencePersonal => 'Persönlich';
+
+  @override
+  String get absenceOverview => 'Anwesenheitsübersicht';
+
+  @override
+  String get absencesUsed => 'Abwesenheiten genutzt';
+
+  @override
+  String get totalAbsences => 'Abwesenheiten gesamt';
+
+  @override
+  String get editAbsence => 'Abwesenheit bearbeiten';
+
+  @override
+  String get deleteAbsence => 'Abwesenheit löschen';
+
+  @override
+  String get selectReason => 'Grund auswählen:';
+
+  @override
+  String get convertToPdf => 'In PDF umwandeln';
+
+  @override
+  String get allNotesToPdf => 'Alle Notizen → PDF';
+
+  @override
+  String get photosToPdf => 'Fotos → PDF';
+
+  @override
+  String get courseReportPdf => 'Kursbericht → PDF';
+
+  @override
+  String get appLock => 'App-Sperre';
+
+  @override
+  String get appLockDisabled => 'Deaktiviert';
+
+  @override
+  String get appLockAuthReason => 'Authentifizieren, um die App-Sperre zu aktivieren';
+
+  @override
+  String get shareNotes => 'Notizen anzeigen';
+
+  @override
+  String get archiveCourse => 'Kurs archivieren';
 }

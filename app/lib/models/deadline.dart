@@ -35,15 +35,29 @@ class Deadline {
   }
 
   factory Deadline.fromMap(Map<String, dynamic> map) {
+    final typeValue = map['type'];
+    DeadlineType deadlineType;
+    if (typeValue is int && typeValue >= 0 && typeValue < DeadlineType.values.length) {
+      deadlineType = DeadlineType.values[typeValue];
+    } else {
+      deadlineType = DeadlineType.other;
+    }
     return Deadline(
-      id: map['id'],
-      courseId: map['courseId'],
-      title: map['title'],
-      date: DateTime.parse(map['date']),
-      type: DeadlineType.values[map['type']],
+      id: map['id'] as String,
+      courseId: map['courseId'] as String,
+      title: map['title'] as String,
+      date: DateTime.parse(map['date'] as String),
+      type: deadlineType,
       reminder: map['reminder'] == 1,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is Deadline && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 
   Deadline copyWith({
     String? id,

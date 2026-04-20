@@ -15,12 +15,10 @@ class _WeeklyTimetableScreenState extends State<WeeklyTimetableScreen> {
   final double _hourHeight = 60.0;
   final double _timeColumnWidth = 50.0;
   final int _startHour = 8;
-  final int _endHour = 22;
 
   late final ScrollController _scrollController;
   
-  // To highlight today
-  final int _todayWeekday = DateTime.now().weekday - 1; // 0=Mon, 6=Sun
+  int get _todayWeekday => DateTime.now().weekday - 1; // 0=Mon, 6=Sun
 
   @override
   void initState() {
@@ -30,7 +28,7 @@ class _WeeklyTimetableScreenState extends State<WeeklyTimetableScreen> {
     Future.microtask(() {
        // Optional: Scroll to current time
        final currentHour = DateTime.now().hour;
-       if (currentHour > _startHour && currentHour < _endHour) {
+       if (currentHour > _startHour) {
          final offset = (currentHour - _startHour) * _hourHeight - 100; // -100 to show some context above
          if (offset > 0 && _scrollController.hasClients) {
             _scrollController.jumpTo(offset);
@@ -68,6 +66,22 @@ class _WeeklyTimetableScreenState extends State<WeeklyTimetableScreen> {
       body: Consumer<CourseProvider>(
         builder: (context, provider, _) {
           final courses = provider.courses;
+          
+          // Calculate dynamic end hour based on the last class of the week
+          int dynamicEndHour = 18; // Default to 18:00 (6 PM) if no courses
+          if (courses.isNotEmpty) {
+            dynamicEndHour = 0;
+            for (var course in courses) {
+              final endH = course.endTime.hour + (course.endTime.minute > 0 ? 1 : 0);
+              if (endH > dynamicEndHour) {
+                dynamicEndHour = endH;
+              }
+            }
+            // Set a sensible minimum so the timetable doesn't look too short
+            if (dynamicEndHour < 15) {
+              dynamicEndHour = 15; 
+            }
+          }
 
           return Column(
             children: [
@@ -135,7 +149,7 @@ class _WeeklyTimetableScreenState extends State<WeeklyTimetableScreen> {
                       SizedBox(
                         width: _timeColumnWidth,
                         child: Column(
-                          children: List.generate(_endHour - _startHour + 1, (index) {
+                          children: List.generate(dynamicEndHour - _startHour + 1, (index) {
                             final hour = _startHour + index;
                             return SizedBox(
                               height: _hourHeight,
@@ -160,14 +174,14 @@ class _WeeklyTimetableScreenState extends State<WeeklyTimetableScreen> {
                         child: LayoutBuilder(
                           builder: (context, constraints) {
                             final columnWidth = constraints.maxWidth / 7;
-                            final totalHeight = (_endHour - _startHour) * _hourHeight;
+                            final totalHeight = (dynamicEndHour - _startHour) * _hourHeight;
 
                             return SizedBox(
                               height: totalHeight + _hourHeight, // buffer
                               child: Stack(
                                 children: [
                                   // Horizontal Lines
-                                  ...List.generate(_endHour - _startHour + 1, (index) {
+                                  ...List.generate(dynamicEndHour - _startHour + 1, (index) {
                                       return Positioned(
                                         top: index * _hourHeight,
                                         left: 0,

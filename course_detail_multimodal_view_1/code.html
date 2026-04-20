@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Course Detail Multimodal View</title>
+<!-- Google Fonts: Lexend -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#3ce619",
+                "background-light": "#f6f8f6",
+                "background-dark": "#142111",
+                "sage": {
+                    50: '#f4f7f4',
+                    100: '#e3ebe3',
+                    500: '#698863', // Sage green for text
+                    800: '#2d3b2a',
+                },
+                "cream": "#fdfdfc",
+              },
+              fontFamily: {
+                "display": ["Lexend", "sans-serif"]
+              },
+              borderRadius: {
+                  "DEFAULT": "1rem", 
+                  "lg": "2rem", 
+                  "xl": "3rem", 
+                  "full": "9999px"
+              },
+              boxShadow: {
+                  "soft": "0 8px 24px -6px rgba(0, 0, 0, 0.04)",
+                  "glass": "0 8px 32px 0 rgba(31, 38, 135, 0.07)",
+              }
+            },
+          },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .glass-panel {
+                @apply bg-white/80 dark:bg-[#142111]/80 backdrop-blur-xl border border-white/40 dark:border-white/5;
+            }
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        }
+        
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+        
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 min-h-screen relative overflow-hidden flex flex-col">
+<!-- Header Section -->
+<header class="flex items-center justify-between px-6 pt-12 pb-4 z-10">
+<button class="flex items-center justify-center w-12 h-12 bg-white dark:bg-white/5 rounded-full shadow-sm hover:shadow-md transition-shadow group">
+<span class="material-symbols-outlined text-slate-800 dark:text-white group-hover:text-primary transition-colors">arrow_back</span>
+</button>
+<div class="flex-1"></div>
+<button class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-slate-800 dark:text-white">more_horiz</span>
+</button>
+</header>
+<!-- Scrollable Content -->
+<main class="flex-1 overflow-y-auto no-scrollbar pb-32 px-6">
+<!-- Course Title Area -->
+<div class="mb-6 animate-fade-in-up">
+<h1 class="text-3xl font-bold text-slate-900 dark:text-white leading-tight tracking-tight mb-3">
+                Advanced<br/>Mathematics
+            </h1>
+<div class="flex items-center flex-wrap gap-3">
+<div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/10">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="text-sm font-medium text-green-800 dark:text-primary">In Progress</span>
+</div>
+<div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white dark:bg-white/5 border border-black/5 dark:border-white/10">
+<span class="text-sm font-medium text-slate-500 dark:text-slate-400">3 Credits</span>
+</div>
+</div>
+<p class="mt-4 text-sage-500 dark:text-sage-100 text-sm font-normal flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">calendar_clock</span>
+                Next Class: Mon, 10:00 AM
+            </p>
+</div>
+<!-- Section Header -->
+<div class="flex items-center justify-between mb-4 mt-8">
+<h3 class="text-lg font-bold text-slate-800 dark:text-white">Lesson Materials</h3>
+<button class="text-primary text-sm font-medium hover:opacity-80">View All</button>
+</div>
+<!-- Cards List -->
+<div class="flex flex-col gap-4">
+<!-- Card 1: Notes -->
+<div class="group bg-white dark:bg-[#1a2b16] p-4 rounded-lg shadow-soft hover:shadow-md transition-all duration-300 border border-transparent hover:border-primary/20 cursor-pointer">
+<div class="flex gap-4">
+<div class="relative w-20 h-20 shrink-0 rounded-2xl overflow-hidden bg-gray-100">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Handwritten calculus notes on white paper" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDsm09TMEM5E1E3-qeSRmGbnrdzMKW4p-8gA3ibxC7lj86FmoKEf7MdTRtXbzEvM5mEpIsvmmJJxzzCM7P4EdXFBtJTIJ5Qp325lGwPAdq5_-GS4cqTfnW0FKIDSuhL0okuR0Xje---ymaho48HRRTX3HwGDi7T6yjiydh66LbsNC7L2lVaGmaRJXnrJ5IqlTkeTYDyerQK0cj-0Oqdw33F-gGJdwlCS6i4wNvt6nhfGZVRv76MJCILVi1Mi9TV9SByCmrKGm604UNU');"></div>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<div class="flex justify-between items-start">
+<h4 class="text-base font-bold text-slate-900 dark:text-white leading-tight mb-1 group-hover:text-primary transition-colors">Differential Equations</h4>
+<span class="material-symbols-outlined text-gray-300 dark:text-gray-600 text-[20px]">chevron_right</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs mb-2">Lecture 4 • Prof. Miller</p>
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1 text-[11px] font-medium text-sage-500 dark:text-sage-100 bg-sage-50 dark:bg-white/5 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[12px]">edit_note</span> Notes
+                            </span>
+<span class="text-[11px] text-gray-400">2 hrs ago</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2: Audio -->
+<div class="group bg-white dark:bg-[#1a2b16] p-4 rounded-lg shadow-soft hover:shadow-md transition-all duration-300 border border-transparent hover:border-primary/20 cursor-pointer">
+<div class="flex gap-4">
+<div class="relative w-20 h-20 shrink-0 rounded-2xl overflow-hidden bg-primary/10 flex items-center justify-center">
+<!-- Waveform visualization -->
+<div class="flex items-center gap-0.5 h-8">
+<div class="w-1 bg-primary rounded-full h-3 opacity-60"></div>
+<div class="w-1 bg-primary rounded-full h-5 opacity-80"></div>
+<div class="w-1 bg-primary rounded-full h-8"></div>
+<div class="w-1 bg-primary rounded-full h-4 opacity-70"></div>
+<div class="w-1 bg-primary rounded-full h-6 opacity-90"></div>
+<div class="w-1 bg-primary rounded-full h-2 opacity-50"></div>
+</div>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<div class="flex justify-between items-start">
+<h4 class="text-base font-bold text-slate-900 dark:text-white leading-tight mb-1 group-hover:text-primary transition-colors">Lecture Audio Recording</h4>
+<span class="material-symbols-outlined text-gray-300 dark:text-gray-600 text-[20px]">chevron_right</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs mb-2">Duration: 45:20</p>
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1 text-[11px] font-medium text-sage-500 dark:text-sage-100 bg-sage-50 dark:bg-white/5 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[12px]">mic</span> Audio
+                            </span>
+<span class="text-[11px] text-gray-400">Yesterday</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 3: Photo -->
+<div class="group bg-white dark:bg-[#1a2b16] p-4 rounded-lg shadow-soft hover:shadow-md transition-all duration-300 border border-transparent hover:border-primary/20 cursor-pointer">
+<div class="flex gap-4">
+<div class="relative w-20 h-20 shrink-0 rounded-2xl overflow-hidden bg-gray-100">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Whiteboard with complex mathematical diagrams and graphs" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBnayxpZQzJjBv0jpFfBRlKbPg5W99Tdbv6fw0ljFq9F3suD6AETF-Wu1qdnlIRzP4ZIE-WCqwprnXE4TAuCMyreKbkh--ZuvBkGbAHepnYOUjyW7y31OPvn1B1whmWIQY4n5Kp_-s59sLhhgOyKGsyQzU_mSSl8txDMLnu-qOVq5omytzzteE9FnZUpxo6ah9iZmWE7ThEP5aCYRHgz5pSiEufSARipyeznsybk4h38plKBTHDdBwqcOEL0E9REDGbWsAuX2eljaeW');"></div>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<div class="flex justify-between items-start">
+<h4 class="text-base font-bold text-slate-900 dark:text-white leading-tight mb-1 group-hover:text-primary transition-colors">Group Study Board</h4>
+<span class="material-symbols-outlined text-gray-300 dark:text-gray-600 text-[20px]">chevron_right</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs mb-2">Library Session • Room 3B</p>
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1 text-[11px] font-medium text-sage-500 dark:text-sage-100 bg-sage-50 dark:bg-white/5 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[12px]">image</span> Scan
+                            </span>
+<span class="text-[11px] text-gray-400">Oct 12</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 4: Quiz -->
+<div class="group bg-white dark:bg-[#1a2b16] p-4 rounded-lg shadow-soft hover:shadow-md transition-all duration-300 border border-transparent hover:border-primary/20 cursor-pointer opacity-80">
+<div class="flex gap-4">
+<div class="relative w-20 h-20 shrink-0 rounded-2xl overflow-hidden bg-gray-50 dark:bg-white/5 flex items-center justify-center">
+<span class="material-symbols-outlined text-4xl text-gray-300 dark:text-gray-600">quiz</span>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<div class="flex justify-between items-start">
+<h4 class="text-base font-bold text-slate-900 dark:text-white leading-tight mb-1 group-hover:text-primary transition-colors">Practice Quiz 1</h4>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-xs mb-2">Score: 85/100</p>
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1 text-[11px] font-medium text-sage-500 dark:text-sage-100 bg-sage-50 dark:bg-white/5 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[12px]">assignment_turned_in</span> Result
+                            </span>
+<span class="text-[11px] text-gray-400">Oct 10</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Bar (Multimodal Input) -->
+<div class="fixed bottom-8 left-0 right-0 px-6 flex justify-center z-50">
+<div class="glass-panel w-full max-w-sm h-[80px] rounded-full shadow-glass flex items-center justify-evenly px-2 relative overflow-hidden">
+<!-- Background Decoration for active feel -->
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+<button class="group flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-all duration-200">
+<div class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 dark:bg-white/10 group-hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-slate-600 dark:text-white group-hover:text-primary transition-colors filled">photo_camera</span>
+</div>
+<span class="text-[10px] font-medium text-slate-500 dark:text-slate-400 opacity-0 group-hover:opacity-100 absolute bottom-1 transition-opacity">Scan</span>
+</button>
+<button class="group flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-all duration-200">
+<div class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 dark:bg-white/10 group-hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-slate-600 dark:text-white group-hover:text-primary transition-colors filled">mic</span>
+</div>
+<span class="text-[10px] font-medium text-slate-500 dark:text-slate-400 opacity-0 group-hover:opacity-100 absolute bottom-1 transition-opacity">Voice</span>
+</button>
+<!-- Primary Action (Notes) -->
+<button class="group flex flex-col items-center justify-center gap-1 w-16 h-16 rounded-full bg-primary shadow-lg shadow-primary/30 hover:scale-105 transition-all duration-200 -mt-2">
+<span class="material-symbols-outlined text-white text-3xl">keyboard</span>
+</button>
+<button class="group flex flex-col items-center justify-center gap-1 w-14 h-14 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-all duration-200">
+<div class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 dark:bg-white/10 group-hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-slate-600 dark:text-white group-hover:text-primary transition-colors filled">photo_library</span>
+</div>
+<span class="text-[10px] font-medium text-slate-500 dark:text-slate-400 opacity-0 group-hover:opacity-100 absolute bottom-1 transition-opacity">Gallery</span>
+</button>
+</div>
+</div>
+</body></html>

@@ -44,7 +44,8 @@ class _StatsScreenState extends State<StatsScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
     final courseProvider = context.read<CourseProvider>();
-    final courses = courseProvider.courses;
+    final originalCourses = courseProvider.courses;
+    final courses = courseProvider.uniqueCourses;
 
     // --- Calculation Logic ---
     
@@ -52,8 +53,14 @@ class _StatsScreenState extends State<StatsScreen> {
     final Map<String, double> courseAverages = {};
 
     for (final course in courses) {
-      final grades = _allGrades[course.id] ?? [];
-      final avg = courseProvider.calculateWeightedAverage(grades);
+      // Bütün aynı isimli derslerin notlarını topla
+      final matchingCourseIds = originalCourses.where((c) => c.name == course.name).map((c) => c.id).toList();
+      List<Grade> allMatchingGrades = [];
+      for (final id in matchingCourseIds) {
+        allMatchingGrades.addAll(_allGrades[id] ?? []);
+      }
+      
+      final avg = courseProvider.calculateWeightedAverage(allMatchingGrades);
       courseAverages[course.id] = avg;
     }
 
@@ -181,10 +188,11 @@ class _StatsScreenState extends State<StatsScreen> {
                               showTitles: true,
                               getTitlesWidget: (value, meta) {
                                 if (value.toInt() >= courses.length) return const SizedBox();
+                                final name = courses[value.toInt()].name;
                                 return Padding(
                                   padding: const EdgeInsets.only(top: 8),
                                   child: Text(
-                                    courses[value.toInt()].name.substring(0, 3).toUpperCase(),
+                                    name.length >= 3 ? name.substring(0, 3).toUpperCase() : name.toUpperCase(),
                                     style: TextStyle(
                                       color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                                       fontSize: 10,

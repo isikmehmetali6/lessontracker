@@ -10,6 +10,11 @@ class CourseDetailsForm extends StatelessWidget {
   final int selectedColorIndex;
   final ValueChanged<int> onColorSelected;
   final bool isDark;
+  final TextEditingController? professorEmailController;
+  final TextEditingController? professorPhoneController;
+  final TextEditingController? professorOfficeController;
+  final TextEditingController? officeHoursController;
+  final TextEditingController? assistantNameController;
 
   const CourseDetailsForm({
     super.key,
@@ -18,6 +23,11 @@ class CourseDetailsForm extends StatelessWidget {
     required this.onDecrementAbsence,
     required this.selectedColorIndex,
     required this.onColorSelected,
+    this.professorEmailController,
+    this.professorPhoneController,
+    this.professorOfficeController,
+    this.officeHoursController,
+    this.assistantNameController,
     required this.isDark,
   });
 
@@ -29,6 +39,10 @@ class CourseDetailsForm extends StatelessWidget {
         _buildAbsenceSection(context),
         const SizedBox(height: 24),
         _buildColorPicker(context),
+        if (professorEmailController != null) ...[
+          const SizedBox(height: 24),
+          _buildProfessorSection(context),
+        ],
       ],
     );
   }
@@ -121,6 +135,77 @@ class CourseDetailsForm extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildProfessorSection(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.person, color: AppColors.primary, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Text(
+                'Professor Details',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildTextField(context, professorEmailController!, 'Email', Icons.email_outlined),
+          const SizedBox(height: 12),
+          _buildTextField(context, professorPhoneController!, 'Phone', Icons.phone_outlined),
+          const SizedBox(height: 12),
+          _buildTextField(context, professorOfficeController!, 'Office Room', Icons.meeting_room_outlined),
+          const SizedBox(height: 12),
+          _buildTextField(context, officeHoursController!, 'Office Hours', Icons.schedule),
+          const SizedBox(height: 12),
+          _buildTextField(context, assistantNameController!, 'Teaching Assistant', Icons.person_outline),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField(BuildContext context, TextEditingController controller, String hint, IconData icon) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        hintText: hint,
+        prefixIcon: Icon(icon, size: 20),
+        filled: true,
+        fillColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
   }

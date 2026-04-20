@@ -15,12 +15,10 @@ class PriorityCoursesList extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Use context.select to only rebuild when courses change
     final courses = context.select<CourseProvider, List<Course>>((provider) {
-      if (provider.courses.isEmpty) return [];
-      return provider.priorityCourses.isNotEmpty
-          ? provider.priorityCourses
-          : provider.courses.take(2).toList();
+      if (provider.uniqueCourses.isEmpty) return [];
+      // Kullanıcının isteği: priority focus listesi tüm dersleri göstersin
+      return provider.uniqueCourses;
     });
 
     if (courses.isEmpty) {

@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +12,7 @@ class CourseBottomToolbar extends StatelessWidget {
   final VoidCallback onToggleRecording;
   final VoidCallback onShowTextNoteDialog;
   final VoidCallback onCaptureOcr;
+  final VoidCallback onOpenDrawingCanvas;
 
   const CourseBottomToolbar({
     super.key,
@@ -20,6 +22,7 @@ class CourseBottomToolbar extends StatelessWidget {
     required this.onToggleRecording,
     required this.onShowTextNoteDialog,
     required this.onCaptureOcr,
+    required this.onOpenDrawingCanvas,
   });
 
   @override
@@ -30,16 +33,20 @@ class CourseBottomToolbar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
       child: Builder(
         builder: (context) {
-          final isRecording = context.select<NoteProvider, bool>((p) => p.isRecording);
+          final isRecording = context.select<NoteProvider, bool>(
+            (p) => p.isRecording,
+          );
           return Container(
             height: 64,
             decoration: BoxDecoration(
-              color: isDark 
-                  ? Colors.white.withValues(alpha: 0.1)
+              color: isDark
+                  ? const Color(0xFF1E1E2E).withValues(alpha: 0.95)
                   : Colors.white.withValues(alpha: 0.9),
               borderRadius: BorderRadius.circular(32),
               border: Border.all(
-                color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade200,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.grey.shade200,
               ),
               boxShadow: [
                 BoxShadow(
@@ -52,16 +59,13 @@ class CourseBottomToolbar extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(32),
               child: BackdropFilter(
-                filter: ColorFilter.mode(
-                  Colors.white.withValues(alpha: 0.1),
-                  BlendMode.overlay,
-                ),
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     // Kamera (Kaydedilmiyorsa) / Yer İmi (Kaydediliyorsa)
                     if (isRecording)
-                       _ToolbarButton(
+                      _ToolbarButton(
                         icon: Icons.flag, // Bookmark icon
                         onTap: onAddBookmark,
                         isDark: isDark,
@@ -72,14 +76,16 @@ class CourseBottomToolbar extends StatelessWidget {
                         onTap: onCaptureImageCamera,
                         isDark: isDark,
                       ),
-                      
+
                     VerticalDivider(
                       width: 1,
                       indent: 16,
                       endIndent: 16,
-                      color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
+                      color: isDark
+                          ? Colors.grey.shade700
+                          : Colors.grey.shade200,
                     ),
-                    
+
                     // Mikrofon / Stop (Ana buton)
                     Container(
                       width: 56,
@@ -89,8 +95,11 @@ class CourseBottomToolbar extends StatelessWidget {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: (isRecording ? AppColors.red : AppColors.primary)
-                                .withValues(alpha: 0.4),
+                            color:
+                                (isRecording
+                                        ? AppColors.red
+                                        : AppColors.primary)
+                                    .withValues(alpha: 0.4),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
@@ -109,7 +118,9 @@ class CourseBottomToolbar extends StatelessWidget {
                       width: 1,
                       indent: 16,
                       endIndent: 16,
-                      color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
+                      color: isDark
+                          ? Colors.grey.shade700
+                          : Colors.grey.shade200,
                     ),
                     // Klavye
                     _ToolbarButton(
@@ -129,6 +140,13 @@ class CourseBottomToolbar extends StatelessWidget {
                       onTap: onCaptureImageGallery,
                       isDark: isDark,
                     ),
+                    // Drawing Canvas (iPad Pencil)
+                    _ToolbarButton(
+                      icon: Icons.draw_outlined,
+                      onTap: onOpenDrawingCanvas,
+                      isDark: isDark,
+                      isHighlight: true,
+                    ),
                   ],
                 ),
               ),
@@ -144,11 +162,13 @@ class _ToolbarButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
   final bool isDark;
+  final bool isHighlight;
 
   const _ToolbarButton({
     required this.icon,
     required this.onTap,
     required this.isDark,
+    this.isHighlight = false,
   });
 
   @override
@@ -166,10 +186,17 @@ class _ToolbarButton extends StatelessWidget {
           height: 44,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
+            color: isHighlight
+                ? AppColors.primary.withValues(alpha: 0.15)
+                : Colors.transparent,
           ),
           child: Icon(
             icon,
-            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+            color: isHighlight
+                ? AppColors.primary
+                : (isDark
+                      ? AppColors.textSecondaryDark
+                      : AppColors.textSecondaryLight),
             size: 24,
           ),
         ),

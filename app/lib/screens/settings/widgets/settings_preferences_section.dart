@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
@@ -6,21 +7,27 @@ import '../../../providers/theme_provider.dart';
 import '../../../providers/course_provider.dart';
 import '../../../providers/language_provider.dart';
 import '../../../core/services/app_lock_service.dart';
+import '../../../core/services/sync_service.dart';
 import '../notification_settings_screen.dart';
 import 'settings_shared.dart';
+import 'smart_attendance_settings.dart';
+import 'moodle_sync_settings.dart';
 
 class SettingsPreferencesSection extends StatefulWidget {
   const SettingsPreferencesSection({super.key});
 
   @override
-  State<SettingsPreferencesSection> createState() => _SettingsPreferencesSectionState();
+  State<SettingsPreferencesSection> createState() =>
+      _SettingsPreferencesSectionState();
 }
 
-class _SettingsPreferencesSectionState extends State<SettingsPreferencesSection> {
+class _SettingsPreferencesSectionState
+    extends State<SettingsPreferencesSection> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final themeProvider = context.read<ThemeProvider>();
+    final themeProvider = context.watch<ThemeProvider>();
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
@@ -33,7 +40,7 @@ class _SettingsPreferencesSectionState extends State<SettingsPreferencesSection>
           SettingsTile(
             icon: Icons.dark_mode,
             iconColor: AppColors.purple,
-            title: AppLocalizations.of(context)!.darkMode,
+            title: l10n.darkMode,
             isDark: isDark,
             trailing: Switch(
               value: isDark,
@@ -49,15 +56,17 @@ class _SettingsPreferencesSectionState extends State<SettingsPreferencesSection>
               return SettingsTile(
                 icon: Icons.notifications,
                 iconColor: AppColors.orange,
-                title: AppLocalizations.of(context)!.notifications,
+                title: l10n.notifications,
                 isDark: isDark,
-                subtitle: courseProvider.notificationsEnabled 
-                    ? 'On • ${courseProvider.reminderMinutes}m before' 
-                    : 'Off',
+                subtitle: courseProvider.notificationsEnabled
+                    ? '${l10n.notifications} • ${courseProvider.reminderMinutes}m'
+                    : l10n.notifications,
                 onTap: () {
                   Navigator.push(
-                    context, 
-                    MaterialPageRoute(builder: (_) => const NotificationSettingsScreen())
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const NotificationSettingsScreen(),
+                    ),
                   );
                 },
               );
@@ -69,8 +78,10 @@ class _SettingsPreferencesSectionState extends State<SettingsPreferencesSection>
               return SettingsTile(
                 icon: Icons.language,
                 iconColor: AppColors.primary,
-                title: AppLocalizations.of(context)!.language,
-                subtitle: _getLanguageName(languageProvider.locale.languageCode),
+                title: l10n.language,
+                subtitle: _getLanguageDisplayName(
+                  languageProvider.locale.languageCode,
+                ),
                 isDark: isDark,
                 onTap: () => _showLanguagePicker(context),
               );
@@ -89,15 +100,17 @@ class _SettingsPreferencesSectionState extends State<SettingsPreferencesSection>
                   return SettingsTile(
                     icon: Icons.fingerprint,
                     iconColor: AppColors.green,
-                    title: 'App Lock',
-                    subtitle: isEnabled ? 'Face ID / Touch ID' : 'Disabled',
+                    title: l10n.appLock,
+                    subtitle: isEnabled
+                        ? 'Face ID / Touch ID'
+                        : l10n.appLockDisabled,
                     isDark: isDark,
                     trailing: Switch(
                       value: isEnabled,
                       onChanged: (value) async {
                         if (value) {
                           final success = await AppLockService.authenticate(
-                            reason: 'Authenticate to enable app lock',
+                            reason: l10n.appLockAuthReason,
                           );
                           if (success) {
                             await AppLockService.setLockEnabled(true);
@@ -115,27 +128,71 @@ class _SettingsPreferencesSectionState extends State<SettingsPreferencesSection>
               );
             },
           ),
+          SettingsDivider(isDark: isDark),
+          SmartAttendanceSettings(isDark: isDark),
+          SettingsDivider(isDark: isDark),
+          FutureBuilder<bool>(
+            future: SyncService().isCloudBackupEnabled(),
+            builder: (context, snapshot) {
+              final isEnabled = snapshot.data ?? false;
+              return SettingsTile(
+                icon: Icons.cloud_upload,
+                iconColor: AppColors.blue,
+                title: 'Bulut Yedekleme',
+                subtitle: isEnabled
+                    ? 'Şifreli yedekleme aktif'
+                    : 'Kapalı (varsayılan)',
+                isDark: isDark,
+                trailing: Switch(
+                  value: isEnabled,
+                  onChanged: (value) async {
+                    final syncService = SyncService();
+                    await syncService.setCloudBackupEnabled(value);
+                    if (mounted) setState(() {});
+                    HapticFeedback.mediumImpact();
+                  },
+                  activeThumbColor: AppColors.primary,
+                ),
+              );
+            },
+          ),
+          SettingsDivider(isDark: isDark),
+          MoodleSyncSettings(isDark: isDark),
         ],
       ),
     );
   }
 
-  String _getLanguageName(String code) {
+  String _getLanguageDisplayName(String code) {
     switch (code) {
-      case 'tr': return 'Türkçe';
-      case 'es': return 'Español';
-      case 'de': return 'Deutsch';
-      case 'en': 
-      default: return 'English';
+      case 'tr':
+        return 'Türkçe';
+      case 'es':
+        return 'Español';
+      case 'de':
+        return 'Deutsch';
+      case 'en':
+      default:
+        return 'English';
     }
   }
 
+  static const List<_LangData> _languages = [
+    _LangData(code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸'),
+    _LangData(code: 'tr', name: 'Turkish', nativeName: 'Türkçe', flag: '🇹🇷'),
+    _LangData(code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸'),
+    _LangData(code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪'),
+  ];
+
   void _showLanguagePicker(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final currentCode = context.read<LanguageProvider>().locale.languageCode;
+    final l10n = AppLocalizations.of(context)!;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
+      builder: (ctx) {
         return Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
@@ -144,21 +201,127 @@ class _SettingsPreferencesSectionState extends State<SettingsPreferencesSection>
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                AppLocalizations.of(context)!.language,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+              // Handle bar
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),
-              _LanguageOption(code: 'en', name: 'English', flag: '🇺🇸'),
-              _LanguageOption(code: 'tr', name: 'Türkçe', flag: '🇹🇷'),
-              _LanguageOption(code: 'es', name: 'Español', flag: '🇪🇸'),
-              _LanguageOption(code: 'de', name: 'Deutsch', flag: '🇩🇪'),
+              const SizedBox(height: 20),
+              // Title
+              Row(
+                children: [
+                  Icon(Icons.translate, color: AppColors.primary, size: 24),
+                  const SizedBox(width: 10),
+                  Text(
+                    l10n.language,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: isDark
+                          ? AppColors.textPrimaryDark
+                          : AppColors.textPrimaryLight,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              // Language options
+              ..._languages.map((lang) {
+                final isSelected = lang.code == currentCode;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () {
+                      context.read<LanguageProvider>().setLocale(
+                        Locale(lang.code),
+                      );
+                      HapticFeedback.lightImpact();
+                      Navigator.pop(ctx);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppColors.primary.withValues(alpha: 0.1)
+                            : (isDark
+                                  ? AppColors.backgroundDark
+                                  : Colors.grey.shade50),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isSelected
+                              ? AppColors.primary.withValues(alpha: 0.5)
+                              : (isDark
+                                    ? Colors.grey.shade700
+                                    : Colors.grey.shade200),
+                          width: isSelected ? 2 : 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Text(lang.flag, style: const TextStyle(fontSize: 28)),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  lang.nativeName,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                    color: isSelected
+                                        ? AppColors.primary
+                                        : (isDark
+                                              ? AppColors.textPrimaryDark
+                                              : AppColors.textPrimaryLight),
+                                  ),
+                                ),
+                                Text(
+                                  lang.name,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isDark
+                                        ? AppColors.textSecondaryDark
+                                        : AppColors.textSecondaryLight,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (isSelected)
+                            Container(
+                              width: 24,
+                              height: 24,
+                              decoration: const BoxDecoration(
+                                color: AppColors.primary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.check,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }),
+              const SizedBox(height: 8),
             ],
           ),
         );
@@ -167,38 +330,16 @@ class _SettingsPreferencesSectionState extends State<SettingsPreferencesSection>
   }
 }
 
-class _LanguageOption extends StatelessWidget {
+class _LangData {
   final String code;
   final String name;
+  final String nativeName;
   final String flag;
 
-  const _LanguageOption({
+  const _LangData({
     required this.code,
     required this.name,
+    required this.nativeName,
     required this.flag,
   });
-
-  @override
-  Widget build(BuildContext context) {
-    final isSelected = context.select((LanguageProvider p) => p.locale.languageCode == code);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return ListTile(
-      leading: Text(flag, style: const TextStyle(fontSize: 24)),
-      title: Text(
-        name,
-        style: TextStyle(
-          color: isSelected 
-              ? AppColors.primary 
-              : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        ),
-      ),
-      trailing: isSelected ? const Icon(Icons.check, color: AppColors.primary) : null,
-      onTap: () {
-        context.read<LanguageProvider>().setLocale(Locale(code));
-        Navigator.pop(context);
-      },
-    );
-  }
 }

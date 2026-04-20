@@ -20,12 +20,25 @@ class FileService {
   /// iOS sandbox path değişikliğini düzelt — eski mutlak yolları yeni dizinle güncelle
   Future<String?> resolveFilePath(String? storedPath) async {
     if (storedPath == null || storedPath.isEmpty) return null;
-    
-    // Dosya zaten mutlak yolda mevcutsa sorun yok
-    if (await File(storedPath).exists()) return storedPath;
-    
-    final knownDirs = ['images/', 'audio/', 'course_materials/', 'restored_notes/'];
-    
+
+    // Mutlak yol ise ve dosya mevcutsa, mutlak yolu döndür
+    // Göreceli yol ise (images/xxx.jpg gibi) mutlak yola çevir
+    if (storedPath.startsWith('/')) {
+      if (await File(storedPath).exists()) return storedPath;
+    } else {
+      // Göreceli yol — mutlak yola çevir
+      final docs = await _documentsDir;
+      final absolutePath = path.join(docs.path, storedPath);
+      if (await File(absolutePath).exists()) return absolutePath;
+    }
+
+    final knownDirs = [
+      'images/',
+      'audio/',
+      'course_materials/',
+      'restored_notes/',
+    ];
+
     // Göreceli yol ise (images/xxx.jpg gibi) doğrudan documents dizinindeki tam yolu oluştur
     for (final dir in knownDirs) {
       if (storedPath.startsWith(dir)) {
@@ -41,7 +54,7 @@ class FileService {
         }
       }
     }
-    
+
     // Mutlak yoldan relative path'i çıkar (images/xxx.jpg veya audio/xxx.m4a)
     for (final dir in knownDirs) {
       final idx = storedPath.indexOf(dir);
@@ -49,30 +62,53 @@ class FileService {
         final relativePath = storedPath.substring(idx);
         final docs = await _documentsDir;
         final resolvedPath = path.join(docs.path, relativePath);
-        
+
         final parentDir = Directory(path.dirname(resolvedPath));
         if (!await parentDir.exists()) {
           await parentDir.create(recursive: true);
         }
-        
+
         if (await File(resolvedPath).exists()) {
-          debugPrint('[FileService] Resolved path: $storedPath -> $resolvedPath');
+          debugPrint(
+            '[FileService] Resolved path: $storedPath -> $resolvedPath',
+          );
           return resolvedPath;
         }
       }
     }
-    
-    // Son çare: sadece dosya adını al ve bilinen klasörlerde ara
+
+    // Son çare: Tüm knownDirs içinde recursive ara (course_materials öncelikli)
     final fileName = path.basename(storedPath);
     final docs = await _documentsDir;
-    for (final dir in knownDirs) {
-      final candidate = path.join(docs.path, dir, fileName);
-      if (await File(candidate).exists()) {
-        debugPrint('[FileService] Found file by name: $storedPath -> $candidate');
-        return candidate;
+
+    // Önce course_materials içinde ID/ dosya yapısında ara
+    final courseMatDir = Directory(path.join(docs.path, 'course_materials'));
+    if (await courseMatDir.exists()) {
+      await for (final entity in courseMatDir.list(recursive: true)) {
+        if (entity is File && path.basename(entity.path) == fileName) {
+          debugPrint(
+            '[FileService] Found in course_materials: $storedPath -> ${entity.path}',
+          );
+          return entity.path;
+        }
       }
     }
-    
+
+    // Tüm knownDirs içinde basename ile ara (images/, audio/, restored_notes/)
+    for (final dir in knownDirs) {
+      final searchDir = Directory(path.join(docs.path, dir));
+      if (!await searchDir.exists()) continue;
+
+      await for (final entity in searchDir.list()) {
+        if (entity is File && path.basename(entity.path) == fileName) {
+          debugPrint(
+            '[FileService] Found by basename in $dir: $storedPath -> ${entity.path}',
+          );
+          return entity.path;
+        }
+      }
+    }
+
     debugPrint('[FileService] ⚠️ Could not resolve file: $storedPath');
     return null; // dosya bulunamazsa null döndür
   }
@@ -115,25 +151,27 @@ class FileService {
     final extension = path.extension(sourceFile.path).replaceFirst('.', '');
     final fileName = _generateFileName(extension.isEmpty ? 'jpg' : extension);
     final destPath = path.join(imagesDir.path, fileName);
-    
+
     // Kaynak dosya var mı kontrol et
     if (!await sourceFile.exists()) {
-      debugPrint('[FileService] ⚠️ Source image file does not exist: ${sourceFile.path}');
+      debugPrint(
+        '[FileService] ⚠️ Source image file does not exist: ${sourceFile.path}',
+      );
       throw Exception('Source image file does not exist');
     }
-    
+
     await sourceFile.copy(destPath);
-    
+
     // Doğrulama: kopyalanan dosya gerçekten var mı?
     final destFile = File(destPath);
     if (!await destFile.exists()) {
       debugPrint('[FileService] ⚠️ Image copy failed! Dest: $destPath');
       throw Exception('Image copy verification failed');
     }
-    
+
     final size = await destFile.length();
     debugPrint('[FileService] ✅ Image saved: $destPath ($size bytes)');
-    
+
     // Göreceli yol döndür (images/xxx.jpg) — iOS sandbox-safe
     return 'images/$fileName';
   }
@@ -144,24 +182,26 @@ class FileService {
     final extension = path.extension(sourceFile.path).replaceFirst('.', '');
     final fileName = _generateFileName(extension.isEmpty ? 'm4a' : extension);
     final destPath = path.join(audioDir.path, fileName);
-    
+
     if (!await sourceFile.exists()) {
-      debugPrint('[FileService] ⚠️ Source audio file does not exist: ${sourceFile.path}');
+      debugPrint(
+        '[FileService] ⚠️ Source audio file does not exist: ${sourceFile.path}',
+      );
       throw Exception('Source audio file does not exist');
     }
-    
+
     await sourceFile.copy(destPath);
-    
+
     // Doğrulama
     final destFile = File(destPath);
     if (!await destFile.exists()) {
       debugPrint('[FileService] ⚠️ Audio copy failed! Dest: $destPath');
       throw Exception('Audio copy verification failed');
     }
-    
+
     final size = await destFile.length();
     debugPrint('[FileService] ✅ Audio saved: $destPath ($size bytes)');
-    
+
     // Göreceli yol döndür (audio/xxx.m4a)
     return 'audio/$fileName';
   }
@@ -191,12 +231,16 @@ class FileService {
 
   /// Dosya var mı?
   Future<bool> fileExists(String filePath) async {
-    return await File(filePath).exists();
+    final resolved = await resolveFilePath(filePath);
+    if (resolved == null) return false;
+    return await File(resolved).exists();
   }
 
   /// Dosya boyutu
   Future<int> getFileSize(String filePath) async {
-    final file = File(filePath);
+    final resolved = await resolveFilePath(filePath);
+    if (resolved == null) return 0;
+    final file = File(resolved);
     if (await file.exists()) {
       return await file.length();
     }
@@ -214,24 +258,28 @@ class FileService {
   Future<List<File>> getAllImages() async {
     final imagesDir = await _imagesDir;
     if (!await imagesDir.exists()) return [];
-    
-    return imagesDir
-        .listSync()
-        .whereType<File>()
-        .where((f) => _isImageFile(f.path))
-        .toList();
+
+    final files = <File>[];
+    await for (final entity in imagesDir.list()) {
+      if (entity is File && _isImageFile(entity.path)) {
+        files.add(entity);
+      }
+    }
+    return files;
   }
 
   /// Tüm ses kayıtlarını getir
   Future<List<File>> getAllAudio() async {
     final audioDir = await _audioDir;
     if (!await audioDir.exists()) return [];
-    
-    return audioDir
-        .listSync()
-        .whereType<File>()
-        .where((f) => _isAudioFile(f.path))
-        .toList();
+
+    final files = <File>[];
+    await for (final entity in audioDir.list()) {
+      if (entity is File && _isAudioFile(entity.path)) {
+        files.add(entity);
+      }
+    }
+    return files;
   }
 
   /// Resim dosyası mı?
@@ -247,42 +295,71 @@ class FileService {
   }
 
   /// Kullanılmayan dosyaları temizle
+  /// [usedPaths] can contain relative or absolute paths
   Future<int> cleanupUnusedFiles(List<String> usedPaths) async {
     int deletedCount = 0;
-    
+    final docs = await _documentsDir;
+
+    // Resolve all used paths to absolute and also keep relative forms for comparison
+    final resolvedUsedPaths = <String>{};
+    for (final p in usedPaths) {
+      resolvedUsedPaths.add(p);
+      if (!p.startsWith('/')) {
+        resolvedUsedPaths.add(path.join(docs.path, p));
+      } else {
+        final knownDirs = [
+          'images/',
+          'audio/',
+          'course_materials/',
+          'restored_notes/',
+        ];
+        for (final dir in knownDirs) {
+          final idx = p.indexOf(dir);
+          if (idx != -1) {
+            resolvedUsedPaths.add(p.substring(idx));
+            break;
+          }
+        }
+      }
+    }
+
     final allImages = await getAllImages();
     for (final file in allImages) {
-      if (!usedPaths.contains(file.path)) {
+      final relativePath = 'images/${path.basename(file.path)}';
+      if (!resolvedUsedPaths.contains(file.path) &&
+          !resolvedUsedPaths.contains(relativePath)) {
         await deleteFile(file.path);
         deletedCount++;
       }
     }
-    
+
     final allAudio = await getAllAudio();
     for (final file in allAudio) {
-      if (!usedPaths.contains(file.path)) {
+      final relativePath = 'audio/${path.basename(file.path)}';
+      if (!resolvedUsedPaths.contains(file.path) &&
+          !resolvedUsedPaths.contains(relativePath)) {
         await deleteFile(file.path);
         deletedCount++;
       }
     }
-    
+
     return deletedCount;
   }
 
   /// Toplam depolama kullanımı
   Future<int> getTotalStorageUsage() async {
     int total = 0;
-    
+
     final allImages = await getAllImages();
     for (final file in allImages) {
       total += await file.length();
     }
-    
+
     final allAudio = await getAllAudio();
     for (final file in allAudio) {
       total += await file.length();
     }
-    
+
     return total;
   }
 }

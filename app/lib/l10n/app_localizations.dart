@@ -159,6 +159,12 @@ abstract class AppLocalizations {
   /// **'No notes yet. Start capturing!'**
   String get noNotesYet;
 
+  /// No description provided for @noNotesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the tools below to capture your first note!'**
+  String get noNotesDescription;
+
   /// No description provided for @goodMorning.
   ///
   /// In en, this message translates to:
@@ -837,6 +843,18 @@ abstract class AppLocalizations {
   /// **'Add Deadline'**
   String get addDeadlineTitle;
 
+  /// No description provided for @editDeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Deadline'**
+  String get editDeadline;
+
+  /// No description provided for @updateDeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Deadline'**
+  String get updateDeadline;
+
   /// No description provided for @fillAllFields.
   ///
   /// In en, this message translates to:
@@ -1502,6 +1520,342 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'GPA Calculator'**
   String get gpaCalcDesc;
+
+  /// No description provided for @absenceCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Absence Calendar'**
+  String get absenceCalendar;
+
+  /// No description provided for @viewAbsenceCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'View Absence Calendar'**
+  String get viewAbsenceCalendar;
+
+  /// No description provided for @noAbsencesOnDay.
+  ///
+  /// In en, this message translates to:
+  /// **'No absences on this day'**
+  String get noAbsencesOnDay;
+
+  /// No description provided for @unexcused.
+  ///
+  /// In en, this message translates to:
+  /// **'Unexcused'**
+  String get unexcused;
+
+  /// No description provided for @medical.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical'**
+  String get medical;
+
+  /// No description provided for @excused.
+  ///
+  /// In en, this message translates to:
+  /// **'Excused'**
+  String get excused;
+
+  /// No description provided for @personal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get personal;
+
+  /// No description provided for @absencePredictionWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'At this rate, you\'ll exceed the limit in {weeks} weeks'**
+  String absencePredictionWarning(String weeks);
+
+  /// No description provided for @professorDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Professor Details'**
+  String get professorDetails;
+
+  /// No description provided for @emailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get emailLabel;
+
+  /// No description provided for @phoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get phoneLabel;
+
+  /// No description provided for @officeRoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Office Room'**
+  String get officeRoom;
+
+  /// No description provided for @officeHoursLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Office Hours'**
+  String get officeHoursLabel;
+
+  /// No description provided for @teachingAssistant.
+  ///
+  /// In en, this message translates to:
+  /// **'Teaching Assistant'**
+  String get teachingAssistant;
+
+  /// No description provided for @emailCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Email copied'**
+  String get emailCopied;
+
+  /// No description provided for @phoneCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone copied'**
+  String get phoneCopied;
+
+  /// No description provided for @addLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Link'**
+  String get addLink;
+
+  /// No description provided for @linkName.
+  ///
+  /// In en, this message translates to:
+  /// **'Link Name'**
+  String get linkName;
+
+  /// No description provided for @linkAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Link added'**
+  String get linkAdded;
+
+  /// No description provided for @webLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Web Link'**
+  String get webLink;
+
+  /// No description provided for @templateCornellNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Cornell Notes'**
+  String get templateCornellNotes;
+
+  /// No description provided for @templateLectureSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture Summary'**
+  String get templateLectureSummary;
+
+  /// No description provided for @templateExamNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Notes'**
+  String get templateExamNotes;
+
+  /// No description provided for @startFromTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start from Template'**
+  String get startFromTemplate;
+
+  /// No description provided for @transcript.
+  ///
+  /// In en, this message translates to:
+  /// **'Transcript'**
+  String get transcript;
+
+  /// No description provided for @inProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In Progress'**
+  String get inProgress;
+
+  /// No description provided for @semesterReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Semester Report'**
+  String get semesterReport;
+
+  /// No description provided for @generatePdfReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate PDF report'**
+  String get generatePdfReport;
+
+  /// No description provided for @exportDataCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Data (CSV)'**
+  String get exportDataCsv;
+
+  /// No description provided for @exportData.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Data'**
+  String get exportData;
+
+  /// No description provided for @gradesCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Grades (CSV)'**
+  String get gradesCsv;
+
+  /// No description provided for @absencesCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Absences (CSV)'**
+  String get absencesCsv;
+
+  /// No description provided for @studySessionsCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Study Sessions (CSV)'**
+  String get studySessionsCsv;
+
+  /// No description provided for @selectAbsenceReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Select absence reason'**
+  String get selectAbsenceReason;
+
+  /// No description provided for @editCourse.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Course'**
+  String get editCourse;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
+
+  /// No description provided for @setLocationGeofence.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Location (Geofence)'**
+  String get setLocationGeofence;
+
+  /// No description provided for @absenceUnexcused.
+  ///
+  /// In en, this message translates to:
+  /// **'Unexcused'**
+  String get absenceUnexcused;
+
+  /// No description provided for @absenceMedical.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical'**
+  String get absenceMedical;
+
+  /// No description provided for @absenceExcused.
+  ///
+  /// In en, this message translates to:
+  /// **'Excused'**
+  String get absenceExcused;
+
+  /// No description provided for @absencePersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get absencePersonal;
+
+  /// No description provided for @absenceOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance Overview'**
+  String get absenceOverview;
+
+  /// No description provided for @absencesUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'absences used'**
+  String get absencesUsed;
+
+  /// No description provided for @totalAbsences.
+  ///
+  /// In en, this message translates to:
+  /// **'total absences'**
+  String get totalAbsences;
+
+  /// No description provided for @editAbsence.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Absence'**
+  String get editAbsence;
+
+  /// No description provided for @deleteAbsence.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Absence'**
+  String get deleteAbsence;
+
+  /// No description provided for @selectReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Select reason:'**
+  String get selectReason;
+
+  /// No description provided for @convertToPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert to PDF'**
+  String get convertToPdf;
+
+  /// No description provided for @allNotesToPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'All Notes → PDF'**
+  String get allNotesToPdf;
+
+  /// No description provided for @photosToPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos → PDF'**
+  String get photosToPdf;
+
+  /// No description provided for @courseReportPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Course Report → PDF'**
+  String get courseReportPdf;
+
+  /// No description provided for @appLock.
+  ///
+  /// In en, this message translates to:
+  /// **'App Lock'**
+  String get appLock;
+
+  /// No description provided for @appLockDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get appLockDisabled;
+
+  /// No description provided for @appLockAuthReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Authenticate to enable app lock'**
+  String get appLockAuthReason;
+
+  /// No description provided for @shareNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'View Notes'**
+  String get shareNotes;
+
+  /// No description provided for @archiveCourse.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive Course'**
+  String get archiveCourse;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

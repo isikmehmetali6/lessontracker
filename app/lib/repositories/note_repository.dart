@@ -1,5 +1,12 @@
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import '../core/database/database_helper.dart';
+import '../core/services/auto_sync_service.dart';
+import '../core/services/e2e_file_service.dart';
+import '../core/services/e2e_key_service.dart';
+import '../core/services/image_compressor_service.dart';
 import '../models/note.dart';
 
 class NoteRepository {
@@ -16,23 +23,37 @@ class NoteRepository {
 
   // ==================== NOT İŞLEMLERİ ====================
 
-  /// Tüm notları getir
-  Future<List<Note>> getAllNotes() async {
+  /// Tüm notları getir (paginated)
+  Future<List<Note>> getAllNotes({int limit = 50, int offset = 0}) async {
     if (_dbHelper.isWeb) {
-      return List.from(_notesInMemory)..sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
+      final sorted = List.from(_notesInMemory)
+        ..sort(
+          (a, b) => (b.createdAt ?? DateTime(2000)).compareTo(
+            a.createdAt ?? DateTime(2000),
+          ),
+        );
+      final start = offset.clamp(0, sorted.length);
+      final end = (offset + limit).clamp(0, sorted.length);
+      return sorted.sublist(start, end).cast<Note>();
     }
     final db = await _dbHelper.database;
-    final maps = await db.query('notes', orderBy: 'createdAt DESC');
+    final maps = await db.query(
+      'notes',
+      orderBy: 'createdAt DESC',
+      limit: limit,
+      offset: offset,
+    );
     return maps.map((map) => Note.fromMap(map)).toList();
   }
 
   /// Derse göre notları getir
   Future<List<Note>> getNotesByCourse(String courseId) async {
     if (_dbHelper.isWeb) {
-      return _notesInMemory
-          .where((n) => n.courseId == courseId)
-          .toList()
-        ..sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
+      return _notesInMemory.where((n) => n.courseId == courseId).toList()..sort(
+        (a, b) => (b.createdAt ?? DateTime(2000)).compareTo(
+          a.createdAt ?? DateTime(2000),
+        ),
+      );
     }
     final db = await _dbHelper.database;
     final maps = await db.query(
@@ -48,7 +69,11 @@ class NoteRepository {
   Future<List<Note>> getRecentNotes({int limit = 10}) async {
     if (_dbHelper.isWeb) {
       final sorted = List<Note>.from(_notesInMemory)
-        ..sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
+        ..sort(
+          (a, b) => (b.createdAt ?? DateTime(2000)).compareTo(
+            a.createdAt ?? DateTime(2000),
+          ),
+        );
       return sorted.take(limit).toList();
     }
     final db = await _dbHelper.database;
@@ -68,15 +93,139 @@ class NoteRepository {
       return;
     }
     final db = await _dbHelper.database;
-    await db.insert(
+    await db.insert('notes', {
+      ...note.toMap(),
+      'searchContent': _dbHelper.normalizeForSearch(
+        '${note.title} ${note.content ?? ''} ${note.tags.join(' ')}',
+      ),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+    AutoSyncService().triggerBackup();
+  }
+
+  /// Not ekle (E2E dosya yüklemesi ile)
+  Future<void> insertNoteWithFile(
+    Note note, {
+    File? attachedFile,
+    File? thumbnail,
+  }) async {
+    String? cloudPath;
+    String? thumbnailCloudPath;
+
+    if (attachedFile != null && await E2EKeyService().isE2EEnabled()) {
+      try {
+        final e2eService = E2EFileService();
+        cloudPath = await _uploadNoteFile(attachedFile, e2eService);
+        debugPrint('Note file uploaded to cloud: $cloudPath');
+
+        if (thumbnail != null) {
+          thumbnailCloudPath = await _uploadNoteFile(thumbnail, e2eService);
+          debugPrint('Thumbnail uploaded to cloud: $thumbnailCloudPath');
+        }
+      } catch (e) {
+        debugPrint('E2E upload error: $e');
+      }
+    }
+
+    await insertNote(note);
+
+    if (cloudPath != null) {
+      await _updateNoteCloudPath(note.id, cloudPath, thumbnailCloudPath);
+    }
+  }
+
+  Future<String> _uploadNoteFile(File file, E2EFileService e2eService) async {
+    final extension = file.path.toLowerCase();
+    if (extension.contains('.jpg') ||
+        extension.contains('.jpeg') ||
+        extension.contains('.png') ||
+        extension.contains('.heic')) {
+      final compressor = ImageCompressorService();
+      final compressedBytes = await compressor.compressAndGetBytes(file.path);
+      if (compressedBytes != null) {
+        final tempPath = '${file.path}_compressed.jpg';
+        final tempFile = File(tempPath);
+        await tempFile.writeAsBytes(compressedBytes);
+        final cloudPath = await e2eService.uploadPhoto(tempFile);
+        await tempFile.delete();
+        return cloudPath;
+      }
+    }
+    return await e2eService.uploadPhoto(file);
+  }
+
+  Future<void> _updateNoteCloudPath(
+    String noteId,
+    String cloudPath,
+    String? thumbnailCloudPath,
+  ) async {
+    if (_dbHelper.isWeb) return;
+    final db = await _dbHelper.database;
+    final updates = <String, dynamic>{'cloudPath': cloudPath};
+    if (thumbnailCloudPath != null) {
+      updates['thumbnailCloudPath'] = thumbnailCloudPath;
+    }
+    await db.update('notes', updates, where: 'id = ?', whereArgs: [noteId]);
+  }
+
+  /// Not dosyasını cloud'dan indir
+  Future<Uint8List?> downloadNoteFile(String cloudPath) async {
+    try {
+      final e2eService = E2EFileService();
+      return await e2eService.downloadPhoto(cloudPath);
+    } catch (e) {
+      debugPrint('Error downloading note file: $e');
+      return null;
+    }
+  }
+
+  /// Not sil (cloud dosyasını da siler)
+  Future<void> deleteNoteWithFiles(String id) async {
+    final cloudPath = await _getNoteCloudPath(id);
+    if (cloudPath != null) {
+      try {
+        final e2eService = E2EFileService();
+        await e2eService.deleteFile(cloudPath);
+        final thumbnailCloudPath = await _getNoteThumbnailCloudPath(id);
+        if (thumbnailCloudPath != null) {
+          await e2eService.deleteFile(thumbnailCloudPath);
+        }
+      } catch (e) {
+        debugPrint('Error deleting cloud files: $e');
+      }
+    }
+    await deleteNote(id);
+  }
+
+  Future<String?> _getNoteCloudPath(String noteId) async {
+    if (_dbHelper.isWeb) return null;
+    final db = await _dbHelper.database;
+    final result = await db.query(
       'notes',
-      {
-        ...note.toMap(),
-        'searchContent': _dbHelper.normalizeForSearch(note.title + ' ' + (note.content ?? '') + ' ' + note.tags.join(' ')),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
+      columns: ['cloudPath'],
+      where: 'id = ?',
+      whereArgs: [noteId],
+      limit: 1,
     );
-    await _dbHelper.recordChange('notes', note.id, 'insert');
+    if (result.isNotEmpty && result.first['cloudPath'] != null) {
+      return result.first['cloudPath'] as String;
+    }
+    return null;
+  }
+
+  Future<String?> _getNoteThumbnailCloudPath(String noteId) async {
+    if (_dbHelper.isWeb) return null;
+    final db = await _dbHelper.database;
+    final result = await db.query(
+      'notes',
+      columns: ['thumbnailCloudPath'],
+      where: 'id = ?',
+      whereArgs: [noteId],
+      limit: 1,
+    );
+    if (result.isNotEmpty && result.first['thumbnailCloudPath'] != null) {
+      return result.first['thumbnailCloudPath'] as String;
+    }
+    return null;
   }
 
   /// Not güncelle
@@ -93,12 +242,14 @@ class NoteRepository {
       'notes',
       {
         ...note.toMap(),
-        'searchContent': _dbHelper.normalizeForSearch(note.title + ' ' + (note.content ?? '') + ' ' + note.tags.join(' ')),
+        'searchContent': _dbHelper.normalizeForSearch(
+          '${note.title} ${note.content ?? ''} ${note.tags.join(' ')}',
+        ),
       },
       where: 'id = ?',
       whereArgs: [note.id],
     );
-    await _dbHelper.recordChange('notes', note.id, 'update');
+    AutoSyncService().triggerBackup();
   }
 
   /// Not sil
@@ -108,12 +259,8 @@ class NoteRepository {
       return;
     }
     final db = await _dbHelper.database;
-    await db.delete(
-      'notes',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-    await _dbHelper.recordChange('notes', id, 'delete');
+    await db.delete('notes', where: 'id = ?', whereArgs: [id]);
+    AutoSyncService().triggerBackup();
   }
 
   /// Not getir
@@ -121,7 +268,8 @@ class NoteRepository {
     if (_dbHelper.isWeb) {
       try {
         return _notesInMemory.firstWhere((n) => n.id == id);
-      } catch (_) {
+      } catch (e, stackTrace) {
+        debugPrint('Error finding note $id in memory: $e\nStack: $stackTrace');
         return null;
       }
     }
@@ -141,7 +289,9 @@ class NoteRepository {
     if (_dbHelper.isWeb) {
       final q = _dbHelper.normalizeForSearch(query);
       return _notesInMemory.where((n) {
-        final searchContent = _dbHelper.normalizeForSearch(n.title + ' ' + (n.content ?? '') + ' ' + n.tags.join(' '));
+        final searchContent = _dbHelper.normalizeForSearch(
+          '${n.title} ${n.content ?? ''} ${n.tags.join(' ')}',
+        );
         return searchContent.contains(q);
       }).toList();
     }
@@ -160,16 +310,18 @@ class NoteRepository {
   Future<void> repairSearchIndex() async {
     if (_dbHelper.isWeb) return;
     final db = await _dbHelper.database;
-    
+
     final notes = await db.query('notes');
     final batch = db.batch();
-    
+
     for (final noteMap in notes) {
       final note = Note.fromMap(noteMap);
-      final searchContent = _dbHelper.normalizeForSearch(note.title + ' ' + (note.content ?? '') + ' ' + note.tags.join(' '));
-      
+      final searchContent = _dbHelper.normalizeForSearch(
+        '${note.title} ${note.content ?? ''} ${note.tags.join(' ')}',
+      );
+
       if (noteMap['searchContent'] == searchContent) continue;
-      
+
       batch.update(
         'notes',
         {'searchContent': searchContent},
@@ -177,7 +329,7 @@ class NoteRepository {
         whereArgs: [note.id],
       );
     }
-    
+
     await batch.commit(noResult: true);
   }
 
@@ -229,15 +381,6 @@ class NoteRepository {
       'SELECT COUNT(*) as count FROM notes WHERE courseId = ?',
       [courseId],
     );
-    return Sqflite.firstIntValue(result) ?? 0;
-  }
-
-  Future<int> getCount() async {
-    if (_dbHelper.isWeb) {
-      return _notesInMemory.length;
-    }
-    final db = await _dbHelper.database;
-    final result = await db.rawQuery('SELECT COUNT(*) FROM notes');
     return Sqflite.firstIntValue(result) ?? 0;
   }
 }

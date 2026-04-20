@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Priority Focus Home Screen</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#70df20",
+                        "primary-dark": "#4da60e", // Darker shade for text on light bg
+                        "background-light": "#f7f8f6",
+                        "background-dark": "#182111",
+                        "card-light": "#ffffff",
+                        "card-dark": "#232d1d",
+                        "subtle-light": "#f2f4f0",
+                        "subtle-dark": "#2c3625",
+                        "text-main": "#141711",
+                        "text-secondary": "#728764",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "2rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar hiding for cleaner look */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-main dark:text-white overflow-x-hidden antialiased pb-24">
+<!-- Top Greeting & Search -->
+<div class="px-4 pt-8 pb-2 sticky top-0 z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm">
+<div class="flex justify-between items-center mb-6">
+<div>
+<p class="text-text-secondary dark:text-gray-400 text-sm font-medium">Good Morning,</p>
+<h1 class="text-2xl font-bold tracking-tight text-text-main dark:text-white">Alex</h1>
+</div>
+<div class="h-10 w-10 rounded-full bg-subtle-light dark:bg-subtle-dark flex items-center justify-center overflow-hidden border border-white/10">
+<img alt="Profile" class="w-full h-full object-cover opacity-80" data-alt="User profile avatar gradient" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCMcw3HZZxeGHXQwoajubPrCb-0mRaXg7e2AjQErdUILnk-T4WIATjXQ_SxMdJl4aWvlpMbSOjdEZIxMo5AOjtfCicaLWKsZfd6g_OMr6_8How5Zy9vZCi1L0VNlZVtBjo9uFKcYBvufyg6AvaoHyJu4pSwkIYOmyADBrrVzIwRUXzr2sL4e_4WIeUWb2rRD21IU7CMiM3YU0G3Qr_LP3ILnTbMY0OfwTgvBd2YYyXn2fC0V908qfVko4dgq17zRY6UjVbOyunbVyj"/>
+</div>
+</div>
+<!-- Search Bar Component -->
+<label class="flex flex-col w-full h-14 transition-all duration-200">
+<div class="flex w-full flex-1 items-stretch rounded-2xl h-full shadow-sm bg-white dark:bg-card-dark border border-transparent focus-within:border-primary/50">
+<div class="text-text-secondary dark:text-gray-400 flex border-none items-center justify-center pl-4 pr-2 rounded-l-2xl border-r-0">
+<span class="material-symbols-outlined text-[24px]">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-2xl rounded-l-none text-text-main dark:text-white focus:outline-0 focus:ring-0 border-none bg-transparent h-full placeholder:text-text-secondary/70 dark:placeholder:text-gray-500 px-2 text-base font-normal leading-normal" placeholder="Find subjects, notes, or tags..." value=""/>
+</div>
+</label>
+</div>
+<!-- Priority Focus Section -->
+<div class="mt-4">
+<div class="flex items-center justify-between px-4 pb-3 pt-2">
+<h2 class="text-text-main dark:text-white tracking-tight text-[22px] font-bold leading-tight">Priority Focus</h2>
+<button class="text-primary font-medium text-sm">View All</button>
+</div>
+<div class="flex flex-col gap-4 px-4">
+<!-- Card 1: Mathematics -->
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none border border-transparent dark:border-white/5 transition-transform active:scale-[0.99]">
+<div class="flex gap-4">
+<div class="bg-center bg-no-repeat bg-cover rounded-xl w-[80px] h-[80px] shrink-0 bg-subtle-light dark:bg-subtle-dark" data-alt="Abstract geometric shapes representing mathematics" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBvapeUdoS_is34qvImEEqVk0T0B-dtUDqhRyTeqAs4-tRDs6c3cgGb4w1RQ--x1oNxo7JzH_IReLCMWV_ikWp7kc3RJwmdQsooSW4rioVwLM_c1zoegA9cB41NTqEdBQa-7T5bmIcw2oCTDDJ9vzOGzirhrECTMLuP0Ssreg5we8MOfZ9CuZ3Qmw9XG7o2sAR-tCfZNPZEnABaK1Hvb4zlOY30Y7DB09Hlp9FIjkjHO81UwfJkTmbOUrIVXpjWRv50ze6Xfte65lvX");'></div>
+<div class="flex flex-1 flex-col justify-between py-1">
+<div>
+<div class="flex justify-between items-start">
+<p class="text-text-main dark:text-white text-lg font-bold leading-snug">Mathematics</p>
+<span class="px-2 py-0.5 rounded-md bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 text-[10px] font-bold uppercase tracking-wide">Exam</span>
+</div>
+<p class="text-text-secondary dark:text-gray-400 text-sm font-medium mt-0.5">Calculus II - Integration</p>
+</div>
+<div class="mt-2">
+<div class="flex justify-between items-center mb-1.5">
+<span class="text-xs font-semibold text-primary dark:text-primary">75% Complete</span>
+</div>
+<div class="w-full h-2 rounded-full bg-subtle-light dark:bg-subtle-dark overflow-hidden">
+<div class="h-full rounded-full bg-primary" style="width: 75%;"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2: History -->
+<div class="bg-card-light dark:bg-card-dark rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-none border border-transparent dark:border-white/5 transition-transform active:scale-[0.99]">
+<div class="flex gap-4">
+<div class="bg-center bg-no-repeat bg-cover rounded-xl w-[80px] h-[80px] shrink-0 bg-subtle-light dark:bg-subtle-dark" data-alt="Old map parchment texture representing history" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDvBoZmndSKDWwohQ_L0aaiicm140ETh0QB6VBpHfZvoHLTYHXXH--bBd4iLBB8H8GaxuM7TlfCJghdn43HFr3-H5RuDAf3NttOApyV1x0Et637zE5BXpImks-kNMJVuMEj2TT7CliLxLceeldC4X0QTTnoyBmEv9HX7URTZ2ka-ouI2G4BWnUWUqYHiHeWR7F1DHL-9rKOc34CSEK3_tNfiZWqpi7C7bBljocESaVXqnpVCXY7pQ1DOceAlPsYzPX5Ek8IJWP5v6ks");'></div>
+<div class="flex flex-1 flex-col justify-between py-1">
+<div>
+<div class="flex justify-between items-start">
+<p class="text-text-main dark:text-white text-lg font-bold leading-snug">History</p>
+<span class="px-2 py-0.5 rounded-md bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-[10px] font-bold uppercase tracking-wide">Behind</span>
+</div>
+<p class="text-text-secondary dark:text-gray-400 text-sm font-medium mt-0.5">The Industrial Revolution</p>
+</div>
+<div class="mt-2">
+<div class="flex justify-between items-center mb-1.5">
+<span class="text-xs font-semibold text-text-main dark:text-gray-300">40% Complete</span>
+</div>
+<div class="w-full h-2 rounded-full bg-subtle-light dark:bg-subtle-dark overflow-hidden">
+<div class="h-full rounded-full bg-text-main dark:bg-gray-500" style="width: 40%;"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Capture Section -->
+<div class="mt-6">
+<h2 class="text-text-main dark:text-white tracking-tight text-[22px] font-bold leading-tight px-4 text-left pb-3 pt-2">Quick Capture</h2>
+<div class="grid grid-cols-2 gap-4 px-4">
+<!-- Scan Button -->
+<button class="group flex flex-col items-start justify-between p-5 h-36 rounded-2xl bg-primary/20 dark:bg-primary/10 border border-primary/20 dark:border-primary/5 active:scale-95 transition-all">
+<div class="w-12 h-12 rounded-full bg-white dark:bg-background-dark flex items-center justify-center text-primary-dark dark:text-primary shadow-sm group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[28px]">document_scanner</span>
+</div>
+<div>
+<p class="text-text-main dark:text-white font-bold text-lg">Scan Notes</p>
+<p class="text-text-secondary dark:text-gray-400 text-xs font-medium">OCR Import</p>
+</div>
+</button>
+<!-- Voice Button -->
+<button class="group flex flex-col items-start justify-between p-5 h-36 rounded-2xl bg-subtle-light dark:bg-subtle-dark border border-transparent dark:border-white/5 active:scale-95 transition-all">
+<div class="w-12 h-12 rounded-full bg-white dark:bg-background-dark flex items-center justify-center text-text-main dark:text-white shadow-sm group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[28px]">mic</span>
+</div>
+<div>
+<p class="text-text-main dark:text-white font-bold text-lg">Voice Memo</p>
+<p class="text-text-secondary dark:text-gray-400 text-xs font-medium">Record Audio</p>
+</div>
+</button>
+</div>
+</div>
+<!-- Spacer for Bottom Nav -->
+<div class="h-8"></div>
+<!-- Bottom Navigation -->
+<div class="fixed bottom-0 left-0 w-full bg-white dark:bg-[#12180d] border-t border-gray-100 dark:border-white/5 pb-6 pt-3 px-6 z-50">
+<div class="flex justify-between items-center max-w-md mx-auto">
+<button class="flex flex-col items-center gap-1 w-16 text-primary">
+<span class="material-symbols-outlined text-[26px] fill-1">home</span>
+<span class="text-[10px] font-medium">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 w-16 text-gray-400 dark:text-gray-500 hover:text-text-main dark:hover:text-gray-300 transition-colors">
+<span class="material-symbols-outlined text-[26px]">calendar_month</span>
+<span class="text-[10px] font-medium">Plan</span>
+</button>
+<!-- Floating Add Button (Optional center emphasis) -->
+<button class="flex items-center justify-center w-14 h-14 rounded-full bg-text-main dark:bg-white text-primary dark:text-background-dark -mt-8 shadow-lg shadow-black/10 dark:shadow-white/5 active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[32px]">add</span>
+</button>
+<button class="flex flex-col items-center gap-1 w-16 text-gray-400 dark:text-gray-500 hover:text-text-main dark:hover:text-gray-300 transition-colors">
+<span class="material-symbols-outlined text-[26px]">bar_chart</span>
+<span class="text-[10px] font-medium">Stats</span>
+</button>
+<button class="flex flex-col items-center gap-1 w-16 text-gray-400 dark:text-gray-500 hover:text-text-main dark:hover:text-gray-300 transition-colors">
+<span class="material-symbols-outlined text-[26px]">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</button>
+</div>
+</div>
+</body></html>

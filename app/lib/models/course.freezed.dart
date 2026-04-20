@@ -16,7 +16,7 @@ mixin _$Course {
 
  String get id; String get name; String? get subtitle; String? get professor; String? get location; Color get color; List<int> get scheduleDays;// 0 = Pazartesi, 6 = Pazar
  TimeOfDay get startTime; TimeOfDay get endTime; int get absenceLimit; int get currentAbsences; double get progress; String? get iconName; DateTime? get createdAt; DateTime? get nextExamDate; int get credits; String get status;// 'active', 'completed', 'archived'
- List<DateTime> get absenceDates; double? get latitude; double? get longitude;
+ List<DateTime> get absenceDates; double? get latitude; double? get longitude; String? get professorEmail; String? get professorPhone; String? get professorOffice; String? get officeHours; String? get assistantName;
 /// Create a copy of Course
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,16 +27,16 @@ $CourseCopyWith<Course> get copyWith => _$CourseCopyWithImpl<Course>(this as Cou
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Course&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.subtitle, subtitle) || other.subtitle == subtitle)&&(identical(other.professor, professor) || other.professor == professor)&&(identical(other.location, location) || other.location == location)&&(identical(other.color, color) || other.color == color)&&const DeepCollectionEquality().equals(other.scheduleDays, scheduleDays)&&(identical(other.startTime, startTime) || other.startTime == startTime)&&(identical(other.endTime, endTime) || other.endTime == endTime)&&(identical(other.absenceLimit, absenceLimit) || other.absenceLimit == absenceLimit)&&(identical(other.currentAbsences, currentAbsences) || other.currentAbsences == currentAbsences)&&(identical(other.progress, progress) || other.progress == progress)&&(identical(other.iconName, iconName) || other.iconName == iconName)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.nextExamDate, nextExamDate) || other.nextExamDate == nextExamDate)&&(identical(other.credits, credits) || other.credits == credits)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.absenceDates, absenceDates)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Course&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.subtitle, subtitle) || other.subtitle == subtitle)&&(identical(other.professor, professor) || other.professor == professor)&&(identical(other.location, location) || other.location == location)&&(identical(other.color, color) || other.color == color)&&const DeepCollectionEquality().equals(other.scheduleDays, scheduleDays)&&(identical(other.startTime, startTime) || other.startTime == startTime)&&(identical(other.endTime, endTime) || other.endTime == endTime)&&(identical(other.absenceLimit, absenceLimit) || other.absenceLimit == absenceLimit)&&(identical(other.currentAbsences, currentAbsences) || other.currentAbsences == currentAbsences)&&(identical(other.progress, progress) || other.progress == progress)&&(identical(other.iconName, iconName) || other.iconName == iconName)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.nextExamDate, nextExamDate) || other.nextExamDate == nextExamDate)&&(identical(other.credits, credits) || other.credits == credits)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.absenceDates, absenceDates)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.professorEmail, professorEmail) || other.professorEmail == professorEmail)&&(identical(other.professorPhone, professorPhone) || other.professorPhone == professorPhone)&&(identical(other.professorOffice, professorOffice) || other.professorOffice == professorOffice)&&(identical(other.officeHours, officeHours) || other.officeHours == officeHours)&&(identical(other.assistantName, assistantName) || other.assistantName == assistantName));
 }
 
 
 @override
-int get hashCode => Object.hashAll([runtimeType,id,name,subtitle,professor,location,color,const DeepCollectionEquality().hash(scheduleDays),startTime,endTime,absenceLimit,currentAbsences,progress,iconName,createdAt,nextExamDate,credits,status,const DeepCollectionEquality().hash(absenceDates),latitude,longitude]);
+int get hashCode => Object.hashAll([runtimeType,id,name,subtitle,professor,location,color,const DeepCollectionEquality().hash(scheduleDays),startTime,endTime,absenceLimit,currentAbsences,progress,iconName,createdAt,nextExamDate,credits,status,const DeepCollectionEquality().hash(absenceDates),latitude,longitude,professorEmail,professorPhone,professorOffice,officeHours,assistantName]);
 
 @override
 String toString() {
-  return 'Course(id: $id, name: $name, subtitle: $subtitle, professor: $professor, location: $location, color: $color, scheduleDays: $scheduleDays, startTime: $startTime, endTime: $endTime, absenceLimit: $absenceLimit, currentAbsences: $currentAbsences, progress: $progress, iconName: $iconName, createdAt: $createdAt, nextExamDate: $nextExamDate, credits: $credits, status: $status, absenceDates: $absenceDates, latitude: $latitude, longitude: $longitude)';
+  return 'Course(id: $id, name: $name, subtitle: $subtitle, professor: $professor, location: $location, color: $color, scheduleDays: $scheduleDays, startTime: $startTime, endTime: $endTime, absenceLimit: $absenceLimit, currentAbsences: $currentAbsences, progress: $progress, iconName: $iconName, createdAt: $createdAt, nextExamDate: $nextExamDate, credits: $credits, status: $status, absenceDates: $absenceDates, latitude: $latitude, longitude: $longitude, professorEmail: $professorEmail, professorPhone: $professorPhone, professorOffice: $professorOffice, officeHours: $officeHours, assistantName: $assistantName)';
 }
 
 
@@ -47,7 +47,7 @@ abstract mixin class $CourseCopyWith<$Res>  {
   factory $CourseCopyWith(Course value, $Res Function(Course) _then) = _$CourseCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String? subtitle, String? professor, String? location, Color color, List<int> scheduleDays, TimeOfDay startTime, TimeOfDay endTime, int absenceLimit, int currentAbsences, double progress, String? iconName, DateTime? createdAt, DateTime? nextExamDate, int credits, String status, List<DateTime> absenceDates, double? latitude, double? longitude
+ String id, String name, String? subtitle, String? professor, String? location, Color color, List<int> scheduleDays, TimeOfDay startTime, TimeOfDay endTime, int absenceLimit, int currentAbsences, double progress, String? iconName, DateTime? createdAt, DateTime? nextExamDate, int credits, String status, List<DateTime> absenceDates, double? latitude, double? longitude, String? professorEmail, String? professorPhone, String? professorOffice, String? officeHours, String? assistantName
 });
 
 
@@ -64,7 +64,7 @@ class _$CourseCopyWithImpl<$Res>
 
 /// Create a copy of Course
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? subtitle = freezed,Object? professor = freezed,Object? location = freezed,Object? color = null,Object? scheduleDays = null,Object? startTime = null,Object? endTime = null,Object? absenceLimit = null,Object? currentAbsences = null,Object? progress = null,Object? iconName = freezed,Object? createdAt = freezed,Object? nextExamDate = freezed,Object? credits = null,Object? status = null,Object? absenceDates = null,Object? latitude = freezed,Object? longitude = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? subtitle = freezed,Object? professor = freezed,Object? location = freezed,Object? color = null,Object? scheduleDays = null,Object? startTime = null,Object? endTime = null,Object? absenceLimit = null,Object? currentAbsences = null,Object? progress = null,Object? iconName = freezed,Object? createdAt = freezed,Object? nextExamDate = freezed,Object? credits = null,Object? status = null,Object? absenceDates = null,Object? latitude = freezed,Object? longitude = freezed,Object? professorEmail = freezed,Object? professorPhone = freezed,Object? professorOffice = freezed,Object? officeHours = freezed,Object? assistantName = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -86,7 +86,12 @@ as int,status: null == status ? _self.status : status // ignore: cast_nullable_t
 as String,absenceDates: null == absenceDates ? _self.absenceDates : absenceDates // ignore: cast_nullable_to_non_nullable
 as List<DateTime>,latitude: freezed == latitude ? _self.latitude : latitude // ignore: cast_nullable_to_non_nullable
 as double?,longitude: freezed == longitude ? _self.longitude : longitude // ignore: cast_nullable_to_non_nullable
-as double?,
+as double?,professorEmail: freezed == professorEmail ? _self.professorEmail : professorEmail // ignore: cast_nullable_to_non_nullable
+as String?,professorPhone: freezed == professorPhone ? _self.professorPhone : professorPhone // ignore: cast_nullable_to_non_nullable
+as String?,professorOffice: freezed == professorOffice ? _self.professorOffice : professorOffice // ignore: cast_nullable_to_non_nullable
+as String?,officeHours: freezed == officeHours ? _self.officeHours : officeHours // ignore: cast_nullable_to_non_nullable
+as String?,assistantName: freezed == assistantName ? _self.assistantName : assistantName // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -171,10 +176,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String? subtitle,  String? professor,  String? location,  Color color,  List<int> scheduleDays,  TimeOfDay startTime,  TimeOfDay endTime,  int absenceLimit,  int currentAbsences,  double progress,  String? iconName,  DateTime? createdAt,  DateTime? nextExamDate,  int credits,  String status,  List<DateTime> absenceDates,  double? latitude,  double? longitude)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String? subtitle,  String? professor,  String? location,  Color color,  List<int> scheduleDays,  TimeOfDay startTime,  TimeOfDay endTime,  int absenceLimit,  int currentAbsences,  double progress,  String? iconName,  DateTime? createdAt,  DateTime? nextExamDate,  int credits,  String status,  List<DateTime> absenceDates,  double? latitude,  double? longitude,  String? professorEmail,  String? professorPhone,  String? professorOffice,  String? officeHours,  String? assistantName)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Course() when $default != null:
-return $default(_that.id,_that.name,_that.subtitle,_that.professor,_that.location,_that.color,_that.scheduleDays,_that.startTime,_that.endTime,_that.absenceLimit,_that.currentAbsences,_that.progress,_that.iconName,_that.createdAt,_that.nextExamDate,_that.credits,_that.status,_that.absenceDates,_that.latitude,_that.longitude);case _:
+return $default(_that.id,_that.name,_that.subtitle,_that.professor,_that.location,_that.color,_that.scheduleDays,_that.startTime,_that.endTime,_that.absenceLimit,_that.currentAbsences,_that.progress,_that.iconName,_that.createdAt,_that.nextExamDate,_that.credits,_that.status,_that.absenceDates,_that.latitude,_that.longitude,_that.professorEmail,_that.professorPhone,_that.professorOffice,_that.officeHours,_that.assistantName);case _:
   return orElse();
 
 }
@@ -192,10 +197,10 @@ return $default(_that.id,_that.name,_that.subtitle,_that.professor,_that.locatio
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String? subtitle,  String? professor,  String? location,  Color color,  List<int> scheduleDays,  TimeOfDay startTime,  TimeOfDay endTime,  int absenceLimit,  int currentAbsences,  double progress,  String? iconName,  DateTime? createdAt,  DateTime? nextExamDate,  int credits,  String status,  List<DateTime> absenceDates,  double? latitude,  double? longitude)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String? subtitle,  String? professor,  String? location,  Color color,  List<int> scheduleDays,  TimeOfDay startTime,  TimeOfDay endTime,  int absenceLimit,  int currentAbsences,  double progress,  String? iconName,  DateTime? createdAt,  DateTime? nextExamDate,  int credits,  String status,  List<DateTime> absenceDates,  double? latitude,  double? longitude,  String? professorEmail,  String? professorPhone,  String? professorOffice,  String? officeHours,  String? assistantName)  $default,) {final _that = this;
 switch (_that) {
 case _Course():
-return $default(_that.id,_that.name,_that.subtitle,_that.professor,_that.location,_that.color,_that.scheduleDays,_that.startTime,_that.endTime,_that.absenceLimit,_that.currentAbsences,_that.progress,_that.iconName,_that.createdAt,_that.nextExamDate,_that.credits,_that.status,_that.absenceDates,_that.latitude,_that.longitude);case _:
+return $default(_that.id,_that.name,_that.subtitle,_that.professor,_that.location,_that.color,_that.scheduleDays,_that.startTime,_that.endTime,_that.absenceLimit,_that.currentAbsences,_that.progress,_that.iconName,_that.createdAt,_that.nextExamDate,_that.credits,_that.status,_that.absenceDates,_that.latitude,_that.longitude,_that.professorEmail,_that.professorPhone,_that.professorOffice,_that.officeHours,_that.assistantName);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -212,10 +217,10 @@ return $default(_that.id,_that.name,_that.subtitle,_that.professor,_that.locatio
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String? subtitle,  String? professor,  String? location,  Color color,  List<int> scheduleDays,  TimeOfDay startTime,  TimeOfDay endTime,  int absenceLimit,  int currentAbsences,  double progress,  String? iconName,  DateTime? createdAt,  DateTime? nextExamDate,  int credits,  String status,  List<DateTime> absenceDates,  double? latitude,  double? longitude)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String? subtitle,  String? professor,  String? location,  Color color,  List<int> scheduleDays,  TimeOfDay startTime,  TimeOfDay endTime,  int absenceLimit,  int currentAbsences,  double progress,  String? iconName,  DateTime? createdAt,  DateTime? nextExamDate,  int credits,  String status,  List<DateTime> absenceDates,  double? latitude,  double? longitude,  String? professorEmail,  String? professorPhone,  String? professorOffice,  String? officeHours,  String? assistantName)?  $default,) {final _that = this;
 switch (_that) {
 case _Course() when $default != null:
-return $default(_that.id,_that.name,_that.subtitle,_that.professor,_that.location,_that.color,_that.scheduleDays,_that.startTime,_that.endTime,_that.absenceLimit,_that.currentAbsences,_that.progress,_that.iconName,_that.createdAt,_that.nextExamDate,_that.credits,_that.status,_that.absenceDates,_that.latitude,_that.longitude);case _:
+return $default(_that.id,_that.name,_that.subtitle,_that.professor,_that.location,_that.color,_that.scheduleDays,_that.startTime,_that.endTime,_that.absenceLimit,_that.currentAbsences,_that.progress,_that.iconName,_that.createdAt,_that.nextExamDate,_that.credits,_that.status,_that.absenceDates,_that.latitude,_that.longitude,_that.professorEmail,_that.professorPhone,_that.professorOffice,_that.officeHours,_that.assistantName);case _:
   return null;
 
 }
@@ -227,7 +232,7 @@ return $default(_that.id,_that.name,_that.subtitle,_that.professor,_that.locatio
 
 
 class _Course extends Course {
-  const _Course({required this.id, required this.name, this.subtitle, this.professor, this.location, required this.color, required final  List<int> scheduleDays, required this.startTime, required this.endTime, this.absenceLimit = 3, this.currentAbsences = 0, this.progress = 0.0, this.iconName, this.createdAt, this.nextExamDate, this.credits = 3, this.status = 'active', final  List<DateTime> absenceDates = const [], this.latitude, this.longitude}): _scheduleDays = scheduleDays,_absenceDates = absenceDates,super._();
+  const _Course({required this.id, required this.name, this.subtitle, this.professor, this.location, required this.color, required final  List<int> scheduleDays, required this.startTime, required this.endTime, this.absenceLimit = 3, this.currentAbsences = 0, this.progress = 0.0, this.iconName, this.createdAt, this.nextExamDate, this.credits = 3, this.status = 'active', final  List<DateTime> absenceDates = const [], this.latitude, this.longitude, this.professorEmail, this.professorPhone, this.professorOffice, this.officeHours, this.assistantName}): _scheduleDays = scheduleDays,_absenceDates = absenceDates,super._();
   
 
 @override final  String id;
@@ -265,6 +270,11 @@ class _Course extends Course {
 
 @override final  double? latitude;
 @override final  double? longitude;
+@override final  String? professorEmail;
+@override final  String? professorPhone;
+@override final  String? professorOffice;
+@override final  String? officeHours;
+@override final  String? assistantName;
 
 /// Create a copy of Course
 /// with the given fields replaced by the non-null parameter values.
@@ -276,16 +286,16 @@ _$CourseCopyWith<_Course> get copyWith => __$CourseCopyWithImpl<_Course>(this, _
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Course&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.subtitle, subtitle) || other.subtitle == subtitle)&&(identical(other.professor, professor) || other.professor == professor)&&(identical(other.location, location) || other.location == location)&&(identical(other.color, color) || other.color == color)&&const DeepCollectionEquality().equals(other._scheduleDays, _scheduleDays)&&(identical(other.startTime, startTime) || other.startTime == startTime)&&(identical(other.endTime, endTime) || other.endTime == endTime)&&(identical(other.absenceLimit, absenceLimit) || other.absenceLimit == absenceLimit)&&(identical(other.currentAbsences, currentAbsences) || other.currentAbsences == currentAbsences)&&(identical(other.progress, progress) || other.progress == progress)&&(identical(other.iconName, iconName) || other.iconName == iconName)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.nextExamDate, nextExamDate) || other.nextExamDate == nextExamDate)&&(identical(other.credits, credits) || other.credits == credits)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._absenceDates, _absenceDates)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Course&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.subtitle, subtitle) || other.subtitle == subtitle)&&(identical(other.professor, professor) || other.professor == professor)&&(identical(other.location, location) || other.location == location)&&(identical(other.color, color) || other.color == color)&&const DeepCollectionEquality().equals(other._scheduleDays, _scheduleDays)&&(identical(other.startTime, startTime) || other.startTime == startTime)&&(identical(other.endTime, endTime) || other.endTime == endTime)&&(identical(other.absenceLimit, absenceLimit) || other.absenceLimit == absenceLimit)&&(identical(other.currentAbsences, currentAbsences) || other.currentAbsences == currentAbsences)&&(identical(other.progress, progress) || other.progress == progress)&&(identical(other.iconName, iconName) || other.iconName == iconName)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.nextExamDate, nextExamDate) || other.nextExamDate == nextExamDate)&&(identical(other.credits, credits) || other.credits == credits)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._absenceDates, _absenceDates)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.professorEmail, professorEmail) || other.professorEmail == professorEmail)&&(identical(other.professorPhone, professorPhone) || other.professorPhone == professorPhone)&&(identical(other.professorOffice, professorOffice) || other.professorOffice == professorOffice)&&(identical(other.officeHours, officeHours) || other.officeHours == officeHours)&&(identical(other.assistantName, assistantName) || other.assistantName == assistantName));
 }
 
 
 @override
-int get hashCode => Object.hashAll([runtimeType,id,name,subtitle,professor,location,color,const DeepCollectionEquality().hash(_scheduleDays),startTime,endTime,absenceLimit,currentAbsences,progress,iconName,createdAt,nextExamDate,credits,status,const DeepCollectionEquality().hash(_absenceDates),latitude,longitude]);
+int get hashCode => Object.hashAll([runtimeType,id,name,subtitle,professor,location,color,const DeepCollectionEquality().hash(_scheduleDays),startTime,endTime,absenceLimit,currentAbsences,progress,iconName,createdAt,nextExamDate,credits,status,const DeepCollectionEquality().hash(_absenceDates),latitude,longitude,professorEmail,professorPhone,professorOffice,officeHours,assistantName]);
 
 @override
 String toString() {
-  return 'Course(id: $id, name: $name, subtitle: $subtitle, professor: $professor, location: $location, color: $color, scheduleDays: $scheduleDays, startTime: $startTime, endTime: $endTime, absenceLimit: $absenceLimit, currentAbsences: $currentAbsences, progress: $progress, iconName: $iconName, createdAt: $createdAt, nextExamDate: $nextExamDate, credits: $credits, status: $status, absenceDates: $absenceDates, latitude: $latitude, longitude: $longitude)';
+  return 'Course(id: $id, name: $name, subtitle: $subtitle, professor: $professor, location: $location, color: $color, scheduleDays: $scheduleDays, startTime: $startTime, endTime: $endTime, absenceLimit: $absenceLimit, currentAbsences: $currentAbsences, progress: $progress, iconName: $iconName, createdAt: $createdAt, nextExamDate: $nextExamDate, credits: $credits, status: $status, absenceDates: $absenceDates, latitude: $latitude, longitude: $longitude, professorEmail: $professorEmail, professorPhone: $professorPhone, professorOffice: $professorOffice, officeHours: $officeHours, assistantName: $assistantName)';
 }
 
 
@@ -296,7 +306,7 @@ abstract mixin class _$CourseCopyWith<$Res> implements $CourseCopyWith<$Res> {
   factory _$CourseCopyWith(_Course value, $Res Function(_Course) _then) = __$CourseCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String? subtitle, String? professor, String? location, Color color, List<int> scheduleDays, TimeOfDay startTime, TimeOfDay endTime, int absenceLimit, int currentAbsences, double progress, String? iconName, DateTime? createdAt, DateTime? nextExamDate, int credits, String status, List<DateTime> absenceDates, double? latitude, double? longitude
+ String id, String name, String? subtitle, String? professor, String? location, Color color, List<int> scheduleDays, TimeOfDay startTime, TimeOfDay endTime, int absenceLimit, int currentAbsences, double progress, String? iconName, DateTime? createdAt, DateTime? nextExamDate, int credits, String status, List<DateTime> absenceDates, double? latitude, double? longitude, String? professorEmail, String? professorPhone, String? professorOffice, String? officeHours, String? assistantName
 });
 
 
@@ -313,7 +323,7 @@ class __$CourseCopyWithImpl<$Res>
 
 /// Create a copy of Course
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? subtitle = freezed,Object? professor = freezed,Object? location = freezed,Object? color = null,Object? scheduleDays = null,Object? startTime = null,Object? endTime = null,Object? absenceLimit = null,Object? currentAbsences = null,Object? progress = null,Object? iconName = freezed,Object? createdAt = freezed,Object? nextExamDate = freezed,Object? credits = null,Object? status = null,Object? absenceDates = null,Object? latitude = freezed,Object? longitude = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? subtitle = freezed,Object? professor = freezed,Object? location = freezed,Object? color = null,Object? scheduleDays = null,Object? startTime = null,Object? endTime = null,Object? absenceLimit = null,Object? currentAbsences = null,Object? progress = null,Object? iconName = freezed,Object? createdAt = freezed,Object? nextExamDate = freezed,Object? credits = null,Object? status = null,Object? absenceDates = null,Object? latitude = freezed,Object? longitude = freezed,Object? professorEmail = freezed,Object? professorPhone = freezed,Object? professorOffice = freezed,Object? officeHours = freezed,Object? assistantName = freezed,}) {
   return _then(_Course(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -335,7 +345,12 @@ as int,status: null == status ? _self.status : status // ignore: cast_nullable_t
 as String,absenceDates: null == absenceDates ? _self._absenceDates : absenceDates // ignore: cast_nullable_to_non_nullable
 as List<DateTime>,latitude: freezed == latitude ? _self.latitude : latitude // ignore: cast_nullable_to_non_nullable
 as double?,longitude: freezed == longitude ? _self.longitude : longitude // ignore: cast_nullable_to_non_nullable
-as double?,
+as double?,professorEmail: freezed == professorEmail ? _self.professorEmail : professorEmail // ignore: cast_nullable_to_non_nullable
+as String?,professorPhone: freezed == professorPhone ? _self.professorPhone : professorPhone // ignore: cast_nullable_to_non_nullable
+as String?,professorOffice: freezed == professorOffice ? _self.professorOffice : professorOffice // ignore: cast_nullable_to_non_nullable
+as String?,officeHours: freezed == officeHours ? _self.officeHours : officeHours // ignore: cast_nullable_to_non_nullable
+as String?,assistantName: freezed == assistantName ? _self.assistantName : assistantName // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

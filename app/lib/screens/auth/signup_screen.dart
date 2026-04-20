@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/auth_provider.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
+import 'email_verification_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -41,15 +43,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final provider = context.read<AuthProvider>();
+    final provider = context.watch<AuthProvider>();
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF5F7FA),
+      backgroundColor: isDark
+          ? const Color(0xFF121212)
+          : const Color(0xFFF5F7FA),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: isDark ? Colors.white : Colors.black),
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            color: isDark ? Colors.white : Colors.black,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -59,9 +66,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           child: Form(
             key: _formKey,
             child: Column(
-               crossAxisAlignment: CrossAxisAlignment.stretch,
-               children: [
-                 Text(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
                   'Create Account',
                   style: TextStyle(
                     fontSize: 32,
@@ -74,11 +81,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   'Join us to track your academic success.',
                   style: TextStyle(
                     fontSize: 16,
-                     color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                   ),
                 ),
                 const SizedBox(height: 32),
-                
+
                 // Error Message
                 if (provider.error != null)
                   Container(
@@ -87,22 +94,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     decoration: BoxDecoration(
                       color: Colors.red.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: Colors.red.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                        const Icon(
+                          Icons.error_outline,
+                          color: Colors.red,
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             provider.error!,
-                            style: const TextStyle(color: Colors.red, fontSize: 13),
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                
+
                 // Name Field
                 _buildTextField(
                   controller: _nameController,
@@ -148,13 +164,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   isDark: isDark,
                   isPassword: true,
                   isPasswordVisible: _isPasswordVisible,
-                  onPasswordToggle: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                  onPasswordToggle: () =>
+                      setState(() => _isPasswordVisible = !_isPasswordVisible),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter a password';
                     }
                     if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
+                      return AppLocalizations.of(context)!.passwordTooShort;
                     }
                     return null;
                   },
@@ -164,18 +181,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 // Confirm Password Field
                 _buildTextField(
                   controller: _confirmPasswordController,
-                  label: 'Confirm Password',
+                  label: AppLocalizations.of(context)!.confirmPassword,
                   icon: Icons.lock_outline,
                   isDark: isDark,
                   isPassword: true,
                   isPasswordVisible: _isConfirmPasswordVisible,
-                  onPasswordToggle: () => setState(() => _isConfirmPasswordVisible = !_isConfirmPasswordVisible),
+                  onPasswordToggle: () => setState(
+                    () =>
+                        _isConfirmPasswordVisible = !_isConfirmPasswordVisible,
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please confirm your password';
                     }
                     if (value != _passwordController.text) {
-                      return 'Passwords do not match';
+                      return AppLocalizations.of(context)!.passwordsDoNotMatch;
                     }
                     return null;
                   },
@@ -186,37 +206,63 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 SizedBox(
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: (provider.isLoading || _isSubmitting) 
-                        ? null 
+                    onPressed: (provider.isLoading || _isSubmitting)
+                        ? null
                         : () => _handleSignUp(provider),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       elevation: 0,
                     ),
                     child: (provider.isLoading || _isSubmitting)
-                        ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : const Text('Sign Up', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            'Sign Up',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       "Already have an account?",
-                      style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+                      style: TextStyle(
+                        color: isDark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600,
+                      ),
                     ),
                     TextButton(
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: const Text('Log In', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        'Log In',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-               ],
+              ],
             ),
           ),
         ),
@@ -227,18 +273,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
   /// Kayıt işlemi — çift tıklama korumalı
   Future<void> _handleSignUp(AuthProvider provider) async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     setState(() => _isSubmitting = true);
     try {
       final success = await provider.signUp(
-        _emailController.text.trim(), 
+        _emailController.text.trim(),
         _passwordController.text,
         _nameController.text.trim(),
       );
-      
+
       if (success) {
         if (!mounted) return;
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const EmailVerificationScreen()),
+          (route) => route.isFirst,
+        );
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -264,7 +313,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+            color: isDark
+                ? AppColors.textSecondaryDark
+                : AppColors.textSecondaryLight,
           ),
         ),
         const SizedBox(height: 8),
@@ -275,37 +326,47 @@ class _SignUpScreenState extends State<SignUpScreen> {
             border: Border.all(
               color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
             ),
-             boxShadow: [
+            boxShadow: [
               if (!isDark)
-              BoxShadow(
-                color: Colors.grey.shade100,
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              )
-            ]
+                BoxShadow(
+                  color: Colors.grey.shade100,
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+            ],
           ),
           child: TextFormField(
             controller: controller,
             obscureText: isPassword && !isPasswordVisible,
             keyboardType: keyboardType,
             validator: validator,
-            style: TextStyle(
-              color: isDark ? Colors.white : Colors.black87,
-            ),
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
             decoration: InputDecoration(
-              prefixIcon: Icon(icon, color: isDark ? Colors.grey.shade600 : Colors.grey.shade400),
-              suffixIcon: isPassword ? IconButton(
-                icon: Icon(
-                  isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                  color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
-                ),
-                onPressed: onPasswordToggle,
-              ) : null,
+              prefixIcon: Icon(
+                icon,
+                color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+              ),
+              suffixIcon: isPassword
+                  ? IconButton(
+                      icon: Icon(
+                        isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: isDark
+                            ? Colors.grey.shade600
+                            : Colors.grey.shade400,
+                      ),
+                      onPressed: onPasswordToggle,
+                    )
+                  : null,
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
+              ),
               hintText: 'Enter your $label',
               hintStyle: TextStyle(
-                 color: isDark ? Colors.grey.shade700 : Colors.grey.shade400,
+                color: isDark ? Colors.grey.shade700 : Colors.grey.shade400,
               ),
               errorStyle: const TextStyle(fontSize: 12),
             ),

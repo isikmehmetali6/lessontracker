@@ -4,6 +4,7 @@ import '../repositories/note_repository.dart';
 import '../core/services/ocr_service.dart';
 import '../core/services/file_service.dart';
 import '../core/services/audio_service.dart';
+import '../core/services/watermark_service.dart';
 import '../models/note.dart';
 import 'package:uuid/uuid.dart';
 
@@ -16,7 +17,8 @@ class NoteProvider extends ChangeNotifier {
   final _uuid = const Uuid();
 
   // Audio Streams
-  Stream<dynamic> get onPlayerStateChanged => _audioService.onPlayerStateChanged;
+  Stream<dynamic> get onPlayerStateChanged =>
+      _audioService.onPlayerStateChanged;
   Stream<Duration> get onPositionChanged => _audioService.onPositionChanged;
   Stream<void> get onPlayerComplete => _audioService.onPlayerComplete;
 
@@ -29,8 +31,8 @@ class NoteProvider extends ChangeNotifier {
   String? _error;
 
   // Getters
-  List<Note> get notes => _notes;
-  List<Note> get recentNotes => _recentNotes;
+  List<Note> get notes => List.unmodifiable(_notes);
+  List<Note> get recentNotes => List.unmodifiable(_recentNotes);
   List<Note> get courseNotes => _courseNotes;
   bool get isLoading => _isLoading;
   bool get isRecording => _isRecording;
@@ -52,9 +54,8 @@ class NoteProvider extends ChangeNotifier {
     try {
       _notes = await _noteRepo.getAllNotes();
       _recentNotes = await _noteRepo.getRecentNotes(limit: 10);
-      
-      // Arama indeksini arka planda onar (Performans için await etmiyoruz)
-      _noteRepo.repairSearchIndex();
+
+      await _noteRepo.repairSearchIndex();
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -62,7 +63,6 @@ class NoteProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-
 
   /// Ders notlarını yükle
   Future<void> loadCourseNotes(String courseId) async {
@@ -115,25 +115,44 @@ class NoteProvider extends ChangeNotifier {
     required File imageFile,
     String? customTitle,
     List<String>? tags,
+    String? courseName,
+    String userName = 'User',
   }) async {
     _error = null;
     _isProcessingOcr = true;
     notifyListeners();
 
     try {
-      // Resmi kaydet
-      final imagePath = await _fileService.saveImage(imageFile);
+      File imageToSave = imageFile;
 
-      // OCR işlemi
-      final ocrResult = await _ocr.recognizeText(imagePath);
+      if (courseName != null) {
+        final watermarkedFile = await WatermarkService.addWatermarkToImage(
+          imageFile: imageFile,
+          courseName: courseName,
+          userName: userName,
+        );
+        if (watermarkedFile != null) {
+          imageToSave = watermarkedFile;
+        }
+      }
+
+      final imagePath = await _fileService.saveImage(imageToSave);
+
+      final resolvedPath = await _fileService.resolveFilePath(imagePath);
+      if (resolvedPath == null) {
+        _error = 'Saved image file could not be found';
+        return null;
+      }
+
+      final ocrResult = await _ocr.recognizeText(resolvedPath);
 
       if (!ocrResult.success) {
         _error = ocrResult.error ?? 'OCR işlemi başarısız';
         return null;
       }
 
-      final title = customTitle ?? 
-          'Scan ${DateTime.now().day}/${DateTime.now().month}';
+      final title =
+          customTitle ?? 'Scan ${DateTime.now().day}/${DateTime.now().month}';
 
       final note = Note(
         id: _uuid.v4(),
@@ -182,14 +201,14 @@ class NoteProvider extends ChangeNotifier {
   /// Kayıt sırasında yer imi ekle
   void addBookmark() {
     if (!_isRecording) return;
-    
+
     final currentMs = _audioService.recordingDurationMs;
     _currentBookmarks.add(Duration(milliseconds: currentMs));
     notifyListeners();
   }
-  
+
   /// Ses kaydını durdur ve kaydet
-  
+
   /// Ses kaydını durdur ve kaydet
   Future<Note?> stopRecordingAndSave({
     required String courseId,
@@ -207,7 +226,8 @@ class NoteProvider extends ChangeNotifier {
         return null;
       }
 
-      final title = customTitle ?? 
+      final title =
+          customTitle ??
           'Voice Memo ${DateTime.now().day}/${DateTime.now().month}';
 
       final note = Note(
@@ -268,13 +288,28 @@ class NoteProvider extends ChangeNotifier {
     String? customTitle,
     String? content,
     List<String>? tags,
+    String? courseName,
+    String userName = 'User',
   }) async {
     _error = null;
     try {
-      final imagePath = await _fileService.saveImage(imageFile);
+      File imageToSave = imageFile;
 
-      final title = customTitle ?? 
-          'Image ${DateTime.now().day}/${DateTime.now().month}';
+      if (courseName != null) {
+        final watermarkedFile = await WatermarkService.addWatermarkToImage(
+          imageFile: imageFile,
+          courseName: courseName,
+          userName: userName,
+        );
+        if (watermarkedFile != null) {
+          imageToSave = watermarkedFile;
+        }
+      }
+
+      final imagePath = await _fileService.saveImage(imageToSave);
+
+      final title =
+          customTitle ?? 'Image ${DateTime.now().day}/${DateTime.now().month}';
 
       final note = Note(
         id: _uuid.v4(),
@@ -336,12 +371,41 @@ class NoteProvider extends ChangeNotifier {
     }
   }
 
+  /// Çizim ile notu kaydet (el yazısı, PDF açıklama, fotoğraf üzerine çizim)
+  Future<bool> saveNoteWithDrawing(Note note) async {
+    _error = null;
+    try {
+      // Check if note exists - update or insert
+      final existing = await _noteRepo.getNoteById(note.id);
+      if (existing != null) {
+        await _noteRepo.updateNote(note.copyWith(updatedAt: DateTime.now()));
+      } else {
+        await _noteRepo.insertNote(note);
+      }
+      await loadNotes();
+      await loadCourseNotes(note.courseId);
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Note by ID
+  Future<Note?> getNoteById(String id) async {
+    return await _noteRepo.getNoteById(id);
+  }
+
   /// Notu başka bir derse taşı
   Future<bool> moveNoteToCourse(Note note, String newCourseId) async {
     _error = null;
     try {
       final oldCourseId = note.courseId;
-      final updated = note.copyWith(courseId: newCourseId, updatedAt: DateTime.now());
+      final updated = note.copyWith(
+        courseId: newCourseId,
+        updatedAt: DateTime.now(),
+      );
       await _noteRepo.updateNote(updated);
       await loadNotes();
       await loadCourseNotes(oldCourseId);
@@ -380,7 +444,8 @@ class NoteProvider extends ChangeNotifier {
         courseId: courseIds[0],
         type: NoteType.ocr,
         title: 'Chapter 4 Summary',
-        content: 'Key concepts on cellular respiration and mitochondrial functions...',
+        content:
+            'Key concepts on cellular respiration and mitochondrial functions...',
         tags: ['biology', 'exam-prep'],
       ),
       Note(
@@ -396,7 +461,8 @@ class NoteProvider extends ChangeNotifier {
         courseId: courseIds[0],
         type: NoteType.text,
         title: 'Study Group Notes',
-        content: 'Discussed integration by parts and how to choose \'u\' and \'dv\'. Key takeaway: use LIATE rule (Logarithmic, Inverse trig, Algebraic, Trig, Exponential) to prioritize selection.',
+        content:
+            'Discussed integration by parts and how to choose \'u\' and \'dv\'. Key takeaway: use LIATE rule (Logarithmic, Inverse trig, Algebraic, Trig, Exponential) to prioritize selection.',
         tags: ['exam-prep', 'group'],
       ),
       Note(

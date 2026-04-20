@@ -4,10 +4,11 @@ part 'note.freezed.dart';
 
 /// Not türleri
 enum NoteType {
-  text,    // Manuel metin notu
-  ocr,     // OCR ile taranan not
-  audio,   // Ses kaydı
-  image,   // Sadece resim
+  text, // Manuel metin notu
+  ocr, // OCR ile taranan not
+  audio, // Ses kaydı
+  image, // Sadece resim
+  drawing, // El yazısı/çizim notu
 }
 
 /// Not modeli
@@ -20,15 +21,16 @@ abstract class Note with _$Note {
     required String courseId,
     required NoteType type,
     required String title,
-    String? content,          // Metin içeriği (OCR sonucu dahil)
-    String? filePath,         // Ses/resim dosya yolu
-    String? thumbnailPath,    // Önizleme resmi
-    int? audioDuration,       // Ses süresi (saniye)
+    String? content, // Metin içeriği (OCR sonucu dahil)
+    String? filePath, // Ses/resim dosya yolu
+    String? thumbnailPath, // Önizleme resmi
+    int? audioDuration, // Ses süresi (saniye)
     @Default([]) List<String> tags,
     @Default([]) List<Duration> bookmarks,
     @Default(false) bool isBookmarked,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? drawingData, // JSON serialized drawing strokes
   }) = _Note;
 
   /// Ses notu mu?
@@ -67,6 +69,7 @@ abstract class Note with _$Note {
       'isBookmarked': isBookmarked ? 1 : 0,
       'createdAt': (createdAt ?? DateTime.now()).toIso8601String(),
       'updatedAt': (updatedAt ?? DateTime.now()).toIso8601String(),
+      'drawingData': drawingData,
     };
   }
 
@@ -75,18 +78,23 @@ abstract class Note with _$Note {
     return Note(
       id: map['id'] as String,
       courseId: map['courseId'] as String,
-      type: NoteType.values.firstWhere((e) => e.name == map['type']),
+      type: NoteType.values.firstWhere(
+        (e) => e.name == map['type'],
+        orElse: () => NoteType.text,
+      ),
       title: map['title'] as String,
       content: map['content'] as String?,
       filePath: map['filePath'] as String?,
       thumbnailPath: map['thumbnailPath'] as String?,
       audioDuration: map['audioDuration'] as int?,
-      tags: (map['tags'] as String?)
+      tags:
+          (map['tags'] as String?)
               ?.split(',')
               .where((s) => s.isNotEmpty)
               .toList() ??
           [],
-      bookmarks: (map['bookmarks'] as String?)
+      bookmarks:
+          (map['bookmarks'] as String?)
               ?.split(',')
               .where((s) => s.isNotEmpty)
               .map((s) => Duration(milliseconds: int.parse(s)))
@@ -95,6 +103,7 @@ abstract class Note with _$Note {
       isBookmarked: (map['isBookmarked'] as int) == 1,
       createdAt: DateTime.parse(map['createdAt'] as String),
       updatedAt: DateTime.parse(map['updatedAt'] as String),
+      drawingData: map['drawingData'] as String?,
     );
   }
 }

@@ -5,38 +5,38 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/course.dart';
 import '../../providers/course_provider.dart';
 import '../../providers/note_provider.dart';
 import '../../widgets/home/home_widgets.dart';
-import '../../widgets/course/note_cards.dart';
 import '../course_detail/course_detail_screen.dart';
-import '../add_course/add_course_screen.dart';
-import '../search/search_screen.dart';
 import 'tabs/weekly_plan_screen.dart';
 import 'tabs/weekly_timetable_screen.dart';
 import '../settings/settings_screen.dart';
 import '../study_timer/study_timer_screen.dart';
 import '../gpa/gpa_calculator_screen.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
-import '../../services/home_widget_service.dart';
-import '../../core/services/location_service.dart';
 import '../../core/services/notification_service.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/deadline_provider.dart';
 import '../../providers/sync_provider.dart';
 import '../../core/services/sync_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/services/secure_storage_service.dart';
 import 'widgets/quick_action_card.dart';
 import 'widgets/voice_recording_sheet.dart';
 import 'widgets/today_schedule_list.dart';
 import 'widgets/priority_courses_list.dart';
 import 'widgets/attendance_overview_list.dart';
 import 'widgets/recent_notes_list.dart';
-import 'widgets/home_fab.dart';
 import 'widgets/home_bottom_nav.dart';
 import 'widgets/home_header.dart';
 import 'widgets/home_search_bar.dart';
+import '../../core/utils/error_handler.dart';
+import '../moodle/moodle_hub_screen.dart';
+import '../../core/utils/consent_utils.dart';
 
 /// Ana ekran
 class HomeScreen extends StatefulWidget {
@@ -48,45 +48,65 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
+  bool _isOffline = false;
 
   @override
   void initState() {
     super.initState();
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
+      results,
+    ) {
+      final offline = results.every((r) => r == ConnectivityResult.none);
+      if (_isOffline != offline) {
+        setState(() => _isOffline = offline);
+      }
+    });
     // Call load data asynchronously
     Future.microtask(() => _loadData());
   }
 
+  @override
+  void dispose() {
+    _connectivitySubscription.cancel();
+    super.dispose();
+  }
+
   Future<void> _loadData() async {
     if (!mounted) return;
-    
+
     final courseProvider = context.read<CourseProvider>();
     final noteProvider = context.read<NoteProvider>();
+    final deadlineProvider = context.read<DeadlineProvider>();
     final authProvider = context.read<AuthProvider>();
     final syncProvider = context.read<SyncProvider>();
 
     // Yeni cihaz kontrolü — sadece giriş yapan (misafir olmayan) kullanıcılar için
     if (authProvider.user != null && !authProvider.isGuest) {
       final uid = authProvider.user!.uid;
-      final prefs = await SharedPreferences.getInstance();
       final knownKey = 'known_user_$uid';
-      final isKnownDevice = prefs.getBool(knownKey) ?? false;
+      final isKnownDevice =
+          await SecureStorageService.getBool(knownKey);
 
       if (!isKnownDevice) {
         // Bu kullanıcı bu cihazda ilk kez — bulutta veri var mı kontrol et
         try {
           final syncService = SyncService();
           final hasBackup = await syncService.hasCloudBackup();
-          
+
           if (hasBackup && mounted) {
             final courseCount = await syncService.getCloudCourseCount();
             if (!mounted) return;
-            
+
             // Kullanıcıya sor: verileri yükle mi, sıfırdan mı başla?
             final shouldRestore = await _showRestoreDialog(courseCount);
-            
+
             if (shouldRestore == true && mounted) {
-              // Restore işlemi
-              syncProvider.registerProviders(context);
+              syncProvider.registerProviders(
+                courseProvider,
+                noteProvider,
+                deadlineProvider,
+              );
               await syncProvider.restore();
               if (!mounted) return;
             }
@@ -94,31 +114,37 @@ class _HomeScreenState extends State<HomeScreen> {
         } catch (e) {
           debugPrint('Cloud backup check error: $e');
         }
-        
+
         // Bu cihazı artık bilinen olarak işaretle
-        await prefs.setBool(knownKey, true);
+        await SecureStorageService.setBool(knownKey, true);
       }
     }
 
     // Normal veri yükleme
     await courseProvider.loadCourses();
     if (!mounted) return;
-    
+
     await noteProvider.loadNotes();
     if (!mounted) return;
 
     // Eğer yerel DB boşsa ve kullanıcı giriş yapmışsa, bulutta veri olabilir
-    if (courseProvider.courses.isEmpty && authProvider.user != null && !authProvider.isGuest) {
+    if (courseProvider.courses.isEmpty &&
+        authProvider.user != null &&
+        !authProvider.isGuest) {
       try {
         final syncService = SyncService();
         final hasBackup = await syncService.hasCloudBackup();
         if (hasBackup && mounted) {
           final courseCount = await syncService.getCloudCourseCount();
           if (!mounted) return;
-          
+
           final shouldRestore = await _showRestoreDialog(courseCount);
           if (shouldRestore == true && mounted) {
-            syncProvider.registerProviders(context);
+            syncProvider.registerProviders(
+              courseProvider,
+              noteProvider,
+              deadlineProvider,
+            );
             await syncProvider.restore();
             if (!mounted) return;
             // Verileri tekrar yükle
@@ -137,21 +163,20 @@ class _HomeScreenState extends State<HomeScreen> {
     if (courseProvider.courses.isEmpty) {
       final prefs = await SharedPreferences.getInstance();
       final hasSeenSampleData = prefs.getBool('has_seen_sample_data') ?? false;
-      
+
       if (!hasSeenSampleData) {
         await courseProvider.addSampleData();
         if (!mounted) return;
-        
+
         await noteProvider.addSampleNotes(
           courseProvider.courses.map((c) => c.id).toList(),
         );
         await prefs.setBool('has_seen_sample_data', true);
       }
     }
-    
-    // Check location for attendance
+
+    // Call permissions check
     if (mounted) {
-      _checkAttendance();
       await NotificationService().requestPermissions();
     }
   }
@@ -164,7 +189,9 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           backgroundColor: isDark ? const Color(0xFF1E1E2E) : Colors.white,
           title: Row(
             children: [
@@ -174,7 +201,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.cloud_download_rounded, color: AppColors.primary, size: 28),
+                child: Icon(
+                  Icons.cloud_download_rounded,
+                  color: AppColors.primary,
+                  size: 28,
+                ),
               ),
               const SizedBox(width: 12),
               const Expanded(
@@ -200,15 +231,23 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey[50],
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : Colors.grey[50],
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey[200]!,
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : Colors.grey[200]!,
                   ),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, size: 18, color: AppColors.primary),
+                    Icon(
+                      Icons.info_outline,
+                      size: 18,
+                      color: AppColors.primary,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -226,7 +265,28 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
+              onPressed: () async {
+                // Return 'false' to dismiss dialog
+                Navigator.of(ctx).pop(false);
+
+                // Arka planda buluttaki eski verileri siliyoruz
+                try {
+                  await SyncService().clearCloudData();
+                  if (ctx.mounted) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Eski bulut kayıtları temizlendi. Yeni sayfa açık.',
+                        ),
+                        backgroundColor: AppColors.green,
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  debugPrint('Bulut silme hatası: $e');
+                }
+              },
               child: Text(
                 'Sıfırdan Başla',
                 style: TextStyle(
@@ -242,8 +302,13 @@ class _HomeScreenState extends State<HomeScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
               ),
             ),
           ],
@@ -252,69 +317,57 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> _checkAttendance() async {
-    final provider = context.read<CourseProvider>();
-    // Simple check: Just check first course with location that is "today"
-    // Ideally we check time too.
-    
-    for (var course in provider.todayCourses) {
-      // Basic time check: Now is within start/end time buffer (e.g. 1 hour window)
-      // For MVP demo, filtering by "Is Today" is enough to trigger if location matches.
-      
-      if (course.latitude != null && course.longitude != null) {
-          final isNear = await LocationService().isNearCourse(course);
-          
-          if (isNear && mounted) {
-             _showAttendanceDialog(course);
-             break; // Only show one
-          }
-      }
-    }
-  }
-
-  void _showAttendanceDialog(Course course) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('📍 Welcome to ${course.name}'),
-        content: const Text('It looks like you are at the class location. Would you like to open the course page to take notes?'),
-        actions: [
-          TextButton(
-             onPressed: () => Navigator.pop(context),
-             child: const Text('No'),
-          ),
-          TextButton(
-             onPressed: () {
-               Navigator.pop(context);
-               _navigateToCourse(course);
-             },
-             child: const Text('Yes, Open Course'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset:
+          false, // Prevents keyboard from squishing the UI and throwing pixel errors
       body: SafeArea(
-        child: IndexedStack(
-          index: _currentIndex,
+        child: Column(
           children: [
-            _HomeContent(
-              onScanTap: () => _showQuickCapture(context, isOcr: true),
-              onVoiceTap: () => _showQuickCapture(context, isOcr: false),
-              onCourseTap: (course) => _navigateToCourse(course),
+            if (_isOffline)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 16,
+                ),
+                color: Colors.orange.shade800,
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.wifi_off, color: Colors.white, size: 16),
+                    SizedBox(width: 8),
+                    Text(
+                      'You are offline',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            Expanded(
+              child: IndexedStack(
+                index: _currentIndex,
+                children: [
+                  _HomeContent(
+                    onScanTap: () => _showQuickCapture(context, isOcr: true),
+                    onVoiceTap: () => _showQuickCapture(context, isOcr: false),
+                    onCourseTap: (course) => _navigateToCourse(course),
+                  ),
+                  const WeeklyPlanScreen(),
+                  const WeeklyTimetableScreen(),
+                  const SettingsScreen(),
+                  const MoodleHubScreen(),
+                ],
+              ),
             ),
-            const WeeklyPlanScreen(),
-            const WeeklyTimetableScreen(),
-            const SettingsScreen(),
           ],
         ),
       ),
-      floatingActionButton: const HomeFAB(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: HomeBottomNav(
         currentIndex: _currentIndex,
         onTabSelected: (index) => setState(() => _currentIndex = index),
@@ -322,13 +375,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-
   void _navigateToCourse(Course course) {
     Navigator.push(
       context,
-      CupertinoPageRoute(
-        builder: (_) => CourseDetailScreen(course: course),
-      ),
+      CupertinoPageRoute(builder: (_) => CourseDetailScreen(course: course)),
     );
   }
 
@@ -345,6 +395,9 @@ class _HomeScreenState extends State<HomeScreen> {
   /// OCR Quick Capture: Camera → OCR → Course Selection → Save
   Future<void> _quickCaptureOcr(BuildContext context) async {
     try {
+      final consent = await ConsentUtils.showContentCaptureConsentDialog(context);
+      if (consent != true || !mounted) return;
+
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.camera,
         maxWidth: 1920,
@@ -362,20 +415,35 @@ class _HomeScreenState extends State<HomeScreen> {
         SnackBar(
           content: const Row(
             children: [
-              SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              ),
               SizedBox(width: 12),
               Text('Processing OCR...'),
             ],
           ),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           duration: const Duration(seconds: 10),
         ),
       );
 
+      final courseProvider = context.read<CourseProvider>();
+      final course = await courseProvider.getCourseById(courseId);
+      final userName = 'User';
+
       final note = await context.read<NoteProvider>().addOcrNote(
         courseId: courseId,
         imageFile: File(image.path),
+        courseName: course?.name,
+        userName: userName,
       );
 
       if (!mounted) return;
@@ -387,49 +455,36 @@ class _HomeScreenState extends State<HomeScreen> {
           SnackBar(
             content: const Text('📝 OCR note saved!'),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.read<NoteProvider>().error ?? 'OCR failed'),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: AppColors.red,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
+        ErrorHandler.handleError(
+          context,
+          context.read<NoteProvider>().error ?? 'OCR failed',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: AppColors.red,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        );
+        ErrorHandler.handleError(context, e, customMessage: 'Error: $e');
       }
     }
   }
 
   /// Voice Quick Capture: Record → Stop → Course Selection → Save
   Future<void> _quickCaptureVoice(BuildContext context) async {
+    final consent = await ConsentUtils.showContentCaptureConsentDialog(context, isAudio: true);
+    if (consent != true || !mounted) return;
+
     final noteProvider = context.read<NoteProvider>();
 
     // Start recording
     final success = await noteProvider.startRecording();
     if (!success) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Microphone permission required'),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: AppColors.red,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        );
+        ErrorHandler.handleError(context, 'Microphone permission required');
       }
       return;
     }
@@ -466,7 +521,9 @@ class _HomeScreenState extends State<HomeScreen> {
           SnackBar(
             content: const Text('🎙️ Voice memo saved!'),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }
@@ -478,13 +535,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Course selection dialog — returns courseId or null if cancelled
   Future<String?> _showCourseSelectionDialog(BuildContext context) async {
-    final courses = context.read<CourseProvider>().courses;
+    final courses = context.read<CourseProvider>().uniqueCourses;
     if (courses.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('No courses available. Add a course first!'),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
       return null;
@@ -507,7 +566,8 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Center(
                 child: Container(
-                  width: 40, height: 4,
+                  width: 40,
+                  height: 4,
                   decoration: BoxDecoration(
                     color: Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(2),
@@ -520,7 +580,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                  color: isDark
+                      ? AppColors.textPrimaryDark
+                      : AppColors.textPrimaryLight,
                 ),
               ),
               const SizedBox(height: 4),
@@ -528,7 +590,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 'Choose where to save this note',
                 style: TextStyle(
                   fontSize: 14,
-                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : AppColors.textSecondaryLight,
                 ),
               ),
               const SizedBox(height: 16),
@@ -544,26 +608,37 @@ class _HomeScreenState extends State<HomeScreen> {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       decoration: BoxDecoration(
-                        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade50,
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.05)
+                            : Colors.grey.shade50,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade200,
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.1)
+                              : Colors.grey.shade200,
                         ),
                       ),
                       child: ListTile(
                         leading: Container(
-                          width: 40, height: 40,
+                          width: 40,
+                          height: 40,
                           decoration: BoxDecoration(
                             color: course.color.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Icon(Icons.school, color: course.color, size: 20),
+                          child: Icon(
+                            Icons.school,
+                            color: course.color,
+                            size: 20,
+                          ),
                         ),
                         title: Text(
                           course.name,
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                            color: isDark
+                                ? AppColors.textPrimaryDark
+                                : AppColors.textPrimaryLight,
                           ),
                         ),
                         subtitle: course.professor != null
@@ -571,14 +646,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                 course.professor!,
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                                  color: isDark
+                                      ? AppColors.textSecondaryDark
+                                      : AppColors.textSecondaryLight,
                                 ),
                               )
                             : null,
-                        trailing: Icon(Icons.chevron_right,
-                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+                        trailing: Icon(
+                          Icons.chevron_right,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight,
+                        ),
                         onTap: () => Navigator.pop(ctx, course.id),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     );
                   },
@@ -592,7 +675,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
 
 /// Ana sayfa içeriği
 class _HomeContent extends StatelessWidget {
@@ -622,21 +704,15 @@ class _HomeContent extends StatelessWidget {
       child: CustomScrollView(
         slivers: [
           // Header
-          const SliverToBoxAdapter(
-            child: HomeHeader(),
-          ),
+          const SliverToBoxAdapter(child: HomeHeader()),
 
           // Arama çubuğu
-          const SliverToBoxAdapter(
-            child: HomeSearchBar(),
-          ),
-          
+          const SliverToBoxAdapter(child: HomeSearchBar()),
+
           // Stats Summary (New)
           const SliverPadding(
             padding: EdgeInsets.symmetric(horizontal: 24),
-            sliver: SliverToBoxAdapter(
-              child: HomeStatsSummary(),
-            ),
+            sliver: SliverToBoxAdapter(child: HomeStatsSummary()),
           ),
 
           // Today's Schedule
@@ -648,7 +724,9 @@ class _HomeContent extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                  color: isDark
+                      ? AppColors.textPrimaryDark
+                      : AppColors.textPrimaryLight,
                 ),
               ),
             ),
@@ -660,28 +738,15 @@ class _HomeContent extends StatelessWidget {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                     Text(
-                        AppLocalizations.of(context)!.priorityFocus,
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-                        ),
-                     ),
-                  TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      AppLocalizations.of(context)!.viewAll,
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
+              child: Text(
+                AppLocalizations.of(context)!.priorityFocus,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: isDark
+                      ? AppColors.textPrimaryDark
+                      : AppColors.textPrimaryLight,
+                ),
               ),
             ),
           ),
@@ -698,7 +763,9 @@ class _HomeContent extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                  color: isDark
+                      ? AppColors.textPrimaryDark
+                      : AppColors.textPrimaryLight,
                 ),
               ),
             ),
@@ -723,7 +790,9 @@ class _HomeContent extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                  color: isDark
+                      ? AppColors.textPrimaryDark
+                      : AppColors.textPrimaryLight,
                 ),
               ),
             ),
@@ -744,7 +813,9 @@ class _HomeContent extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const StudyTimerScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const StudyTimerScreen(),
+                          ),
                         );
                       },
                     ),
@@ -760,7 +831,9 @@ class _HomeContent extends StatelessWidget {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const GPACalculatorScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const GPACalculatorScreen(),
+                          ),
                         );
                       },
                     ),
@@ -769,7 +842,7 @@ class _HomeContent extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Attendance Overview
           SliverToBoxAdapter(
             child: Padding(
@@ -779,12 +852,14 @@ class _HomeContent extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                  color: isDark
+                      ? AppColors.textPrimaryDark
+                      : AppColors.textPrimaryLight,
                 ),
               ),
             ),
           ),
-          
+
           const AttendanceOverviewList(),
 
           // Recent Notes
@@ -793,10 +868,7 @@ class _HomeContent extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(24, 32, 24, 12),
               child: Text(
                 AppLocalizations.of(context)!.recentNotes,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
               ),
             ),
           ),

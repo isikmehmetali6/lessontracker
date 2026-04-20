@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'core/theme/app_theme.dart';
 import 'providers/theme_provider.dart';
@@ -17,16 +18,47 @@ import 'core/services/notification_service.dart';
 import 'core/services/auto_sync_service.dart';
 import 'core/services/app_lock_service.dart';
 import 'core/services/weekly_report_service.dart';
+import 'providers/planner_event_provider.dart';
+import 'providers/moodle_provider.dart';
+import 'core/services/attendance_automation_service.dart';
+import 'core/services/moodle_background_service.dart';
+import 'package:workmanager/workmanager.dart';
 
 import 'screens/home/home_screen.dart';
 import 'screens/auth/login_screen.dart';
+import 'screens/auth/email_verification_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
-
+import 'screens/onboarding/kvkk_flow.dart';
 import 'firebase_options.dart';
+
+@pragma('vm:entry-point')
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    if (task == 'attendance_check_task') {
+      try {
+        final service = AttendanceAutomationService();
+        await service.executeBackgroundCheck();
+      } catch (e) {
+        debugPrint('Workmanager error: $e');
+      }
+    } else if (task == 'moodle_sync_task') {
+      try {
+        final service = MoodleBackgroundService();
+        await service.executeBackgroundSync();
+      } catch (e) {
+        debugPrint('Moodle Workmanager error: $e');
+      }
+    }
+    return Future.value(true);
+  });
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+  // Load Env
+  await dotenv.load(fileName: ".env");
+
   // Status bar
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -42,29 +74,31 @@ Future<void> main() async {
 
   // Init Services
   await NotificationService().init();
-  
-  // Initialize Firebase
+
+  // Init Workmanager for Background Tasks
+  Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
+
+  // Initialize Firebase — must succeed before sync/auth services
+  bool firebaseReady = false;
   try {
-     await Firebase.initializeApp(
-       options: DefaultFirebaseOptions.currentPlatform,
-     );
-     
-     
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    firebaseReady = true;
   } catch (e) {
     debugPrint('Firebase Init Warning: $e');
   }
 
-  // Start AutoSync
-  AutoSyncService().startAutoSync();
+  // Firebase initialized — start connectivity listener for auto-sync retry
+  if (firebaseReady) {
+    AutoSyncService().init();
+  }
 
-  // Schedule weekly study report (every Sunday 20:00)
   NotificationService().scheduleWeeklyReport();
 
-  // Pazar günü ise detaylı rapor gönder (devamsızlık + çalışma süresi)
   if (DateTime.now().weekday == DateTime.sunday) {
     WeeklyReportService().checkAndSendReport();
   }
-
 
   runApp(
     MultiProvider(
@@ -76,6 +110,10 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => LanguageProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => SyncProvider()),
+        ChangeNotifierProvider(
+          create: (_) => PlannerEventProvider()..loadEvents(),
+        ),
+        ChangeNotifierProvider(create: (_) => MoodleProvider()..initialize()),
       ],
       child: const LessonTrackerApp(),
     ),
@@ -92,12 +130,12 @@ class LessonTrackerApp extends StatelessWidget {
         return MaterialApp(
           title: 'Lesson Tracker',
           debugShowCheckedModeBanner: false,
-          
+
           // Theme
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: themeProvider.themeMode,
-          
+
           // Localization
           locale: languageProvider.locale, // Using provider's locale
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -105,7 +143,7 @@ class LessonTrackerApp extends StatelessWidget {
 
           // Home Wrapper
           home: const AuthWrapper(),
-          
+
           // Builder for global accessibilities etc
           builder: (context, child) {
             return MediaQuery(
@@ -133,31 +171,43 @@ class AuthWrapper extends StatefulWidget {
 class _AuthWrapperState extends State<AuthWrapper> {
   bool _callbacksRegistered = false;
   bool _showOnboarding = false;
+  bool _showKvkk = false;
   bool _isLocked = false;
-  bool _onboardingChecked = false;
+  bool _initChecked = false;
 
   @override
   void initState() {
     super.initState();
-    _checkOnboarding();
-    _checkAppLock();
+    _initChecks();
   }
 
-  Future<void> _checkOnboarding() async {
+  Future<void> _initChecks() async {
     final prefs = await SharedPreferences.getInstance();
-    final done = prefs.getBool('onboarding_complete') ?? false;
+    final onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
+    final isLocked = await AppLockService.isLockEnabled();
+    if (mounted) {
+      await context.read<AuthProvider>().ensureGuestRestored();
+    }
     if (mounted) {
       setState(() {
-        _showOnboarding = !done;
-        _onboardingChecked = true;
+        _showOnboarding = !onboardingComplete;
+        _isLocked = isLocked;
+        _initChecked = true;
       });
     }
   }
 
-  Future<void> _checkAppLock() async {
-    final enabled = await AppLockService.isLockEnabled();
-    if (enabled && mounted) {
-      setState(() => _isLocked = true);
+  Future<void> _checkKvkkConsent() async {
+    if (_showOnboarding || _isLocked) return;
+
+    final user = context.read<AuthProvider>().user;
+    if (user == null) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final kvkkConsent = prefs.getInt('kvkk_consent_timestamp');
+
+    if (kvkkConsent == null && mounted) {
+      setState(() => _showKvkk = true);
     }
   }
 
@@ -171,11 +221,21 @@ class _AuthWrapperState extends State<AuthWrapper> {
       final noteProvider = context.read<NoteProvider>();
       final deadlineProvider = context.read<DeadlineProvider>();
 
-      authProvider.onSignOutCallbacks = [
-        () async => courseProvider.clear(),
-        () async => noteProvider.clear(),
-        () async => deadlineProvider.clear(),
-      ];
+      authProvider.addSignOutCallback(() async => courseProvider.clear());
+      authProvider.addSignOutCallback(() async => noteProvider.clear());
+      authProvider.addSignOutCallback(() async => deadlineProvider.clear());
+      authProvider.addSignOutCallback(
+        () async => context.read<MoodleProvider>().clearAll(),
+      );
+
+      if (authProvider.isAuthenticated) {
+        _checkKvkkConsent();
+      }
+    } else if (_initChecked && !_showOnboarding && !_isLocked) {
+      final auth = context.watch<AuthProvider>();
+      if (auth.isAuthenticated && !_showKvkk) {
+        _checkKvkkConsent();
+      }
     }
   }
 
@@ -183,18 +243,19 @@ class _AuthWrapperState extends State<AuthWrapper> {
   Widget build(BuildContext context) {
     // App Lock
     if (_isLocked) {
-      return AppLockScreen(
-        onUnlocked: () => setState(() => _isLocked = false),
-      );
+      return AppLockScreen(onUnlocked: () => setState(() => _isLocked = false));
     }
 
     // Onboarding
-    if (!_onboardingChecked) {
+    if (!_initChecked) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     if (_showOnboarding) {
       return OnboardingScreen(
-        onComplete: () => setState(() => _showOnboarding = false),
+        onComplete: () {
+          setState(() => _showOnboarding = false);
+          _checkKvkkConsent();
+        },
       );
     }
 
@@ -202,6 +263,14 @@ class _AuthWrapperState extends State<AuthWrapper> {
     return Consumer<AuthProvider>(
       builder: (context, auth, _) {
         if (auth.isAuthenticated) {
+          if (!auth.isEmailVerified) {
+            return const EmailVerificationScreen();
+          }
+          if (_showKvkk) {
+            return KvkkOnboardingFlow(
+              onComplete: () => setState(() => _showKvkk = false),
+            );
+          }
           return const HomeScreen();
         } else {
           return const LoginScreen();

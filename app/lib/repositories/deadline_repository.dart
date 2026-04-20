@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import '../core/database/database_helper.dart';
+import '../core/services/auto_sync_service.dart';
 import '../models/deadline.dart';
 
 class DeadlineRepository {
@@ -19,7 +21,8 @@ class DeadlineRepository {
   /// Tüm deadline'ları getir
   Future<List<Deadline>> getAllDeadlines() async {
     if (_dbHelper.isWeb) {
-      return List.from(_deadlinesInMemory)..sort((a, b) => a.date.compareTo(b.date));
+      return List.from(_deadlinesInMemory)
+        ..sort((a, b) => a.date.compareTo(b.date));
     }
     final db = await _dbHelper.database;
     final maps = await db.query('deadlines', orderBy: 'date ASC');
@@ -29,9 +32,7 @@ class DeadlineRepository {
   /// Derse göre deadline'ları getir
   Future<List<Deadline>> getDeadlinesByCourse(String courseId) async {
     if (_dbHelper.isWeb) {
-      return _deadlinesInMemory
-          .where((d) => d.courseId == courseId)
-          .toList()
+      return _deadlinesInMemory.where((d) => d.courseId == courseId).toList()
         ..sort((a, b) => a.date.compareTo(b.date));
     }
     final db = await _dbHelper.database;
@@ -43,7 +44,7 @@ class DeadlineRepository {
     );
     return maps.map((map) => Deadline.fromMap(map)).toList();
   }
-  
+
   /// Deadline ekle
   Future<void> insertDeadline(Deadline deadline) async {
     if (_dbHelper.isWeb) {
@@ -57,8 +58,9 @@ class DeadlineRepository {
       deadline.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    AutoSyncService().triggerBackup();
   }
-  
+
   /// Deadline sil
   Future<void> deleteDeadline(String id) async {
     if (_dbHelper.isWeb) {
@@ -66,11 +68,50 @@ class DeadlineRepository {
       return;
     }
     final db = await _dbHelper.database;
-    await db.delete(
+    await db.delete('deadlines', where: 'id = ?', whereArgs: [id]);
+    AutoSyncService().triggerBackup();
+  }
+
+  /// Deadline güncelle
+  Future<void> updateDeadline(Deadline deadline) async {
+    if (_dbHelper.isWeb) {
+      final index = _deadlinesInMemory.indexWhere((d) => d.id == deadline.id);
+      if (index != -1) {
+        _deadlinesInMemory[index] = deadline;
+      }
+      return;
+    }
+    final db = await _dbHelper.database;
+    await db.update(
+      'deadlines',
+      deadline.toMap(),
+      where: 'id = ?',
+      whereArgs: [deadline.id],
+    );
+    AutoSyncService().triggerBackup();
+  }
+
+  /// Deadline getir
+  Future<Deadline?> getDeadlineById(String id) async {
+    if (_dbHelper.isWeb) {
+      try {
+        return _deadlinesInMemory.firstWhere((d) => d.id == id);
+      } catch (e, stackTrace) {
+        debugPrint(
+          'Error finding deadline $id in memory: $e\nStack: $stackTrace',
+        );
+        return null;
+      }
+    }
+    final db = await _dbHelper.database;
+    final maps = await db.query(
       'deadlines',
       where: 'id = ?',
       whereArgs: [id],
+      limit: 1,
     );
+    if (maps.isEmpty) return null;
+    return Deadline.fromMap(maps.first);
   }
 
   Future<int> getCount() async {

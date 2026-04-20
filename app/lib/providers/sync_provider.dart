@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../core/services/sync_service.dart';
 import 'course_provider.dart';
 import 'note_provider.dart';
@@ -33,12 +32,11 @@ class SyncProvider extends ChangeNotifier {
     };
   }
 
-  /// Belirli bir BuildContext üzerinden provider'ları kaydet (kolay kullanım).
-  void registerProviders(BuildContext context) {
+  void registerProviders(CourseProvider courseProvider, NoteProvider noteProvider, DeadlineProvider deadlineProvider) {
     reloadCallbacks = [
-      () => context.read<CourseProvider>().loadCourses(),
-      () => context.read<NoteProvider>().loadNotes(),
-      () => context.read<DeadlineProvider>().loadDeadlines(),
+      () => courseProvider.loadCourses(),
+      () => noteProvider.loadNotes(),
+      () => deadlineProvider.loadDeadlines(),
     ];
   }
 

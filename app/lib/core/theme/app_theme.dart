@@ -19,7 +19,7 @@ class AppTheme {
         secondary: AppColors.primaryDark,
         surface: AppColors.surfaceLight,
         error: AppColors.red,
-        onPrimary: AppColors.textPrimaryLight,
+        onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: AppColors.textPrimaryLight,
         onError: Colors.white,
@@ -61,7 +61,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.textPrimaryLight,
+          foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
@@ -113,7 +113,7 @@ class AppTheme {
       // Floating Action Button
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textPrimaryLight,
+        foregroundColor: Colors.white,
         elevation: 4,
         shape: CircleBorder(),
       ),
@@ -145,7 +145,7 @@ class AppTheme {
         secondary: AppColors.primaryDark,
         surface: AppColors.surfaceDark,
         error: AppColors.red,
-        onPrimary: AppColors.textPrimaryLight,
+        onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: AppColors.textPrimaryDark,
         onError: Colors.white,
@@ -187,7 +187,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.textPrimaryLight,
+          foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
@@ -239,7 +239,7 @@ class AppTheme {
       // Floating Action Button
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textPrimaryLight,
+        foregroundColor: Colors.white,
         elevation: 4,
         shape: CircleBorder(),
       ),

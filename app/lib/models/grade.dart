@@ -31,13 +31,13 @@ class Grade {
 
   factory Grade.fromMap(Map<String, dynamic> map) {
     return Grade(
-      id: map['id'],
-      courseId: map['courseId'],
-      name: map['name'],
-      score: map['score']?.toDouble() ?? 0.0,
-      maxScore: map['maxScore']?.toDouble() ?? 100.0,
-      weight: map['weight']?.toDouble() ?? 0.0,
-      createdAt: DateTime.parse(map['createdAt']),
+      id: map['id'] as String,
+      courseId: map['courseId'] as String,
+      name: map['name'] as String,
+      score: (map['score'] as num?)?.toDouble() ?? 0.0,
+      maxScore: (map['maxScore'] as num?)?.toDouble() ?? 100.0,
+      weight: (map['weight'] as num?)?.toDouble() ?? 0.0,
+      createdAt: DateTime.parse(map['createdAt'] as String),
     );
   }
 
@@ -60,4 +60,11 @@ class Grade {
       createdAt: createdAt ?? this.createdAt,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is Grade && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

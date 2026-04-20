@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'secure_storage_service.dart';
 
 /// Biyometrik kilit servisi (Face ID / Touch ID / PIN)
 class AppLockService {
@@ -13,7 +13,10 @@ class AppLockService {
       final canAuth = await _auth.canCheckBiometrics;
       final isDeviceSupported = await _auth.isDeviceSupported();
       return canAuth || isDeviceSupported;
-    } catch (_) {
+    } catch (e, stackTrace) {
+      debugPrint(
+        'Error checking biometric availability: $e\nStack: $stackTrace',
+      );
       return false;
     }
   }
@@ -22,13 +25,16 @@ class AppLockService {
   static Future<List<BiometricType>> getAvailableBiometrics() async {
     try {
       return await _auth.getAvailableBiometrics();
-    } catch (_) {
+    } catch (e, stackTrace) {
+      debugPrint('Error getting available biometrics: $e\nStack: $stackTrace');
       return [];
     }
   }
 
   /// Kimlik doğrulama yap
-  static Future<bool> authenticate({String reason = 'Authenticate to access the app'}) async {
+  static Future<bool> authenticate({
+    String reason = 'Authenticate to access the app',
+  }) async {
     try {
       return await _auth.authenticate(
         localizedReason: reason,
@@ -37,29 +43,61 @@ class AppLockService {
           biometricOnly: false, // PIN/pattern de kabul et
         ),
       );
-    } catch (_) {
+    } catch (e, stackTrace) {
+      debugPrint('Error authenticating: $e\nStack: $stackTrace');
       return false;
     }
   }
 
-  /// Kilit etkin mi?
   static Future<bool> isLockEnabled() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_lockEnabledKey) ?? false;
+    return await SecureStorageService.getBool(
+      _lockEnabledKey,
+      defaultValue: false,
+    );
   }
 
   /// Kilidi aç/kapat
   static Future<void> setLockEnabled(bool enabled) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_lockEnabledKey, enabled);
+    await SecureStorageService.setBool(_lockEnabledKey, enabled);
   }
 }
 
 /// Kilit ekranı — uygulama açıldığında gösterilir
-class AppLockScreen extends StatelessWidget {
+class AppLockScreen extends StatefulWidget {
   final VoidCallback onUnlocked;
 
   const AppLockScreen({super.key, required this.onUnlocked});
+
+  @override
+  State<AppLockScreen> createState() => _AppLockScreenState();
+}
+
+class _AppLockScreenState extends State<AppLockScreen> {
+  bool _isAuthenticating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _tryAuthenticate());
+  }
+
+  Future<void> _tryAuthenticate() async {
+    if (_isAuthenticating) return;
+    setState(() => _isAuthenticating = true);
+    try {
+      final available = await AppLockService.isBiometricAvailable();
+      if (!available) {
+        widget.onUnlocked();
+        return;
+      }
+      final success = await AppLockService.authenticate();
+      if (success) {
+        widget.onUnlocked();
+      }
+    } finally {
+      if (mounted) setState(() => _isAuthenticating = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,17 +131,20 @@ class AppLockScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 40),
-            FilledButton.icon(
-              onPressed: () async {
-                final success = await AppLockService.authenticate();
-                if (success) onUnlocked();
-              },
-              icon: const Icon(Icons.fingerprint),
-              label: const Text('Unlock'),
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            if (_isAuthenticating)
+              const CircularProgressIndicator()
+            else
+              FilledButton.icon(
+                onPressed: _tryAuthenticate,
+                icon: const Icon(Icons.fingerprint),
+                label: const Text('Unlock'),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                ),
               ),
-            ),
           ],
         ),
       ),

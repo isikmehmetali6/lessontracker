@@ -1,0 +1,486 @@
+# Moodle LMS Entegrasyonu — İmplementasyon Planı
+
+Öğrencilerin birden fazla üniversitenin Moodle hesabını LessonTracker'a bağlayarak derslerini, ödevlerini, notlarını, duyurularını ve takvim etkinliklerini tek bir yerden takip edebilmesini sağlayacak tam kapsamlı bir entegrasyon.
+
+## ⚠️ User Review Required
+
+> [!IMPORTANT]
+> **Geri alma stratejisi**: Moodle entegrasyonu tamamen **kendi katmanında** geliştirilecek. Mevcut `courses`, `grades`, `notes` tablolarına ve mevcut provider'lara **dokunulmayacak**. Yeni `moodle_*` tabloları ve `MoodleProvider` izole olacak. Hata durumunda tek yapılacak şey: yeni tabloları drop etmek ve yeni dosyaları silmek — rollback 100% güvenli.
+
+> [!WARNING]
+> **Şifre güvenliği**: Kullanıcı şifreleri **hiçbir zaman** uygulamada saklanmaz. Yalnızca Moodle token'ı `flutter_secure_storage` ile şifrelenmiş olarak cihazda tutulur. Token asla sunucumuza gönderilmez.
+
+> [!NOTE]
+> **API kısıtı**: Bazı üniversiteler Moodle Web Services'i kapatmış olabilir. Bağlantı başarısız olursa kullanıcıya anlaşılır bir hata mesajı gösterilir. Moodle API gelen veriyi standartlaştırdığı için tek bir servis tüm üniversiteleri destekler — sadece `baseUrl` değişir.
+
+---
+
+## Rollback Stratejisi
+
+Her aşama bitmeden bir sonrakine geçilmez. Yeni dosyaların listesi tutulur.  
+**Acil rollback**: Yeni dosyaları silmek + DB migration'ı revert etmek (`version: 13`'e dönmek) yeterlidir. Mevcut hiçbir veri etkilenmez.
+
+```
+moodle/ klasörü tamamen izole → git branch "feature/moodle-integration" → her commit bir phase
+```
+
+---
+
+## Önerilen Değişiklikler
+
+### 1 — Data Layer (Modeller)
+
+#### [NEW] `lib/models/moodle/moodle_account.dart`
+Kullanıcının bağladığı her Moodle hesabını temsil eder.
+
+```dart
+@freezed
+class MoodleAccount {
+  String id;          // UUID
+  String baseUrl;     // https://moodle.itu.edu.tr
+  String siteTitle;   // "İTÜ Ninova"
+  String username;    // Görüntüleme amaçlı
+  String fullName;    // Moodle'dan alınan gerçek ad
+  String? avatarUrl;  // Profil fotoğrafı URL
+  DateTime lastSynced;
+  bool isActive;
+}
+```
+
+#### [NEW] `lib/models/moodle/moodle_course.dart`
+```dart
+@freezed
+class MoodleCourse {
+  int    id;           // Moodle internal ID
+  String accountId;   // hangi hesaba ait
+  String shortName;   // "MAT201"
+  String fullName;    // "Matematik II"
+  String? summary;
+  String? categoryName;
+  DateTime? startDate;
+  DateTime? endDate;
+  bool   isFavorite;
+  String? courseImageUrl;
+  int    progress; // 0-100
+}
+```
+
+#### [NEW] `lib/models/moodle/moodle_assignment.dart`
+```dart
+@freezed
+class MoodleAssignment {
+  int      id;
+  String   accountId;
+  int      courseId;
+  String   courseName;
+  String   name;
+  String?  description;
+  DateTime dueDate;
+  bool     submitted;
+  double?  grade;
+  double?  maxGrade;
+}
+```
+
+#### [NEW] `lib/models/moodle/moodle_grade.dart`
+```dart
+@freezed
+class MoodleGrade {
+  String  accountId;
+  int     courseId;
+  String  courseName;
+  String  itemName;    // "Vize 1"
+  double? gradeValue;
+  double  gradeMax;
+  double  percentage;  // Hesaplanmış %
+  String? letterGrade;
+}
+```
+
+#### [NEW] `lib/models/moodle/moodle_announcement.dart`
+```dart
+@freezed
+class MoodleAnnouncement {
+  int      id;
+  String   accountId;
+  int      courseId;
+  String   courseName;
+  String   subject;
+  String   message;
+  String   authorName;
+  DateTime created;
+  bool     isRead;
+}
+```
+
+#### [NEW] `lib/models/moodle/moodle_calendar_event.dart`
+```dart
+@freezed
+class MoodleCalendarEvent {
+  int      id;
+  String   accountId;
+  String   name;
+  String?  description;
+  DateTime timeStart;
+  int      durationSeconds;
+  String   eventType;   // 'course' | 'user' | 'site'
+  int?     courseId;
+  String?  courseName;
+}
+```
+
+---
+
+### 2 — Database (SQLite Migration v14)
+
+#### [MODIFY] [database_helper.dart](file:///Users/mehmetaliisik/Desktop/lessontracker/app/lib/core/database/database_helper.dart)
+
+`version: 13` → `version: 14` olarak arttırılır. [_onCreate](file:///Users/mehmetaliisik/Desktop/lessontracker/app/lib/core/database/database_helper.dart#60-221) ve [_onUpgrade](file:///Users/mehmetaliisik/Desktop/lessontracker/app/lib/core/database/database_helper.dart#222-424) (if oldVersion < 14) bloğuna 2 yeni tablo eklenir:
+
+```sql
+-- Moodle hesap bilgileri (token hariç — token SecureStorage'da)
+CREATE TABLE moodle_accounts (
+  id          TEXT PRIMARY KEY,
+  baseUrl     TEXT NOT NULL,
+  siteTitle   TEXT NOT NULL,
+  username    TEXT NOT NULL,
+  fullName    TEXT NOT NULL,
+  avatarUrl   TEXT,
+  lastSynced  TEXT NOT NULL,
+  isActive    INTEGER DEFAULT 1
+);
+
+-- Moodle önbelleği (JSON olarak ham API yanıtları)
+CREATE TABLE moodle_cache (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  accountId   TEXT NOT NULL,
+  dataType    TEXT NOT NULL,   -- 'courses' | 'assignments' | 'grades' | 'announcements' | 'events'
+  payload     TEXT NOT NULL,   -- JSON
+  cachedAt    TEXT NOT NULL,
+  FOREIGN KEY (accountId) REFERENCES moodle_accounts(id) ON DELETE CASCADE
+);
+CREATE INDEX idx_moodle_cache_account ON moodle_cache (accountId, dataType);
+```
+
+> **Rollback**: DB version'ı 13'e döndür ve iki yeni tabloyu drop et — başka hiçbir şey değişmez.
+
+---
+
+### 3 — Token Güvenliği
+
+#### [NEW] `lib/services/moodle/moodle_token_storage.dart`
+
+`flutter_secure_storage` wrapper'ı. Mevcut pubspec'te zaten var: `flutter_secure_storage: ^10.0.0`.
+
+```dart
+class MoodleTokenStorage {
+  Future<void> saveToken(String accountId, String token);
+  Future<String?> getToken(String accountId);
+  Future<void> deleteToken(String accountId);
+  Future<void> deleteAllTokens();
+}
+```
+
+---
+
+### 4 — API Service Layer
+
+#### [NEW] `lib/services/moodle/moodle_api_service.dart`
+
+Tüm Moodle REST API çağrılarını yapan servis. Mevcut `http: ^1.6.0` paketi kullanılır.
+
+**Temel method'lar:**
+
+| Method | Moodle Function | Açıklama |
+|---|---|---|
+| `login()` | `core_webservice_get_token` | User/pass → token |
+| `getSiteInfo()` | `core_webservice_get_site_info` | Site adı, kullanıcı profili |
+| `getEnrolledCourses()` | `core_enrol_get_users_courses` | Kayıtlı dersler |
+| `getAssignments()` | `mod_assign_get_assignments` | Tüm ödevler |
+| `getGrades()` | `gradereport_overview_get_course_grades` | Ders notları |
+| `getForumDiscussions()` | `mod_forum_get_forum_discussions` | Duyurular |
+| `getCalendarEvents()` | `core_calendar_get_calendar_events` | Takvim etkinlikleri |
+| `getAssignmentStatus()` | `mod_assign_get_submission_status` | Ödev teslim durumu |
+
+**Hata yönetimi:**
+- Network timeout → `MoodleNetworkException`  
+- Invalid token → `MoodleAuthException` (→ hesabı "disconnected" yap)  
+- API disabled → `MoodleServiceException`
+
+#### [NEW] `lib/services/moodle/moodle_sync_service.dart`
+
+Tüm API çağrılarını paralel olarak orchestrate eder, sonuçları cache'e yazar.
+
+```dart
+Future<MoodleSyncResult> syncAccount(MoodleAccount account);
+```
+
+Tek `syncAccount` çağrısı: courses, assignments, grades, announcements, events'i **paralel** `Future.wait` ile çeker. Sonuçlar cache'e yazılır, provider bilgilendirilir.
+
+---
+
+### 5 — Repository Layer
+
+#### [NEW] `lib/repositories/moodle_account_repository.dart`
+`moodle_accounts` tablosu üzerinde CRUD.
+
+#### [NEW] `lib/repositories/moodle_cache_repository.dart`
+Cache okuma/yazma, TTL kontrolü (varsayılan: 30 dakika).
+
+---
+
+### 6 — State Management
+
+#### [NEW] `lib/providers/moodle_provider.dart`
+
+```dart
+class MoodleProvider extends ChangeNotifier {
+  List<MoodleAccount> accounts;
+  Map<String, MoodleSyncStatus> syncStatuses; // per account
+  List<MoodleCourse> get allCourses;          // aggregated
+  List<MoodleAssignment> get upcomingAssignments; // sorted by due date
+  List<MoodleCalendarEvent> get todayEvents;
+  List<MoodleAnnouncement> get unreadAnnouncements;
+  
+  Future<bool> addAccount(String baseUrl, String username, String password);
+  Future<void> removeAccount(String accountId);
+  Future<void> syncAll();
+  Future<void> syncAccount(String accountId);
+  int get unreadCount;
+}
+```
+
+#### [MODIFY] [lib/main.dart](file:///Users/mehmetaliisik/Desktop/lessontracker/app/lib/main.dart)
+`MoodleProvider` MultiProvider listesine eklenir.
+
+---
+
+### 7 — UI Katmanı
+
+#### [NEW] `lib/screens/moodle/moodle_hub_screen.dart`
+
+Bottom nav'a **5. sekme** olarak eklenir (Moodle ikonu). İçinde `DefaultTabController` ile 5 alt sekme:
+
+```
+┌─────────────────────────────────────────────────────┐
+│  🎓 Moodle                    [Sync All] [+ Hesap] │
+├─────────────┬──────────┬──────┬───────────┬─────────┤
+│  Dersler    │  Ödevler │Notlar│  Duyurular│Takvim   │
+└─────────────┴──────────┴──────┴───────────┴─────────┘
+```
+
+**Header'da hesap seçici** — birden fazla hesap varsa `DropdownButton` veya `CupertinoSlidingSegmentedControl` ile hangi hesabın gösterildiği seçilir (veya "Tümü").
+
+---
+
+#### [NEW] `lib/screens/moodle/widgets/add_moodle_account_sheet.dart`
+
+Modal bottom sheet:
+
+**Adım 1 — Üniversite Seç:**
+```
+🔍 [Üniversitenizi arayın...]
+
+Popüler:
+🏛 İTÜ Ninova          → ninova.itu.edu.tr
+🏛 ODTÜ Class          → odtuclass.metu.edu.tr  
+🏛 Boğaziçi Moodle     → moodle.boun.edu.tr
+🏛 Hacettepe Moodle    → moodle.hacettepe.edu.tr
+🏛 Ankara Üniversitesi → moodle.ankara.edu.tr
+🏛 YTÜ Moodle          → moodle.yildiz.edu.tr
+🏛 Gazi Üniversitesi   → moodle.gazi.edu.tr
+🏛 Ege Üniversitesi    → moodle.ege.edu.tr
+🏛 Çukurova Üniversitesi → moodle.cu.edu.tr
+🌐 Manuel URL Gir...
+```
+
+**Adım 2 — Giriş Bilgileri:**
+```
+[Kullanıcı Adı]
+[Şifre] (👁 göster/gizle)
+[Bağlan →]
+```
+
+**Adım 3 — Bağlantı Testi:**
+```
+⟳ Bağlanıyor...
+✓ Hoş geldin, Mehmet Ali Işık!
+  İTÜ Ninova — 6 ders bulundu
+[Tamamla]
+```
+
+---
+
+#### [NEW] `lib/screens/moodle/tabs/moodle_courses_tab.dart`
+
+- Akordeon liste: Hesap başlıkları altında ders kartları
+- Her kart: Ders adı, progress bar, kaç ödev bekliyor badge'i
+- Ders kartına tıklanınca Moodle ders detay ekranı (assignmentlar + notlar)
+
+#### [NEW] `lib/screens/moodle/tabs/moodle_assignments_tab.dart`
+
+- **Vadesi Geçmiş** / **Bu Hafta** / **Gelecek** grupları
+- Her ödev: Ders rengi (kurs bazlı otomatik renk), teslim saati countdown
+- Teslim durumu badge: ✅ Teslim Edildi / ⏰ Bekliyor / ❌ Geç
+
+#### [NEW] `lib/screens/moodle/tabs/moodle_grades_tab.dart`
+
+- `fl_chart` ile her ders için horizontal bar chart
+- Ağırlıklı ortalama hesabı
+
+#### [NEW] `lib/screens/moodle/tabs/moodle_announcements_tab.dart`
+
+- Okunmamış badge ile forum duyuruları
+- Tıklanınca Moodle URL'yi `url_launcher` ile açar
+
+#### [NEW] `lib/screens/moodle/tabs/moodle_calendar_tab.dart`
+
+- Mevcut `table_calendar` paketini kullanır
+- Moodle etkinlikleri + yerel planner etkinlikleri aynı takvimde birleştirilir
+
+---
+
+#### [MODIFY] Home Ekranı Widgets
+
+- **`home_header.dart`**: Okunmamış Moodle duyurusu varsa küçük bildirim balonu göster  
+- **`attendance_overview_list.dart`**: "Bugün Moodle'da son teslim: X ödev" satırı ekle  
+- Yeni `MoodleUpcomingWidget` → yaklaşan ödevler için home'da mini kart
+
+#### [MODIFY] Settings Ekranı
+
+- **Yeni "Moodle Hesapları" bölümü:**
+  - Bağlı hesapların listesi (avatar + site adı + son sync zamanı)
+  - Hesap başına: Yenile / Bağlantıyı Kes butonları
+  - "Tüm Moodle Verilerini Temizle" seçeneği
+
+---
+
+### 8 — Üniversite Listesi
+
+#### [NEW] `lib/core/constants/moodle_universities.dart`
+
+```dart
+const kTurkishUniversities = [
+  MoodleUniversity('İTÜ Ninova', 'https://ninova.itu.edu.tr'),
+  MoodleUniversity('ODTÜ Class', 'https://odtuclass.metu.edu.tr'),
+  MoodleUniversity('Boğaziçi Üniversitesi', 'https://moodle.boun.edu.tr'),
+  MoodleUniversity('Hacettepe Üniversitesi', 'https://moodle.hacettepe.edu.tr'),
+  MoodleUniversity('Ankara Üniversitesi', 'https://moodle.ankara.edu.tr'),
+  MoodleUniversity('Yıldız Teknik Üniversitesi', 'https://moodle.yildiz.edu.tr'),
+  MoodleUniversity('Gazi Üniversitesi', 'https://moodle.gazi.edu.tr'),
+  MoodleUniversity('Ege Üniversitesi', 'https://moodle.ege.edu.tr'),
+  MoodleUniversity('Çukurova Üniversitesi', 'https://moodle.cu.edu.tr'),
+  MoodleUniversity('İstanbul Üniversitesi', 'https://moodle.istanbul.edu.tr'),
+  // ... genişletilebilir
+];
+```
+
+---
+
+## Paket Değişiklikleri
+
+**Yeni paket gerekmiyor** — tüm bağımlılıklar mevcut [pubspec.yaml](file:///Users/mehmetaliisik/Desktop/lessontracker/app/pubspec.yaml)'da zaten mevcut:
+
+| Paket | Kullanım |
+|---|---|
+| `http: ^1.6.0` | Moodle REST API çağrıları |
+| `flutter_secure_storage: ^10.0.0` | Token şifreli saklama |
+| `sqflite: ^2.3.3+1` | Yeni moodle tabloları |
+| `shared_preferences` | Aktif hesap seçimi cache |
+| `flutter_typeahead: ^5.2.0` | Üniversite arama kutusu |
+| `table_calendar: ^3.2.0` | Moodle takvim sekmesi |
+| `fl_chart: ^1.1.1` | Notlar grafiği |
+| `cached_network_image: ^3.4.1` | Profil avatarı |
+| `url_launcher: ^6.3.1` | Duyuru / Ödev linklerini aç |
+
+---
+
+## Dosya Ağacı Özeti
+
+```
+lib/
+├── models/moodle/
+│   ├── moodle_account.dart          [NEW]
+│   ├── moodle_course.dart           [NEW]
+│   ├── moodle_assignment.dart       [NEW]
+│   ├── moodle_grade.dart            [NEW]
+│   ├── moodle_announcement.dart     [NEW]
+│   └── moodle_calendar_event.dart   [NEW]
+├── services/moodle/
+│   ├── moodle_api_service.dart      [NEW]
+│   ├── moodle_sync_service.dart     [NEW]
+│   └── moodle_token_storage.dart    [NEW]
+├── repositories/
+│   ├── moodle_account_repository.dart [NEW]
+│   └── moodle_cache_repository.dart   [NEW]
+├── providers/
+│   └── moodle_provider.dart         [NEW]
+├── core/
+│   ├── constants/moodle_universities.dart [NEW]
+│   └── database/database_helper.dart      [MODIFY — v14]
+├── screens/moodle/
+│   ├── moodle_hub_screen.dart       [NEW]
+│   ├── tabs/
+│   │   ├── moodle_courses_tab.dart      [NEW]
+│   │   ├── moodle_assignments_tab.dart  [NEW]
+│   │   ├── moodle_grades_tab.dart       [NEW]
+│   │   ├── moodle_announcements_tab.dart[NEW]
+│   │   └── moodle_calendar_tab.dart     [NEW]
+│   └── widgets/
+│       └── add_moodle_account_sheet.dart[NEW]
+└── main.dart                        [MODIFY — provider ekle]
+```
+
+**Mevcut dosyalara dokunulan minimal değişiklikler:**
+- [database_helper.dart](file:///Users/mehmetaliisik/Desktop/lessontracker/app/lib/core/database/database_helper.dart) — sadece version bump + 2 yeni tablo
+- [main.dart](file:///Users/mehmetaliisik/Desktop/lessontracker/app/lib/main.dart) — sadece `MoodleProvider` provider listesine eklenir
+- `home_header.dart` — isteğe bağlı duyuru badge'i
+- Settings ekranı — Moodle hesapları bölümü
+
+---
+
+## Verification Planı
+
+### Otomatik Testler
+
+#### Yeni Unit Testler
+
+**`test/services/moodle_api_service_test.dart`** — Mock HTTP ile:
+```bash
+cd /Users/mehmetaliisik/Desktop/lessontracker/app
+flutter test test/services/moodle_api_service_test.dart
+```
+Test senaryoları:
+- Başarılı login → token döner
+- Hatalı şifre → `MoodleAuthException` fırlatır
+- Network timeout → `MoodleNetworkException` fırlatır
+- `getEnrolledCourses()` → doğru model listesi döner
+
+**`test/providers/moodle_provider_test.dart`** — Mock servislerle:
+```bash
+flutter test test/providers/moodle_provider_test.dart
+```
+- `addAccount()` başarı senaryosu
+- `removeAccount()` → token silinir + DB temizlenir
+- Çoklu hesap aggregation
+
+#### Mevcut Testler (regresyon kontrolü)
+```bash
+cd /Users/mehmetaliisik/Desktop/lessontracker/app
+flutter test
+```
+Mevcut bütün testler başarılı olmaya devam etmeli (moodle izole olduğu için regresyon beklenmez).
+
+#### Build Kontrolü
+```bash
+flutter build ios --debug --no-codesign  # iOS build kırılmadı mı?
+flutter analyze                           # Dart analyzer hata yok mu?
+```
+
+### Manuel Doğrulama
+
+1. **Bağlantı testi**: Uygulamayı aç → Settings → Moodle Hesapları → "+ Hesap Ekle" → kendi üniversiteni seç → giriş yap → "6 ders bulundu" mesajını gör
+2. **Çoklu hesap**: 2. bir hesap daha ekle → Moodle Hub'da hesap switcher'ı görünüyor mu?
+3. **Ödevler sekmesi**: Vadesi geçmiş ödev varsa kırmızı badge ile görünüyor mu?
+4. **Uygulama çökmesi yok**: Hesabı sil → tüm veriler temizlendi mi, crash yok mu?
+5. **Mevcut özellikler etkilenmedi**: Ana ekran, dersler, notlar, çalışma zamanlayıcısı hâlâ normal çalışıyor mu?

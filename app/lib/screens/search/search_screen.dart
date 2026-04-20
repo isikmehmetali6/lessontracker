@@ -50,8 +50,9 @@ class _SearchScreenState extends State<SearchScreen> {
 
     setState(() => _isLoading = true);
 
+    final noteProvider = context.read<NoteProvider>();
     _debounce = Timer(const Duration(milliseconds: 500), () async {
-      final results = await context.read<NoteProvider>().searchNotes(query);
+      final results = await noteProvider.searchNotes(query);
       if (mounted) {
         setState(() {
           _results = results;

@@ -6,11 +6,13 @@ import '../../../../widgets/common/common_widgets.dart';
 class CourseDetailAppBar extends StatelessWidget {
   final Course course;
   final VoidCallback onOptionsTap;
+  final VoidCallback? onAddDeadlineTap;
 
   const CourseDetailAppBar({
     super.key,
     required this.course,
     required this.onOptionsTap,
+    this.onAddDeadlineTap,
   });
 
   @override
@@ -33,6 +35,8 @@ class CourseDetailAppBar extends StatelessWidget {
               child: Text(
                 course.name,
                 textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -42,6 +46,12 @@ class CourseDetailAppBar extends StatelessWidget {
               ),
             ),
           ),
+          if (onAddDeadlineTap != null)
+            CircleIconButton(
+              icon: Icons.event_available,
+              onTap: onAddDeadlineTap!,
+              showShadow: false,
+            ),
           CircleIconButton(
             icon: Icons.more_horiz,
             onTap: onOptionsTap,

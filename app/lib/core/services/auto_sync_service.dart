@@ -1,83 +1,152 @@
 import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:sqflite/sqflite.dart';
 import 'dart:async';
+import 'sync_service.dart';
 import '../database/database_helper.dart';
 
-/// Arka plan otomatik senkronizasyon servisi
-/// pending_changes tablosunu izler ve internet bağlantısı olduğunda Firebase'e senkronize eder
 class AutoSyncService {
   static final AutoSyncService _instance = AutoSyncService._internal();
   factory AutoSyncService() => _instance;
   AutoSyncService._internal();
 
-  Timer? _syncTimer;
-  StreamSubscription? _connectivitySubscription;
+  Timer? _debounceTimer;
   bool _isSyncing = false;
-  final DatabaseHelper _dbHelper = DatabaseHelper();
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
-  /// Otomatik sync'i başlat
-  void startAutoSync() {
-    // Her 5 dakikada bir kontrol et
-    _syncTimer?.cancel();
-    _syncTimer = Timer.periodic(const Duration(minutes: 5), (_) => _trySync());
-
-    // Connectivity değiştiğinde sync dene
+  void init() {
     _connectivitySubscription?.cancel();
-    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((results) {
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
+      results,
+    ) {
       final hasConnection = results.any((r) => r != ConnectivityResult.none);
       if (hasConnection) {
-        _trySync();
+        final pendingCount = _getPendingChangesCountSync();
+        if (pendingCount > 0) {
+          debugPrint(
+            'AutoSync: Internet restored, processing $pendingCount pending changes...',
+          );
+          _performBackup();
+        }
       }
     });
-
-    // İlk başlatmada bir kez dene
-    _trySync();
   }
 
-  /// Otomatik sync'i durdur
-  void stopAutoSync() {
-    _syncTimer?.cancel();
-    _syncTimer = null;
-    _connectivitySubscription?.cancel();
-    _connectivitySubscription = null;
+  void triggerBackup() {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(seconds: 2), _performBackup);
   }
 
-  /// Senkronizasyon dene
-  Future<void> _trySync() async {
+  Future<void> _performBackup() async {
     if (_isSyncing) return;
 
     try {
       _isSyncing = true;
 
-      // Bekleyen değişiklik var mı kontrol et
-      final pendingChanges = await _dbHelper.getPendingChanges();
-      if (pendingChanges.isEmpty) return;
+      if (FirebaseAuth.instance.currentUser == null) return;
 
-      // İnternet bağlantısı kontrol et
       final connectivityResult = await Connectivity().checkConnectivity();
-      final hasConnection = connectivityResult.any((r) => r != ConnectivityResult.none);
-      if (!hasConnection) return;
+      final hasConnection = connectivityResult.any(
+        (r) => r != ConnectivityResult.none,
+      );
+      if (!hasConnection) {
+        debugPrint(
+          'AutoSync: No internet connection, pending changes saved locally.',
+        );
+        return;
+      }
 
-      debugPrint('AutoSync: ${pendingChanges.length} pending changes found. Syncing...');
+      final pendingCount = await _getPendingChangesCount();
+      if (pendingCount > 0) {
+        debugPrint(
+          'AutoSync: Processing $pendingCount pending changes before backup...',
+        );
+        await _processPendingChanges();
+      }
 
-      // Senkronize edilmiş olarak işaretle
-      final ids = pendingChanges.map((c) => c['id'] as int).toList();
-      await _dbHelper.markChangesSynced(ids);
-
-      // Eski sync'lenmiş kayıtları temizle
-      await _dbHelper.clearSyncedChanges();
-
-      debugPrint('AutoSync: Sync complete. ${ids.length} changes synced.');
+      debugPrint('AutoSync: Triggering backup after data change...');
+      await SyncService().backupData();
+      await _clearPendingChanges();
+      debugPrint('AutoSync: Backup complete.');
     } catch (e) {
-      debugPrint('AutoSync: Error during sync: $e');
+      debugPrint('AutoSync: Error during backup: $e');
     } finally {
       _isSyncing = false;
     }
   }
 
-  /// Bekleyen değişiklik sayısı
-  Future<int> getPendingChangeCount() async {
-    final changes = await _dbHelper.getPendingChanges();
-    return changes.length;
+  Future<void> recordPendingChange(
+    String tableName,
+    String recordId,
+    String operation,
+  ) async {
+    try {
+      final db = await DatabaseHelper().database;
+      await db.insert('pending_changes', {
+        'tableName': tableName,
+        'recordId': recordId,
+        'operation': operation,
+        'timestamp': DateTime.now().toIso8601String(),
+        'synced': 0,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    } catch (e) {
+      debugPrint('AutoSync: Error recording pending change: $e');
+    }
+  }
+
+  Future<int> _getPendingChangesCount() async {
+    try {
+      final db = await DatabaseHelper().database;
+      final result = await db.rawQuery(
+        'SELECT COUNT(*) FROM pending_changes WHERE synced = 0',
+      );
+      return Sqflite.firstIntValue(result) ?? 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  int _getPendingChangesCountSync() {
+    return 0;
+  }
+
+  Future<void> _processPendingChanges() async {
+    try {
+      final db = await DatabaseHelper().database;
+      final pending = await db.query(
+        'pending_changes',
+        where: 'synced = ?',
+        whereArgs: [0],
+        orderBy: 'timestamp ASC',
+      );
+
+      for (final change in pending) {
+        await db.update(
+          'pending_changes',
+          {'synced': 1},
+          where: 'id = ?',
+          whereArgs: [change['id']],
+        );
+      }
+    } catch (e) {
+      debugPrint('AutoSync: Error processing pending changes: $e');
+    }
+  }
+
+  Future<void> _clearPendingChanges() async {
+    try {
+      final db = await DatabaseHelper().database;
+      await db.delete('pending_changes', where: 'synced = ?', whereArgs: [1]);
+    } catch (e) {
+      debugPrint('AutoSync: Error clearing pending changes: $e');
+    }
+  }
+
+  void dispose() {
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
+    _connectivitySubscription?.cancel();
+    _connectivitySubscription = null;
   }
 }

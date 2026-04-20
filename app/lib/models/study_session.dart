@@ -49,9 +49,9 @@ class StudySession {
   /// Bu hafta mı?
   bool get isThisWeek {
     final now = DateTime.now();
-    final weekStart = now.subtract(Duration(days: now.weekday - 1));
+    final weekStart = DateTime(now.year, now.month, now.day)
+        .subtract(Duration(days: now.weekday - 1));
     final weekEnd = weekStart.add(const Duration(days: 7));
-    return startedAt.isAfter(weekStart.subtract(const Duration(days: 1))) &&
-        startedAt.isBefore(weekEnd);
+    return !startedAt.isBefore(weekStart) && startedAt.isBefore(weekEnd);
   }
 }

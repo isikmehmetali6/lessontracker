@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/auth_provider.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
+import '../../core/utils/error_handler.dart';
 import 'signup_screen.dart';
+import 'email_verification_screen.dart';
+import 'password_recovery_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -28,10 +32,12 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final provider = context.read<AuthProvider>();
+    final provider = context.watch<AuthProvider>();
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF5F7FA),
+      backgroundColor: isDark
+          ? const Color(0xFF121212)
+          : const Color(0xFFF5F7FA),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
@@ -52,17 +58,21 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                           color: AppColors.primary.withValues(alpha: 0.3),
-                           blurRadius: 12,
-                           offset: const Offset(0, 6)
-                        )
-                      ]
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
                     ),
-                    child: const Icon(Icons.school_rounded, color: Colors.white, size: 36),
+                    child: const Icon(
+                      Icons.school_rounded,
+                      color: Colors.white,
+                      size: 36,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Title
                 Text(
                   'Welcome back!',
@@ -77,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   'Log in to continue your learning journey.',
                   style: TextStyle(
                     fontSize: 16,
-                     color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                   ),
                 ),
                 const SizedBox(height: 48),
@@ -90,16 +100,25 @@ class _LoginScreenState extends State<LoginScreen> {
                     decoration: BoxDecoration(
                       color: Colors.red.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: Colors.red.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                        const Icon(
+                          Icons.error_outline,
+                          color: Colors.red,
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             provider.error!,
-                            style: const TextStyle(color: Colors.red, fontSize: 13),
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
                       ],
@@ -124,7 +143,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
                 const SizedBox(height: 20),
-                
+
                 // Password Field
                 _buildTextField(
                   controller: _passwordController,
@@ -133,7 +152,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   isDark: isDark,
                   isPassword: true,
                   isPasswordVisible: _isPasswordVisible,
-                  onPasswordToggle: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                  onPasswordToggle: () =>
+                      setState(() => _isPasswordVisible = !_isPasswordVisible),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your password';
@@ -141,87 +161,149 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                
+
                 const SizedBox(height: 12),
                 // Forgot Password Link
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () => _showForgotPasswordDialog(context, provider, isDark),
-                    child: const Text('Forgot Password?', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PasswordRecoveryScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Forgot Password?',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Login Button
                 SizedBox(
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: (provider.isLoading || _isSubmitting) 
-                        ? null 
+                    onPressed: (provider.isLoading || _isSubmitting)
+                        ? null
                         : () => _handleLogin(provider),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       elevation: 0,
                     ),
                     child: (provider.isLoading || _isSubmitting)
-                        ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : const Text('Log In', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            'Log In',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
                 Row(
                   children: [
-                     Expanded(child: Divider(color: isDark ? Colors.grey.shade800 : Colors.grey.shade300)),
-                     Padding(
-                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                       child: Text(
-                         'OR', 
-                         style: TextStyle(
-                           color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
-                           fontSize: 12,
-                           fontWeight: FontWeight.bold,
-                         )
-                       ),
-                     ),
-                     Expanded(child: Divider(color: isDark ? Colors.grey.shade800 : Colors.grey.shade300)),
+                    Expanded(
+                      child: Divider(
+                        color: isDark
+                            ? Colors.grey.shade800
+                            : Colors.grey.shade300,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'OR',
+                        style: TextStyle(
+                          color: isDark
+                              ? Colors.grey.shade500
+                              : Colors.grey.shade400,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Divider(
+                        color: isDark
+                            ? Colors.grey.shade800
+                            : Colors.grey.shade300,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 24),
-                
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       "Don't have an account?",
-                      style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+                      style: TextStyle(
+                        color: isDark
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade600,
+                      ),
                     ),
                     TextButton(
                       onPressed: () {
                         provider.clearError(); // Eski hata mesajını temizle
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const SignUpScreen()));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const SignUpScreen(),
+                          ),
+                        );
                       },
-                      child: const Text('Sign Up', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        'Sign Up',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-                
+
                 // Guest Mode
                 const SizedBox(height: 24),
                 Center(
                   child: TextButton(
-                    onPressed: () {
-                       provider.loginAsGuest();
-                    },
+                    onPressed: () =>
+                        _showGuestModeDialog(context, provider, isDark),
                     child: Text(
                       'Continue as Guest',
-                      style: TextStyle(color: isDark ? Colors.grey.shade600 : Colors.grey.shade500, fontSize: 12),
+                      style: TextStyle(
+                        color: isDark
+                            ? Colors.grey.shade600
+                            : Colors.grey.shade500,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -233,22 +315,36 @@ class _LoginScreenState extends State<LoginScreen> {
   /// Giriş işlemi — çift tıklama korumalı
   Future<void> _handleLogin(AuthProvider provider) async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     setState(() => _isSubmitting = true);
     try {
-      await provider.signIn(
-        _emailController.text.trim(), 
+      final success = await provider.signIn(
+        _emailController.text.trim(),
         _passwordController.text,
       );
+      if (success && mounted) {
+        // Refresh to check email verification
+        await provider.refreshUser();
+        if (!provider.isEmailVerified && mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const EmailVerificationScreen()),
+          );
+        }
+      }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
   /// Şifre sıfırlama dialog'u
-  void _showForgotPasswordDialog(BuildContext context, AuthProvider provider, bool isDark) {
+  void _showForgotPasswordDialog(
+    BuildContext context,
+    AuthProvider provider,
+    bool isDark,
+  ) {
     final resetEmailController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -278,9 +374,16 @@ class _LoginScreenState extends State<LoginScreen> {
               style: TextStyle(color: isDark ? Colors.white : Colors.black87),
               decoration: InputDecoration(
                 hintText: 'Email address',
-                prefixIcon: Icon(Icons.email_outlined, color: isDark ? Colors.grey.shade600 : Colors.grey.shade400),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                hintStyle: TextStyle(color: isDark ? Colors.grey.shade700 : Colors.grey.shade400),
+                prefixIcon: Icon(
+                  Icons.email_outlined,
+                  color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                hintStyle: TextStyle(
+                  color: isDark ? Colors.grey.shade700 : Colors.grey.shade400,
+                ),
               ),
             ),
           ],
@@ -288,36 +391,108 @@ class _LoginScreenState extends State<LoginScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text('Cancel', style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600)),
+            child: Text(
+              AppLocalizations.of(dialogContext)!.cancel,
+              style: TextStyle(
+                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+              ),
+            ),
           ),
           ElevatedButton(
             onPressed: () async {
               final email = resetEmailController.text.trim();
               if (email.isEmpty) return;
-              
+
               Navigator.pop(dialogContext);
-              
+
               final success = await provider.resetPassword(email);
               if (!context.mounted) return;
-              
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    success 
-                      ? 'Password reset email sent! Check your inbox.' 
-                      : provider.error ?? 'Failed to send reset email.',
+
+              if (success) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text(
+                      'Password reset email sent! Check your inbox.',
+                    ),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    backgroundColor: Colors.green,
                   ),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  backgroundColor: success ? Colors.green : Colors.red,
-                ),
-              );
+                );
+              } else {
+                ErrorHandler.handleError(
+                  context,
+                  provider.error ?? 'Failed to send reset email.',
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            child: const Text('Send Link', style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'Send Link',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    ).then((_) => resetEmailController.dispose());
+  }
+
+  void _showGuestModeDialog(
+    BuildContext context,
+    AuthProvider provider,
+    bool isDark,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'Continue as Guest',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : const Color(0xFF1A1F36),
+          ),
+        ),
+        content: Text(
+          'Your data will be stored locally on this device only and won\'t sync to the cloud. You can create an account later to backup your data.',
+          style: TextStyle(
+            fontSize: 14,
+            color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              AppLocalizations.of(ctx)!.cancel,
+              style: TextStyle(
+                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              provider.loginAsGuest();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text(
+              'Continue',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -343,7 +518,9 @@ class _LoginScreenState extends State<LoginScreen> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+            color: isDark
+                ? AppColors.textSecondaryDark
+                : AppColors.textSecondaryLight,
           ),
         ),
         const SizedBox(height: 8),
@@ -356,35 +533,45 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             boxShadow: [
               if (!isDark)
-              BoxShadow(
-                color: Colors.grey.shade100,
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              )
-            ]
+                BoxShadow(
+                  color: Colors.grey.shade100,
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+            ],
           ),
           child: TextFormField(
             controller: controller,
             obscureText: isPassword && !isPasswordVisible,
             keyboardType: keyboardType,
             validator: validator,
-             style: TextStyle(
-              color: isDark ? Colors.white : Colors.black87,
-            ),
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
             decoration: InputDecoration(
-              prefixIcon: Icon(icon, color: isDark ? Colors.grey.shade600 : Colors.grey.shade400),
-              suffixIcon: isPassword ? IconButton(
-                icon: Icon(
-                  isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                  color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
-                ),
-                onPressed: onPasswordToggle,
-              ) : null,
+              prefixIcon: Icon(
+                icon,
+                color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+              ),
+              suffixIcon: isPassword
+                  ? IconButton(
+                      icon: Icon(
+                        isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: isDark
+                            ? Colors.grey.shade600
+                            : Colors.grey.shade400,
+                      ),
+                      onPressed: onPasswordToggle,
+                    )
+                  : null,
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
+              ),
               hintText: 'Enter your $label',
               hintStyle: TextStyle(
-                 color: isDark ? Colors.grey.shade700 : Colors.grey.shade400,
+                color: isDark ? Colors.grey.shade700 : Colors.grey.shade400,
               ),
               errorStyle: const TextStyle(fontSize: 12),
             ),
