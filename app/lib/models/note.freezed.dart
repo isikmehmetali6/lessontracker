@@ -2,6 +2,9 @@
 // coverage:ignore-file
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+// 
+// ⚠️ NOTE: This file is manually updated to add cloudPath and thumbnailCloudPath fields.
+// Run `flutter pub run build_runner build` to regenerate properly.
 
 part of 'note.dart';
 
@@ -15,10 +18,11 @@ T _$identity<T>(T value) => value;
 mixin _$Note {
 
  String get id; String get courseId; NoteType get type; String get title; String? get content;// Metin içeriği (OCR sonucu dahil)
- String? get filePath;// Ses/resim dosya yolu
- String? get thumbnailPath;// Önizleme resmi
- int? get audioDuration;// Ses süresi (saniye)
- List<String> get tags; List<Duration> get bookmarks; bool get isBookmarked; DateTime? get createdAt; DateTime? get updatedAt; String? get drawingData;
+  String? get filePath;// Ses/resim dosya yolu
+  String? get thumbnailPath;// Önizleme resmi
+  int? get audioDuration;// Ses süresi (saniye)
+  List<String> get tags; List<Duration> get bookmarks; bool get isBookmarked; DateTime? get createdAt; DateTime? get updatedAt; String? get drawingData; String? get cloudPath;// E2E encrypted cloud path
+  String? get thumbnailCloudPath;// E2E encrypted thumbnail cloud path
 /// Create a copy of Note
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -29,16 +33,16 @@ $NoteCopyWith<Note> get copyWith => _$NoteCopyWithImpl<Note>(this as Note, _$ide
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Note&&(identical(other.id, id) || other.id == id)&&(identical(other.courseId, courseId) || other.courseId == courseId)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.content, content) || other.content == content)&&(identical(other.filePath, filePath) || other.filePath == filePath)&&(identical(other.thumbnailPath, thumbnailPath) || other.thumbnailPath == thumbnailPath)&&(identical(other.audioDuration, audioDuration) || other.audioDuration == audioDuration)&&const DeepCollectionEquality().equals(other.tags, tags)&&const DeepCollectionEquality().equals(other.bookmarks, bookmarks)&&(identical(other.isBookmarked, isBookmarked) || other.isBookmarked == isBookmarked)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.drawingData, drawingData) || other.drawingData == drawingData));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Note&&(identical(other.id, id) || other.id == id)&&(identical(other.courseId, courseId) || other.courseId == courseId)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.content, content) || other.content == content)&&(identical(other.filePath, filePath) || other.filePath == filePath)&&(identical(other.thumbnailPath, thumbnailPath) || other.thumbnailPath == thumbnailPath)&&(identical(other.audioDuration, audioDuration) || other.audioDuration == audioDuration)&&const DeepCollectionEquality().equals(other.tags, tags)&&const DeepCollectionEquality().equals(other.bookmarks, bookmarks)&&(identical(other.isBookmarked, isBookmarked) || other.isBookmarked == isBookmarked)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.drawingData, drawingData) || other.drawingData == drawingData)&&(identical(other.cloudPath, cloudPath) || other.cloudPath == cloudPath)&&(identical(other.thumbnailCloudPath, thumbnailCloudPath) || other.thumbnailCloudPath == thumbnailCloudPath));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,courseId,type,title,content,filePath,thumbnailPath,audioDuration,const DeepCollectionEquality().hash(tags),const DeepCollectionEquality().hash(bookmarks),isBookmarked,createdAt,updatedAt,drawingData);
+int get hashCode => Object.hash(runtimeType,id,courseId,type,title,content,filePath,thumbnailPath,audioDuration,const DeepCollectionEquality().hash(tags),const DeepCollectionEquality().hash(bookmarks),isBookmarked,createdAt,updatedAt,drawingData,cloudPath,thumbnailCloudPath);
 
 @override
 String toString() {
-  return 'Note(id: $id, courseId: $courseId, type: $type, title: $title, content: $content, filePath: $filePath, thumbnailPath: $thumbnailPath, audioDuration: $audioDuration, tags: $tags, bookmarks: $bookmarks, isBookmarked: $isBookmarked, createdAt: $createdAt, updatedAt: $updatedAt, drawingData: $drawingData)';
+  return 'Note(id: $id, courseId: $courseId, type: $type, title: $title, content: $content, filePath: $filePath, thumbnailPath: $thumbnailPath, audioDuration: $audioDuration, tags: $tags, bookmarks: $bookmarks, isBookmarked: $isBookmarked, createdAt: $createdAt, updatedAt: $updatedAt, drawingData: $drawingData, cloudPath: $cloudPath, thumbnailCloudPath: $thumbnailCloudPath)';
 }
 
 
@@ -49,7 +53,7 @@ abstract mixin class $NoteCopyWith<$Res>  {
   factory $NoteCopyWith(Note value, $Res Function(Note) _then) = _$NoteCopyWithImpl;
 @useResult
 $Res call({
- String id, String courseId, NoteType type, String title, String? content, String? filePath, String? thumbnailPath, int? audioDuration, List<String> tags, List<Duration> bookmarks, bool isBookmarked, DateTime? createdAt, DateTime? updatedAt, String? drawingData
+ String id, String courseId, NoteType type, String title, String? content, String? filePath, String? thumbnailPath, int? audioDuration, List<String> tags, List<Duration> bookmarks, bool isBookmarked, DateTime? createdAt, DateTime? updatedAt, String? drawingData, String? cloudPath, String? thumbnailCloudPath
 });
 
 
@@ -66,7 +70,7 @@ class _$NoteCopyWithImpl<$Res>
 
 /// Create a copy of Note
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? courseId = null,Object? type = null,Object? title = null,Object? content = freezed,Object? filePath = freezed,Object? thumbnailPath = freezed,Object? audioDuration = freezed,Object? tags = null,Object? bookmarks = null,Object? isBookmarked = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? drawingData = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? courseId = null,Object? type = null,Object? title = null,Object? content = freezed,Object? filePath = freezed,Object? thumbnailPath = freezed,Object? audioDuration = freezed,Object? tags = null,Object? bookmarks = null,Object? isBookmarked = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? drawingData = freezed,Object? cloudPath = freezed,Object? thumbnailCloudPath = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,courseId: null == courseId ? _self.courseId : courseId // ignore: cast_nullable_to_non_nullable
@@ -82,6 +86,8 @@ as List<Duration>,isBookmarked: null == isBookmarked ? _self.isBookmarked : isBo
 as bool,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,drawingData: freezed == drawingData ? _self.drawingData : drawingData // ignore: cast_nullable_to_non_nullable
+as String?,cloudPath: freezed == cloudPath ? _self.cloudPath : cloudPath // ignore: cast_nullable_to_non_nullable
+as String?,thumbnailCloudPath: freezed == thumbnailCloudPath ? _self.thumbnailCloudPath : thumbnailCloudPath // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -167,10 +173,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String courseId,  NoteType type,  String title,  String? content,  String? filePath,  String? thumbnailPath,  int? audioDuration,  List<String> tags,  List<Duration> bookmarks,  bool isBookmarked,  DateTime? createdAt,  DateTime? updatedAt,  String? drawingData)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String courseId,  NoteType type,  String title,  String? content,  String? filePath,  String? thumbnailPath,  int? audioDuration,  List<String> tags,  List<Duration> bookmarks,  bool isBookmarked,  DateTime? createdAt,  DateTime? updatedAt,  String? drawingData,  String? cloudPath,  String? thumbnailCloudPath)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Note() when $default != null:
-return $default(_that.id,_that.courseId,_that.type,_that.title,_that.content,_that.filePath,_that.thumbnailPath,_that.audioDuration,_that.tags,_that.bookmarks,_that.isBookmarked,_that.createdAt,_that.updatedAt,_that.drawingData);case _:
+return $default(_that.id,_that.courseId,_that.type,_that.title,_that.content,_that.filePath,_that.thumbnailPath,_that.audioDuration,_that.tags,_that.bookmarks,_that.isBookmarked,_that.createdAt,_that.updatedAt,_that.drawingData,_that.cloudPath,_that.thumbnailCloudPath);case _:
   return orElse();
 
 }
@@ -188,10 +194,10 @@ return $default(_that.id,_that.courseId,_that.type,_that.title,_that.content,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String courseId,  NoteType type,  String title,  String? content,  String? filePath,  String? thumbnailPath,  int? audioDuration,  List<String> tags,  List<Duration> bookmarks,  bool isBookmarked,  DateTime? createdAt,  DateTime? updatedAt,  String? drawingData)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String courseId,  NoteType type,  String title,  String? content,  String? filePath,  String? thumbnailPath,  int? audioDuration,  List<String> tags,  List<Duration> bookmarks,  bool isBookmarked,  DateTime? createdAt,  DateTime? updatedAt,  String? drawingData,  String? cloudPath,  String? thumbnailCloudPath)  $default,) {final _that = this;
 switch (_that) {
 case _Note():
-return $default(_that.id,_that.courseId,_that.type,_that.title,_that.content,_that.filePath,_that.thumbnailPath,_that.audioDuration,_that.tags,_that.bookmarks,_that.isBookmarked,_that.createdAt,_that.updatedAt,_that.drawingData);case _:
+return $default(_that.id,_that.courseId,_that.type,_that.title,_that.content,_that.filePath,_that.thumbnailPath,_that.audioDuration,_that.tags,_that.bookmarks,_that.isBookmarked,_that.createdAt,_that.updatedAt,_that.drawingData,_that.cloudPath,_that.thumbnailCloudPath);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -208,10 +214,10 @@ return $default(_that.id,_that.courseId,_that.type,_that.title,_that.content,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String courseId,  NoteType type,  String title,  String? content,  String? filePath,  String? thumbnailPath,  int? audioDuration,  List<String> tags,  List<Duration> bookmarks,  bool isBookmarked,  DateTime? createdAt,  DateTime? updatedAt,  String? drawingData)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String courseId,  NoteType type,  String title,  String? content,  String? filePath,  String? thumbnailPath,  int? audioDuration,  List<String> tags,  List<Duration> bookmarks,  bool isBookmarked,  DateTime? createdAt,  DateTime? updatedAt,  String? drawingData,  String? cloudPath,  String? thumbnailCloudPath)?  $default,) {final _that = this;
 switch (_that) {
 case _Note() when $default != null:
-return $default(_that.id,_that.courseId,_that.type,_that.title,_that.content,_that.filePath,_that.thumbnailPath,_that.audioDuration,_that.tags,_that.bookmarks,_that.isBookmarked,_that.createdAt,_that.updatedAt,_that.drawingData);case _:
+return $default(_that.id,_that.courseId,_that.type,_that.title,_that.content,_that.filePath,_that.thumbnailPath,_that.audioDuration,_that.tags,_that.bookmarks,_that.isBookmarked,_that.createdAt,_that.updatedAt,_that.drawingData,_that.cloudPath,_that.thumbnailCloudPath);case _:
   return null;
 
 }
@@ -223,7 +229,7 @@ return $default(_that.id,_that.courseId,_that.type,_that.title,_that.content,_th
 
 
 class _Note extends Note {
-  const _Note({required this.id, required this.courseId, required this.type, required this.title, this.content, this.filePath, this.thumbnailPath, this.audioDuration, final  List<String> tags = const [], final  List<Duration> bookmarks = const [], this.isBookmarked = false, this.createdAt, this.updatedAt, this.drawingData}): _tags = tags,_bookmarks = bookmarks,super._();
+  const _Note({required this.id, required this.courseId, required this.type, required this.title, this.content, this.filePath, this.thumbnailPath, this.audioDuration, final  List<String> tags = const [], final  List<Duration> bookmarks = const [], this.isBookmarked = false, this.createdAt, this.updatedAt, this.drawingData, this.cloudPath, this.thumbnailCloudPath}): _tags = tags,_bookmarks = bookmarks,super._();
   
 
 @override final  String id;
@@ -257,6 +263,10 @@ class _Note extends Note {
 @override final  DateTime? createdAt;
 @override final  DateTime? updatedAt;
 @override final  String? drawingData;
+// E2E encrypted cloud path
+@override final  String? cloudPath;
+// E2E encrypted thumbnail cloud path
+@override final  String? thumbnailCloudPath;
 
 /// Create a copy of Note
 /// with the given fields replaced by the non-null parameter values.
@@ -268,16 +278,16 @@ _$NoteCopyWith<_Note> get copyWith => __$NoteCopyWithImpl<_Note>(this, _$identit
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Note&&(identical(other.id, id) || other.id == id)&&(identical(other.courseId, courseId) || other.courseId == courseId)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.content, content) || other.content == content)&&(identical(other.filePath, filePath) || other.filePath == filePath)&&(identical(other.thumbnailPath, thumbnailPath) || other.thumbnailPath == thumbnailPath)&&(identical(other.audioDuration, audioDuration) || other.audioDuration == audioDuration)&&const DeepCollectionEquality().equals(other._tags, _tags)&&const DeepCollectionEquality().equals(other._bookmarks, _bookmarks)&&(identical(other.isBookmarked, isBookmarked) || other.isBookmarked == isBookmarked)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.drawingData, drawingData) || other.drawingData == drawingData));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Note&&(identical(other.id, id) || other.id == id)&&(identical(other.courseId, courseId) || other.courseId == courseId)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.content, content) || other.content == content)&&(identical(other.filePath, filePath) || other.filePath == filePath)&&(identical(other.thumbnailPath, thumbnailPath) || other.thumbnailPath == thumbnailPath)&&(identical(other.audioDuration, audioDuration) || other.audioDuration == audioDuration)&&const DeepCollectionEquality().equals(other._tags, _tags)&&const DeepCollectionEquality().equals(other._bookmarks, _bookmarks)&&(identical(other.isBookmarked, isBookmarked) || other.isBookmarked == isBookmarked)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.drawingData, drawingData) || other.drawingData == drawingData)&&(identical(other.cloudPath, cloudPath) || other.cloudPath == cloudPath)&&(identical(other.thumbnailCloudPath, thumbnailCloudPath) || other.thumbnailCloudPath == thumbnailCloudPath));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,courseId,type,title,content,filePath,thumbnailPath,audioDuration,const DeepCollectionEquality().hash(_tags),const DeepCollectionEquality().hash(_bookmarks),isBookmarked,createdAt,updatedAt,drawingData);
+int get hashCode => Object.hash(runtimeType,id,courseId,type,title,content,filePath,thumbnailPath,audioDuration,const DeepCollectionEquality().hash(_tags),const DeepCollectionEquality().hash(_bookmarks),isBookmarked,createdAt,updatedAt,drawingData,cloudPath,thumbnailCloudPath);
 
 @override
 String toString() {
-  return 'Note(id: $id, courseId: $courseId, type: $type, title: $title, content: $content, filePath: $filePath, thumbnailPath: $thumbnailPath, audioDuration: $audioDuration, tags: $tags, bookmarks: $bookmarks, isBookmarked: $isBookmarked, createdAt: $createdAt, updatedAt: $updatedAt, drawingData: $drawingData)';
+  return 'Note(id: $id, courseId: $courseId, type: $type, title: $title, content: $content, filePath: $filePath, thumbnailPath: $thumbnailPath, audioDuration: $audioDuration, tags: $tags, bookmarks: $bookmarks, isBookmarked: $isBookmarked, createdAt: $createdAt, updatedAt: $updatedAt, drawingData: $drawingData, cloudPath: $cloudPath, thumbnailCloudPath: $thumbnailCloudPath)';
 }
 
 
@@ -288,7 +298,7 @@ abstract mixin class _$NoteCopyWith<$Res> implements $NoteCopyWith<$Res> {
   factory _$NoteCopyWith(_Note value, $Res Function(_Note) _then) = __$NoteCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String courseId, NoteType type, String title, String? content, String? filePath, String? thumbnailPath, int? audioDuration, List<String> tags, List<Duration> bookmarks, bool isBookmarked, DateTime? createdAt, DateTime? updatedAt, String? drawingData
+ String id, String courseId, NoteType type, String title, String? content, String? filePath, String? thumbnailPath, int? audioDuration, List<String> tags, List<Duration> bookmarks, bool isBookmarked, DateTime? createdAt, DateTime? updatedAt, String? drawingData, String? cloudPath, String? thumbnailCloudPath
 });
 
 
@@ -305,7 +315,7 @@ class __$NoteCopyWithImpl<$Res>
 
 /// Create a copy of Note
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? courseId = null,Object? type = null,Object? title = null,Object? content = freezed,Object? filePath = freezed,Object? thumbnailPath = freezed,Object? audioDuration = freezed,Object? tags = null,Object? bookmarks = null,Object? isBookmarked = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? drawingData = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? courseId = null,Object? type = null,Object? title = null,Object? content = freezed,Object? filePath = freezed,Object? thumbnailPath = freezed,Object? audioDuration = freezed,Object? tags = null,Object? bookmarks = null,Object? isBookmarked = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? drawingData = freezed,Object? cloudPath = freezed,Object? thumbnailCloudPath = freezed,}) {
   return _then(_Note(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,courseId: null == courseId ? _self.courseId : courseId // ignore: cast_nullable_to_non_nullable
@@ -321,6 +331,8 @@ as List<Duration>,isBookmarked: null == isBookmarked ? _self.isBookmarked : isBo
 as bool,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,drawingData: freezed == drawingData ? _self.drawingData : drawingData // ignore: cast_nullable_to_non_nullable
+as String?,cloudPath: freezed == cloudPath ? _self.cloudPath : cloudPath // ignore: cast_nullable_to_non_nullable
+as String?,thumbnailCloudPath: freezed == thumbnailCloudPath ? _self.thumbnailCloudPath : thumbnailCloudPath // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

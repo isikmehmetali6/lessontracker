@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path/path.dart' as path;
 
 class ImageCompressorService {
@@ -48,38 +49,19 @@ class ImageCompressorService {
 
   Future<Uint8List> _compressWithPlugin(String imagePath) async {
     try {
-      final flutterImageCompress = await _getCompressor();
-      if (flutterImageCompress != null) {
-        final result = await flutterImageCompress.compressWithFile(
-          imagePath,
-          quality: quality,
-          minWidth: maxWidth,
-          minHeight: maxHeight,
-        );
-        if (result != null) return result;
-      }
+      final result = await FlutterImageCompress.compressWithFile(
+        imagePath,
+        quality: quality,
+        minWidth: maxWidth,
+        minHeight: maxHeight,
+      );
+      if (result != null) return result;
     } catch (e) {
       debugPrint('ImageCompressorService: Plugin compression failed - $e');
     }
 
     final file = File(imagePath);
     return await file.readAsBytes();
-  }
-
-  Future<dynamic> _getCompressor() async {
-    try {
-      final module = await _importFlutterImageCompress();
-      return module;
-    } catch (e) {
-      debugPrint(
-        'ImageCompressorService: Could not load flutter_image_compress - $e',
-      );
-      return null;
-    }
-  }
-
-  Future<dynamic> _importFlutterImageCompress() async {
-    return null;
   }
 
   Future<File?> compressAndSave(String imagePath) async {
@@ -102,16 +84,13 @@ class ImageCompressorService {
 
   Future<Uint8List?> compressFromBytes(Uint8List bytes) async {
     try {
-      final plugin = await _getCompressor();
-      if (plugin != null) {
-        final result = await plugin.compressWithList(
-          bytes,
-          quality: quality,
-          minWidth: maxWidth,
-          minHeight: maxHeight,
-        );
-        if (result != null) return result;
-      }
+      final result = await FlutterImageCompress.compressWithList(
+        bytes,
+        quality: quality,
+        minWidth: maxWidth,
+        minHeight: maxHeight,
+      );
+      if (result != null) return result;
     } catch (e) {
       debugPrint('ImageCompressorService: Error compressing bytes - $e');
     }

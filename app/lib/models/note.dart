@@ -31,6 +31,8 @@ abstract class Note with _$Note {
     DateTime? createdAt,
     DateTime? updatedAt,
     String? drawingData, // JSON serialized drawing strokes
+    String? cloudPath, // E2E encrypted cloud path
+    String? thumbnailCloudPath, // E2E encrypted thumbnail cloud path
   }) = _Note;
 
   /// Ses notu mu?
@@ -70,6 +72,8 @@ abstract class Note with _$Note {
       'createdAt': (createdAt ?? DateTime.now()).toIso8601String(),
       'updatedAt': (updatedAt ?? DateTime.now()).toIso8601String(),
       'drawingData': drawingData,
+      'cloudPath': cloudPath,
+      'thumbnailCloudPath': thumbnailCloudPath,
     };
   }
 
@@ -104,6 +108,8 @@ abstract class Note with _$Note {
       createdAt: DateTime.parse(map['createdAt'] as String),
       updatedAt: DateTime.parse(map['updatedAt'] as String),
       drawingData: map['drawingData'] as String?,
+      cloudPath: map['cloudPath'] as String?,
+      thumbnailCloudPath: map['thumbnailCloudPath'] as String?,
     );
   }
 }

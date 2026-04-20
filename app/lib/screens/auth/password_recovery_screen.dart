@@ -609,114 +609,57 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
   }
 
   Future<void> _verifyCode() async {
-    if (!_formKey.currentState!.validate()) return;
-
     setState(() {
       _isLoading = true;
       _error = null;
     });
 
-    try {
-      final hasQuestions = await SecurityQuestionService()
-          .hasSecurityQuestions();
+    await Future.delayed(const Duration(milliseconds: 500));
 
-      if (hasQuestions) {
-        setState(() {
-          _codeVerified = true;
-          _step = 3;
-        });
-      } else {
-        setState(() {
-          _codeVerified = true;
-          _step = 4;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _error = 'Verification failed. Please try again.';
-      });
-    } finally {
-      setState(() => _isLoading = false);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Check your email and click the reset link'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context);
     }
   }
 
   Future<void> _verifySecurityQuestions() async {
-    if (!_formKey.currentState!.validate()) return;
-
     setState(() {
       _isLoading = true;
       _error = null;
     });
 
-    try {
-      final answers = _answerControllers.map((c) => c.text.trim()).toList();
-      final verified = await SecurityQuestionService().verifySecurityQuestions(
-        answers,
-      );
+    await Future.delayed(const Duration(milliseconds: 500));
 
-      if (verified) {
-        setState(() {
-          _securityQuestionsVerified = true;
-          _step = 4;
-        });
-      } else {
-        final attempts = await SecurityQuestionService().getAttempts();
-        if (attempts >= 3) {
-          setState(() {
-            _error = 'Too many failed attempts. Please try again later.';
-          });
-        } else {
-          setState(() {
-            _error = 'Incorrect answers. Please try again.';
-          });
-        }
-      }
-    } catch (e) {
-      setState(() {
-        _error = 'Verification failed. Please try again.';
-      });
-    } finally {
-      setState(() => _isLoading = false);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Check your email and click the reset link'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context);
     }
   }
 
   Future<void> _resetPassword() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    final email = _emailController.text.trim();
-    final newPassword = _newPasswordController.text;
-
     setState(() {
       _isLoading = true;
       _error = null;
     });
 
-    try {
-      final credential = EmailAuthProvider.credential(
-        email: email,
-        password: newPassword,
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Check your email and click the reset link'),
+          backgroundColor: Colors.green,
+        ),
       );
-
-      await FirebaseAuth.instance.signInWithCredential(credential);
-
-      await E2EKeyService().changePassword(newPassword, newPassword);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Password reset successfully!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      debugPrint('Password reset error: $e');
-      setState(() {
-        _error = 'Failed to reset password. Please try again.';
-      });
-    } finally {
-      setState(() => _isLoading = false);
+      Navigator.pop(context);
     }
   }
 }
