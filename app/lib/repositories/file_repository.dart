@@ -6,7 +6,7 @@ import '../core/database/database_helper.dart';
 import '../core/services/auto_sync_service.dart';
 import '../core/services/e2e_file_service.dart';
 import '../core/services/e2e_key_service.dart';
-import '../core/services/image_compressor_service.dart';
+import '../core/services/e2e_upload_service.dart';
 import '../models/course_file.dart';
 
 class FileRepository {
@@ -61,8 +61,8 @@ class FileRepository {
 
     if (await E2EKeyService().isE2EEnabled()) {
       try {
-        final e2eService = E2EFileService();
-        cloudPath = await _uploadFileToCloud(localFile, file.type, e2eService);
+        final uploadService = E2EUploadService();
+        cloudPath = await uploadService.uploadCourseFile(localFile);
         debugPrint('Course file uploaded to cloud: $cloudPath');
       } catch (e) {
         debugPrint('E2E upload error: $e');
@@ -85,30 +85,6 @@ class FileRepository {
     if (cloudPath != null) {
       await _updateFileCloudPath(file.id, cloudPath);
     }
-  }
-
-  Future<String> _uploadFileToCloud(
-    File file,
-    String type,
-    E2EFileService e2eService,
-  ) async {
-    final extension = file.path.toLowerCase();
-    if (extension.contains('.jpg') ||
-        extension.contains('.jpeg') ||
-        extension.contains('.png') ||
-        extension.contains('.heic')) {
-      final compressor = ImageCompressorService();
-      final compressedBytes = await compressor.compressAndGetBytes(file.path);
-      if (compressedBytes != null) {
-        final tempPath = '${file.path}_compressed.jpg';
-        final tempFile = File(tempPath);
-        await tempFile.writeAsBytes(compressedBytes);
-        final cloudPath = await e2eService.uploadPhoto(tempFile);
-        await tempFile.delete();
-        return cloudPath;
-      }
-    }
-    return await e2eService.uploadDocument(file);
   }
 
   Future<void> _updateFileCloudPath(String fileId, String cloudPath) async {

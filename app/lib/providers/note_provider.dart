@@ -165,7 +165,11 @@ class NoteProvider extends ChangeNotifier {
         tags: tags ?? [],
       );
 
-      await _noteRepo.insertNote(note);
+      await _noteRepo.insertNoteWithFile(
+        note,
+        attachedFile: File(resolvedPath),
+        thumbnail: File(resolvedPath),
+      );
       await loadNotes();
       await loadCourseNotes(courseId);
       return note;
@@ -241,7 +245,10 @@ class NoteProvider extends ChangeNotifier {
         bookmarks: _currentBookmarks,
       );
 
-      await _noteRepo.insertNote(note);
+      await _noteRepo.insertNoteWithFile(
+        note,
+        attachedFile: File(result.filePath),
+      );
       await loadNotes();
       await loadCourseNotes(courseId);
       return note;
@@ -322,7 +329,11 @@ class NoteProvider extends ChangeNotifier {
         tags: tags ?? [],
       );
 
-      await _noteRepo.insertNote(note);
+      await _noteRepo.insertNoteWithFile(
+        note,
+        attachedFile: imageToSave,
+        thumbnail: imageToSave,
+      );
       await loadNotes();
       await loadCourseNotes(courseId);
       return note;

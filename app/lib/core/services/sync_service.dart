@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
+import 'package:path/path.dart' as p;
 import '../../core/database/database_helper.dart';
 import '../../repositories/course_repository.dart';
 import '../../repositories/note_repository.dart';
@@ -24,12 +25,44 @@ import '../../models/planner_event.dart';
 import 'file_service.dart';
 import 'e2e_file_service.dart';
 import 'e2e_key_service.dart';
-import 'image_compressor_service.dart';
+import 'e2e_upload_service.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
+import 'package:path_provider/path_provider.dart';
 
 /// Birden çok batch'e bölme limiti (Firestore max 500)
 const int _kBatchChunkSize = 400;
+
+bool _isNetworkError(Object error) {
+  final msg = error.toString().toLowerCase();
+  return msg.contains('socketexception') ||
+      msg.contains('timeoutexception') ||
+      msg.contains('handshakeexception') ||
+      msg.contains('connection') ||
+      msg.contains('network') ||
+      msg.contains('clientexception') ||
+      msg.contains('httpexception') ||
+      msg.contains('cloud_firestore') ||
+      msg.contains('firestore');
+}
+
+Future<T> _withRetry<T>(Future<T> Function() operation, int maxAttempts) async {
+  int attempt = 0;
+  while (true) {
+    try {
+      return await operation();
+    } catch (e) {
+      attempt++;
+      if (attempt >= maxAttempts || !_isNetworkError(e)) {
+        rethrow;
+      }
+      final delay = Duration(seconds: (1 << (attempt - 1)));
+      debugPrint('Retry $attempt/$maxAttempts after ${delay.inSeconds}s: $e');
+      await Future.delayed(delay);
+    }
+  }
+}
 
 class SyncService {
   final CourseRepository _courseRepo = CourseRepository();
@@ -366,16 +399,15 @@ class SyncService {
         // E2E Storage - files are encrypted and uploaded to Firebase Storage
         if (await E2EKeyService().isE2EEnabled()) {
           try {
-            final e2eService = E2EFileService();
+            final uploadService = E2EUploadService();
             if (note.filePath != null) {
               final resolvedPath = await _fileService.resolveFilePath(
                 note.filePath,
               );
               if (resolvedPath != null && await File(resolvedPath).exists()) {
-                final cloudPath = await _uploadNoteFileE2E(
-                  File(resolvedPath),
-                  note.id,
-                  e2eService,
+                final cloudPath = await _withRetry(
+                  () => uploadService.uploadNoteFile(File(resolvedPath)),
+                  3,
                 );
                 if (cloudPath != null) {
                   noteMap['cloudPath'] = cloudPath;
@@ -390,10 +422,11 @@ class SyncService {
               );
               if (resolvedThumbPath != null &&
                   await File(resolvedThumbPath).exists()) {
-                final cloudPath = await _uploadNoteThumbnailE2E(
-                  File(resolvedThumbPath),
-                  '${note.id}_thumb',
-                  e2eService,
+                final cloudPath = await _withRetry(
+                  () => uploadService.uploadNoteThumbnail(
+                    File(resolvedThumbPath),
+                  ),
+                  3,
                 );
                 if (cloudPath != null) {
                   noteMap['thumbnailCloudPath'] = cloudPath;
@@ -427,18 +460,15 @@ class SyncService {
         // E2E Storage - files are encrypted and uploaded to Firebase Storage
         if (await E2EKeyService().isE2EEnabled()) {
           try {
-            final e2eService = E2EFileService();
+            final uploadService = E2EUploadService();
             final resolvedFilePath = await _fileService.resolveFilePath(
               file.path,
             );
             if (resolvedFilePath != null &&
                 await File(resolvedFilePath).exists()) {
-              final cloudPath = await _uploadCourseFileE2E(
-                File(resolvedFilePath),
-                file.courseId,
-                file.id,
-                file.type,
-                e2eService,
+              final cloudPath = await _withRetry(
+                () => uploadService.uploadCourseFile(File(resolvedFilePath)),
+                3,
               );
               if (cloudPath != null) {
                 fileMap['cloudPath'] = cloudPath;
@@ -524,8 +554,9 @@ class SyncService {
           .collection('courses')
           .get();
       for (var doc in courseSnaps.docs) {
-        final decryptedData = await _decryptData(
-          doc.data()['encryptedData'] as String,
+        final decryptedData = await _withRetry(
+          () => _decryptData(doc.data()['encryptedData'] as String),
+          3,
         );
         final course = Course.fromMap(decryptedData);
         final exists = await _courseRepo.getCourseById(course.id);
@@ -544,8 +575,9 @@ class SyncService {
           .get();
       for (var doc in deadlineSnaps.docs) {
         try {
-          final decryptedData = await _decryptData(
-            doc.data()['encryptedData'] as String,
+          final decryptedData = await _withRetry(
+            () => _decryptData(doc.data()['encryptedData'] as String),
+            3,
           );
           final deadline = Deadline.fromMap(decryptedData);
           await _deadlineRepo.insertDeadline(deadline);
@@ -562,8 +594,9 @@ class SyncService {
           .get();
       for (var doc in plannerSnaps.docs) {
         try {
-          final decryptedData = await _decryptData(
-            doc.data()['encryptedData'] as String,
+          final decryptedData = await _withRetry(
+            () => _decryptData(doc.data()['encryptedData'] as String),
+            3,
           );
           final event = PlannerEvent.fromMap(decryptedData);
           final exists = await _plannerEventRepo.getEventById(event.id);
@@ -585,8 +618,9 @@ class SyncService {
           .get();
       for (var doc in gradeSnaps.docs) {
         try {
-          final decryptedData = await _decryptData(
-            doc.data()['encryptedData'] as String,
+          final decryptedData = await _withRetry(
+            () => _decryptData(doc.data()['encryptedData'] as String),
+            3,
           );
           final grade = Grade.fromMap(decryptedData);
           await _gradeRepo.insertGrade(grade);
@@ -603,11 +637,13 @@ class SyncService {
           .get();
       int totalNotes = noteSnaps.docs.length;
       int processedNotes = 0;
+      final isE2EEnabled = await E2EKeyService().isE2EEnabled();
 
       for (var doc in noteSnaps.docs) {
         try {
-          final decryptedData = await _decryptData(
-            doc.data()['encryptedData'] as String,
+          final decryptedData = await _withRetry(
+            () => _decryptData(doc.data()['encryptedData'] as String),
+            3,
           );
           final data = Map<String, dynamic>.from(decryptedData);
           String? localPath = data['filePath'];
@@ -618,25 +654,58 @@ class SyncService {
             0.3 + (processedNotes / totalNotes) * 0.4,
           );
 
-          // Download File if needed
-          // [DISABLE_STORAGE] Storage features are disabled to stay on free plan
-          /*
-          if (storageUrl != null) {
-             final relativeNotePath = 'restored_notes/${doc.id}_${p.basename(localPath ?? "file")}';
-             final downloadedFile = await _downloadFile(storageUrl, relativeNotePath);
-             if (downloadedFile != null) {
-               localPath = relativeNotePath;
-             }
+          final cloudPath = data['cloudPath'] as String?;
+          final thumbCloudPath = data['thumbnailCloudPath'] as String?;
+
+          if (cloudPath != null && isE2EEnabled) {
+            try {
+              final e2eService = E2EFileService();
+              final decryptedBytes = await e2eService.downloadFile(cloudPath);
+
+              final extension = cloudPath.contains('.enc')
+                  ? p.extension(cloudPath.replaceAll('.enc', ''))
+                  : p.extension(localPath ?? '');
+              final noteBasename = localPath != null
+                  ? p.basename(localPath)
+                  : '${doc.id}_note$extension';
+              final relativeNotePath = 'restored_notes/$noteBasename';
+              final localFilePath = await _saveDecryptedFile(
+                decryptedBytes,
+                relativeNotePath,
+              );
+              if (localFilePath != null) {
+                localPath = localFilePath;
+              }
+            } catch (e) {
+              debugPrint('Error downloading note file: $e');
+            }
           }
-          
-          if (storageThumbUrl != null) {
-             final relativeThumbPath = 'restored_notes/${doc.id}_thumb_${p.basename(localThumbPath ?? "thumb")}';
-             final downloadedFile = await _downloadFile(storageUrl, relativeThumbPath);
-             if (downloadedFile != null) {
-               localThumbPath = relativeThumbPath;
-             }
+
+          if (thumbCloudPath != null && isE2EEnabled) {
+            try {
+              final e2eService = E2EFileService();
+              final decryptedBytes = await e2eService.downloadFile(
+                thumbCloudPath,
+              );
+
+              final extension = thumbCloudPath.contains('.enc')
+                  ? p.extension(thumbCloudPath.replaceAll('.enc', ''))
+                  : p.extension(localThumbPath ?? '');
+              final thumbBasename = localThumbPath != null
+                  ? p.basename(localThumbPath)
+                  : '${doc.id}_thumb$extension';
+              final relativeThumbPath = 'restored_notes/$thumbBasename';
+              final localThumbFilePath = await _saveDecryptedFile(
+                decryptedBytes,
+                relativeThumbPath,
+              );
+              if (localThumbFilePath != null) {
+                localThumbPath = localThumbFilePath;
+              }
+            } catch (e) {
+              debugPrint('Error downloading thumbnail: $e');
+            }
           }
-          */
 
           data['filePath'] = localPath;
           data['thumbnailPath'] = localThumbPath;
@@ -661,23 +730,34 @@ class SyncService {
           .get();
       for (var doc in fileSnaps.docs) {
         try {
-          final decryptedData = await _decryptData(
-            doc.data()['encryptedData'] as String,
+          final decryptedData = await _withRetry(
+            () => _decryptData(doc.data()['encryptedData'] as String),
+            3,
           );
           final data = Map<String, dynamic>.from(decryptedData);
           String? localPath = data['path'];
+          final cloudPath = data['cloudPath'] as String?;
 
-          // [DISABLE_STORAGE] Storage features are disabled to stay on free plan
-          /*
-          if (storageUrl != null) {
-             final name = data['name'] ?? 'unknown_file';
-             final relativeCourseFilePath = 'course_materials/${data['courseId']}/$name';
-             final downloadedFile = await _downloadFile(storageUrl, relativeCourseFilePath);
-             if (downloadedFile != null) {
-               localPath = relativeCourseFilePath;
-             }
+          if (cloudPath != null && isE2EEnabled) {
+            try {
+              final e2eService = E2EFileService();
+              final decryptedBytes = await e2eService.downloadFile(cloudPath);
+
+              final name = data['name'] ?? 'unknown_file';
+              final courseId = data['courseId'] ?? 'unknown';
+              final relativeCourseFilePath = 'course_materials/$courseId/$name';
+              final savedPath = await _saveDecryptedFile(
+                decryptedBytes,
+                relativeCourseFilePath,
+              );
+              if (savedPath != null) {
+                localPath = savedPath;
+              }
+            } catch (e) {
+              debugPrint('Error downloading course file: $e');
+            }
           }
-          */
+
           data['path'] = localPath;
 
           final file = CourseFile.fromMap(data);
@@ -723,6 +803,28 @@ class SyncService {
     }
   }
 
+  Future<String?> _saveDecryptedFile(
+    Uint8List decryptedBytes,
+    String relativePath,
+  ) async {
+    try {
+      final appDir = await getApplicationDocumentsDirectory();
+      final filePath = p.join(appDir.path, relativePath);
+      final file = File(filePath);
+
+      final dir = file.parent;
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+      }
+
+      await file.writeAsBytes(decryptedBytes);
+      return relativePath;
+    } catch (e) {
+      debugPrint('Error saving decrypted file: $e');
+      return null;
+    }
+  }
+
   /// B1 fix: Firestore batch'lerini 400'lük parçalara bölerek commit et
   Future<void> _commitInChunks<T>({
     required List<T> items,
@@ -742,7 +844,7 @@ class SyncService {
         batch.set(docRef, toMap(item));
         onItem?.call(item);
       }
-      await batch.commit();
+      await _withRetry(() async => batch.commit(), 3);
     }
   }
 
@@ -765,7 +867,7 @@ class SyncService {
         batch.set(docRef, {'encryptedData': encryptedData});
         onItem?.call(item);
       }
-      await batch.commit();
+      await _withRetry(() async => batch.commit(), 3);
     }
   }
 
@@ -863,62 +965,4 @@ class SyncService {
   }
 
   // ==================== E2E FILE UPLOAD HELPERS ====================
-
-  Future<String?> _uploadNoteFileE2E(
-    File file,
-    String noteId,
-    E2EFileService e2eService,
-  ) async {
-    final extension = file.path.toLowerCase();
-    if (extension.contains('.jpg') ||
-        extension.contains('.jpeg') ||
-        extension.contains('.png') ||
-        extension.contains('.heic')) {
-      final compressor = ImageCompressorService();
-      final compressedBytes = await compressor.compressAndGetBytes(file.path);
-      if (compressedBytes != null) {
-        final tempPath = '${file.path}_compressed.jpg';
-        final tempFile = File(tempPath);
-        await tempFile.writeAsBytes(compressedBytes);
-        final cloudPath = await e2eService.uploadPhoto(tempFile);
-        await tempFile.delete();
-        return cloudPath;
-      }
-    }
-    return await e2eService.uploadPhoto(file);
-  }
-
-  Future<String?> _uploadNoteThumbnailE2E(
-    File file,
-    String thumbId,
-    E2EFileService e2eService,
-  ) async {
-    return await e2eService.uploadPhoto(file);
-  }
-
-  Future<String?> _uploadCourseFileE2E(
-    File file,
-    String courseId,
-    String fileId,
-    String fileType,
-    E2EFileService e2eService,
-  ) async {
-    final extension = file.path.toLowerCase();
-    if (extension.contains('.jpg') ||
-        extension.contains('.jpeg') ||
-        extension.contains('.png') ||
-        extension.contains('.heic')) {
-      final compressor = ImageCompressorService();
-      final compressedBytes = await compressor.compressAndGetBytes(file.path);
-      if (compressedBytes != null) {
-        final tempPath = '${file.path}_compressed.jpg';
-        final tempFile = File(tempPath);
-        await tempFile.writeAsBytes(compressedBytes);
-        final cloudPath = await e2eService.uploadPhoto(tempFile);
-        await tempFile.delete();
-        return cloudPath;
-      }
-    }
-    return await e2eService.uploadDocument(file);
-  }
 }

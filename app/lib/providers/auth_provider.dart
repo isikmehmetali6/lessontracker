@@ -64,12 +64,11 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  void loginAsGuest() {
+  Future<void> loginAsGuest() async {
     _isGuest = true;
     _error = null;
-    SharedPreferences.getInstance().then(
-      (prefs) => prefs.setBool(_keyIsGuest, true),
-    );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyIsGuest, true);
     notifyListeners();
   }
 
@@ -173,14 +172,14 @@ class AuthProvider extends ChangeNotifier {
 
       // Update last login
       if (_auth!.currentUser != null) {
-        // Run unawaited to not block UI
-        _firestore
-            .collection('users')
-            .doc(_auth!.currentUser!.uid)
-            .update({'lastLogin': FieldValue.serverTimestamp()})
-            .catchError((e) {
-              debugPrint('Error updating lastLogin: $e');
-            });
+        try {
+          await _firestore
+              .collection('users')
+              .doc(_auth!.currentUser!.uid)
+              .update({'lastLogin': FieldValue.serverTimestamp()});
+        } catch (e) {
+          debugPrint('Error updating lastLogin: $e');
+        }
 
         // Load E2E key from cloud if not available locally
         try {
@@ -191,8 +190,11 @@ class AuthProvider extends ChangeNotifier {
             final keyLoaded = await keyService.loadKeyFromCloud(password);
             if (keyLoaded) {
               debugPrint('E2E key loaded from cloud successfully');
-              // Trigger background migration if needed
-              E2EMigrationService().migrateLegacyFiles();
+              try {
+                await E2EMigrationService().migrateLegacyFiles();
+              } catch (e) {
+                debugPrint('E2E migration error: $e');
+              }
             } else {
               debugPrint(
                 'Failed to load E2E key from cloud - may be first login',
@@ -376,6 +378,10 @@ class AuthProvider extends ChangeNotifier {
 
     // 4. Firebase çıkışı
     await _auth?.signOut();
+
+    // 5. E2E key cache temizle — RAM'deki şifre anahtarını sıfırla
+    E2EKeyService().clearCache();
+
     _user = null;
     _isGuest = false;
     _error = null;
@@ -503,7 +509,10 @@ class AuthProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
 
-      // 3. Auth state'i sıfırla
+      // 3. E2E encryption key sil — KVKK gereği tüm kullanıcı verisi temizlenmeli
+      await E2EKeyService().deleteKey();
+
+      // 4. Auth state'i sıfırla
       _user = null;
       _isGuest = false;
 

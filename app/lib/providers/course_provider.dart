@@ -743,7 +743,7 @@ class CourseProvider extends ChangeNotifier {
           createdAt: DateTime.now(),
         );
 
-        await _fileRepo.insertFile(courseFile);
+        await _fileRepo.insertFileWithUpload(courseFile, sourceFile);
         notifyListeners();
         return true;
       }

@@ -7,6 +7,7 @@ import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
 import 'e2e_crypto_service.dart';
 import 'e2e_key_service.dart';
+import 'package:flutter/foundation.dart';
 
 class E2EFileService {
   final E2ECryptoService _cryptoService = E2ECryptoService();
@@ -44,10 +45,12 @@ class E2EFileService {
     }
 
     final fileBytes = await localFile.readAsBytes();
-    final encryptedData = _cryptoService.encryptFile(
-      Uint8List.fromList(fileBytes),
-      key,
-    );
+    if (fileBytes.length > 50 * 1024 * 1024) {
+      debugPrint(
+        'E2EFileService: Warning - Large file (${fileBytes.length}) may cause memory issues. Consider chunked upload.',
+      );
+    }
+    final encryptedData = _cryptoService.encryptFile(fileBytes, key);
 
     final fileId = _uuid.v4();
     final extension = path.extension(localFile.path);
@@ -98,12 +101,15 @@ class E2EFileService {
 
     final ref = _storage.ref().child(cloudPath);
     final bytes = await ref.getData();
-
     if (bytes == null) {
       throw Exception('File not found at $cloudPath');
     }
-
-    return _cryptoService.decryptFile(Uint8List.fromList(bytes), key);
+    if (bytes.length > 50 * 1024 * 1024) {
+      debugPrint(
+        'E2EFileService: Warning - Large file (${bytes.length}) may cause memory issues. Consider chunked download.',
+      );
+    }
+    return _cryptoService.decryptFile(bytes, key);
   }
 
   Future<void> deleteFile(String cloudPath) async {

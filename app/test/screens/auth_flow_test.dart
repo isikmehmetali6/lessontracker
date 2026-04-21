@@ -19,7 +19,7 @@ class MockAuthProvider extends Mock implements AuthProvider {
   @override
   Future<bool> signUp(String email, String password, String name) async => true;
   @override
-  void loginAsGuest() {}
+  Future<void> loginAsGuest() async {}
 }
 
 void main() {

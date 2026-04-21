@@ -6,7 +6,7 @@ import '../core/database/database_helper.dart';
 import '../core/services/auto_sync_service.dart';
 import '../core/services/e2e_file_service.dart';
 import '../core/services/e2e_key_service.dart';
-import '../core/services/image_compressor_service.dart';
+import '../core/services/e2e_upload_service.dart';
 import '../models/note.dart';
 
 class NoteRepository {
@@ -113,12 +113,14 @@ class NoteRepository {
 
     if (attachedFile != null && await E2EKeyService().isE2EEnabled()) {
       try {
-        final e2eService = E2EFileService();
-        cloudPath = await _uploadNoteFile(attachedFile, e2eService);
+        final uploadService = E2EUploadService();
+        cloudPath = await uploadService.uploadNoteFile(attachedFile);
         debugPrint('Note file uploaded to cloud: $cloudPath');
 
         if (thumbnail != null) {
-          thumbnailCloudPath = await _uploadNoteFile(thumbnail, e2eService);
+          thumbnailCloudPath = await uploadService.uploadNoteThumbnail(
+            thumbnail,
+          );
           debugPrint('Thumbnail uploaded to cloud: $thumbnailCloudPath');
         }
       } catch (e) {
@@ -131,26 +133,6 @@ class NoteRepository {
     if (cloudPath != null) {
       await _updateNoteCloudPath(note.id, cloudPath, thumbnailCloudPath);
     }
-  }
-
-  Future<String> _uploadNoteFile(File file, E2EFileService e2eService) async {
-    final extension = file.path.toLowerCase();
-    if (extension.contains('.jpg') ||
-        extension.contains('.jpeg') ||
-        extension.contains('.png') ||
-        extension.contains('.heic')) {
-      final compressor = ImageCompressorService();
-      final compressedBytes = await compressor.compressAndGetBytes(file.path);
-      if (compressedBytes != null) {
-        final tempPath = '${file.path}_compressed.jpg';
-        final tempFile = File(tempPath);
-        await tempFile.writeAsBytes(compressedBytes);
-        final cloudPath = await e2eService.uploadPhoto(tempFile);
-        await tempFile.delete();
-        return cloudPath;
-      }
-    }
-    return await e2eService.uploadPhoto(file);
   }
 
   Future<void> _updateNoteCloudPath(
