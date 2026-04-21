@@ -137,6 +137,9 @@ class DatabaseHelper {
         createdAt TEXT NOT NULL,
         updatedAt TEXT NOT NULL,
         searchContent TEXT,
+        drawingData TEXT,
+        cloudPath TEXT,
+        thumbnailCloudPath TEXT,
         FOREIGN KEY (courseId) REFERENCES courses (id) ON DELETE CASCADE
       )
     ''');
@@ -559,24 +562,17 @@ class DatabaseHelper {
     if (oldVersion < 16) {
       debugPrint('[DB Migration v16] Database encryption enabled.');
     }
-    if (oldVersion < 17) {
-      await db.execute('''
-        CREATE TABLE IF NOT EXISTS e2e_metadata (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          user_key_salt TEXT,
-          encrypted_key TEXT,
-          security_questions_hash TEXT,
-          created_at TEXT NOT NULL,
-          key_version INTEGER DEFAULT 1,
-          last_key_change TEXT
-        )
-      ''');
-      await db.execute('ALTER TABLE notes ADD COLUMN cloud_path TEXT');
+if (oldVersion < 17) {
       await db.execute(
-        'ALTER TABLE notes ADD COLUMN thumbnail_cloud_path TEXT',
+        'ALTER TABLE notes ADD COLUMN cloudPath TEXT',
       );
-      await db.execute('ALTER TABLE course_files ADD COLUMN cloud_path TEXT');
-      debugPrint('[DB Migration v17] E2E encryption tables added.');
+      await db.execute(
+        'ALTER TABLE notes ADD COLUMN thumbnailCloudPath TEXT',
+      );
+      await db.execute(
+        'ALTER TABLE course_files ADD COLUMN cloudPath TEXT',
+      );
+      debugPrint('[DB Migration v17] Cloud path columns added.');
     }
   }
 

@@ -19,6 +19,14 @@ class OcrService {
 
   /// Resimden metin çıkar
   Future<OcrResult> recognizeText(String imagePath) async {
+    if (kIsWeb) {
+      return OcrResult(
+        fullText: '',
+        blocks: [],
+        success: false,
+        error: 'OCR is not supported on web',
+      );
+    }
     try {
       if (!await File(imagePath).exists()) {
         debugPrint('[OcrService] ⚠️ Image file not found at path: $imagePath');

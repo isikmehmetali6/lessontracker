@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'secure_storage_service.dart';
 
 /// Biyometrik kilit servisi (Face ID / Touch ID / PIN)
@@ -9,6 +10,7 @@ class AppLockService {
 
   /// Biyometrik doğrulama mevcut mu?
   static Future<bool> isBiometricAvailable() async {
+    if (kIsWeb) return false;
     try {
       final canAuth = await _auth.canCheckBiometrics;
       final isDeviceSupported = await _auth.isDeviceSupported();
@@ -23,6 +25,7 @@ class AppLockService {
 
   /// Kullanılabilir biyometrik türlerini getir
   static Future<List<BiometricType>> getAvailableBiometrics() async {
+    if (kIsWeb) return [];
     try {
       return await _auth.getAvailableBiometrics();
     } catch (e, stackTrace) {
@@ -35,6 +38,7 @@ class AppLockService {
   static Future<bool> authenticate({
     String reason = 'Authenticate to access the app',
   }) async {
+    if (kIsWeb) return false;
     try {
       return await _auth.authenticate(
         localizedReason: reason,

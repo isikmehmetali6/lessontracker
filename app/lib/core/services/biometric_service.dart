@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:local_auth/local_auth.dart';
 
 class BiometricService {
@@ -9,6 +9,7 @@ class BiometricService {
   BiometricService._internal();
 
   Future<bool> isAvailable() async {
+    if (kIsWeb) return false;
     try {
       return await _auth.canCheckBiometrics;
     } catch (e) {
@@ -18,6 +19,7 @@ class BiometricService {
   }
 
   Future<bool> isDeviceSupported() async {
+    if (kIsWeb) return false;
     try {
       return await _auth.isDeviceSupported();
     } catch (e) {
@@ -29,6 +31,7 @@ class BiometricService {
   Future<bool> authenticate({
     String reason = 'Dosyalarınıza erişmek için doğrulama yapın',
   }) async {
+    if (kIsWeb) return false;
     try {
       return await _auth.authenticate(
         localizedReason: reason,
@@ -44,6 +47,7 @@ class BiometricService {
   }
 
   Future<List<BiometricType>> getAvailableBiometrics() async {
+    if (kIsWeb) return [];
     try {
       return await _auth.getAvailableBiometrics();
     } catch (e) {
@@ -53,16 +57,19 @@ class BiometricService {
   }
 
   Future<bool> hasFaceId() async {
+    if (kIsWeb) return false;
     final biometrics = await getAvailableBiometrics();
     return biometrics.contains(BiometricType.face);
   }
 
   Future<bool> hasTouchId() async {
+    if (kIsWeb) return false;
     final biometrics = await getAvailableBiometrics();
     return biometrics.contains(BiometricType.fingerprint);
   }
 
   Future<String> getBiometricTypeName() async {
+    if (kIsWeb) return 'Not supported on web';
     final biometrics = await getAvailableBiometrics();
     if (biometrics.contains(BiometricType.face)) {
       return 'Face ID';

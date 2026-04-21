@@ -1,7 +1,8 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' show debugPrint;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../../models/course.dart';
 import '../../repositories/course_repository.dart';
@@ -24,6 +25,7 @@ class AttendanceAutomationService {
   // açıldığında çağrılır.
   // ──────────────────────────────────────────────
   static Future<void> registerPeriodicTask() async {
+    if (kIsWeb) return;
     await Workmanager().registerPeriodicTask(
       'smart_attendance_periodic',
       taskName,
@@ -35,6 +37,7 @@ class AttendanceAutomationService {
   }
 
   static Future<void> cancelPeriodicTask() async {
+    if (kIsWeb) return;
     await Workmanager().cancelByUniqueName('smart_attendance_periodic');
     debugPrint('SmartAttendance: Periodic task cancelled.');
   }
@@ -44,6 +47,7 @@ class AttendanceAutomationService {
   // çağrılır (callbackDispatcher → executeTask)
   // ──────────────────────────────────────────────
   Future<void> executeBackgroundCheck() async {
+    if (kIsWeb) return;
     try {
       // 1. Akıllı Yoklama açık mı?
       final prefs = await SharedPreferences.getInstance();

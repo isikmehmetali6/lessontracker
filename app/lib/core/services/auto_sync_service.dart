@@ -14,6 +14,7 @@ class AutoSyncService {
   Timer? _debounceTimer;
   bool _isSyncing = false;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  int _pendingChangesCount = 0;
 
   void init() {
     _connectivitySubscription?.cancel();
@@ -101,14 +102,16 @@ class AutoSyncService {
       final result = await db.rawQuery(
         'SELECT COUNT(*) FROM pending_changes WHERE synced = 0',
       );
-      return Sqflite.firstIntValue(result) ?? 0;
+      final count = Sqflite.firstIntValue(result) ?? 0;
+      _pendingChangesCount = count;
+      return count;
     } catch (e) {
       return 0;
     }
   }
 
   int _getPendingChangesCountSync() {
-    return 0;
+    return _pendingChangesCount;
   }
 
   Future<void> _processPendingChanges() async {

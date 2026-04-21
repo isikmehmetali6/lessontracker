@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../repositories/course_repository.dart';
 import '../repositories/absence_repository.dart';
 import '../repositories/grade_repository.dart';
@@ -387,8 +388,28 @@ class CourseProvider extends ChangeNotifier {
     }
   }
 
+  /// Direct course ekleme (çakışma kontrolü yok - Moodle senkron için)
+  Future<bool> addCourseDirect(Course course) async {
+    _error = null;
+    try {
+      final courseWithId = course.copyWith(id: _uuid.v4());
+      await _courseRepo.insertCourse(courseWithId);
+      await loadCourses();
+
+      // Schedule Notification
+      await _scheduleForCourse(courseWithId);
+
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// Ders sil
   Future<bool> deleteCourse(String id) async {
+    if (kIsWeb) return false;
     try {
       // Find course to get ID/Days for cancellation?
       // Actually we have ID. But we need days to generate IDs.
@@ -398,7 +419,10 @@ class CourseProvider extends ChangeNotifier {
       // Safer:
       Course? course;
       try {
-        course = _courses.firstWhere((c) => c.id == id);
+        course = _courses.firstWhere(
+          (c) => c.id == id,
+          orElse: () => throw StateError('Course not found: $id'),
+        );
       } catch (e, stackTrace) {
         debugPrint('Error finding course $id: $e\nStack: $stackTrace');
       }
@@ -690,6 +714,7 @@ class CourseProvider extends ChangeNotifier {
   /// Dosya ekle (Picker açar)
   /// Göreceli yol kullanır — iOS sandbox değişince dosyalar kaybolmasın
   Future<bool> addFile(String courseId) async {
+    if (kIsWeb) return false;
     try {
       final result = await FilePicker.platform.pickFiles();
 

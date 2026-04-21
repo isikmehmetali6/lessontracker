@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/course.dart';
@@ -9,6 +10,8 @@ class LocationService {
 
   /// Konum izni iste
   Future<bool> requestPermission() async {
+    if (kIsWeb) return false;
+
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -35,6 +38,7 @@ class LocationService {
 
   /// Mevcut konumu al
   Future<Position?> getCurrentLocation() async {
+    if (kIsWeb) return null;
     try {
       final hasPermission = await requestPermission();
       if (!hasPermission) return null;
@@ -51,6 +55,7 @@ class LocationService {
 
   /// Ders konumuna yakın mı? (Varsayılan 100 metre)
   Future<bool> isNearCourse(Course course, {int radiusInMeters = 100}) async {
+    if (kIsWeb) return false;
     if (course.latitude == null || course.longitude == null) return false;
 
     final currentPosition = await getCurrentLocation();

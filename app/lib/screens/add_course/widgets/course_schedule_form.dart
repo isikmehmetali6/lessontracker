@@ -44,8 +44,8 @@ class CourseScheduleForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dayNames = [
-      'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
-    ]; // Can be localized later
+      'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'
+    ];
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -63,7 +63,6 @@ class CourseScheduleForm extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Başlık
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -103,7 +102,6 @@ class CourseScheduleForm extends StatelessWidget {
                ),
              ),
 
-          // Liste
           ...scheduleItems.asMap().entries.map((entry) {
             final index = entry.key;
             final item = entry.value;
@@ -111,7 +109,7 @@ class CourseScheduleForm extends StatelessWidget {
             return Container(
               key: ObjectKey(item),
               margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
                 borderRadius: BorderRadius.circular(16),
@@ -121,15 +119,13 @@ class CourseScheduleForm extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // Gün ve Silme Butonları
                   Row(
                     children: [
-                      // Gün Seçici Dropdown
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
                           color: isDark ? AppColors.surfaceDark : Colors.white,
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<int>(
@@ -141,10 +137,10 @@ class CourseScheduleForm extends StatelessWidget {
                                 child: Text(
                                   dayNames[i],
                                   style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-                                  ),
+                                                            fontSize: 14,
+                                                            fontWeight: FontWeight.w600,
+                                                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                                                          ),
                                 ),
                               );
                             }),
@@ -157,8 +153,6 @@ class CourseScheduleForm extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
-                      
-                      // Silme butonu
                       if (scheduleItems.length > 1)
                         IconButton(
                           icon: const Icon(Icons.delete_outline, size: 20, color: Colors.red),
@@ -168,108 +162,77 @@ class CourseScheduleForm extends StatelessWidget {
                         ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  // Saatler
+                  const SizedBox(height: 16),
+                  
                   Row(
                     children: [
-                      Expanded(
-                        child: _CompactTimePicker(
-                          time: item.startTime,
-                          label: 'Start',
-                          isDark: isDark,
-                          onTap: () async {
-                            final picked = await showTimePicker(context: context, initialTime: item.startTime);
-                            if (picked != null) {
-                              onStartTimeChanged(index, picked);
-                            }
-                          },
-                        ),
+                      _TimePickerField(
+                        label: 'Start',
+                        time: item.startTime,
+                        isDark: isDark,
+                        onTap: () async {
+                          final picked = await showTimePicker(
+                            context: context,
+                            initialTime: item.startTime,
+                            builder: (context, child) {
+                              return MediaQuery(
+                                data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+                                child: child!,
+                              );
+                            },
+                          );
+                          if (picked != null) {
+                            onStartTimeChanged(index, picked);
+                          }
+                        },
                       ),
                       const SizedBox(width: 12),
-                      const Icon(Icons.arrow_forward, size: 16, color: Colors.grey),
+                      Icon(Icons.arrow_forward, size: 20, color: Colors.grey.shade400),
                       const SizedBox(width: 12),
-                      Expanded(
-                        child: _CompactTimePicker(
-                          time: item.endTime,
-                          label: 'End',
-                          isDark: isDark,
-                          onTap: () async {
-                            final picked = await showTimePicker(context: context, initialTime: item.endTime);
-                            if (picked != null) {
-                              onEndTimeChanged(index, picked);
-                            }
-                          },
-                        ),
+                      _TimePickerField(
+                        label: 'End',
+                        time: item.endTime,
+                        isDark: isDark,
+                        onTap: () async {
+                          final picked = await showTimePicker(
+                            context: context,
+                            initialTime: item.endTime,
+                            builder: (context, child) {
+                              return MediaQuery(
+                                data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+                                child: child!,
+                              );
+                            },
+                          );
+                          if (picked != null) {
+                            onEndTimeChanged(index, picked);
+                          }
+                        },
                       ),
                     ],
                   ),
                   
                   const SizedBox(height: 16),
                   
-                  // İç içe Konum ve Profesör Alanları
                   Row(
                     children: [
                       Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: isDark ? AppColors.surfaceDark : Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: TextFormField(
-                            initialValue: item.location,
-                            onChanged: (val) {
-                               onLocationChanged(index, val.trim().isEmpty ? null : val.trim());
-                            },
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight
-                            ),
-                            decoration: InputDecoration(
-                              hintText: AppLocalizations.of(context)!.classroomHint,
-                              prefixIcon: const Icon(Icons.location_on, size: 18, color: AppColors.primary),
-                              contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide.none,
-                              ),
-                              hintStyle: TextStyle(
-                                fontSize: 13,
-                                color: isDark ? Colors.grey.shade600 : Colors.grey.shade400
-                              ),
-                            ),
-                          ),
+                        child: _TextField(
+                          hintText: AppLocalizations.of(context)!.classroomHint,
+                          icon: Icons.location_on,
+                          initialValue: item.location,
+                          onChanged: (val) => onLocationChanged(index, val.trim().isEmpty ? null : val.trim()),
+                          isDark: isDark,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: isDark ? AppColors.surfaceDark : Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: TextFormField(
-                            initialValue: item.professor,
-                            onChanged: (val) {
-                               onProfessorChanged(index, val.trim().isEmpty ? null : val.trim());
-                            },
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight
-                            ),
-                            decoration: InputDecoration(
-                              hintText: AppLocalizations.of(context)!.professorHint,
-                              prefixIcon: const Icon(Icons.person, size: 18, color: AppColors.primary),
-                              contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide.none,
-                              ),
-                              hintStyle: TextStyle(
-                                fontSize: 13,
-                                color: isDark ? Colors.grey.shade600 : Colors.grey.shade400
-                              ),
-                            ),
-                          ),
+                        child: _TextField(
+                          hintText: AppLocalizations.of(context)!.professorHint,
+                          icon: Icons.person,
+                          initialValue: item.professor,
+                          onChanged: (val) => onProfessorChanged(index, val.trim().isEmpty ? null : val.trim()),
+                          isDark: isDark,
                         ),
                       ),
                     ],
@@ -284,15 +247,15 @@ class CourseScheduleForm extends StatelessWidget {
   }
 }
 
-class _CompactTimePicker extends StatelessWidget {
-  final TimeOfDay time;
+class _TimePickerField extends StatelessWidget {
   final String label;
+  final TimeOfDay time;
   final VoidCallback onTap;
   final bool isDark;
 
-  const _CompactTimePicker({
-    required this.time,
+  const _TimePickerField({
     required this.label,
+    required this.time,
     required this.onTap,
     required this.isDark,
   });
@@ -302,30 +265,39 @@ class _CompactTimePicker extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 48,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: isDark ? AppColors.surfaceDark : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+            color: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
           ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.access_time,
-              size: 16,
-              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-            ),
+            Icon(Icons.access_time, size: 18, color: AppColors.primary),
             const SizedBox(width: 8),
-            Text(
-              _formatTime(time),
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _formatTime(time),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -337,5 +309,52 @@ class _CompactTimePicker extends StatelessWidget {
     final hour = time.hour.toString().padLeft(2, '0');
     final minute = time.minute.toString().padLeft(2, '0');
     return '$hour:$minute';
+  }
+}
+
+class _TextField extends StatelessWidget {
+  final String hintText;
+  final IconData icon;
+  final String? initialValue;
+  final ValueChanged<String> onChanged;
+  final bool isDark;
+
+  const _TextField({
+    required this.hintText,
+    required this.icon,
+    this.initialValue,
+    required this.onChanged,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: TextFormField(
+        initialValue: initialValue,
+        onChanged: onChanged,
+        style: TextStyle(
+          fontSize: 14,
+          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+        ),
+        decoration: InputDecoration(
+          hintText: hintText,
+          prefixIcon: Icon(icon, size: 18, color: AppColors.primary),
+          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          hintStyle: TextStyle(
+            fontSize: 13,
+            color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+          ),
+        ),
+      ),
+    );
   }
 }

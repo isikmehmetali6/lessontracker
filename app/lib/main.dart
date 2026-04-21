@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'core/theme/app_theme.dart';
 import 'providers/theme_provider.dart';
@@ -72,11 +73,13 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Init Services
-  await NotificationService().init();
+// Init Services (only on mobile)
+  if (!kIsWeb) {
+    NotificationService().init();
 
-  // Init Workmanager for Background Tasks
-  Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
+    // Init Workmanager for Background Tasks (only on mobile)
+    Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
+  }
 
   // Initialize Firebase — must succeed before sync/auth services
   bool firebaseReady = false;
@@ -94,9 +97,11 @@ Future<void> main() async {
     AutoSyncService().init();
   }
 
-  NotificationService().scheduleWeeklyReport();
+  if (!kIsWeb) {
+    NotificationService().scheduleWeeklyReport();
+  }
 
-  if (DateTime.now().weekday == DateTime.sunday) {
+  if (!kIsWeb && DateTime.now().weekday == DateTime.sunday) {
     WeeklyReportService().checkAndSendReport();
   }
 
@@ -263,9 +268,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
     return Consumer<AuthProvider>(
       builder: (context, auth, _) {
         if (auth.isAuthenticated) {
-          if (!auth.isEmailVerified) {
-            return const EmailVerificationScreen();
-          }
+          // TODO: Enable email verification check after SMTP settings are configured
+          // if (!auth.isEmailVerified) {
+          //   return const EmailVerificationScreen();
+          // }
           if (_showKvkk) {
             return KvkkOnboardingFlow(
               onComplete: () => setState(() => _showKvkk = false),

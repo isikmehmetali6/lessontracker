@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:record/record.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'file_service.dart';
@@ -22,11 +22,13 @@ class AudioService {
 
   /// Mikrofon izni var mı?
   Future<bool> hasPermission() async {
+    if (kIsWeb) return false;
     return await _recorder.hasPermission();
   }
 
   /// Kaydı başlat
   Future<bool> startRecording() async {
+    if (kIsWeb) return false;
     try {
       if (await isRecording) {
         await stopRecording();

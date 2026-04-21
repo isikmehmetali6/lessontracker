@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../repositories/note_repository.dart';
 import '../core/services/ocr_service.dart';
 import '../core/services/file_service.dart';
@@ -89,6 +90,10 @@ class NoteProvider extends ChangeNotifier {
   }) async {
     _error = null;
     try {
+      if (kIsWeb) {
+        _error = 'Text notes are not supported on web';
+        return null;
+      }
       final note = Note(
         id: _uuid.v4(),
         courseId: courseId,
@@ -118,6 +123,10 @@ class NoteProvider extends ChangeNotifier {
     String? courseName,
     String userName = 'User',
   }) async {
+    if (kIsWeb) {
+      _error = 'OCR notes are not supported on web';
+      return null;
+    }
     _error = null;
     _isProcessingOcr = true;
     notifyListeners();
@@ -298,6 +307,10 @@ class NoteProvider extends ChangeNotifier {
     String? courseName,
     String userName = 'User',
   }) async {
+    if (kIsWeb) {
+      _error = 'Image notes are not supported on web';
+      return null;
+    }
     _error = null;
     try {
       File imageToSave = imageFile;

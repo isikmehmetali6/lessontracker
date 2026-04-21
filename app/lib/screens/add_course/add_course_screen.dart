@@ -3,11 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/course_provider.dart';
+import '../../providers/moodle_provider.dart';
 import '../../widgets/common/common_widgets.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../core/utils/error_handler.dart';
-
 import '../../models/course.dart';
+import '../../models/moodle/moodle_course.dart';
 import 'widgets/course_basic_info_form.dart';
 import 'widgets/course_schedule_form.dart';
 import 'widgets/course_details_form.dart';
@@ -178,7 +179,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                         }
                       },
                     ),
-                    const SizedBox(height: 120),
+                    SizedBox(height: 120 + MediaQuery.of(context).padding.bottom),
                   ],
                 ),
               ),
@@ -192,6 +193,9 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   }
 
   Widget _buildAppBar(bool isDark) {
+    final moodleProvider = context.watch<MoodleProvider>();
+    final hasMoodle = moodleProvider.hasAccounts;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -201,22 +205,75 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
             onTap: () => Navigator.pop(context),
             showShadow: true,
           ),
-          Expanded(
-            child: Text(
-              widget.courseToEdit != null 
-                  ? 'Edit Course' // TODO: Localize 'Edit Course'
-                  : AppLocalizations.of(context)!.addNewCourse,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
+          const Spacer(),
+          if (hasMoodle && widget.courseToEdit == null)
+            IconButton(
+              onPressed: () => _showMoodleCoursePicker(context),
+              icon: Icon(
+                Icons.sync,
+                color: Theme.of(context).colorScheme.primary,
               ),
+              tooltip: 'Moodle\'dan Senkronize Et',
+            ),
+          Text(
+            widget.courseToEdit != null 
+                ? AppLocalizations.of(context)!.editCourse
+                : AppLocalizations.of(context)!.addNewCourse,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
             ),
           ),
+          const Spacer(),
           const SizedBox(width: 44), // Balance
         ],
       ),
     );
+  }
+
+  void _showMoodleCoursePicker(BuildContext context) async {
+    final moodleProvider = context.read<MoodleProvider>();
+    final courses = moodleProvider.allCourses;
+
+    if (courses.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Önce Moodle hesabınızı senkronize edin'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final selectedCourses = await showModalBottomSheet<List<MoodleCourse>>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _MoodleCoursePickerSheet(courses: courses),
+    );
+
+    if (selectedCourses != null && selectedCourses.isNotEmpty) {
+      final moodleCourse = selectedCourses.first;
+
+      setState(() {
+        _nameController.text = moodleCourse.fullName;
+        _scheduleItems.clear();
+        _scheduleItems.add(ScheduleItemData(
+          day: 0,
+          startTime: const TimeOfDay(hour: 9, minute: 0),
+          endTime: const TimeOfDay(hour: 9, minute: 50),
+        ));
+      });
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${moodleCourse.fullName} seçildi — ders bilgilerini düzenleyin'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   Widget _buildBottomButton(bool isDark) {
@@ -234,7 +291,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       ),
       child: PrimaryButton(
         text: widget.courseToEdit != null 
-            ? 'Save Changes' // TODO: Localize
+            ? AppLocalizations.of(context)!.saveChanges
             : AppLocalizations.of(context)!.createCourse,
         icon: Icons.check,
         isLoading: _isLoading,
@@ -390,5 +447,126 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
         setState(() => _isLoading = false);
       }
     }
+  }
+}
+
+class _MoodleCoursePickerSheet extends StatefulWidget {
+  final List<MoodleCourse> courses;
+
+  const _MoodleCoursePickerSheet({required this.courses});
+
+  @override
+  State<_MoodleCoursePickerSheet> createState() => _MoodleCoursePickerSheetState();
+}
+
+class _MoodleCoursePickerSheetState extends State<_MoodleCoursePickerSheet> {
+  final Set<int> _selectedIds = {};
+  String _searchQuery = '';
+
+  List<MoodleCourse> get _filteredCourses {
+    if (_searchQuery.isEmpty) return widget.courses;
+    return widget.courses.where((c) => 
+      c.fullName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+      (c.shortName?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false)
+    ).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.85,
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: Column(
+        children: [
+          // Handle
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.outlineVariant,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          // Header
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Row(
+              children: [
+                Text(
+                  'Moodle\'dan Seç',
+                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, <MoodleCourse>[]),
+                  child: const Text('İptal'),
+                ),
+                const SizedBox(width: 8),
+                FilledButton(
+                  onPressed: _selectedIds.isEmpty ? null : () {
+                    final selected = widget.courses.where((c) => _selectedIds.contains(c.id)).toList();
+                    Navigator.pop(context, selected);
+                  },
+                  child: Text('Ekle (${_selectedIds.length})'),
+                ),
+              ],
+            ),
+          ),
+          // Search
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: TextField(
+              onChanged: (v) => setState(() => _searchQuery = v),
+              decoration: InputDecoration(
+                hintText: 'Ders ara...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Course list
+          Expanded(
+            child: ListView.builder(
+              itemCount: _filteredCourses.length,
+              itemBuilder: (context, index) {
+                final course = _filteredCourses[index];
+                final isSelected = _selectedIds.contains(course.id);
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: isSelected 
+                        ? theme.colorScheme.primary 
+                        : theme.colorScheme.surfaceContainerHighest,
+                    child: isSelected 
+                        ? Icon(Icons.check, color: theme.colorScheme.onPrimary)
+                        : Text('${index + 1}'),
+                  ),
+                  title: Text(course.fullName),
+                  subtitle: course.shortName != null ? Text(course.shortName!) : null,
+                  onTap: () {
+                    setState(() {
+                      if (isSelected) {
+                        _selectedIds.remove(course.id);
+                      } else {
+                        _selectedIds.add(course.id);
+                      }
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

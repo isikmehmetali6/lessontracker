@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:uuid/uuid.dart';
 import '../models/moodle/moodle_account.dart';
 import '../models/moodle/moodle_announcement.dart';
@@ -51,6 +52,7 @@ class MoodleProvider extends ChangeNotifier {
 
   bool _isInitialized = false;
   bool _isLoading = false;
+  bool _isSyncing = false;
 
   // ==================== GETTERS ====================
 
@@ -151,6 +153,12 @@ class MoodleProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // Web'de SQLite kullanılamaz, moodle provider atlanır
+      if (kIsWeb) {
+        _isInitialized = true;
+        return;
+      }
+      
       _accounts = await _accountRepo.getAll();
       _isInitialized = true;
 
@@ -175,6 +183,14 @@ class MoodleProvider extends ChangeNotifier {
     required String username,
     required String password,
   }) async {
+    // Web'de SQLite kullanılamaz
+    if (kIsWeb) {
+      return (
+        success: false,
+        error: 'Moodle entegrasyonu şu an web\'de desteklenmiyor. Mobil uygulamayı kullanın.',
+      );
+    }
+
     // Duplikat kontrolü
     final alreadyExists = await _accountRepo.exists(baseUrl, username);
     if (alreadyExists) {
@@ -262,12 +278,19 @@ class MoodleProvider extends ChangeNotifier {
   }
 
   Future<void> _syncAll({bool silent = false}) async {
-    for (final account in _accounts) {
-      await _syncAccount(account.id, silent: silent);
+    if (_isSyncing) return;
+    _isSyncing = true;
+    try {
+      for (final account in _accounts) {
+        await _syncAccount(account.id, silent: silent);
+      }
+    } finally {
+      _isSyncing = false;
     }
   }
 
   Future<void> _syncAccount(String accountId, {bool silent = false}) async {
+    if (_isSyncing) return;
     final account = _accounts.where((a) => a.id == accountId).firstOrNull;
     if (account == null) return;
 

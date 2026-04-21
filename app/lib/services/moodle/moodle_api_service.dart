@@ -57,12 +57,8 @@ class MoodleApiService {
       final response = await http
           .post(
             uri,
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              'username': username,
-              'password': password,
-              'service': _tokenService,
-            }),
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'username=${Uri.encodeComponent(username)}&password=${Uri.encodeComponent(password)}&service=$_tokenService',
           )
           .timeout(_timeout);
       final body = _parseResponse(response);

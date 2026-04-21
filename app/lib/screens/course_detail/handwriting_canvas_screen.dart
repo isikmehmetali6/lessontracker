@@ -279,6 +279,12 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
   }
 
   @override
+  void dispose() {
+    _pdfController?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
