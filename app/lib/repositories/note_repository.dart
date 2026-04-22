@@ -123,7 +123,7 @@ class NoteRepository {
     placeholders.add('?');
     values.add(
       _dbHelper.normalizeForSearch(
-        '${note.title} ${note.content ?? ''} ${note.tags.join(' ')}',
+        '${note.title} ${note.content ?? ''} ${note.tags.join(' ')} ${note.filePath ?? ''} ${note.type.name}',
       ),
     );
 
@@ -298,13 +298,13 @@ class NoteRepository {
     return Note.fromMap(maps.first);
   }
 
-  /// Arama yap
+  /// Arama yap - title, content, tags, filePath, type, courseId hepsine bakar
   Future<List<Note>> searchNotes(String query) async {
     if (_dbHelper.isWeb) {
       final q = _dbHelper.normalizeForSearch(query);
       return _notesInMemory.where((n) {
         final searchContent = _dbHelper.normalizeForSearch(
-          '${n.title} ${n.content ?? ''} ${n.tags.join(' ')}',
+          '${n.title} ${n.content ?? ''} ${n.tags.join(' ')} ${n.filePath ?? ''} ${n.type.name}',
         );
         return searchContent.contains(q);
       }).toList();
@@ -313,8 +313,8 @@ class NoteRepository {
     final normalizedQuery = _dbHelper.normalizeForSearch(query);
     final maps = await db.query(
       'notes',
-      where: 'searchContent LIKE ?',
-      whereArgs: ['%$normalizedQuery%'],
+      where: 'searchContent LIKE ? OR filePath LIKE ? OR title LIKE ?',
+      whereArgs: ['%$normalizedQuery%', '%$query%', '%$query%'],
       orderBy: 'createdAt DESC',
     );
     return maps.map((map) => Note.fromMap(map)).toList();
@@ -331,7 +331,7 @@ class NoteRepository {
     for (final noteMap in notes) {
       final note = Note.fromMap(noteMap);
       final searchContent = _dbHelper.normalizeForSearch(
-        '${note.title} ${note.content ?? ''} ${note.tags.join(' ')}',
+        '${note.title} ${note.content ?? ''} ${note.tags.join(' ')} ${note.filePath ?? ''} ${note.type.name}',
       );
 
       if (noteMap['searchContent'] == searchContent) continue;
