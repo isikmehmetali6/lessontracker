@@ -502,7 +502,10 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 1. Local database'i temizle
+      // 1. Firebase Auth hesabını sil
+      await _auth?.currentUser?.delete();
+
+      // 2. Local database'i temizle
       await DatabaseHelper().clearAllData();
 
       // 2. SharedPreferences'ı temizle

@@ -338,6 +338,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   /// Şifre sıfırlama dialog'u
+  /// Not: Bu method şu anda kullanılmıyor - password recovery ayrı bir ekranda
+  // ignore: unused_element
   void _showForgotPasswordDialog(
     BuildContext context,
     AuthProvider provider,

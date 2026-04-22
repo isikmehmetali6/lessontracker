@@ -17,10 +17,7 @@ import 'widgets/course_details_form.dart';
 class AddCourseScreen extends StatefulWidget {
   final Course? courseToEdit;
 
-  const AddCourseScreen({
-    super.key,
-    this.courseToEdit,
-  });
+  const AddCourseScreen({super.key, this.courseToEdit});
 
   @override
   State<AddCourseScreen> createState() => _AddCourseScreenState();
@@ -59,20 +56,25 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       _officeHoursController.text = course.officeHours ?? '';
       _assistantController.text = course.assistantName ?? '';
       _absenceLimit = course.absenceLimit;
-      
+
       // Find color index
-      final colorIndex = AppColors.courseColors.indexWhere((c) => c.toARGB32() == course.color.toARGB32());
+      final colorIndex = AppColors.courseColors.indexWhere(
+        (c) => c.toARGB32() == course.color.toARGB32(),
+      );
       _selectedColorIndex = colorIndex != -1 ? colorIndex : 0;
 
       // Populate schedule
       _scheduleItems.clear();
       for (final day in course.scheduleDays) {
-        _scheduleItems.add(ScheduleItemData(
-          day: day,
-          startTime: course.startTime,
-          endTime: course.endTime,
-        )..location = course.location
-         ..professor = course.professor);
+        _scheduleItems.add(
+          ScheduleItemData(
+              day: day,
+              startTime: course.startTime,
+              endTime: course.endTime,
+            )
+            ..location = course.location
+            ..professor = course.professor,
+        );
       }
     }
   }
@@ -118,11 +120,13 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                       isDark: isDark,
                       onAddSchedule: () {
                         setState(() {
-                          _scheduleItems.add(ScheduleItemData(
-                            day: 0,
-                            startTime: const TimeOfDay(hour: 10, minute: 0),
-                            endTime: const TimeOfDay(hour: 10, minute: 50),
-                          ));
+                          _scheduleItems.add(
+                            ScheduleItemData(
+                              day: 0,
+                              startTime: const TimeOfDay(hour: 10, minute: 0),
+                              endTime: const TimeOfDay(hour: 10, minute: 50),
+                            ),
+                          );
                         });
                       },
                       onRemoveSchedule: (index) {
@@ -179,7 +183,9 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                         }
                       },
                     ),
-                    SizedBox(height: 120 + MediaQuery.of(context).padding.bottom),
+                    SizedBox(
+                      height: 120 + MediaQuery.of(context).padding.bottom,
+                    ),
                   ],
                 ),
               ),
@@ -216,14 +222,11 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
               tooltip: 'Moodle\'dan Senkronize Et',
             ),
           Text(
-            widget.courseToEdit != null 
+            widget.courseToEdit != null
                 ? AppLocalizations.of(context)!.editCourse
                 : AppLocalizations.of(context)!.addNewCourse,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
           ),
           const Spacer(),
           const SizedBox(width: 44), // Balance
@@ -259,17 +262,21 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       setState(() {
         _nameController.text = moodleCourse.fullName;
         _scheduleItems.clear();
-        _scheduleItems.add(ScheduleItemData(
-          day: 0,
-          startTime: const TimeOfDay(hour: 9, minute: 0),
-          endTime: const TimeOfDay(hour: 9, minute: 50),
-        ));
+        _scheduleItems.add(
+          ScheduleItemData(
+            day: 0,
+            startTime: const TimeOfDay(hour: 9, minute: 0),
+            endTime: const TimeOfDay(hour: 9, minute: 50),
+          ),
+        );
       });
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${moodleCourse.fullName} seçildi — ders bilgilerini düzenleyin'),
+          content: Text(
+            '${moodleCourse.fullName} seçildi — ders bilgilerini düzenleyin',
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -278,7 +285,12 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
 
   Widget _buildBottomButton(bool isDark) {
     return Container(
-      padding: EdgeInsets.fromLTRB(24, 16, 24, MediaQuery.of(context).padding.bottom + 16),
+      padding: EdgeInsets.fromLTRB(
+        24,
+        16,
+        24,
+        MediaQuery.of(context).padding.bottom + 16,
+      ),
       decoration: BoxDecoration(
         color: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
         boxShadow: [
@@ -290,7 +302,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
         ],
       ),
       child: PrimaryButton(
-        text: widget.courseToEdit != null 
+        text: widget.courseToEdit != null
             ? AppLocalizations.of(context)!.saveChanges
             : AppLocalizations.of(context)!.createCourse,
         icon: Icons.check,
@@ -306,18 +318,22 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
         SnackBar(
           content: Text(AppLocalizations.of(context)!.pleaseEnterCourseName),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
       return;
     }
 
     if (_scheduleItems.isEmpty) {
-       ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context)!.pleaseAddClassTime),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
       return;
@@ -341,69 +357,94 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       final provider = context.read<CourseProvider>();
 
       if (widget.courseToEdit != null) {
-         // Düzenleme modu
-         if (_scheduleItems.isNotEmpty) {
-           final item = _scheduleItems[0];
-           final updatedCourse = widget.courseToEdit!.copyWith(
+        // Düzenleme modu
+        if (_scheduleItems.isNotEmpty) {
+          final item = _scheduleItems[0];
+          final updatedCourse = widget.courseToEdit!.copyWith(
+            name: name,
+            location: item.location,
+            professor: item.professor,
+            color: color,
+            scheduleDays: [item.day],
+            startTime: item.startTime,
+            endTime: item.endTime,
+            absenceLimit: _absenceLimit,
+            professorEmail: _profEmailController.text.isNotEmpty
+                ? _profEmailController.text
+                : null,
+            professorPhone: _profPhoneController.text.isNotEmpty
+                ? _profPhoneController.text
+                : null,
+            professorOffice: _profOfficeController.text.isNotEmpty
+                ? _profOfficeController.text
+                : null,
+            officeHours: _officeHoursController.text.isNotEmpty
+                ? _officeHoursController.text
+                : null,
+            assistantName: _assistantController.text.isNotEmpty
+                ? _assistantController.text
+                : null,
+          );
+
+          final success = await provider.updateCourse(updatedCourse);
+
+          if (!mounted) return;
+
+          if (!success) {
+            // Çakışma hatası göster
+            ErrorHandler.handleError(
+              context,
+              provider.error ?? 'Failed to update course.',
+            );
+            return;
+          }
+
+          // Ek schedule item'ları yeni ders olarak ekle
+          for (int i = 1; i < _scheduleItems.length; i++) {
+            if (!mounted) return;
+            final newItem = _scheduleItems[i];
+            final addSuccess = await provider.addCourse(
               name: name,
-              location: item.location,
-              professor: item.professor,
+              location: newItem.location,
+              professor: newItem.professor,
               color: color,
-              scheduleDays: [item.day],
-              startTime: item.startTime,
-              endTime: item.endTime,
+              scheduleDays: [newItem.day],
+              startTime: newItem.startTime,
+              endTime: newItem.endTime,
               absenceLimit: _absenceLimit,
-              professorEmail: _profEmailController.text.isNotEmpty ? _profEmailController.text : null,
-              professorPhone: _profPhoneController.text.isNotEmpty ? _profPhoneController.text : null,
-              professorOffice: _profOfficeController.text.isNotEmpty ? _profOfficeController.text : null,
-              officeHours: _officeHoursController.text.isNotEmpty ? _officeHoursController.text : null,
-              assistantName: _assistantController.text.isNotEmpty ? _assistantController.text : null,
-           );
-           
-           final success = await provider.updateCourse(updatedCourse);
-           
-           if (!mounted) return;
-
-           if (!success) {
-             // Çakışma hatası göster
-             ErrorHandler.handleError(context, provider.error ?? 'Failed to update course.');
-             return;
-           }
-
-           // Ek schedule item'ları yeni ders olarak ekle
-           for (int i = 1; i < _scheduleItems.length; i++) {
-             if (!mounted) return;
-             final newItem = _scheduleItems[i];
-             final addSuccess = await provider.addCourse(
-                name: name,
-                location: newItem.location,
-                professor: newItem.professor,
-                color: color,
-                scheduleDays: [newItem.day],
-                startTime: newItem.startTime,
-                endTime: newItem.endTime,
-                absenceLimit: _absenceLimit,
-                professorEmail: _profEmailController.text.isNotEmpty ? _profEmailController.text : null,
-                professorPhone: _profPhoneController.text.isNotEmpty ? _profPhoneController.text : null,
-                professorOffice: _profOfficeController.text.isNotEmpty ? _profOfficeController.text : null,
-                officeHours: _officeHoursController.text.isNotEmpty ? _officeHoursController.text : null,
-                assistantName: _assistantController.text.isNotEmpty ? _assistantController.text : null,
-             );
-             if (!addSuccess && mounted) {
-               ErrorHandler.handleError(context, provider.error ?? 'Schedule conflict detected.');
-               return;
-             }
-           }
+              professorEmail: _profEmailController.text.isNotEmpty
+                  ? _profEmailController.text
+                  : null,
+              professorPhone: _profPhoneController.text.isNotEmpty
+                  ? _profPhoneController.text
+                  : null,
+              professorOffice: _profOfficeController.text.isNotEmpty
+                  ? _profOfficeController.text
+                  : null,
+              officeHours: _officeHoursController.text.isNotEmpty
+                  ? _officeHoursController.text
+                  : null,
+              assistantName: _assistantController.text.isNotEmpty
+                  ? _assistantController.text
+                  : null,
+            );
+            if (!addSuccess && mounted) {
+              ErrorHandler.handleError(
+                context,
+                provider.error ?? 'Schedule conflict detected.',
+              );
+              return;
+            }
+          }
         }
-        
+
         if (!mounted) return;
         HapticFeedback.mediumImpact();
         Navigator.pop(context);
-
       } else {
         // Yeni ders oluşturma
         int successCount = 0;
-        
+
         for (var item in _scheduleItems) {
           if (!mounted) return;
           final success = await provider.addCourse(
@@ -415,18 +456,31 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
             startTime: item.startTime,
             endTime: item.endTime,
             absenceLimit: _absenceLimit,
-            professorEmail: _profEmailController.text.isNotEmpty ? _profEmailController.text : null,
-            professorPhone: _profPhoneController.text.isNotEmpty ? _profPhoneController.text : null,
-            professorOffice: _profOfficeController.text.isNotEmpty ? _profOfficeController.text : null,
-            officeHours: _officeHoursController.text.isNotEmpty ? _officeHoursController.text : null,
-            assistantName: _assistantController.text.isNotEmpty ? _assistantController.text : null,
+            professorEmail: _profEmailController.text.isNotEmpty
+                ? _profEmailController.text
+                : null,
+            professorPhone: _profPhoneController.text.isNotEmpty
+                ? _profPhoneController.text
+                : null,
+            professorOffice: _profOfficeController.text.isNotEmpty
+                ? _profOfficeController.text
+                : null,
+            officeHours: _officeHoursController.text.isNotEmpty
+                ? _officeHoursController.text
+                : null,
+            assistantName: _assistantController.text.isNotEmpty
+                ? _assistantController.text
+                : null,
           );
           if (success) {
             successCount++;
           } else {
             // Çakışma veya hata — kullanıcıya göster ve dur
             if (mounted) {
-              ErrorHandler.handleError(context, provider.error ?? 'Failed to create course.');
+              ErrorHandler.handleError(
+                context,
+                provider.error ?? 'Failed to create course.',
+              );
             }
             return;
           }
@@ -441,7 +495,11 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      ErrorHandler.handleError(context, e, customMessage: 'An error occurred: $e');
+      ErrorHandler.handleError(
+        context,
+        e,
+        customMessage: 'An error occurred: $e',
+      );
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -456,7 +514,8 @@ class _MoodleCoursePickerSheet extends StatefulWidget {
   const _MoodleCoursePickerSheet({required this.courses});
 
   @override
-  State<_MoodleCoursePickerSheet> createState() => _MoodleCoursePickerSheetState();
+  State<_MoodleCoursePickerSheet> createState() =>
+      _MoodleCoursePickerSheetState();
 }
 
 class _MoodleCoursePickerSheetState extends State<_MoodleCoursePickerSheet> {
@@ -465,10 +524,13 @@ class _MoodleCoursePickerSheetState extends State<_MoodleCoursePickerSheet> {
 
   List<MoodleCourse> get _filteredCourses {
     if (_searchQuery.isEmpty) return widget.courses;
-    return widget.courses.where((c) => 
-      c.fullName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-      (c.shortName?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false)
-    ).toList();
+    return widget.courses
+        .where(
+          (c) =>
+              c.fullName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+              c.shortName.toLowerCase().contains(_searchQuery.toLowerCase()),
+        )
+        .toList();
   }
 
   @override
@@ -503,7 +565,9 @@ class _MoodleCoursePickerSheetState extends State<_MoodleCoursePickerSheet> {
               children: [
                 Text(
                   'Moodle\'dan Seç',
-                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const Spacer(),
                 TextButton(
@@ -512,10 +576,14 @@ class _MoodleCoursePickerSheetState extends State<_MoodleCoursePickerSheet> {
                 ),
                 const SizedBox(width: 8),
                 FilledButton(
-                  onPressed: _selectedIds.isEmpty ? null : () {
-                    final selected = widget.courses.where((c) => _selectedIds.contains(c.id)).toList();
-                    Navigator.pop(context, selected);
-                  },
+                  onPressed: _selectedIds.isEmpty
+                      ? null
+                      : () {
+                          final selected = widget.courses
+                              .where((c) => _selectedIds.contains(c.id))
+                              .toList();
+                          Navigator.pop(context, selected);
+                        },
                   child: Text('Ekle (${_selectedIds.length})'),
                 ),
               ],
@@ -529,7 +597,9 @@ class _MoodleCoursePickerSheetState extends State<_MoodleCoursePickerSheet> {
               decoration: InputDecoration(
                 hintText: 'Ders ara...',
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ),
@@ -543,15 +613,17 @@ class _MoodleCoursePickerSheetState extends State<_MoodleCoursePickerSheet> {
                 final isSelected = _selectedIds.contains(course.id);
                 return ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: isSelected 
-                        ? theme.colorScheme.primary 
+                    backgroundColor: isSelected
+                        ? theme.colorScheme.primary
                         : theme.colorScheme.surfaceContainerHighest,
-                    child: isSelected 
+                    child: isSelected
                         ? Icon(Icons.check, color: theme.colorScheme.onPrimary)
                         : Text('${index + 1}'),
                   ),
                   title: Text(course.fullName),
-                  subtitle: course.shortName != null ? Text(course.shortName!) : null,
+                  subtitle: course.shortName.isNotEmpty
+                      ? Text(course.shortName)
+                      : null,
                   onTap: () {
                     setState(() {
                       if (isSelected) {

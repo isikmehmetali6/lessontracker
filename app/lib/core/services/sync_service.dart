@@ -825,7 +825,10 @@ class SyncService {
     }
   }
 
-  /// B1 fix: Firestore batch'lerini 400'lük parçalara bölerek commit et
+  /// @nodoc
+  // B1 fix: Firestore batch'lerini 400'lük parçalara bölerek commit et
+  // NOT: Bu method şu anda kullanılmıyor ama gelecekte batch operations için gerekebilir
+  // ignore: unused_element
   Future<void> _commitInChunks<T>({
     required List<T> items,
     required String collectionPath,

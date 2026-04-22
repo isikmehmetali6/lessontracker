@@ -84,17 +84,20 @@ class ImageCompressorService {
 
   Future<Uint8List?> compressFromBytes(Uint8List bytes) async {
     try {
-      final result = await FlutterImageCompress.compressWithList(
+      final dynamic result = await FlutterImageCompress.compressWithList(
         bytes,
         quality: quality,
         minWidth: maxWidth,
         minHeight: maxHeight,
       );
-      if (result != null) return result;
+      if (result != null) {
+        return result as Uint8List;
+      }
+      return bytes;
     } catch (e) {
       debugPrint('ImageCompressorService: Error compressing bytes - $e');
+      return bytes;
     }
-    return bytes;
   }
 
   bool shouldCompress(int fileSizeBytes) {

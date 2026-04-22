@@ -17,7 +17,6 @@ class E2EMigrationService {
 
   final E2ECryptoService _cryptoService = E2ECryptoService();
   final E2EKeyService _keyService = E2EKeyService();
-  final E2EFileService _fileService = E2EFileService();
   final FileService _localFileService = FileService();
   final ImageCompressorService _imageCompressor = ImageCompressorService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
