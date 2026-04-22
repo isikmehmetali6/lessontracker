@@ -554,25 +554,41 @@ class DatabaseHelper {
       debugPrint('[DB Migration v14] Moodle tables created.');
     }
     if (oldVersion < 15) {
-      await db.execute("ALTER TABLE notes ADD COLUMN drawingData TEXT");
-      debugPrint(
-        '[DB Migration v15] Drawing data column added to notes table.',
-      );
+      // drawingData için migration - mevcut kolon kontrolü
+      try {
+        await db.execute("ALTER TABLE notes ADD COLUMN drawingData TEXT");
+        debugPrint('[DB Migration v15] Drawing data column added.');
+      } catch (e) {
+        debugPrint('[DB Migration v15] Column may already exist: $e');
+      }
     }
     if (oldVersion < 16) {
       debugPrint('[DB Migration v16] Database encryption enabled.');
     }
-if (oldVersion < 17) {
-      await db.execute(
-        'ALTER TABLE notes ADD COLUMN cloudPath TEXT',
-      );
-      await db.execute(
-        'ALTER TABLE notes ADD COLUMN thumbnailCloudPath TEXT',
-      );
-      await db.execute(
-        'ALTER TABLE course_files ADD COLUMN cloudPath TEXT',
-      );
-      debugPrint('[DB Migration v17] Cloud path columns added.');
+    if (oldVersion < 17) {
+      // cloudPath için migration - mevcut kolon kontrolü
+      try {
+        await db.execute('ALTER TABLE notes ADD COLUMN cloudPath TEXT');
+      } catch (e) {
+        debugPrint('[DB Migration v17] cloudPath may already exist: $e');
+      }
+      try {
+        await db.execute(
+          'ALTER TABLE notes ADD COLUMN thumbnailCloudPath TEXT',
+        );
+      } catch (e) {
+        debugPrint(
+          '[DB Migration v17] thumbnailCloudPath may already exist: $e',
+        );
+      }
+      try {
+        await db.execute('ALTER TABLE course_files ADD COLUMN cloudPath TEXT');
+      } catch (e) {
+        debugPrint(
+          '[DB Migration v17] course_files.cloudPath may already exist: $e',
+        );
+      }
+      debugPrint('[DB Migration v17] Cloud path columns processed.');
     }
   }
 

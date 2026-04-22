@@ -93,12 +93,44 @@ class NoteRepository {
       return;
     }
     final db = await _dbHelper.database;
-    await db.insert('notes', {
-      ...note.toMap(),
-      'searchContent': _dbHelper.normalizeForSearch(
+
+    // Sadece mevcut kolonları kullan (migration'dan bağımsız)
+    final map = note.toMap();
+    final columns = [
+      'id',
+      'courseId',
+      'type',
+      'title',
+      'content',
+      'filePath',
+      'thumbnailPath',
+      'audioDuration',
+      'tags',
+      'bookmarks',
+      'isBookmarked',
+      'createdAt',
+      'updatedAt',
+    ];
+    final values = <dynamic>[];
+    final placeholders = <String>[];
+
+    for (final col in columns) {
+      if (map.containsKey(col)) {
+        placeholders.add('?');
+        values.add(map[col]);
+      }
+    }
+    placeholders.add('?');
+    values.add(
+      _dbHelper.normalizeForSearch(
         '${note.title} ${note.content ?? ''} ${note.tags.join(' ')}',
       ),
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
+    );
+
+    await db.execute(
+      'INSERT OR REPLACE INTO notes (${columns.join(',')}, searchContent) VALUES (${placeholders.join(',')})',
+      values,
+    );
     AutoSyncService().triggerBackup();
   }
 
