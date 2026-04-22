@@ -26,7 +26,6 @@ import '../../core/services/sync_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/secure_storage_service.dart';
 import 'widgets/quick_action_card.dart';
-import 'widgets/voice_recording_sheet.dart';
 import 'widgets/today_schedule_list.dart';
 import 'widgets/priority_courses_list.dart';
 import 'widgets/attendance_overview_list.dart';
@@ -85,8 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (authProvider.user != null && !authProvider.isGuest) {
       final uid = authProvider.user!.uid;
       final knownKey = 'known_user_$uid';
-      final isKnownDevice =
-          await SecureStorageService.getBool(knownKey);
+      final isKnownDevice = await SecureStorageService.getBool(knownKey);
 
       if (!isKnownDevice) {
         // Bu kullanıcı bu cihazda ilk kez — bulutta veri var mı kontrol et
@@ -354,8 +352,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 index: _currentIndex,
                 children: [
                   _HomeContent(
-                    onScanTap: () => _showQuickCapture(context, isOcr: true),
-                    onVoiceTap: () => _showQuickCapture(context, isOcr: false),
+                    onScanTap: () => _quickCaptureOcr(context),
                     onCourseTap: (course) => _navigateToCourse(course),
                   ),
                   const WeeklyPlanScreen(),
@@ -384,18 +381,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final ImagePicker _imagePicker = ImagePicker();
 
-  void _showQuickCapture(BuildContext context, {required bool isOcr}) {
-    if (isOcr) {
-      _quickCaptureOcr(context);
-    } else {
-      _quickCaptureVoice(context);
-    }
-  }
-
   /// OCR Quick Capture: Camera → OCR → Course Selection → Save
   Future<void> _quickCaptureOcr(BuildContext context) async {
     try {
-      final consent = await ConsentUtils.showContentCaptureConsentDialog(context);
+      final consent = await ConsentUtils.showContentCaptureConsentDialog(
+        context,
+      );
       if (consent != true || !mounted) return;
 
       final XFile? image = await _imagePicker.pickImage(
@@ -470,66 +461,6 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted) {
         ErrorHandler.handleError(context, e, customMessage: 'Error: $e');
       }
-    }
-  }
-
-  /// Voice Quick Capture: Record → Stop → Course Selection → Save
-  Future<void> _quickCaptureVoice(BuildContext context) async {
-    final consent = await ConsentUtils.showContentCaptureConsentDialog(context, isAudio: true);
-    if (consent != true || !mounted) return;
-
-    final noteProvider = context.read<NoteProvider>();
-
-    // Start recording
-    final success = await noteProvider.startRecording();
-    if (!success) {
-      if (mounted) {
-        ErrorHandler.handleError(context, 'Microphone permission required');
-      }
-      return;
-    }
-
-    if (!mounted) return;
-    HapticFeedback.mediumImpact();
-
-    // Show recording bottom sheet
-    final shouldSave = await showModalBottomSheet<bool>(
-      context: context,
-      isDismissible: false,
-      enableDrag: false,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => VoiceRecordingSheet(noteProvider: noteProvider),
-    );
-
-    if (!mounted) return;
-
-    if (shouldSave == true) {
-      // Ask which course to save to
-      final courseId = await _showCourseSelectionDialog(context);
-      if (courseId == null || !mounted) {
-        // User cancelled — discard recording
-        await noteProvider.cancelRecording();
-        return;
-      }
-
-      final note = await noteProvider.stopRecordingAndSave(courseId: courseId);
-
-      if (!mounted) return;
-      if (note != null) {
-        HapticFeedback.mediumImpact();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('🎙️ Voice memo saved!'),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        );
-      }
-    } else {
-      // User cancelled recording
-      await noteProvider.cancelRecording();
     }
   }
 
@@ -679,14 +610,9 @@ class _HomeScreenState extends State<HomeScreen> {
 /// Ana sayfa içeriği
 class _HomeContent extends StatelessWidget {
   final VoidCallback onScanTap;
-  final VoidCallback onVoiceTap;
   final Function(Course) onCourseTap;
 
-  const _HomeContent({
-    required this.onScanTap,
-    required this.onVoiceTap,
-    required this.onCourseTap,
-  });
+  const _HomeContent({required this.onScanTap, required this.onCourseTap});
 
   @override
   Widget build(BuildContext context) {
@@ -774,10 +700,7 @@ class _HomeContent extends StatelessWidget {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: QuickCaptureButtons(
-                onScanTap: onScanTap,
-                onVoiceTap: onVoiceTap,
-              ),
+              child: QuickCaptureButtons(onScanTap: onScanTap),
             ),
           ),
 

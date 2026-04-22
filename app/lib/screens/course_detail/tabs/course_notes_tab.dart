@@ -72,7 +72,9 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
     final l10n = AppLocalizations.of(context)!;
 
     final isLoading = context.select<NoteProvider, bool>((p) => p.isLoading);
-    final notes = context.select<NoteProvider, List<Note>>((p) => p.courseNotes);
+    final notes = context.select<NoteProvider, List<Note>>(
+      (p) => p.courseNotes,
+    );
 
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -99,7 +101,9 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                      color: isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondaryLight,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -108,7 +112,9 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
-                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                      color: isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondaryLight,
                     ),
                   ),
                 ],
@@ -161,25 +167,49 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
             children: [
               _buildFilterChip(null, l10n.viewAll, Icons.list, isDark),
               const SizedBox(width: 8),
-              _buildFilterChip(NoteType.text, l10n.keyboard, Icons.text_snippet_outlined, isDark),
+              _buildFilterChip(
+                NoteType.text,
+                l10n.keyboard,
+                Icons.text_snippet_outlined,
+                isDark,
+              ),
               const SizedBox(width: 8),
-              _buildFilterChip(NoteType.image, l10n.camera, Icons.image_outlined, isDark),
+              _buildFilterChip(
+                NoteType.image,
+                l10n.camera,
+                Icons.image_outlined,
+                isDark,
+              ),
               const SizedBox(width: 8),
-              _buildFilterChip(NoteType.audio, l10n.voiceMemo, Icons.mic_outlined, isDark),
+              _buildFilterChip(
+                NoteType.ocr,
+                'OCR',
+                Icons.document_scanner_outlined,
+                isDark,
+              ),
               const SizedBox(width: 8),
-              _buildFilterChip(NoteType.ocr, 'OCR', Icons.document_scanner_outlined, isDark),
-              const SizedBox(width: 8),
-              _buildFilterChip(NoteType.drawing, 'Drawing', Icons.draw_outlined, isDark),
+              _buildFilterChip(
+                NoteType.drawing,
+                'Drawing',
+                Icons.draw_outlined,
+                isDark,
+              ),
               const SizedBox(width: 8),
               // Bookmark sort toggle
               GestureDetector(
-                onTap: () => setState(() => _bookmarkedFirst = !_bookmarkedFirst),
+                onTap: () =>
+                    setState(() => _bookmarkedFirst = !_bookmarkedFirst),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: _bookmarkedFirst
                         ? AppColors.amber.withValues(alpha: 0.15)
-                        : (isDark ? AppColors.surfaceDark : Colors.grey.shade100),
+                        : (isDark
+                              ? AppColors.surfaceDark
+                              : Colors.grey.shade100),
                     borderRadius: BorderRadius.circular(10),
                     border: _bookmarkedFirst
                         ? Border.all(color: AppColors.amber, width: 1.5)
@@ -189,16 +219,26 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        _bookmarkedFirst ? Icons.bookmark : Icons.bookmark_border,
+                        _bookmarkedFirst
+                            ? Icons.bookmark
+                            : Icons.bookmark_border,
                         size: 16,
-                        color: _bookmarkedFirst ? AppColors.amber : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+                        color: _bookmarkedFirst
+                            ? AppColors.amber
+                            : (isDark
+                                  ? AppColors.textSecondaryDark
+                                  : AppColors.textSecondaryLight),
                       ),
                       const SizedBox(width: 4),
                       Text(
                         '★',
                         style: TextStyle(
                           fontSize: 12,
-                          color: _bookmarkedFirst ? AppColors.amber : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+                          color: _bookmarkedFirst
+                              ? AppColors.amber
+                              : (isDark
+                                    ? AppColors.textSecondaryDark
+                                    : AppColors.textSecondaryLight),
                         ),
                       ),
                     ],
@@ -217,7 +257,9 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
               Icon(
                 Icons.sticky_note_2_outlined,
                 size: 14,
-                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                color: isDark
+                    ? AppColors.textSecondaryDark
+                    : AppColors.textSecondaryLight,
               ),
               const SizedBox(width: 6),
               Text(
@@ -227,7 +269,9 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : AppColors.textSecondaryLight,
                 ),
               ),
             ],
@@ -241,7 +285,9 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
                   child: Text(
                     l10n.noResults,
                     style: TextStyle(
-                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                      color: isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondaryLight,
                     ),
                   ),
                 )
@@ -261,7 +307,11 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
                         ),
                         alignment: Alignment.centerRight,
                         padding: const EdgeInsets.only(right: 24),
-                        child: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
+                        child: const Icon(
+                          Icons.delete_outline,
+                          color: Colors.white,
+                          size: 28,
+                        ),
                       ),
                       confirmDismiss: (direction) async {
                         return await showDialog<bool>(
@@ -276,7 +326,10 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
                               ),
                               TextButton(
                                 onPressed: () => Navigator.pop(context, true),
-                                child: Text(l10n.delete, style: const TextStyle(color: AppColors.red)),
+                                child: Text(
+                                  l10n.delete,
+                                  style: const TextStyle(color: AppColors.red),
+                                ),
                               ),
                             ],
                           ),
@@ -288,7 +341,9 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
                           SnackBar(
                             content: Text(l10n.delete),
                             behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                         );
                       },
@@ -309,7 +364,12 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
     );
   }
 
-  Widget _buildFilterChip(NoteType? type, String label, IconData icon, bool isDark) {
+  Widget _buildFilterChip(
+    NoteType? type,
+    String label,
+    IconData icon,
+    bool isDark,
+  ) {
     final isSelected = _selectedFilter == type;
     return GestureDetector(
       onTap: () => setState(() => _selectedFilter = type),
@@ -329,14 +389,26 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 16, color: isSelected ? AppColors.primary : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected
+                  ? AppColors.primary
+                  : (isDark
+                        ? AppColors.textSecondaryDark
+                        : AppColors.textSecondaryLight),
+            ),
             const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? AppColors.primary : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+                color: isSelected
+                    ? AppColors.primary
+                    : (isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondaryLight),
               ),
             ),
           ],

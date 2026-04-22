@@ -683,13 +683,8 @@ class PriorityCourseCard extends StatelessWidget {
 /// Hızlı yakalama butonları
 class QuickCaptureButtons extends StatelessWidget {
   final VoidCallback onScanTap;
-  final VoidCallback onVoiceTap;
 
-  const QuickCaptureButtons({
-    super.key,
-    required this.onScanTap,
-    required this.onVoiceTap,
-  });
+  const QuickCaptureButtons({super.key, required this.onScanTap});
 
   @override
   Widget build(BuildContext context) {
@@ -706,21 +701,6 @@ class QuickCaptureButtons extends StatelessWidget {
             color: AppColors.primary,
             isHighlighted: true,
             onTap: onScanTap,
-            isDark: isDark,
-          ),
-        ),
-        const SizedBox(width: 16),
-        // Voice Memo
-        Expanded(
-          child: _QuickCaptureButton(
-            icon: Icons.mic,
-            title: 'Voice Memo',
-            subtitle: 'Record Audio',
-            color: isDark
-                ? AppColors.textPrimaryDark
-                : AppColors.textPrimaryLight,
-            isHighlighted: false,
-            onTap: onVoiceTap,
             isDark: isDark,
           ),
         ),
