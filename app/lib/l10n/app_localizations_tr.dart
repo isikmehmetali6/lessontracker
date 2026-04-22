@@ -39,7 +39,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get noNotesYet => 'Henüz not yok. Kaydetmeye başla!';
 
   @override
-  String get noNotesDescription => 'İlk notunuzu almak için aşağıdaki araçları kullanın!';
+  String get noNotesDescription =>
+      'İlk notunuzu almak için aşağıdaki araçları kullanın!';
 
   @override
   String get goodMorning => 'Günaydın,';
@@ -138,7 +139,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get deleteCourse => 'Dersi Sil';
 
   @override
-  String get deleteCourseConfirmation => 'Bu işlem, bu dersle ilişkili tüm notları silecektir.';
+  String get deleteCourseConfirmation =>
+      'Bu işlem, bu dersle ilişkili tüm notları silecektir.';
 
   @override
   String get cancel => 'İptal';
@@ -313,13 +315,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get improvementNeeded => 'Geliştirilmeli';
 
   @override
-  String get gradesTab => 'Notlar';
+  String get gradesTab => 'Sınavlar';
 
   @override
   String get filesTab => 'Dosyalar';
 
   @override
-  String get notesTab => 'Notlar';
+  String get notesTab => 'Notlarım';
 
   @override
   String get addGrade => 'Puan Ekle';
@@ -452,7 +454,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get youAreInArea => 'Ders konumundasın.';
 
   @override
-  String get syncDescription => 'Verilerinizi buluta yedekleyin veya bu cihaza geri yükleyin.';
+  String get syncDescription =>
+      'Verilerinizi buluta yedekleyin veya bu cihaza geri yükleyin.';
 
   @override
   String get processing => 'İşleniyor...';
@@ -467,13 +470,15 @@ class AppLocalizationsTr extends AppLocalizations {
   String get restoreData => 'Verileri Geri Yükle';
 
   @override
-  String get restoreDescription => 'Buluttan indir (Yerel verinin üzerine yazar)';
+  String get restoreDescription =>
+      'Buluttan indir (Yerel verinin üzerine yazar)';
 
   @override
   String get confirmRestore => 'Geri Yüklemeyi Onayla';
 
   @override
-  String get restoreWarning => 'Bu işlem bazı yerel verilerin üzerine bulut verilerini yazacaktır. Devam et?';
+  String get restoreWarning =>
+      'Bu işlem bazı yerel verilerin üzerine bulut verilerini yazacaktır. Devam et?';
 
   @override
   String get restoreAction => 'Geri Yükle';
@@ -544,7 +549,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get profileUpdated => 'Profil başarıyla güncellendi';
 
   @override
-  String get emailVerificationSent => 'Yeni adrese doğrulama e-postası gönderildi';
+  String get emailVerificationSent =>
+      'Yeni adrese doğrulama e-postası gönderildi';
 
   @override
   String get passwordChanged => 'Şifre başarıyla değiştirildi';
@@ -556,31 +562,36 @@ class AppLocalizationsTr extends AppLocalizations {
   String get faqQ1 => 'Yeni ders nasıl eklenir?';
 
   @override
-  String get faqA1 => 'Ana ekrandaki + butonuna dokunun ve ders adı, program ve profesör bilgilerini doldurun.';
+  String get faqA1 =>
+      'Ana ekrandaki + butonuna dokunun ve ders adı, program ve profesör bilgilerini doldurun.';
 
   @override
   String get faqQ2 => 'Devamsızlıklarımı nasıl takip edebilirim?';
 
   @override
-  String get faqA2 => 'Herhangi bir dersi açın ve devamsızlık sayacını kullanarak devamsızlık ekleyin veya çıkarın. Limite yaklaştığınızda uyarı alırsınız.';
+  String get faqA2 =>
+      'Herhangi bir dersi açın ve devamsızlık sayacını kullanarak devamsızlık ekleyin veya çıkarın. Limite yaklaştığınızda uyarı alırsınız.';
 
   @override
   String get faqQ3 => 'Verilerimi yedekleyebilir miyim?';
 
   @override
-  String get faqA3 => 'Evet! Ayarlar > Senkronizasyon bölümüne giderek verilerinizi buluta yükleyebilirsiniz. Bu özelliği kullanmak için giriş yapmanız gerekir.';
+  String get faqA3 =>
+      'Evet! Ayarlar > Senkronizasyon bölümüne giderek verilerinizi buluta yükleyebilirsiniz. Bu özelliği kullanmak için giriş yapmanız gerekir.';
 
   @override
   String get faqQ4 => 'Sesli not nasıl kaydedilir?';
 
   @override
-  String get faqA4 => 'Bir ders açın, + butonuna dokunun ve mikrofon simgesini seçerek ses kaydı başlatın.';
+  String get faqA4 =>
+      'Bir ders açın, + butonuna dokunun ve mikrofon simgesini seçerek ses kaydı başlatın.';
 
   @override
   String get faqQ5 => 'Uygulama dilini nasıl değiştiririm?';
 
   @override
-  String get faqA5 => 'Ayarlar\'a gidin ve Dil seçeneğine dokunun. İngilizce, Türkçe, İspanyolca ve Almanca arasında seçim yapabilirsiniz.';
+  String get faqA5 =>
+      'Ayarlar\'a gidin ve Dil seçeneğine dokunun. İngilizce, Türkçe, İspanyolca ve Almanca arasında seçim yapabilirsiniz.';
 
   @override
   String get contactUs => 'İletişim';
@@ -604,7 +615,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get aboutApp => 'Hakkında';
 
   @override
-  String get aboutDescription => 'Lesson Tracker, öğrencilerin derslerini organize etmelerine, devamsızlıklarını takip etmelerine, not almalarına ve teslim tarihlerini yönetmelerine yardımcı olur.';
+  String get aboutDescription =>
+      'Lesson Tracker, öğrencilerin derslerini organize etmelerine, devamsızlıklarını takip etmelerine, not almalarına ve teslim tarihlerini yönetmelerine yardımcı olur.';
 
   @override
   String get privacyPolicy => 'Gizlilik Politikası';
@@ -634,7 +646,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get clearCache => 'Önbelleği Temizle';
 
   @override
-  String get clearCacheConfirmation => 'Geçici dosyalar silinecektir. Verileriniz etkilenmez. Devam et?';
+  String get clearCacheConfirmation =>
+      'Geçici dosyalar silinecektir. Verileriniz etkilenmez. Devam et?';
 
   @override
   String get cacheCleared => 'Önbellek başarıyla temizlendi!';
@@ -891,7 +904,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get appLockDisabled => 'Kapalı';
 
   @override
-  String get appLockAuthReason => 'Uygulama kilidini etkinleştirmek için doğrulayın';
+  String get appLockAuthReason =>
+      'Uygulama kilidini etkinleştirmek için doğrulayın';
 
   @override
   String get shareNotes => 'Notlarını Görüntüle';
