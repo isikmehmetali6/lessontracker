@@ -314,7 +314,11 @@ class NoteRepository {
     final maps = await db.query(
       'notes',
       where: 'searchContent LIKE ? OR filePath LIKE ? OR title LIKE ?',
-      whereArgs: ['%$normalizedQuery%', '%$query%', '%$query%'],
+      whereArgs: [
+        '%$normalizedQuery%',
+        '%$normalizedQuery%',
+        '%$normalizedQuery%',
+      ],
       orderBy: 'createdAt DESC',
     );
     return maps.map((map) => Note.fromMap(map)).toList();
