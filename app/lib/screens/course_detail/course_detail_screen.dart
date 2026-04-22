@@ -144,7 +144,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
         },
         onCaptureImageCamera: () => _captureImage(ImageSource.camera, course),
         onCaptureImageGallery: () => _captureImage(ImageSource.gallery, course),
-        onToggleRecording: () => _toggleRecording(course),
         onShowTextNoteDialog: () => _showTextNoteDialog(course),
         onCaptureOcr: () => _captureOcr(course),
         onOpenDrawingCanvas: () => _openDrawingCanvas(course),
@@ -417,7 +416,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
     );
   }
 
-
   Future<void> _addFile(Course course) async {
     final success = await context.read<CourseProvider>().addFile(course.id);
     if (success) {
@@ -613,7 +611,9 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
           }
         }
       } else {
-        final consent = await ConsentUtils.showContentCaptureConsentDialog(context);
+        final consent = await ConsentUtils.showContentCaptureConsentDialog(
+          context,
+        );
         if (consent != true || !mounted) return;
 
         final XFile? image = await _imagePicker.pickImage(
@@ -689,8 +689,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
     }
   }
 
-
-
   void _showImageNoteDialog(File imageFile, Course course) {
     showModalBottomSheet(
       context: context,
@@ -719,32 +717,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
         },
       ),
     );
-  }
-
-  Future<void> _toggleRecording(Course course) async {
-    final provider = context.read<NoteProvider>();
-
-    if (provider.isRecording) {
-      // Kaydı durdur
-      final note = await provider.stopRecordingAndSave(courseId: course.id);
-
-      if (note != null) {
-        HapticFeedback.mediumImpact();
-        _showSnackBar('Voice memo saved!');
-      }
-    } else {
-      final consent = await ConsentUtils.showContentCaptureConsentDialog(context, isAudio: true);
-      if (consent != true || !mounted) return;
-
-      // Kaydı başlat
-      final success = await provider.startRecording();
-      if (success) {
-        HapticFeedback.mediumImpact();
-        _showSnackBar('Recording started...');
-      } else {
-        ErrorHandler.handleError(context, 'Microphone permission required');
-      }
-    }
   }
 
   void _showTextNoteDialog(Course course) {
