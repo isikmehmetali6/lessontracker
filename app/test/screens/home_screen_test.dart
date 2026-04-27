@@ -18,7 +18,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:lesson_tracker/core/services/notification_service.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
-import 'package:lesson_tracker/screens/home/widgets/quick_action_card.dart';
 
 class MockCourseProvider extends Mock implements CourseProvider {}
 class MockNoteProvider extends Mock implements NoteProvider {}

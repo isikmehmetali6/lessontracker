@@ -5,6 +5,8 @@ import 'package:lesson_tracker/core/database/database_helper.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   setUpAll(() {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
@@ -17,24 +19,21 @@ void main() {
     setUp(() async {
       provider = DeadlineProvider();
       await DatabaseHelper().clearAllData();
-      
+
       // Ensure the course exists to satisfy the FOREIGN KEY constraint for 'c1'
       final db = await DatabaseHelper().database;
-      await db.insert(
-        'courses',
-        {
-          'id': 'c1',
-          'name': 'Test',
-          'color': 0xFF000000,
-          'scheduleDays': '[0]',
-          'startTimeHour': 9,
-          'startTimeMinute': 0,
-          'endTimeHour': 10,
-          'endTimeMinute': 0,
-          'createdAt': DateTime.now().toIso8601String(),
-        },
-      );
-      
+      await db.insert('courses', {
+        'id': 'c1',
+        'name': 'Test',
+        'color': 0xFF000000,
+        'scheduleDays': '[0]',
+        'startTimeHour': 9,
+        'startTimeMinute': 0,
+        'endTimeHour': 10,
+        'endTimeMinute': 0,
+        'createdAt': DateTime.now().toIso8601String(),
+      });
+
       await provider.loadDeadlines();
     });
 
@@ -63,14 +62,17 @@ void main() {
       await provider.addDeadline(d2);
 
       expect(provider.deadlines.length, 2);
-      expect(provider.deadlines.first.id, '2'); // Earlier deadline should be first
+      expect(
+        provider.deadlines.first.id,
+        '2',
+      ); // Earlier deadline should be first
     });
 
     test('getDaysLeft correctly calculates difference in days', () {
       final now = DateTime.now();
-      final targetDate = DateTime(now.year, now.month, now.day + 4); 
+      final targetDate = DateTime(now.year, now.month, now.day + 4);
       final daysLeft = provider.getDaysLeft(targetDate);
-      expect(daysLeft, 4); 
+      expect(daysLeft, 4);
     });
 
     test('deleteDeadline removes deadline', () async {

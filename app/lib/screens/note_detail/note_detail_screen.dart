@@ -1,15 +1,18 @@
 import 'dart:io';
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:pdfx/pdfx.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/note.dart';
 import '../../models/course.dart';
 import '../../providers/note_provider.dart';
 import '../../providers/course_provider.dart';
 import '../../core/services/file_service.dart';
+import '../../widgets/course/drawing_canvas.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 
 class NoteDetailScreen extends StatefulWidget {
@@ -120,6 +123,27 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                   // Audio Player
                   if (widget.note.isAudio) ...[
                     _AudioPlayerWidget(note: widget.note, isDark: isDark),
+                    const SizedBox(height: 32),
+                  ],
+
+                  // Drawing display
+                  if (widget.note.type == NoteType.drawing &&
+                      widget.note.drawingData != null &&
+                      widget.note.drawingData!.isNotEmpty) ...[
+                    _DrawingDisplayWidget(
+                      drawingData: widget.note.drawingData!,
+                      isDark: isDark,
+                    ),
+                    const SizedBox(height: 32),
+                  ],
+
+                  // PDF display
+                  if (widget.note.filePath != null &&
+                      widget.note.filePath!.toLowerCase().endsWith('.pdf')) ...[
+                    _PdfDisplayWidget(
+                      pdfPath: widget.note.filePath!,
+                      isDark: isDark,
+                    ),
                     const SizedBox(height: 32),
                   ],
 
@@ -921,6 +945,201 @@ class _AudioPlayerWidgetState extends State<_AudioPlayerWidget> {
     final minutes = d.inMinutes;
     final seconds = d.inSeconds % 60;
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+}
+
+class _DrawingDisplayWidget extends StatelessWidget {
+  final String drawingData;
+  final bool isDark;
+
+  const _DrawingDisplayWidget({required this.drawingData, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    List<DrawingStroke> strokes = [];
+    try {
+      final Map<String, dynamic> decoded = jsonDecode(drawingData);
+      if (decoded.containsKey('strokesByPage')) {
+        final strokesByPage = decoded['strokesByPage'] as Map<String, dynamic>;
+        if (strokesByPage.containsKey('1')) {
+          final pageStrokes = strokesByPage['1'] as List;
+          strokes = pageStrokes
+              .map((e) => DrawingStroke.fromMap(e as Map<String, dynamic>))
+              .toList();
+        }
+      } else {
+        final List<dynamic> jsonList = jsonDecode(drawingData);
+        strokes = jsonList
+            .map((e) => DrawingStroke.fromMap(e as Map<String, dynamic>))
+            .toList();
+      }
+    } catch (e) {
+      debugPrint('Error parsing drawing data: $e');
+    }
+
+    if (strokes.isEmpty) {
+      return Container(
+        height: 200,
+        decoration: BoxDecoration(
+          color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Center(
+          child: Text('No drawing data'),
+        ),
+      );
+    }
+
+    return Container(
+      height: 300,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: DrawingCanvas(
+          strokes: strokes,
+          currentColor: Colors.black,
+          currentSize: 4.0,
+          backgroundColor: Colors.white,
+        ),
+      ),
+    );
+  }
+}
+
+class _PdfDisplayWidget extends StatefulWidget {
+  final String pdfPath;
+  final bool isDark;
+
+  const _PdfDisplayWidget({required this.pdfPath, required this.isDark});
+
+  @override
+  State<_PdfDisplayWidget> createState() => _PdfDisplayWidgetState();
+}
+
+class _PdfDisplayWidgetState extends State<_PdfDisplayWidget> {
+  String? _resolvedPath;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolvePath();
+  }
+
+  Future<void> _resolvePath() async {
+    final resolved = await FileService().resolveFilePath(widget.pdfPath);
+    if (mounted) {
+      setState(() {
+        _resolvedPath = resolved;
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Container(
+        height: 200,
+        decoration: BoxDecoration(
+          color: widget.isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_resolvedPath == null || !File(_resolvedPath!).existsSync()) {
+      return Container(
+        height: 200,
+        decoration: BoxDecoration(
+          color: widget.isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.picture_as_pdf,
+                size: 48,
+                color: widget.isDark ? Colors.grey : Colors.grey.shade600,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'PDF file not found',
+                style: TextStyle(
+                  color: widget.isDark ? Colors.grey : Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      height: 400,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: _PdfViewer(filePath: _resolvedPath!),
+      ),
+    );
+  }
+}
+
+class _PdfViewer extends StatefulWidget {
+  final String filePath;
+
+  const _PdfViewer({required this.filePath});
+
+  @override
+  State<_PdfViewer> createState() => _PdfViewerState();
+}
+
+class _PdfViewerState extends State<_PdfViewer> {
+  PdfControllerPinch? _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = PdfControllerPinch(
+      document: PdfDocument.openFile(widget.filePath),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_controller == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return PdfViewPinch(controller: _controller!);
   }
 }
 

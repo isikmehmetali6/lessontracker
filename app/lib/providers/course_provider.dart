@@ -41,6 +41,16 @@ class CourseProvider extends ChangeNotifier {
   // Getters
   List<Course> get courses => List.unmodifiable(_courses);
 
+  /// O(1) lookup by course id
+  Map<String, Course> get coursesById {
+    if (_coursesByIdCache == null || _coursesByIdCache!.length != _courses.length) {
+      _coursesByIdCache = {for (var c in _courses) c.id: c};
+    }
+    return _coursesByIdCache!;
+  }
+
+  Map<String, Course>? _coursesByIdCache;
+
   /// İsim bazlı gruplandırılmış dersler (Aynı isimli dersleri tek bir dersmiş gibi gösterir)
   List<Course> get uniqueCourses {
     final Map<String, Course> courseMap = {};
@@ -280,6 +290,7 @@ class CourseProvider extends ChangeNotifier {
       _error = e.toString();
     } finally {
       _isLoading = false;
+      _coursesByIdCache = null; // Invalidate cache
       notifyListeners();
     }
   }
@@ -340,8 +351,11 @@ class CourseProvider extends ChangeNotifier {
       await _courseRepo.insertCourse(course);
       await loadCourses();
 
-      // Schedule Notification
-      await _scheduleForCourse(course);
+      try {
+        await _scheduleForCourse(course);
+      } catch (e) {
+        debugPrint('NotificationService: Failed to schedule for course ${course.id}: $e');
+      }
 
       return true;
     } catch (e) {
@@ -377,8 +391,11 @@ class CourseProvider extends ChangeNotifier {
       await _courseRepo.updateCourse(course);
       await loadCourses();
 
-      // Schedule new
-      await _scheduleForCourse(course);
+      try {
+        await _scheduleForCourse(course);
+      } catch (e) {
+        debugPrint('NotificationService: Failed to schedule for course ${course.id}: $e');
+      }
 
       return true;
     } catch (e) {
@@ -396,8 +413,11 @@ class CourseProvider extends ChangeNotifier {
       await _courseRepo.insertCourse(courseWithId);
       await loadCourses();
 
-      // Schedule Notification
-      await _scheduleForCourse(courseWithId);
+      try {
+        await _scheduleForCourse(courseWithId);
+      } catch (e) {
+        debugPrint('NotificationService: Failed to schedule for course ${courseWithId.id}: $e');
+      }
 
       return true;
     } catch (e) {
@@ -753,8 +773,9 @@ class CourseProvider extends ChangeNotifier {
         final extLower = ext.toLowerCase();
         String type = 'other';
         if (['.pdf'].contains(extLower)) type = 'pdf';
-        if (['.jpg', '.jpeg', '.png', '.heic', '.webp'].contains(extLower))
+        if (['.jpg', '.jpeg', '.png', '.heic', '.webp'].contains(extLower)) {
           type = 'image';
+        }
         if (['.doc', '.docx', '.txt'].contains(extLower)) type = 'doc';
 
         final relativePath = 'course_materials/$courseId/$uniqueFileName';

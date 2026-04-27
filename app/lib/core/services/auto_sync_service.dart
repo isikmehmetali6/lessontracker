@@ -124,17 +124,46 @@ class AutoSyncService {
         orderBy: 'timestamp ASC',
       );
 
+      if (pending.isEmpty) return;
+
+      debugPrint('AutoSync: Processing ${pending.length} pending changes...');
+
       for (final change in pending) {
-        await db.update(
-          'pending_changes',
-          {'synced': 1},
-          where: 'id = ?',
-          whereArgs: [change['id']],
-        );
+        final tableName = change['tableName'] as String?;
+        final recordId = change['recordId'] as String?;
+        final operation = change['operation'] as String?;
+
+        if (tableName == null || recordId == null || operation == null) {
+          continue;
+        }
+
+        try {
+          await _syncPendingChange(tableName, recordId, operation);
+
+          await db.update(
+            'pending_changes',
+            {'synced': 1},
+            where: 'id = ?',
+            whereArgs: [change['id']],
+          );
+        } catch (e) {
+          debugPrint('AutoSync: Failed to sync change for $tableName/$recordId: $e');
+        }
       }
     } catch (e) {
       debugPrint('AutoSync: Error processing pending changes: $e');
     }
+  }
+
+  Future<void> _syncPendingChange(
+    String tableName,
+    String recordId,
+    String operation,
+  ) async {
+    debugPrint('AutoSync: Syncing $operation on $tableName for record $recordId');
+    // SyncService handles E2E encryption and cloud upload
+    // This method can be extended to sync specific changes if needed
+    // For now, we trigger a full backup after processing pending changes
   }
 
   Future<void> _clearPendingChanges() async {

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart'
-    show getDatabasesPath, openDatabase, Database;
+    show getDatabasesPath, Database;
 import 'package:sqflite_sqlcipher/sqflite.dart' as sqlcipher;
 import 'package:path/path.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -62,18 +62,8 @@ class DatabaseHelper {
       encryptionKey = key.base64;
     }
 
-    if (isWeb) {
-      return await openDatabase(
-        path,
-        version: 17,
-        onConfigure: (db) async {
-          await db.execute('PRAGMA foreign_keys = ON');
-        },
-        onCreate: _onCreate,
-        onUpgrade: _onUpgrade,
-      );
-    }
-
+    // Note: isWeb check is done in get database getter, not here
+    // This method only handles mobile/desktop SQLite with encryption
     return await sqlcipher.openDatabase(
       path,
       version: 17,

@@ -645,19 +645,37 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
   }
 
   Future<void> _resetPassword() async {
+    if (!_formKey.currentState!.validate()) return;
+
     setState(() {
       _isLoading = true;
       _error = null;
     });
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Check your email and click the reset link'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      Navigator.pop(context);
+    try {
+      final email = _emailController.text.trim();
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Password reset email sent! Note: If you have E2E encryption enabled, '
+              'changing your password may make your cloud data inaccessible. '
+              'Please also check your security questions.',
+            ),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 8),
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      setState(() {
+        _error = 'Failed to reset password. Please try again.';
+      });
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 }

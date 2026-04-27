@@ -33,7 +33,8 @@ class HandwritingCanvasScreen extends StatefulWidget {
 
 class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
   CanvasMode _mode = CanvasMode.blank;
-  List<DrawingStroke> _strokes = [];
+  final Map<int, List<DrawingStroke>> _strokesByPage = {};
+  List<DrawingStroke> _currentPageStrokes = [];
   Color _currentColor = Colors.black;
   double _currentSize = 4.0;
 
@@ -44,6 +45,7 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
   // PDF mode
   PdfControllerPinch? _pdfController;
   int _currentPdfPage = 1;
+  int _totalPdfPages = 0;
   String? _pdfPath;
 
   bool _isLoading = false;
@@ -59,12 +61,30 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
     if (widget.existingNote != null &&
         widget.existingNote!.drawingData != null) {
       try {
-        final List<dynamic> jsonList = jsonDecode(
-          widget.existingNote!.drawingData!,
-        );
-        _strokes = jsonList
-            .map((e) => DrawingStroke.fromMap(e as Map<String, dynamic>))
-            .toList();
+        final drawingDataStr = widget.existingNote!.drawingData!;
+        final decoded = jsonDecode(drawingDataStr);
+
+        if (decoded is List) {
+          final List<dynamic> jsonList = decoded;
+          final strokes = jsonList
+              .map((e) => DrawingStroke.fromMap(e as Map<String, dynamic>))
+              .toList();
+          if (strokes.isNotEmpty) {
+            _strokesByPage[1] = strokes;
+            _currentPageStrokes = strokes;
+          }
+        } else if (decoded is Map && decoded.containsKey('strokesByPage')) {
+          final strokesByPage = decoded['strokesByPage'] as Map<String, dynamic>;
+          strokesByPage.forEach((pageStr, strokesList) {
+            final page = int.parse(pageStr);
+            final strokes = (strokesList as List)
+                .map((e) => DrawingStroke.fromMap(e as Map<String, dynamic>))
+                .toList();
+            _strokesByPage[page] = strokes;
+          });
+          _totalPdfPages = decoded['totalPages'] ?? _strokesByPage.keys.length;
+          _currentPageStrokes = _strokesByPage[1] ?? [];
+        }
       } catch (e, stackTrace) {
         debugPrint(
           'Error loading existing note drawing data: $e\nStack: $stackTrace',
@@ -88,7 +108,8 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
           _photoBytes = bytes;
           _photoPath = file.path;
           _mode = CanvasMode.photo;
-          _strokes = [];
+          _currentPageStrokes = [];
+          _strokesByPage.clear();
         });
       }
     } catch (e) {
@@ -112,9 +133,13 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
           document: PdfDocument.openFile(_pdfPath!),
         );
 
+        _strokesByPage.clear();
+        _currentPageStrokes = [];
+
         setState(() {
           _mode = CanvasMode.pdf;
-          _strokes = [];
+          _strokesByPage.clear();
+          _currentPageStrokes = [];
           _isLoading = false;
         });
       }
@@ -125,15 +150,16 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
   }
 
   void _undo() {
-    if (_strokes.isNotEmpty) {
+    if (_currentPageStrokes.isNotEmpty) {
       setState(() {
-        _strokes = List.from(_strokes)..removeLast();
+        _currentPageStrokes = List.from(_currentPageStrokes)..removeLast();
+        _strokesByPage[_currentPdfPage] = _currentPageStrokes;
       });
     }
   }
 
   void _clear() {
-    if (_strokes.isEmpty) return;
+    if (_currentPageStrokes.isEmpty) return;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -147,7 +173,10 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
-              setState(() => _strokes = []);
+              setState(() {
+                _currentPageStrokes = [];
+                _strokesByPage[_currentPdfPage] = [];
+              });
             },
             child: const Text('Clear', style: TextStyle(color: Colors.red)),
           ),
@@ -157,7 +186,7 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
   }
 
   Future<void> _saveDrawing() async {
-    if (_strokes.isEmpty && _photoBytes == null && _pdfPath == null) {
+    if (_currentPageStrokes.isEmpty && _photoBytes == null && _pdfPath == null) {
       _showError('Nothing to save. Please draw something first.');
       return;
     }
@@ -191,11 +220,25 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
 
       // Save PDF path reference
       if (_pdfPath != null) {
-        filePath = _pdfPath;
+        final dir = await getApplicationDocumentsDirectory();
+        final pdfDir = Directory('${dir.path}/pdfs');
+        if (!await pdfDir.exists()) {
+          await pdfDir.create(recursive: true);
+        }
+        final pdfFileName = '${noteId}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+        final savedPdfPath = '${pdfDir.path}/$pdfFileName';
+        await File(_pdfPath!).copy(savedPdfPath);
+        filePath = savedPdfPath;
       }
 
-      // Convert strokes to JSON for storage
-      final drawingJson = jsonEncode(_strokes.map((s) => s.toMap()).toList());
+      // Convert strokes per-page to JSON for storage
+      final Map<String, dynamic> drawingData = {
+        'strokesByPage': _strokesByPage.map(
+          (page, strokes) => MapEntry(page.toString(), strokes.map((s) => s.toMap()).toList()),
+        ),
+        'totalPages': _totalPdfPages,
+      };
+      final drawingJson = jsonEncode(drawingData);
 
       final note = Note(
         id: noteId,
@@ -230,11 +273,11 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
   NoteType _getNoteType() {
     switch (_mode) {
       case CanvasMode.blank:
-        return NoteType.text;
+        return NoteType.drawing;
       case CanvasMode.photo:
         return NoteType.image;
       case CanvasMode.pdf:
-        return NoteType.text;
+        return NoteType.drawing;
     }
   }
 
@@ -250,8 +293,10 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
   }
 
   String? _generateContent() {
-    if (_strokes.isEmpty) return null;
-    return 'Handwritten notes with ${_strokes.length} strokes';
+    if (_strokesByPage.isEmpty) return null;
+    final totalStrokes = _strokesByPage.values.fold<int>(0, (sum, strokes) => sum + strokes.length);
+    if (totalStrokes == 0) return null;
+    return 'Handwritten notes with $totalStrokes strokes across ${_strokesByPage.length} page(s)';
   }
 
   List<String> _getTags() {
@@ -367,7 +412,7 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
             isSelected: _mode == CanvasMode.blank,
             onTap: () => setState(() {
               _mode = CanvasMode.blank;
-              _strokes = [];
+              _currentPageStrokes = [];
             }),
             isDark: isDark,
           ),
@@ -424,12 +469,12 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: DrawingCanvas(
-          strokes: _strokes,
+          strokes: _currentPageStrokes,
           currentColor: _currentColor,
           currentSize: _currentSize,
           backgroundColor: Colors.white,
           onStrokesChanged: (newStrokes) =>
-              setState(() => _strokes = newStrokes),
+              setState(() => _currentPageStrokes = newStrokes),
         ),
       ),
     );
@@ -479,12 +524,12 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
             Image.memory(_photoBytes!, fit: BoxFit.contain),
             // Drawing overlay
             DrawingCanvas(
-              strokes: _strokes,
+              strokes: _currentPageStrokes,
               currentColor: _currentColor,
               currentSize: _currentSize,
               backgroundColor: Colors.transparent,
               onStrokesChanged: (newStrokes) =>
-                  setState(() => _strokes = newStrokes),
+                  setState(() => _currentPageStrokes = newStrokes),
             ),
           ],
         ),
@@ -521,21 +566,30 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
         // PDF Viewer
         PdfViewPinch(
           controller: _pdfController!,
-          onDocumentLoaded: (document) {},
+          onDocumentLoaded: (document) {
+            setState(() {
+              _totalPdfPages = document.pagesCount;
+            });
+          },
           onPageChanged: (page) {
             setState(() {
               _currentPdfPage = page;
+              _currentPageStrokes = _strokesByPage[page] ?? [];
             });
           },
         ),
         // Drawing overlay (transparency adjusted for annotation)
         DrawingCanvas(
-          strokes: _strokes,
+          strokes: _currentPageStrokes,
           currentColor: _currentColor.withValues(alpha: 0.7),
           currentSize: _currentSize,
           backgroundColor: Colors.transparent,
-          onStrokesChanged: (newStrokes) =>
-              setState(() => _strokes = newStrokes),
+          onStrokesChanged: (newStrokes) {
+            setState(() {
+              _currentPageStrokes = newStrokes;
+              _strokesByPage[_currentPdfPage] = newStrokes;
+            });
+          },
         ),
       ],
     );

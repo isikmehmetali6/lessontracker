@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/services/kvkk_consent_service.dart';
 
 class ConsentUtils {
   /// Shows a KVKK explicitly consent dialog before capturing content (audio/video)
   /// Returns [true] if user gives consent, [false] or [null] otherwise.
+  /// If consent was previously granted, returns true without showing dialog.
   static Future<bool?> showContentCaptureConsentDialog(BuildContext context, {bool isAudio = false}) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final consentService = KvkkConsentService();
+    final hasConsent = isAudio
+        ? await consentService.hasAudioConsent()
+        : await consentService.hasCameraConsent();
+
+    if (hasConsent) return true;
     
     return showDialog<bool>(
       context: context,
@@ -94,7 +102,15 @@ class ConsentUtils {
             ),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () async {
+              final consentService = KvkkConsentService();
+              if (isAudio) {
+                await consentService.updateConsent(KvkkConsentService.keyConsentAudio, true);
+              } else {
+                await consentService.updateConsent(KvkkConsentService.keyConsentCamera, true);
+              }
+              if (context.mounted) Navigator.pop(context, true);
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,

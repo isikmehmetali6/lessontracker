@@ -720,7 +720,7 @@ class _SecurityQuestionsSheetState extends State<_SecurityQuestionsSheet> {
         : (index == 1 ? _selectedQuestion2 : _selectedQuestion3);
 
     return DropdownButtonFormField<int>(
-      value: selectedIndex,
+      initialValue: selectedIndex,
       decoration: InputDecoration(
         labelText: 'Question ${index + 1}',
         filled: true,

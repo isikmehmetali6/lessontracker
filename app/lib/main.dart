@@ -27,6 +27,7 @@ import 'package:workmanager/workmanager.dart';
 
 import 'screens/home/home_screen.dart';
 import 'screens/auth/login_screen.dart';
+import 'screens/auth/email_verification_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'screens/onboarding/kvkk_flow.dart';
 import 'firebase_options.dart';
@@ -97,7 +98,11 @@ Future<void> main() async {
   }
 
   if (!kIsWeb) {
-    NotificationService().scheduleWeeklyReport();
+    try {
+      NotificationService().scheduleWeeklyReport();
+    } catch (e) {
+      debugPrint('NotificationService: scheduleWeeklyReport failed: $e');
+    }
   }
 
   if (!kIsWeb && DateTime.now().weekday == DateTime.sunday) {
@@ -269,7 +274,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
         if (auth.isAuthenticated) {
           // TODO: Enable email verification check after SMTP settings are configured
           // if (!auth.isEmailVerified) {
-          //   return const EmailVerificationScreen();
+          //   return EmailVerificationScreen();
           // }
           if (_showKvkk) {
             return KvkkOnboardingFlow(

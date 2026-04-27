@@ -166,9 +166,9 @@ class _CourseCard extends StatelessWidget {
               child: CachedNetworkImage(
                 imageUrl: course.courseImageUrl!,
                 fit: BoxFit.cover,
-                errorWidget: (_, __, ___) =>
+                errorWidget: (_, _, _) =>
                     Container(color: isDark ? Colors.grey.shade900 : Colors.grey.shade100),
-                placeholder: (_, __) =>
+                placeholder: (_, _) =>
                     Container(color: isDark ? Colors.grey.shade900 : Colors.grey.shade100),
               ),
             ),

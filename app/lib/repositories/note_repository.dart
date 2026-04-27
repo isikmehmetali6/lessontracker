@@ -110,6 +110,9 @@ class NoteRepository {
       'isBookmarked',
       'createdAt',
       'updatedAt',
+      'drawingData',
+      'cloudPath',
+      'thumbnailCloudPath',
     ];
     final values = <dynamic>[];
     final placeholders = <String>[];

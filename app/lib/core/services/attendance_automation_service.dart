@@ -100,16 +100,26 @@ class AttendanceAutomationService {
           );
 
           if (!alreadyAbsent) {
-            await absenceRepo.insertAbsence(
-              '${course.id}_${date.toIso8601String().split('T')[0]}',
-              course.id,
-              date,
-            );
-            await prefs.setBool(checkKey, true);
-            await _showAbsenceNotification(course.name);
-            debugPrint(
-              'SmartAttendance: ${course.name} — kampüste değil, devamsızlık eklendi.',
-            );
+            // Check absence limit before adding
+            if (course.absenceLimit > 0 &&
+                existingAbsences.length >= course.absenceLimit) {
+              debugPrint(
+                'SmartAttendance: ${course.name} — absence limit reached, marking at risk.',
+              );
+              await prefs.setBool(checkKey, true);
+              await _showAbsenceLimitWarningNotification(course.name, course.absenceLimit);
+            } else {
+              await absenceRepo.insertAbsence(
+                '${course.id}_${date.toIso8601String().split('T')[0]}',
+                course.id,
+                date,
+              );
+              await prefs.setBool(checkKey, true);
+              await _showAbsenceNotification(course.name);
+              debugPrint(
+                'SmartAttendance: ${course.name} — kampüste değil, devamsızlık eklendi.',
+              );
+            }
           }
         }
       }
@@ -187,6 +197,38 @@ class AttendanceAutomationService {
       'Devamsızlık Eklendi ⚠️',
       '$courseName dersi için okulda olmadığınız tespit edildi. '
           'Devamsızlık kaydı oluşturuldu. Değiştirmek isterseniz uygulamayı açın.',
+      details,
+    );
+  }
+
+  Future<void> _showAbsenceLimitWarningNotification(
+    String courseName,
+    int limit,
+  ) async {
+    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+    const androidDetails = AndroidNotificationDetails(
+      'smart_attendance_channel',
+      'Akıllı Yoklama',
+      channelDescription: 'Otomatik yoklama bildirimleri',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+
+    const iosDetails = DarwinNotificationDetails();
+
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    final notifId = '${courseName}risk${DateTime.now().day}'.hashCode;
+
+    await flutterLocalNotificationsPlugin.show(
+      notifId,
+      '⚠️ Devamsızlık Riski!',
+      '$courseName dersi için devamsızlık limiti ($limit) aşılmak üzere! '
+          'Bu dersi kaçırmamanız önemli.',
       details,
     );
   }

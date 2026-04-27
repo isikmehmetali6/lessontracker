@@ -73,27 +73,39 @@ Toplam: 55 issue (0 error, 21 warning, 34 info)
 
 ### 13.2 Flutter Test Sonuçları
 
-**Durum:** ⚠️ Kısmen Başarısız
+**Durum:** ❌ Başarısız - Altyapı Sorunu
 
 ```
-20 test çalıştı
-34 passed, 38 failed
-Başarı oranı: %47
+Toplam: ~50 test dosyası
+0 passed, 50+ failed
+Başarı oranı: %0
 ```
 
-**Başarısız Testler Analizi:**
-- Widget testleri - Provider mock'lama eksikliği
-- E2E testleri - Firebase bağımlılığı (emulator dışında çalışmıyor)
-- UI testleri - `pumpAndSettle` timeout (animasyonlar / infinite loops)
+**Kritik Sorun:** `flutter_secure_storage` native plugin mock'u eksik
 
-**📋 Yapılabildi Testler:**
-| Test | Durum | Not |
-|------|-------|-----|
-| Auth provider unit test | ✅ Geçti | Temel login/logout |
-| Course provider test | ✅ Geçti | CRUD işlemleri |
-| Note provider test | ⚠️ Kısmen | CRUD var ama race condition testleri eksik |
-| Database helper test | ❌ Atlandı | Gerçek DB gerekiyor |
-| E2E crypto test | ❌ Atlandı | Standalone test yazılmamış |
+Tüm provider testleri şu hata ile başarısız:
+```
+MissingPluginException(No implementation found for method read on channel plugins.it_nomads.com/flutter_secure_storage)
+```
+
+**Nedeni:** `DatabaseHelper` sınıfı, `flutter_secure_storage` üzerinden E2E encryption key okur.
+Test ortamında native plugin mock'u yapılmadığı için tüm database operasyonları fail ediyor.
+
+**Çözüm Gereksinimleri:**
+1. `setMockMethodCallHandler` ile `flutter_secure_storage` channel mock'lama
+2. VEYA `DatabaseHelper` mock'lanabilir bir interface'e ayırma
+3. VEYA Integration test olarak çalıştırma (flutter_test değil)
+
+**📋 Test Dosyaları Durumu:**
+| Test | Sorun | Çözüm |
+|------|-------|-------|
+| note_provider_test.dart | ✅ Binding fix yapıldı, hâlâ secure_storage | Mock gerekli |
+| absence_provider_test.dart | ✅ Binding fix yapıldı | Mock gerekli |
+| course_provider_test.dart | ✅ Binding fix yapıldı | Mock gerekli |
+| deadline_provider_test.dart | ✅ Binding fix yapıldı | Mock gerekli |
+| deadline_provider_extended_test.dart | ✅ Binding fix yapıldı | Mock gerekli |
+| grade_provider_test.dart | ✅ Binding fix yapıldı | Mock gerekli |
+| add_course_screen_test.dart | ⚠️ ProviderNotFoundException | MoodleProvider mock gerekli |
 
 ### 13.3 Build Test
 
@@ -525,6 +537,41 @@ Test Cases:
 
 ### 9.2 Beta Tester Checklist
 
+**Manuel QA Senaryoları:**
+
+#### 🔐 Güvenlik Testleri (Manuel)
+- [ ] E2E şifreleme/doğşifreleme roundtrip test
+- [ ] Biometric authentication test (parmak izi/yüz)
+- [ ] Hesap silme - Firebase account siliniyor mu?
+- [ ] SQL injection deneme (search input: `' OR '1'='1`)
+
+#### 📱 Core Flow Testleri (Manuel)
+- [ ] Kayıt ve giriş akışı sorunsuz
+- [ ] Ders ekleme/düzenleme/silme
+- [ ] Text note oluşturma/düzenleme/silme/arama
+- [ ] OCR ile fotoğraftan metin çıkarma
+- [ ] Devamsızlık işaretleme ve limit kontrolü
+- [ ] Schedule conflict uyarısı
+
+#### 🌙 UI/UX Testleri (Manuel)
+- [ ] Dark mode / Light mode geçiş
+- [ ] 5+ farklı Android cihazda render (Samsung, Xiaomi, OnePlus, Pixel)
+- [ ] TalkBack/Accessibility okunabilirlik
+- [ ] Push bildirimleri geliyor mu?
+
+#### 📦 Offline & Performans (Manuel)
+- [ ] Airplane mode'da temel işlevler çalışıyor mu?
+- [ ] 100+ ders ekleme performansı
+- [ ] 1000+ not arama performansı (< 500ms)
+- [ ] 1 saatlik sürekli kullanımda crash yok
+- [ ] Background battery drain kabul edilebilir
+
+#### ☁️ Cloud & Entegrasyon (Manuel)
+- [ ] Firebase Storage upload/download
+- [ ] Moodle senkronizasyonu (gerçek hesap)
+- [ ] Google Calendar deadline ekleme
+
+**Beta Tester Feedback Toplama:**
 ```
 [ ] "Registration flow was smooth"
 [ ] "Adding courses feels intuitive"

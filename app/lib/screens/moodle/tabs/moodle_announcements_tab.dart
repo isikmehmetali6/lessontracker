@@ -33,7 +33,7 @@ class MoodleAnnouncementsTab extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: announcements.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, i) =>
           _AnnouncementCard(announcement: announcements[i]),
     );

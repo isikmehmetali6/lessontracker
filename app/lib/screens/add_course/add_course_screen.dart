@@ -391,11 +391,12 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
           if (!mounted) return;
 
           if (!success) {
-            // Çakışma hatası göster
             ErrorHandler.handleError(
               context,
               provider.error ?? 'Failed to update course.',
             );
+            setState(() => _isLoading = false);
+            Navigator.pop(context);
             return;
           }
 
@@ -433,14 +434,16 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                 context,
                 provider.error ?? 'Schedule conflict detected.',
               );
+              setState(() => _isLoading = false);
+              Navigator.pop(context);
               return;
             }
           }
-        }
 
-        if (!mounted) return;
-        HapticFeedback.mediumImpact();
-        Navigator.pop(context);
+          if (!mounted) return;
+          HapticFeedback.mediumImpact();
+          Navigator.pop(context);
+        }
       } else {
         // Yeni ders oluşturma
         int successCount = 0;
@@ -475,12 +478,13 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
           if (success) {
             successCount++;
           } else {
-            // Çakışma veya hata — kullanıcıya göster ve dur
             if (mounted) {
               ErrorHandler.handleError(
                 context,
                 provider.error ?? 'Failed to create course.',
               );
+              setState(() => _isLoading = false);
+              Navigator.pop(context);
             }
             return;
           }

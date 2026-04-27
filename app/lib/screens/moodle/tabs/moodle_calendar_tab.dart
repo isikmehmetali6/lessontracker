@@ -85,7 +85,7 @@ class _MoodleCalendarTabState extends State<MoodleCalendarTab> {
               : ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: selectedEvents.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (context, i) =>
                       _EventTile(event: selectedEvents[i]),
                 ),

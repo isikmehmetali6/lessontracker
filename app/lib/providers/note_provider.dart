@@ -134,17 +134,6 @@ class NoteProvider extends ChangeNotifier {
     try {
       File imageToSave = imageFile;
 
-      if (courseName != null) {
-        final watermarkedFile = await WatermarkService.addWatermarkToImage(
-          imageFile: imageFile,
-          courseName: courseName,
-          userName: userName,
-        );
-        if (watermarkedFile != null) {
-          imageToSave = watermarkedFile;
-        }
-      }
-
       final imagePath = await _fileService.saveImage(imageToSave);
 
       final resolvedPath = await _fileService.resolveFilePath(imagePath);
@@ -314,17 +303,6 @@ class NoteProvider extends ChangeNotifier {
     _error = null;
     try {
       File imageToSave = imageFile;
-
-      if (courseName != null) {
-        final watermarkedFile = await WatermarkService.addWatermarkToImage(
-          imageFile: imageFile,
-          courseName: courseName,
-          userName: userName,
-        );
-        if (watermarkedFile != null) {
-          imageToSave = watermarkedFile;
-        }
-      }
 
       final imagePath = await _fileService.saveImage(imageToSave);
 

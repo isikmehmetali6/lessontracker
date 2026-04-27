@@ -120,26 +120,29 @@ class NotificationService {
         ? '${reminderMinutes ~/ 60} hour${reminderMinutes ~/ 60 > 1 ? 's' : ''}'
         : '$reminderMinutes minutes';
 
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      notificationId,
-      'Upcoming Class: $courseName',
-      'Starts in $timeText${location != null ? ' at $location' : ''}',
-      _nextInstanceOfTime(dayOfWeek, hour, minute),
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'class_channel',
-          'Class Reminders',
-          channelDescription: 'Notifications for upcoming classes',
-          importance: Importance.max,
-          priority: Priority.high,
+    try {
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        notificationId,
+        'Upcoming Class: $courseName',
+        'Starts in $timeText${location != null ? ' at $location' : ''}',
+        _nextInstanceOfTime(dayOfWeek, hour, minute),
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'class_channel',
+            'Class Reminders',
+            channelDescription: 'Notifications for upcoming classes',
+            importance: Importance.max,
+            priority: Priority.high,
+          ),
+          iOS: DarwinNotificationDetails(),
+          macOS: DarwinNotificationDetails(),
         ),
-        iOS: DarwinNotificationDetails(),
-        macOS: DarwinNotificationDetails(),
-      ),
-
-      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    );
+        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
+    } catch (e) {
+      debugPrint('NotificationService: Failed to schedule class notification: $e');
+    }
   }
 
   Future<void> cancelClassNotification(String courseId, int dayOfWeek) async {
@@ -209,28 +212,32 @@ class NotificationService {
       scheduledDate = scheduledDate.add(const Duration(days: 7));
     }
 
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      weeklyReportId,
-      '📊 Weekly Study Report',
-      'Tap to view your study time & attendance this week!',
-      scheduledDate,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'weekly_report_channel',
-          'Weekly Reports',
-          channelDescription: 'Weekly study summary notifications',
-          importance: Importance.defaultImportance,
-          priority: Priority.defaultPriority,
-          styleInformation: BigTextStyleInformation(''),
+    try {
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        weeklyReportId,
+        '📊 Weekly Study Report',
+        'Tap to view your study time & attendance this week!',
+        scheduledDate,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'weekly_report_channel',
+            'Weekly Reports',
+            channelDescription: 'Weekly study summary notifications',
+            importance: Importance.defaultImportance,
+            priority: Priority.defaultPriority,
+            styleInformation: BigTextStyleInformation(''),
+          ),
+          iOS: DarwinNotificationDetails(),
+          macOS: DarwinNotificationDetails(),
         ),
-        iOS: DarwinNotificationDetails(),
-        macOS: DarwinNotificationDetails(),
-      ),
-      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    );
+        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
 
-    debugPrint('NotificationService: Weekly report scheduled for Sunday 20:00');
+      debugPrint('NotificationService: Weekly report scheduled for Sunday 20:00');
+    } catch (e) {
+      debugPrint('NotificationService: Failed to schedule weekly report: $e');
+    }
   }
 
   /// DB'den veri çekip detaylı haftalık rapor bildirimi gönder

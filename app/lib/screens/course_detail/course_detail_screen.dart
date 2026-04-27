@@ -107,16 +107,11 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Listen to course updates
-    final course =
-        context.select<CourseProvider, Course?>(
-          (p) => p.courses.cast<Course?>().firstWhere(
-            (c) => c?.id == widget.course.id,
-            orElse: () => null,
-          ),
-        ) ??
-        widget
-            .course; // Fallback to widget.course if not found (e.g. before load)
+    // Listen to course updates using O(1) lookup
+    final coursesById = context.select<CourseProvider, Map<String, Course>>(
+      (p) => p.coursesById,
+    );
+    final course = coursesById[widget.course.id] ?? widget.course;
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -856,10 +851,27 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
   }
 
   void _showNoteDetail(Note note) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => NoteDetailScreen(note: note)),
-    ).then((_) => _loadNotes()); // Dönüşte notları yenile
+    if (note.type == NoteType.drawing || note.drawingData != null) {
+      final courses = context.read<CourseProvider>().courses;
+      final course = courses.firstWhere(
+        (c) => c.id == note.courseId,
+        orElse: () => widget.course,
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => HandwritingCanvasScreen(
+            course: course,
+            existingNote: note,
+          ),
+        ),
+      ).then((_) => _loadNotes());
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => NoteDetailScreen(note: note)),
+      ).then((_) => _loadNotes());
+    }
   }
 
   void _openDrawingCanvas(Course course) {
