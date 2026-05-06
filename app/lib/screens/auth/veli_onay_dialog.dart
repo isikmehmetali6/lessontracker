@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 
 class VeliOnayDialog extends StatefulWidget {
@@ -30,6 +31,7 @@ class _VeliOnayDialogState extends State<VeliOnayDialog> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return AlertDialog(
       backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
@@ -51,7 +53,7 @@ class _VeliOnayDialogState extends State<VeliOnayDialog> {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Veli Onayı Gerekli',
+              l10n.veliConsentTitle,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
@@ -89,7 +91,7 @@ class _VeliOnayDialogState extends State<VeliOnayDialog> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Bilgilendirme',
+                        l10n.acikRizaImportant,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -100,7 +102,7 @@ class _VeliOnayDialogState extends State<VeliOnayDialog> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    '18 yaşın altındaki kullanıcıların uygulamayı kullanabilmesi için veli onayı gerekmektedir.',
+                    l10n.veliConsentDesc,
                     style: TextStyle(
                       fontSize: 14,
                       height: 1.5,
@@ -114,7 +116,7 @@ class _VeliOnayDialogState extends State<VeliOnayDialog> {
             ),
             const SizedBox(height: 20),
             Text(
-              'Veli E-posta Adresi',
+              l10n.veliEmailLabel,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -128,7 +130,7 @@ class _VeliOnayDialogState extends State<VeliOnayDialog> {
               controller: _veliEmailController,
               keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
-                hintText: 'veli@email.com',
+                hintText: l10n.veliEmailHint,
                 filled: true,
                 fillColor: isDark
                     ? const Color(0xFF2C2C2E)
@@ -160,7 +162,7 @@ class _VeliOnayDialogState extends State<VeliOnayDialog> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Veli e-postası sadece onay bildirimi göndermek için kullanılacaktır.',
+                      l10n.veliInfoText,
                       style: TextStyle(
                         fontSize: 12,
                         color: isDark
@@ -179,7 +181,7 @@ class _VeliOnayDialogState extends State<VeliOnayDialog> {
         TextButton(
           onPressed: _isLoading ? null : widget.onCancelled,
           child: Text(
-            'İptal',
+            l10n.cancel,
             style: TextStyle(
               color: isDark
                   ? AppColors.textSecondaryDark
@@ -206,8 +208,8 @@ class _VeliOnayDialogState extends State<VeliOnayDialog> {
                     color: Colors.white,
                   ),
                 )
-              : const Text(
-                  'Onay İste',
+              : Text(
+                  l10n.veliRequestConsent,
                   style: TextStyle(fontWeight: FontWeight.w700),
                 ),
         ),
@@ -216,15 +218,16 @@ class _VeliOnayDialogState extends State<VeliOnayDialog> {
   }
 
   void _handleConfirm() {
+    final l10n = AppLocalizations.of(context)!;
     final email = _veliEmailController.text.trim();
 
     if (email.isEmpty) {
-      setState(() => _error = 'Lütfen veli e-posta adresini girin');
+      setState(() => _error = l10n.veliRequired);
       return;
     }
 
     if (!_isValidEmail(email)) {
-      setState(() => _error = 'Geçerli bir e-posta adresi girin');
+      setState(() => _error = l10n.veliValidEmail);
       return;
     }
 

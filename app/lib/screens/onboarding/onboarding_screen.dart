@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 
 /// Onboarding — ilk açılışta gösterilen tanıtım slaytları
@@ -52,6 +53,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: SafeArea(
@@ -63,7 +65,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: TextButton(
                 onPressed: _complete,
                 child: Text(
-                  'Skip',
+                  l10n.skip,
                   style: TextStyle(
                     color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                     fontWeight: FontWeight.w600,
@@ -182,7 +184,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            _currentPage == _pages.length - 1 ? 'Get Started' : 'Next',
+                            _currentPage == _pages.length - 1 ? l10n.getStarted : l10n.nextLabel,
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w700,

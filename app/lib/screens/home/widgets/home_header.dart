@@ -24,7 +24,7 @@ class HomeHeader extends StatelessWidget {
       builder: (context, auth, _) {
         String displayName = AppLocalizations.of(context)!.guestUser;
         if (auth.user != null && !auth.isGuest) {
-          displayName = auth.user!.displayName ?? 'User';
+          displayName = auth.user!.displayName ?? AppLocalizations.of(context)!.userName;
         }
         return Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 24, 8),
@@ -105,7 +105,7 @@ class HomeHeader extends StatelessWidget {
                           const Icon(Icons.add_rounded, color: Colors.white, size: 20),
                           const SizedBox(width: 4),
                           Text(
-                            AppLocalizations.of(context)!.localeName == 'tr' ? 'Yeni' : 'New',
+                            AppLocalizations.of(context)!.addNewCourse,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,

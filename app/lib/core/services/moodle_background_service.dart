@@ -12,6 +12,7 @@ import '../../services/moodle/moodle_api_service.dart';
 import '../../services/moodle/moodle_sync_service.dart';
 import '../../services/moodle/moodle_token_storage.dart';
 import 'moodle_notification_service.dart';
+import '../utils/moodle_utils.dart';
 
 /// Moodle arka plan senkronizasyon servisi.
 ///
@@ -127,6 +128,7 @@ class MoodleBackgroundService {
 
   Future<_SyncDiff> _syncAndCompare(MoodleAccount account) async {
     final prefs = await SharedPreferences.getInstance();
+    final langCode = prefs.getString('language_code') ?? 'tr';
     int newAssignments = 0;
     int newGrades = 0;
     int newAnnouncements = 0;
@@ -176,8 +178,8 @@ class MoodleBackgroundService {
         if (!sentAssignmentIds.contains(key)) {
           await _notifier.notifyNewAssignment(
             assignmentId: assignment.id,
-            courseName: assignment.courseName,
-            assignmentName: assignment.name,
+            courseName: MoodleUtils.parseMultilang(assignment.courseName, langCode),
+            assignmentName: MoodleUtils.parseMultilang(assignment.name, langCode),
             dueDate: assignment.dueDate,
           );
           sentAssignmentIds.add(key);
@@ -195,8 +197,8 @@ class MoodleBackgroundService {
             '${account.id}_${grade.courseId}_${grade.itemName}_${grade.gradeValue}';
         if (!sentGradeKeys.contains(key)) {
           await _notifier.notifyGradeUpdate(
-            courseName: grade.courseName,
-            itemName: grade.itemName,
+            courseName: MoodleUtils.parseMultilang(grade.courseName, langCode),
+            itemName: MoodleUtils.parseMultilang(grade.itemName, langCode),
             grade: grade.gradeValue,
             maxGrade: grade.gradeMax,
           );
@@ -214,8 +216,8 @@ class MoodleBackgroundService {
         if (!sentAnnouncementIds.contains(key)) {
           await _notifier.notifyNewAnnouncement(
             announcementId: announcement.id,
-            courseName: announcement.courseName,
-            subject: announcement.subject,
+            courseName: MoodleUtils.parseMultilang(announcement.courseName, langCode),
+            subject: MoodleUtils.parseMultilang(announcement.subject, langCode),
             authorName: announcement.authorName,
           );
           sentAnnouncementIds.add(key);
@@ -246,6 +248,7 @@ class MoodleBackgroundService {
   /// Yaklaşan deadline'lar için kademeli uyarı kontrol et
   Future<void> _checkDeadlineAlerts() async {
     final prefs = await SharedPreferences.getInstance();
+    final langCode = prefs.getString('language_code') ?? 'tr';
     final sentAlerts = _getStringSet(prefs, _prefKeyDeadlineAlerts);
 
     try {
@@ -289,8 +292,8 @@ class MoodleBackgroundService {
               if (!sentAlerts.contains(alertKey)) {
                 await _notifier.notifyDeadlineApproaching(
                   assignmentId: assignment.id,
-                  courseName: assignment.courseName,
-                  assignmentName: assignment.name,
+                  courseName: MoodleUtils.parseMultilang(assignment.courseName, langCode),
+                  assignmentName: MoodleUtils.parseMultilang(assignment.name, langCode),
                   hoursRemaining: hoursLeft,
                 );
                 sentAlerts.add(alertKey);

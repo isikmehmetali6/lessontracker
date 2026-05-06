@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../providers/course_provider.dart';
 import '../../models/course.dart';
 import '../../models/grade.dart';
@@ -80,11 +81,12 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final loc = AppLocalizations.of(context)!;
     final courses = context.watch<CourseProvider>().courses;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transcript'),
+        title: Text(loc.transcriptTitle),
         backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
         foregroundColor: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
         elevation: 0,
@@ -158,6 +160,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
   }
 
   Widget _buildTableHeader(bool isDark) {
+    final loc = AppLocalizations.of(context)!;
     final style = TextStyle(
       fontWeight: FontWeight.bold,
       fontSize: 12,
@@ -167,17 +170,18 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          Expanded(flex: 3, child: Text('Course', style: style)),
-          SizedBox(width: 40, child: Text('CR', style: style, textAlign: TextAlign.center)),
-          SizedBox(width: 50, child: Text('Avg', style: style, textAlign: TextAlign.center)),
-          SizedBox(width: 40, child: Text('Grade', style: style, textAlign: TextAlign.center)),
-          SizedBox(width: 40, child: Text('GP', style: style, textAlign: TextAlign.center)),
+          Expanded(flex: 3, child: Text(loc.courseHeader, style: style)),
+          SizedBox(width: 40, child: Text(loc.crHeader, style: style, textAlign: TextAlign.center)),
+          SizedBox(width: 50, child: Text(loc.avgHeader, style: style, textAlign: TextAlign.center)),
+          SizedBox(width: 40, child: Text(loc.gradeHeader, style: style, textAlign: TextAlign.center)),
+          SizedBox(width: 40, child: Text(loc.gpHeader, style: style, textAlign: TextAlign.center)),
         ],
       ),
     );
   }
 
   Widget _buildTableRow(bool isDark, _TranscriptRow row) {
+    final loc = AppLocalizations.of(context)!;
     final textColor = isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
     final subColor = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
 
@@ -200,7 +204,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  row.status == 'active' ? 'In Progress' : row.status.toUpperCase(),
+                  row.status == 'active' ? loc.inProgress : row.status.toUpperCase(),
                   style: TextStyle(fontSize: 10, color: subColor),
                 ),
               ],
@@ -257,6 +261,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
   }
 
   Widget _buildSummaryBar(bool isDark, double gpa, int totalCredits) {
+    final loc = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -278,7 +283,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Overall GPA',
+                    loc.overallGpa,
                     style: TextStyle(
                       fontSize: 14,
                       color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
@@ -300,7 +305,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Total Credits',
+                  loc.totalCreditsLabel,
                   style: TextStyle(
                     fontSize: 14,
                     color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,

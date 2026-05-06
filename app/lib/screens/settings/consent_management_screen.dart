@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/services/kvkk_consent_service.dart';
 
@@ -56,6 +57,7 @@ class _ConsentManagementScreenState extends State<ConsentManagementScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
@@ -72,7 +74,7 @@ class _ConsentManagementScreenState extends State<ConsentManagementScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Rıza Yönetimi',
+          l10n.consentManagementTitle,
           style: TextStyle(
             color: isDark
                 ? AppColors.textPrimaryDark
@@ -89,7 +91,7 @@ class _ConsentManagementScreenState extends State<ConsentManagementScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Açık Rıza Tercihleriniz',
+                    l10n.consentManagementSubtitle,
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w800,
@@ -100,7 +102,7 @@ class _ConsentManagementScreenState extends State<ConsentManagementScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'KVKK Madde 5/1 kapsamında verdiğiniz açık rıza tercihlerini buradan yönetebilirsiniz.',
+                    l10n.consentManagementDesc,
                     style: TextStyle(
                       fontSize: 14,
                       height: 1.5,
@@ -132,7 +134,7 @@ class _ConsentManagementScreenState extends State<ConsentManagementScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            'Rızanızı istediğiniz zaman geri çekebilirsiniz. Rıza geri çekildiğinde ilgili özellik devre dışı kalacaktır.',
+                            l10n.consentWithdrawInfo,
                             style: TextStyle(
                               fontSize: 13,
                               height: 1.5,
@@ -151,9 +153,8 @@ class _ConsentManagementScreenState extends State<ConsentManagementScreen> {
                     isDark: isDark,
                     icon: Icons.camera_alt,
                     iconColor: AppColors.orange,
-                    title: 'Kamera ile Fotoğraf Çekme',
-                    description:
-                        'Ders notlarınızı fotoğraflayarak kaydetmek için kamera erişimi.',
+                    title: l10n.consentCamera,
+                    description: l10n.consentCameraDesc,
                     legalBasis: 'KVKK Madde 5/1 - Açık rıza',
                     value: _cameraConsent,
                     onChanged: (v) {
@@ -168,9 +169,8 @@ class _ConsentManagementScreenState extends State<ConsentManagementScreen> {
                     isDark: isDark,
                     icon: Icons.mic,
                     iconColor: AppColors.purple,
-                    title: 'Ses Kaydı Alma',
-                    description:
-                        'Derslerin ses kaydını alarak notlarınızı zenginleştirmek için mikrofon erişimi.',
+                    title: l10n.consentAudio,
+                    description: l10n.consentAudioDesc,
                     legalBasis: 'KVKK Madde 5/1 - Açık rıza',
                     value: _audioConsent,
                     onChanged: (v) {
@@ -185,9 +185,8 @@ class _ConsentManagementScreenState extends State<ConsentManagementScreen> {
                     isDark: isDark,
                     icon: Icons.document_scanner,
                     iconColor: AppColors.blue,
-                    title: 'OCR ile Metin Tanıma',
-                    description:
-                        'Fotoğraflardaki metinleri tanımak için Google ML Kit kullanımı.',
+                    title: l10n.consentOcr,
+                    description: l10n.consentOcrDesc,
                     legalBasis: 'KVKK Madde 5/1 - Açık rıza',
                     value: _ocrConsent,
                     onChanged: (v) {
@@ -202,9 +201,8 @@ class _ConsentManagementScreenState extends State<ConsentManagementScreen> {
                     isDark: isDark,
                     icon: Icons.notifications,
                     iconColor: AppColors.red,
-                    title: 'Push Bildirimleri',
-                    description:
-                        'Hatırlatmalar ve ödev bildirimleri için bildirim gönderimi.',
+                    title: l10n.consentPush,
+                    description: l10n.consentPushDesc,
                     legalBasis: 'KVKK Madde 5/1 - Açık rıza',
                     value: _notificationsConsent,
                     onChanged: (v) {
@@ -219,9 +217,8 @@ class _ConsentManagementScreenState extends State<ConsentManagementScreen> {
                     isDark: isDark,
                     icon: Icons.cloud_upload,
                     iconColor: AppColors.emerald,
-                    title: 'Bulut Yedekleme',
-                    description:
-                        'Verilerinizi şifreli olarak bulutta yedeklemek için Firebase kullanımı.',
+                    title: l10n.consentCloud,
+                    description: l10n.consentCloudDesc,
                     legalBasis: 'KVKK Madde 5/1 - Açık rıza',
                     value: _cloudBackupConsent,
                     onChanged: (v) {
@@ -256,7 +253,7 @@ class _ConsentManagementScreenState extends State<ConsentManagementScreen> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'Yasal Bilgi',
+                              l10n.consentLegalInfo,
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
@@ -269,7 +266,7 @@ class _ConsentManagementScreenState extends State<ConsentManagementScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '6698 sayılı KVKK kapsamında açık rızanızı istediğiniz zaman geri çekme hakkına sahipsiniz. Rıza geri çekilmeden önce rızaya dayanılarak gerçekleştirilen işlemler hukuka uygun olmaya devam eder.',
+                          l10n.consentLegalDesc,
                           style: TextStyle(
                             fontSize: 13,
                             height: 1.5,

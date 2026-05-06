@@ -44,6 +44,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final provider = context.watch<AuthProvider>();
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: isDark
@@ -69,7 +70,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Create Account',
+                  l10n.createAccount,
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -78,7 +79,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Join us to track your academic success.',
+                  l10n.signupSubtitle,
                   style: TextStyle(
                     fontSize: 16,
                     color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
@@ -122,15 +123,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 // Name Field
                 _buildTextField(
                   controller: _nameController,
-                  label: 'Full Name',
+                  label: l10n.fullName,
                   icon: Icons.person_outline,
                   isDark: isDark,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your name';
+                      return l10n.nameRequired;
                     }
                     if (value.trim().length < 2) {
-                      return 'Name must be at least 2 characters';
+                      return l10n.nameMinLength;
                     }
                     return null;
                   },
@@ -140,16 +141,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 // Email Field
                 _buildTextField(
                   controller: _emailController,
-                  label: 'Email Address',
+                  label: l10n.emailAddress,
                   icon: Icons.email_outlined,
                   isDark: isDark,
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your email address';
+                      return l10n.emailRequired;
                     }
                     if (!AuthProvider.isValidEmail(value.trim())) {
-                      return 'Please enter a valid email address';
+                      return l10n.validEmailRequired;
                     }
                     return null;
                   },
@@ -159,7 +160,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 // Password Field
                 _buildTextField(
                   controller: _passwordController,
-                  label: 'Password',
+                  label: l10n.newPassword,
                   icon: Icons.lock_outline,
                   isDark: isDark,
                   isPassword: true,
@@ -168,7 +169,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       setState(() => _isPasswordVisible = !_isPasswordVisible),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a password';
+                      return l10n.passwordRequired;
                     }
                     if (value.length < 6) {
                       return AppLocalizations.of(context)!.passwordTooShort;
@@ -192,7 +193,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please confirm your password';
+                      return l10n.confirmPasswordRequired;
                     }
                     if (value != _passwordController.text) {
                       return AppLocalizations.of(context)!.passwordsDoNotMatch;
@@ -225,8 +226,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               strokeWidth: 2,
                             ),
                           )
-                        : const Text(
-                            'Sign Up',
+                        : Text(
+                            l10n.signUp,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 16,
@@ -241,7 +242,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Already have an account?",
+                      l10n.haveAccount,
                       style: TextStyle(
                         color: isDark
                             ? Colors.grey.shade400
@@ -252,8 +253,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: const Text(
-                        'Log In',
+                      child: Text(
+                        l10n.logIn,
                         style: TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,

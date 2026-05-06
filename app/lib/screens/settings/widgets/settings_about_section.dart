@@ -29,6 +29,7 @@ class SettingsAboutSection extends StatelessWidget {
   }
 
   Future<void> _performAccountDeletion(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final authProvider = context.read<AuthProvider>();
     final syncService = SyncService();
 
@@ -52,7 +53,7 @@ class SettingsAboutSection extends StatelessWidget {
                 const CircularProgressIndicator(),
                 const SizedBox(height: 24),
                 Text(
-                  'Hesap siliniyor...',
+                  l10n.deletingAccount,
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ],
@@ -78,7 +79,7 @@ class SettingsAboutSection extends StatelessWidget {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Hesap silme hatası: $e'),
+            content: Text(l10n.deleteAccountError('$e')),
             backgroundColor: AppColors.red,
           ),
         );
@@ -89,6 +90,7 @@ class SettingsAboutSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       children: [
@@ -103,7 +105,7 @@ class SettingsAboutSection extends StatelessWidget {
               SettingsTile(
                 icon: Icons.privacy_tip,
                 iconColor: AppColors.blue,
-                title: 'Gizlilik Politikası',
+                title: l10n.privacyPolicy,
                 isDark: isDark,
                 onTap: () {
                   Navigator.push(
@@ -118,7 +120,7 @@ class SettingsAboutSection extends StatelessWidget {
               SettingsTile(
                 icon: Icons.description,
                 iconColor: AppColors.orange,
-                title: 'Kullanım Şartları',
+                title: l10n.termsOfService,
                 isDark: isDark,
                 onTap: () {
                   Navigator.push(
@@ -133,7 +135,7 @@ class SettingsAboutSection extends StatelessWidget {
               SettingsTile(
                 icon: Icons.cookie,
                 iconColor: AppColors.amber,
-                title: 'Çerez Politikası',
+                title: l10n.cookiePolicy,
                 isDark: isDark,
                 onTap: () {
                   Navigator.push(
@@ -148,8 +150,8 @@ class SettingsAboutSection extends StatelessWidget {
               SettingsTile(
                 icon: Icons.tune,
                 iconColor: AppColors.purple,
-                title: 'Rıza Yönetimi',
-                subtitle: 'KVKK Açık Rıza Tercihleriniz',
+                title: l10n.consentManagement,
+                subtitle: l10n.consentManagementDesc,
                 isDark: isDark,
                 onTap: () {
                   Navigator.push(
@@ -164,8 +166,8 @@ class SettingsAboutSection extends StatelessWidget {
               SettingsTile(
                 icon: Icons.delete_forever,
                 iconColor: AppColors.red,
-                title: 'Hesabımı Sil',
-                subtitle: 'KVKK Madde 7 - Silme Hakkı',
+                title: l10n.deleteAccount,
+                subtitle: l10n.deleteAccountKvkk,
                 isDark: isDark,
                 titleColor: AppColors.red,
                 onTap: () => _showDeleteAccountDialog(context),
@@ -232,7 +234,7 @@ class SettingsAboutSection extends StatelessWidget {
           padding: const EdgeInsets.all(24),
           child: Center(
             child: Text(
-              'Lesson Tracker v1.0.0',
+              l10n.appVersion,
               style: TextStyle(
                 fontSize: 12,
                 color: isDark

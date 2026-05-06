@@ -4,6 +4,7 @@ import '../../../providers/moodle_provider.dart';
 import '../../../models/moodle/moodle_message.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/moodle_utils.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../../providers/language_provider.dart';
 
 /// Moodle mesajları (gelen kutusu) sekmesi.
@@ -12,6 +13,7 @@ class MoodleMessagesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final provider = context.watch<MoodleProvider>();
     final messages = provider.allMessages;
 
@@ -24,12 +26,12 @@ class MoodleMessagesTab extends StatelessWidget {
                 size: 56,
                 color: Theme.of(context).colorScheme.outlineVariant),
             const SizedBox(height: 12),
-            Text('Mesaj bulunamadı',
+            Text(l10n.moodleNoMessages,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant)),
             const SizedBox(height: 4),
             Text(
-              'Moodle mesajlarınız burada görünecek',
+              l10n.moodleMessagesHere,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),

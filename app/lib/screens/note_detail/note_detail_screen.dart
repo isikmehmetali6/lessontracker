@@ -370,20 +370,20 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
             }
           },
           itemBuilder: (context) => [
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'move',
               child: ListTile(
-                leading: Icon(Icons.drive_file_move_outline),
-                title: Text('Move to Course'),
+                leading: const Icon(Icons.drive_file_move_outline),
+                title: Text(AppLocalizations.of(context)!.moveToCourse),
               ),
             ),
             PopupMenuItem(
               value: 'delete',
               child: ListTile(
-                leading: Icon(Icons.delete_outline, color: AppColors.red),
+                leading: const Icon(Icons.delete_outline, color: AppColors.red),
                 title: Text(
-                  'Delete Note',
-                  style: TextStyle(color: AppColors.red),
+                  AppLocalizations.of(context)!.deleteNote,
+                  style: const TextStyle(color: AppColors.red),
                 ),
               ),
             ),
@@ -540,7 +540,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Image unavailable',
+              AppLocalizations.of(context)!.imageUnavailable,
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: isDark
@@ -593,7 +593,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     if (courses.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('No other courses available'),
+          content: Text(AppLocalizations.of(context)!.noOtherCourses),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -630,7 +630,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
               ),
               const SizedBox(height: 20),
               Text(
-                'Move to Course',
+                AppLocalizations.of(context)!.moveToCourse,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -641,7 +641,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Select destination course',
+                AppLocalizations.of(context)!.selectDestination,
                 style: TextStyle(
                   fontSize: 14,
                   color: isDark
@@ -744,7 +744,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       HapticFeedback.mediumImpact();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Moved to $courseName'),
+          content: Text(AppLocalizations.of(context)!.movedTo(courseName)),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -995,8 +995,8 @@ class _DrawingDisplayWidgetState extends State<_DrawingDisplayWidget> {
           color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Center(
-          child: Text('No drawing data'),
+        child: Center(
+          child: Text(AppLocalizations.of(context)!.noDrawingData),
         ),
       );
     }
@@ -1091,7 +1091,7 @@ class _PdfDisplayWidgetState extends State<_PdfDisplayWidget> {
               ),
               const SizedBox(height: 8),
               Text(
-                'PDF file not found',
+                AppLocalizations.of(context)!.pdfFileNotFound,
                 style: TextStyle(
                   color: widget.isDark ? Colors.grey : Colors.grey.shade600,
                 ),

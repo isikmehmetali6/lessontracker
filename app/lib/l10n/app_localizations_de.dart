@@ -51,7 +51,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get goodEvening => 'Guten Abend,';
 
   @override
-  String get weeklySchedule => 'Plan';
+  String get weeklySchedule => 'Wochenplan';
 
   @override
   String get todaysClasses => 'Heutige Kurse';
@@ -189,7 +189,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get thisActionCannotBeUndone => 'Diese Aktion kann nicht rückgängig gemacht werden.';
 
   @override
-  String get totalCourses => 'Kurse';
+  String get totalCourses => 'Gesamtkurse';
 
   @override
   String get totalNotes => 'Gesamtnotizen';
@@ -307,7 +307,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get good => 'Gut';
 
   @override
-  String get average => 'Durchschn.';
+  String get average => 'Durchschnitt';
 
   @override
   String get improvementNeeded => 'Verbesserungswürdig';
@@ -325,7 +325,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get addGrade => 'Note Hinzufügen';
 
   @override
-  String get noGradesYet => 'Noch keine Noten';
+  String get noGradesYet => 'Noch keine Noten hinzugefügt.';
 
   @override
   String get noFilesYet => 'Noch keine Dateien';
@@ -709,6 +709,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get totalCredits => 'Leistungspunkte';
 
   @override
+  String get gpaCourses => 'Kurse';
+
+  @override
   String get letterGrade => 'Note';
 
   @override
@@ -719,6 +722,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get credits => 'Leistungspunkte';
+
+  @override
+  String get gpaNoGrades => 'Noch keine Noten';
 
   @override
   String get quickActions => 'Schnellaktionen';
@@ -898,4 +904,1412 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get archiveCourse => 'Kurs archivieren';
+
+  @override
+  String get welcomeBack => 'Willkommen zurück!';
+
+  @override
+  String get loginSubtitle => 'Melde dich an, um deine Lernreise fortzusetzen.';
+
+  @override
+  String get emailAddress => 'E-Mail-Adresse';
+
+  @override
+  String get emailRequired => 'Bitte gib deine E-Mail-Adresse ein';
+
+  @override
+  String get validEmailRequired => 'Bitte gib eine gültige E-Mail-Adresse ein';
+
+  @override
+  String get passwordRequired => 'Bitte gib dein Passwort ein';
+
+  @override
+  String get forgotPassword => 'Passwort vergessen?';
+
+  @override
+  String get logIn => 'Anmelden';
+
+  @override
+  String get orDivider => 'ODER';
+
+  @override
+  String get dontHaveAccount => 'Noch kein Konto?';
+
+  @override
+  String get signUp => 'Registrieren';
+
+  @override
+  String get continueAsGuest => 'Als Gast fortfahren';
+
+  @override
+  String get resetPassword => 'Passwort zurücksetzen';
+
+  @override
+  String get resetPasswordDescription => 'Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen deines Passworts.';
+
+  @override
+  String get sendLink => 'Link senden';
+
+  @override
+  String get passwordResetSent => 'E-Mail zum Zurücksetzen des Passworts gesendet! Prüfe dein Postfach.';
+
+  @override
+  String get guestDescription => 'Deine Daten werden nur lokal auf diesem Gerät gespeichert und nicht mit der Cloud synchronisiert. Du kannst später ein Konto erstellen, um deine Daten zu sichern.';
+
+  @override
+  String get continueAction => 'Fortfahren';
+
+  @override
+  String get createAccount => 'Konto erstellen';
+
+  @override
+  String get signupSubtitle => 'Begleite uns, um deinen akademischen Erfolg zu verfolgen.';
+
+  @override
+  String get fullName => 'Vollständiger Name';
+
+  @override
+  String get nameRequired => 'Bitte gib deinen Namen ein';
+
+  @override
+  String get nameMinLength => 'Der Name muss mindestens 2 Zeichen lang sein';
+
+  @override
+  String get confirmPasswordRequired => 'Bitte bestätige dein Passwort';
+
+  @override
+  String get haveAccount => 'Bereits ein Konto?';
+
+  @override
+  String get verifyYourEmail => 'E-Mail bestätigen';
+
+  @override
+  String get verificationEmailSent => 'Bestätigungs-E-Mail gesendet! Prüfe dein Postfach.';
+
+  @override
+  String get checkInbox => 'Bitte prüfe dein Postfach und klicke auf den Bestätigungslink, um dein Konto zu aktivieren.';
+
+  @override
+  String get resendVerification => 'Bestätigungs-E-Mail erneut senden';
+
+  @override
+  String get iVerifiedMyEmail => 'Ich habe meine E-Mail bestätigt → Weiter';
+
+  @override
+  String get skip => 'Überspringen';
+
+  @override
+  String get getStarted => 'Loslegen';
+
+  @override
+  String get nextLabel => 'Weiter';
+
+  @override
+  String get savedDataFound => 'Gespeicherte Daten gefunden';
+
+  @override
+  String savedDataDescription(Object courseCount) {
+    return 'Dieses Konto hat $courseCount gespeicherte Kurse.';
+  }
+
+  @override
+  String get loadDataDescription => 'Beim Laden deiner Daten werden deine Kurse, Notizen und Fristen auf dieses Gerät übertragen.';
+
+  @override
+  String get cloudDataCleared => 'Alte Cloud-Daten gelöscht. Es wird neu begonnen.';
+
+  @override
+  String get startFresh => 'Neu beginnen';
+
+  @override
+  String get loadData => 'Daten laden';
+
+  @override
+  String get youAreOffline => 'Du bist offline';
+
+  @override
+  String get processingOcr => 'OCR wird verarbeitet...';
+
+  @override
+  String get ocrNoteSaved => 'OCR-Notiz gespeichert!';
+
+  @override
+  String get noCoursesAddFirst => 'Keine Kurse verfügbar. Füge zuerst einen Kurs hinzu!';
+
+  @override
+  String get selectCourseTitle => 'Kurs auswählen';
+
+  @override
+  String get chooseSaveLocation => 'Wähle, wo diese Notiz gespeichert werden soll';
+
+  @override
+  String get weeklyTimetable => 'Wochenstundenplan';
+
+  @override
+  String get dayMon => 'Mo';
+
+  @override
+  String get dayTue => 'Di';
+
+  @override
+  String get dayWed => 'Mi';
+
+  @override
+  String get dayThu => 'Do';
+
+  @override
+  String get dayFri => 'Fr';
+
+  @override
+  String get daySat => 'Sa';
+
+  @override
+  String get daySun => 'So';
+
+  @override
+  String get dayM => 'M';
+
+  @override
+  String get dayT => 'D';
+
+  @override
+  String get dayW => 'M';
+
+  @override
+  String get dayTh => 'Do';
+
+  @override
+  String get dayF => 'F';
+
+  @override
+  String get daySa => 'Sa';
+
+  @override
+  String get daySu => 'So';
+
+  @override
+  String get dailyPlan => 'Tagesplan';
+
+  @override
+  String get scheduleAtGlance => 'Dein Stundenplan auf einen Blick';
+
+  @override
+  String get addPlan => 'Plan hinzufügen';
+
+  @override
+  String scheduleFor(Object date) {
+    return 'Stundenplan für $date';
+  }
+
+  @override
+  String get freeDay => 'Ein freier Tag!';
+
+  @override
+  String get freeDayDescription => 'Du hast keine Kurse oder Fristen. Genieße deine freie Zeit oder plane voraus.';
+
+  @override
+  String get deleteEventTitle => 'Ereignis löschen?';
+
+  @override
+  String deleteEventConfirm(Object title) {
+    return 'Möchtest du \"$title\" löschen?';
+  }
+
+  @override
+  String get addPlanEvent => 'Plan-Ereignis hinzufügen';
+
+  @override
+  String get eventTitleHint => 'Ereignistitel (z.B. Treffen mit Ali)';
+
+  @override
+  String get eventTitleRequired => 'Bitte gib einen Titel ein';
+
+  @override
+  String get eventType => 'Ereignistyp';
+
+  @override
+  String startLabel(Object time) {
+    return 'Start: $time';
+  }
+
+  @override
+  String endLabel(Object time) {
+    return 'Ende: $time';
+  }
+
+  @override
+  String get notesOptional => 'Notizen (Optional)';
+
+  @override
+  String get saveEvent => 'Ereignis speichern';
+
+  @override
+  String get colorLabel => 'Farbe';
+
+  @override
+  String get eventStudy => 'Lernen';
+
+  @override
+  String get eventMeeting => 'Besprechung';
+
+  @override
+  String get eventCoffee => 'Kaffeepause';
+
+  @override
+  String get eventPersonal => 'Persönlich';
+
+  @override
+  String get eventOther => 'Sonstiges';
+
+  @override
+  String get recording => 'Aufnahme...';
+
+  @override
+  String get stopAndSave => 'Stoppen & Speichern';
+
+  @override
+  String get syncFromMoodle => 'Von Moodle synchronisieren';
+
+  @override
+  String get moodleSyncFirst => 'Moodle-Konto zuerst synchronisieren';
+
+  @override
+  String moodleCourseSelected(Object courseName) {
+    return '$courseName ausgewählt — Kursdetails bearbeiten';
+  }
+
+  @override
+  String get selectFromMoodle => 'Von Moodle auswählen';
+
+  @override
+  String get cancelMoodle => 'Abbrechen';
+
+  @override
+  String addSelected(Object count) {
+    return 'Hinzufügen ($count)';
+  }
+
+  @override
+  String get searchCourse => 'Kurs suchen...';
+
+  @override
+  String get courseArchived => 'Kurs archiviert';
+
+  @override
+  String get notificationsDisabled => 'Benachrichtigungen deaktiviert';
+
+  @override
+  String get notificationsEnabled => 'Benachrichtigungen aktiviert';
+
+  @override
+  String get deadlineAdded => 'Frist erfolgreich hinzugefügt!';
+
+  @override
+  String get fileAdded => 'Datei erfolgreich hinzugefügt';
+
+  @override
+  String photoSaved(Object count) {
+    return '$count Fotos gespeichert!';
+  }
+
+  @override
+  String get noteSaved => 'Notiz gespeichert!';
+
+  @override
+  String get drawingSaved => 'Zeichnung gespeichert!';
+
+  @override
+  String get gradeDeleted => 'Note gelöscht';
+
+  @override
+  String get ocrLabel => 'OCR';
+
+  @override
+  String get drawingLabel => 'Zeichnung';
+
+  @override
+  String ofNotes(Object count, Object total) {
+    return '$count von $total Notizen';
+  }
+
+  @override
+  String notesCount(Object count) {
+    return '$count Notizen';
+  }
+
+  @override
+  String get clearCanvas => 'Leinwand leeren';
+
+  @override
+  String get clearCanvasConfirm => 'Bist du sicher, dass du alle Zeichnungen löschen möchtest?';
+
+  @override
+  String get clearAction => 'Leeren';
+
+  @override
+  String get nothingToSave => 'Nichts zu speichern. Bitte zeichne zuerst etwas.';
+
+  @override
+  String get blankPaper => 'Leeres Blatt';
+
+  @override
+  String get photoAnnotation => 'Foto-Anmerkung';
+
+  @override
+  String get pdfAnnotation => 'PDF-Anmerkung';
+
+  @override
+  String get blankLabel => 'Leer';
+
+  @override
+  String get photoLabel => 'Foto';
+
+  @override
+  String get pdfLabel => 'PDF';
+
+  @override
+  String get tapPhotoHint => 'Tippe auf \"Foto\", um ein Bild auszuwählen';
+
+  @override
+  String get tapPdfHint => 'Tippe auf \"PDF\", um ein Dokument auszuwählen';
+
+  @override
+  String get moveToCourse => 'In Kurs verschieben';
+
+  @override
+  String get deleteNote => 'Notiz löschen';
+
+  @override
+  String get imageUnavailable => 'Bild nicht verfügbar';
+
+  @override
+  String get noOtherCourses => 'Keine anderen Kurse verfügbar';
+
+  @override
+  String get selectDestination => 'Zielkurs auswählen';
+
+  @override
+  String movedTo(Object course) {
+    return 'Verschoben nach $course';
+  }
+
+  @override
+  String get noDrawingData => 'Keine Zeichnungsdaten';
+
+  @override
+  String get pdfFileNotFound => 'PDF-Datei nicht gefunden';
+
+  @override
+  String get studyHistory => 'Lernverlauf';
+
+  @override
+  String get range7D => '7T';
+
+  @override
+  String get range14D => '14T';
+
+  @override
+  String get range30D => '30T';
+
+  @override
+  String get totalStudy => 'Gesamtlernzeit';
+
+  @override
+  String get sessionsLabel => 'Sitzungen';
+
+  @override
+  String get avgPerDay => 'Schnitt/Tag';
+
+  @override
+  String get dailyStudyTime => 'Tägliche Lernzeit';
+
+  @override
+  String get noDataYet => 'Noch keine Daten';
+
+  @override
+  String get byCourse => 'Nach Kurs';
+
+  @override
+  String get general => 'Allgemein';
+
+  @override
+  String get recentSessions => 'Letzte Sitzungen';
+
+  @override
+  String get noStudySessions => 'Noch keine Lernsitzungen.\nStarte einen Pomodoro-Timer!';
+
+  @override
+  String get deleteSession => 'Sitzung löschen';
+
+  @override
+  String deleteSessionConfirm(Object minutes) {
+    return 'Diese ${minutes}m Lernsitzung löschen?';
+  }
+
+  @override
+  String get enabled => 'Aktiviert';
+
+  @override
+  String get active => 'Aktiv';
+
+  @override
+  String get inactive => 'Inaktiv';
+
+  @override
+  String get start => 'Starten';
+
+  @override
+  String get close => 'Schließen';
+
+  @override
+  String get saveQuestions => 'Fragen speichern';
+
+  @override
+  String questionLabel(Object index) {
+    return 'Frage $index';
+  }
+
+  @override
+  String get yourAnswer => 'Deine Antwort';
+
+  @override
+  String get allAnswersRequired => 'Alle Antworten sind erforderlich';
+
+  @override
+  String get questionsSaved => 'Sicherheitsfragen gespeichert';
+
+  @override
+  String get questionsSaveFailed => 'Speichern der Fragen fehlgeschlagen';
+
+  @override
+  String get resetQuestions => 'Fragen zurücksetzen';
+
+  @override
+  String biometricEnabled(Object biometric) {
+    return '$biometric erfolgreich aktiviert';
+  }
+
+  @override
+  String biometricDisabled(Object biometric) {
+    return '$biometric deaktiviert';
+  }
+
+  @override
+  String biometricAuthReason(Object biometric) {
+    return 'Authentifiziere dich, um $biometric zu aktivieren';
+  }
+
+  @override
+  String get e2eEncryption => 'Ende-zu-Ende-Verschlüsselung';
+
+  @override
+  String get e2eDescription => 'Deine Dateien werden auf deinem Gerät verschlüsselt, bevor sie in die Cloud hochgeladen werden.';
+
+  @override
+  String get encryptionKey => 'Verschlüsselungsschlüssel';
+
+  @override
+  String get keyStorage => 'Schlüsselspeicher';
+
+  @override
+  String get cloudAccess => 'Cloud-Zugriff';
+
+  @override
+  String get aes256 => 'AES-256-CBC';
+
+  @override
+  String get deviceKeychain => 'Geräte-Schlüsselbund';
+
+  @override
+  String get encryptedOnly => 'Nur verschlüsselte Daten';
+
+  @override
+  String get evenDevCantAccess => 'Selbst App-Entwickler können nicht auf deine Dateien zugreifen';
+
+  @override
+  String get alreadyEncrypted => 'Alle Dateien sind bereits verschlüsselt';
+
+  @override
+  String get startingMigration => 'Migration wird gestartet...';
+
+  @override
+  String get migrationComplete => 'Migration abgeschlossen!';
+
+  @override
+  String get allEncrypted => 'Alle Dateien erfolgreich verschlüsselt!';
+
+  @override
+  String get migrationFailed => 'Migration fehlgeschlagen';
+
+  @override
+  String migrationFailedDetail(Object error) {
+    return 'Migration fehlgeschlagen: $error';
+  }
+
+  @override
+  String get setUpSecurityQuestions => 'Richte 3 Sicherheitsfragen ein, um dein Konto wiederherzustellen, falls du dein Passwort vergisst.';
+
+  @override
+  String get questionsAlreadyConfigured => 'Sicherheitsfragen sind bereits konfiguriert';
+
+  @override
+  String get encryptExistingFiles => 'Vorhandene Dateien verschlüsseln';
+
+  @override
+  String get backupFilesToCloud => 'Deine Dateien in der Cloud sichern';
+
+  @override
+  String get securityQuestions => 'Sicherheitsfragen';
+
+  @override
+  String get securityQ1 => 'Wie heißt dein Haustier?';
+
+  @override
+  String get securityQ2 => 'Wie hieß dein erster Lehrer?';
+
+  @override
+  String get securityQ3 => 'In welcher Stadt wurdest du geboren?';
+
+  @override
+  String get securityQ4 => 'Was ist dein Lieblingsfilm?';
+
+  @override
+  String get securityQ5 => 'Was war deine erste Telefonnummer?';
+
+  @override
+  String get securityQ6 => 'Wie lautet der Mädchenname deiner Mutter?';
+
+  @override
+  String get securityQ7 => 'Wie hieß deine erste Schule?';
+
+  @override
+  String get securityQ8 => 'Was ist dein Lieblingsbuch?';
+
+  @override
+  String get recoveryStepEmail => 'E-Mail bestätigen';
+
+  @override
+  String get recoveryStepQuestions => 'Sicherheitsfragen';
+
+  @override
+  String get recoveryStepPassword => 'Neues Passwort';
+
+  @override
+  String get recoveryEmailDesc => 'Gib deine E-Mail ein, um den Wiederherstellungsprozess zu starten';
+
+  @override
+  String get recoveryCodeSent => 'Wir haben einen Bestätigungscode an deine E-Mail gesendet';
+
+  @override
+  String get recoveryQuestionsDesc => 'Beantworte deine Sicherheitsfragen, um fortzufahren';
+
+  @override
+  String get recoveryNewPasswordDesc => 'Erstelle ein neues Passwort für dein Konto';
+
+  @override
+  String get emailHint => 'E-Mail-Adresse';
+
+  @override
+  String get emailIsRequired => 'E-Mail ist erforderlich';
+
+  @override
+  String get enterValidEmail => 'Gib eine gültige E-Mail ein';
+
+  @override
+  String get sendCode => 'Code senden';
+
+  @override
+  String get verificationCode => 'Bestätigungscode';
+
+  @override
+  String get codeIsRequired => 'Code ist erforderlich';
+
+  @override
+  String get verifyCode => 'Code bestätigen';
+
+  @override
+  String get resendCode => 'Code erneut senden';
+
+  @override
+  String get yourAnswerLabel => 'Deine Antwort';
+
+  @override
+  String get required => 'Erforderlich';
+
+  @override
+  String get verifyAnswers => 'Antworten bestätigen';
+
+  @override
+  String securityQuestionN(Object number) {
+    return 'Sicherheitsfrage $number';
+  }
+
+  @override
+  String get passwordLengthError => 'Das Passwort muss mindestens 6 Zeichen lang sein';
+
+  @override
+  String get confirmPasswordLabel => 'Passwort bestätigen';
+
+  @override
+  String get passwordsDoNotMatchError => 'Passwörter stimmen nicht überein';
+
+  @override
+  String get resetPasswordButton => 'Passwort zurücksetzen';
+
+  @override
+  String get failedToSendReset => 'Senden der E-Mail zum Zurücksetzen fehlgeschlagen. Bitte überprüfe deine E-Mail-Adresse.';
+
+  @override
+  String get checkEmailForLink => 'Prüfe dein Postfach und klicke auf den Link';
+
+  @override
+  String get passwordResetEmailSent => 'E-Mail zum Passwortzurücksetzen gesendet! Hinweis: Wenn E2E-Verschlüsselung aktiviert ist...';
+
+  @override
+  String get failedToResetPassword => 'Passwort zurücksetzen fehlgeschlagen. Bitte versuche es erneut.';
+
+  @override
+  String get professorDetailsSection => 'Professordetails';
+
+  @override
+  String get notificationGeneral => 'Allgemein';
+
+  @override
+  String get turnOffAllNotifications => 'Alle App-Benachrichtigungen deaktivieren';
+
+  @override
+  String get reminderTiming => 'Erinnerungszeitpunkt';
+
+  @override
+  String get remindBeforeClass => 'Vor dem Unterricht erinnern';
+
+  @override
+  String get reminder5min => '5 Minuten';
+
+  @override
+  String get reminder10min => '10 Minuten';
+
+  @override
+  String get reminder15min => '15 Minuten';
+
+  @override
+  String get reminder30min => '30 Minuten';
+
+  @override
+  String get reminder1hour => '1 Stunde';
+
+  @override
+  String get reminder2hours => '2 Stunden';
+
+  @override
+  String alertAt(Object time) {
+    return 'Erinnern um $time';
+  }
+
+  @override
+  String get courseCustomization => 'Kursanpassung';
+
+  @override
+  String get transcriptTitle => 'Transkript';
+
+  @override
+  String get courseHeader => 'Kurs';
+
+  @override
+  String get crHeader => 'LP';
+
+  @override
+  String get avgHeader => 'Schnitt';
+
+  @override
+  String get gradeHeader => 'Note';
+
+  @override
+  String get gpHeader => 'NP';
+
+  @override
+  String get overallGpa => 'Gesamtnotendurchschnitt';
+
+  @override
+  String get totalCreditsLabel => 'Leistungspunkte gesamt';
+
+  @override
+  String get storageOptimized => 'Tiefe Speicheroptimierung abgeschlossen! Gerät wurde freigegeben.';
+
+  @override
+  String get smartStorageManagement => 'Intelligente Speicherverwaltung';
+
+  @override
+  String get storageOptions => 'Optionen zum Freigeben von Speicherplatz auf deinem Gerät';
+
+  @override
+  String get standardCleanup => 'Standardbereinigung';
+
+  @override
+  String standardCleanupDesc(Object size) {
+    return 'Löscht temporäre Dateien. ($size)';
+  }
+
+  @override
+  String get deepOptimization => 'Tiefenoptimierung';
+
+  @override
+  String get deepOptimizationDesc => 'Entfernt Bildreste und Speicherlecks, beschleunigt das Gerät.';
+
+  @override
+  String get optimizeStorage => 'Speicher optimieren';
+
+  @override
+  String get userName => 'Benutzer';
+
+  @override
+  String get guestUserLabel => 'Gastbenutzer';
+
+  @override
+  String get signInToSync => 'Anmelden, um Daten zu synchronisieren';
+
+  @override
+  String get guestMode => 'Gastmodus';
+
+  @override
+  String get faceId => 'Face ID / Touch ID';
+
+  @override
+  String get faceIdSubtitle => 'Face ID / Touch ID zum Entsperren verwenden';
+
+  @override
+  String get notAvailableOnDevice => 'Auf diesem Gerät nicht verfügbar';
+
+  @override
+  String get cloudBackup => 'Cloud-Backup';
+
+  @override
+  String get encryptedBackupActive => 'Verschlüsseltes Backup aktiv';
+
+  @override
+  String get backupOffDefault => 'Aus (Standard)';
+
+  @override
+  String get languageTurkish => 'Türkçe';
+
+  @override
+  String get languageSpanish => 'Español';
+
+  @override
+  String get languageGerman => 'Deutsch';
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
+  String get deleteAccount => 'Konto löschen';
+
+  @override
+  String get deleteAccountKvkk => 'KVKK Artikel 7 – Recht auf Löschung';
+
+  @override
+  String get deletingAccount => 'Konto wird gelöscht...';
+
+  @override
+  String deleteAccountError(Object error) {
+    return 'Fehler beim Löschen des Kontos: $error';
+  }
+
+  @override
+  String get cookiePolicy => 'Cookie-Richtlinie';
+
+  @override
+  String get consentManagement => 'Einwilligungsverwaltung';
+
+  @override
+  String get consentManagementDesc => 'Deine KVKK-Einwilligungspräferenzen';
+
+  @override
+  String get appVersion => 'Lesson Tracker v1.0.0';
+
+  @override
+  String get moodleTabCourses => 'Kurse';
+
+  @override
+  String get moodleTabAssignments => 'Aufgaben';
+
+  @override
+  String get moodleTabGrades => 'Noten';
+
+  @override
+  String get moodleTabAnnouncements => 'Ankündigungen';
+
+  @override
+  String get moodleTabCalendar => 'Kalender';
+
+  @override
+  String get moodleTabMessages => 'Nachrichten';
+
+  @override
+  String get moodleTitle => 'Moodle';
+
+  @override
+  String moodleSummary(Object accounts, Object courses, Object unread) {
+    return '$accounts Konto · $courses Kurse · $unread ungelesen';
+  }
+
+  @override
+  String get moodleRefreshAll => 'Alle aktualisieren';
+
+  @override
+  String get moodleManageAccounts => 'Konten verwalten';
+
+  @override
+  String get moodleAddAccount => 'Konto hinzufügen';
+
+  @override
+  String get moodleConnect => 'Moodle verbinden';
+
+  @override
+  String get moodleConnectDesc => 'Verbinde dich mit dem Moodle-System deiner Universität, um Kurse, Aufgaben und Noten zu synchronisieren.';
+
+  @override
+  String get moodleFeatureAssignments => 'Aufgaben & Termine';
+
+  @override
+  String get moodleFeatureGrades => 'Noten';
+
+  @override
+  String get moodleFeatureAnnouncements => 'Ankündigungen';
+
+  @override
+  String get moodleFeatureMultiAccount => 'Mehrere Konten';
+
+  @override
+  String get moodlePasswordNotStored => 'Dein Passwort wird niemals auf deinem Gerät gespeichert';
+
+  @override
+  String get moodleConnected => 'Moodle-Konto erfolgreich verbunden!';
+
+  @override
+  String get moodleNoCourses => 'Keine Kurse gefunden';
+
+  @override
+  String get moodleSyncing => 'Moodle-Konto wird synchronisiert...';
+
+  @override
+  String get moodleNoAssignments => 'Keine ausstehenden Aufgaben gefunden';
+
+  @override
+  String get moodleAllDone => 'Super! Sieht aus, als wäre alles erledigt.';
+
+  @override
+  String get moodleOverdue => 'Überfällig';
+
+  @override
+  String get moodleThisWeek => 'Diese Woche';
+
+  @override
+  String get moodleUpcoming => 'Bevorstehend';
+
+  @override
+  String get moodleSubmitted => 'Eingereicht';
+
+  @override
+  String get moodleLate => 'Verspätet';
+
+  @override
+  String get moodleDueToday => 'Heute fällig!';
+
+  @override
+  String moodleDaysLeft(Object days) {
+    return 'Noch $days Tage';
+  }
+
+  @override
+  String get moodleNoGrades => 'Keine Noten gefunden';
+
+  @override
+  String get moodleNoAnnouncements => 'Keine Ankündigungen gefunden';
+
+  @override
+  String get moodleNoEvents => 'Keine Ereignisse an diesem Tag';
+
+  @override
+  String get moodleAllDay => 'Ganztägig';
+
+  @override
+  String get moodleNoMessages => 'Keine Nachrichten gefunden';
+
+  @override
+  String get moodleMessagesHere => 'Deine Moodle-Nachrichten werden hier angezeigt';
+
+  @override
+  String moodleAccountCourses(Object count) {
+    return '$count Aufgaben';
+  }
+
+  @override
+  String get moodleAcademicSummary => 'Akademische Zusammenfassung';
+
+  @override
+  String get moodleAvg => 'Schnitt';
+
+  @override
+  String get moodleThisWeekTasks => 'Aufgaben diese Woche';
+
+  @override
+  String get moodleOverdueTasks => 'Überfällig';
+
+  @override
+  String get moodleCourseCount => 'Kursanzahl';
+
+  @override
+  String get moodleBest => 'Beste';
+
+  @override
+  String get moodleWorst => 'Schlechteste';
+
+  @override
+  String get moodleSelectUniversity => 'Universität auswählen';
+
+  @override
+  String get moodleSelectUniversityDesc => 'Wähle deine Universität aus, um dein Moodle-Konto zu verbinden';
+
+  @override
+  String get moodleSearchUniversity => 'Universität suchen...';
+
+  @override
+  String get moodleManualUrl => 'Manuelle URL-Eingabe';
+
+  @override
+  String get moodleManualUrlDesc => 'Für Universitäten, die nicht in der Liste sind';
+
+  @override
+  String get moodleBack => 'Zurück';
+
+  @override
+  String get moodleUrl => 'Moodle-URL';
+
+  @override
+  String get moodleUrlHint => 'z.B. moodle.universitaet.de';
+
+  @override
+  String get moodleUrlRequired => 'URL ist erforderlich';
+
+  @override
+  String get moodleLogin => 'Anmelden';
+
+  @override
+  String get moodleUsername => 'Benutzername';
+
+  @override
+  String get moodleUsernameRequired => 'Benutzername ist erforderlich';
+
+  @override
+  String get moodlePassword => 'Passwort';
+
+  @override
+  String get moodlePasswordRequired => 'Passwort ist erforderlich';
+
+  @override
+  String get moodlePasswordHint => 'Dein Passwort wird niemals auf deinem Gerät gespeichert.';
+
+  @override
+  String get moodleConnectButton => 'Verbinden';
+
+  @override
+  String get moodleConnecting => 'Verbindung zu Moodle wird hergestellt...';
+
+  @override
+  String get moodleConnectionFailed => 'Verbindung fehlgeschlagen';
+
+  @override
+  String get moodleTryAgain => 'Erneut versuchen';
+
+  @override
+  String get moodleConnectionSuccess => 'Verbindung erfolgreich!';
+
+  @override
+  String get moodleGreat => 'Super!';
+
+  @override
+  String get moodleAccountsManage => 'Konten verwalten';
+
+  @override
+  String get moodleAccountAdd => 'Moodle-Konto hinzufügen';
+
+  @override
+  String get moodleNoAccounts => 'Keine verbundenen Konten';
+
+  @override
+  String get moodleNoAccountsDesc => 'Füge dein Moodle-Konto mit dem untenstehenden Button hinzu.';
+
+  @override
+  String get moodleLogout => 'Abmelden';
+
+  @override
+  String moodleLogoutConfirm(Object account) {
+    return 'Bist du sicher, dass du dich von $account abmelden möchtest?';
+  }
+
+  @override
+  String moodleLogoutDone(Object account) {
+    return 'Von $account abgemeldet';
+  }
+
+  @override
+  String get moodleContentLoading => 'Kursinhalt wird geladen...';
+
+  @override
+  String moodleContentError(Object error) {
+    return 'Inhalt konnte nicht geladen werden: $error';
+  }
+
+  @override
+  String get moodleContentNotFound => 'Inhalt nicht gefunden';
+
+  @override
+  String get moodleDownloadFailed => 'Download fehlgeschlagen oder Datei zu groß.';
+
+  @override
+  String get moodleTransferToCourse => 'In meine Kurse übertragen';
+
+  @override
+  String get moodleTransferDesc => 'Speichere diese Datei in einem deiner Kurse in der App.';
+
+  @override
+  String get moodleSelectCourse => 'Kurs auswählen';
+
+  @override
+  String get moodleNoLocalCourses => 'Du hast noch keine Kurse hinzugefügt.';
+
+  @override
+  String moodleSavedToCourse(Object course) {
+    return 'Datei erfolgreich in \"$course\" gespeichert!';
+  }
+
+  @override
+  String get moodleSaveError => 'Beim Speichern der Datei ist ein Fehler aufgetreten.';
+
+  @override
+  String get moodleTokenNotFound => 'Token nicht gefunden — Konto neu verbinden';
+
+  @override
+  String get moodleAccountNotFound => 'Konto nicht gefunden';
+
+  @override
+  String get veliConsentTitle => 'Eltern';
+
+  @override
+  String get veliConsentDesc => 'Benutzer unter 18 Jahren benötigen die elterliche Einwilligung zur Nutzung der App.';
+
+  @override
+  String get veliEmailLabel => 'E-Mail der Eltern';
+
+  @override
+  String get veliEmailHint => 'E-Mail-Adresse der Eltern eingeben';
+
+  @override
+  String get veliConfirmCheck => 'Ich bestätige, dass ich Elternteil bin und meinem Kind die Nutzung dieser App erlaube.';
+
+  @override
+  String get veliKvkkCheck => 'Ich gebe die elterliche Einwilligung gemäß KVKK Gesetz Nr. 6698.';
+
+  @override
+  String veliCodeSent(Object email) {
+    return 'Bestätigungscode an $email gesendet.';
+  }
+
+  @override
+  String get veliEnterCode => 'Gib den 6-stelligen Bestätigungscode ein';
+
+  @override
+  String get veliVerifyAndApprove => 'Bestätigen & Genehmigen';
+
+  @override
+  String get veliResendCode => 'Code erneut senden';
+
+  @override
+  String get veliChangeEmail => 'E-Mail ändern';
+
+  @override
+  String get veliSendCode => 'Bestätigungscode senden';
+
+  @override
+  String get veliCancel => 'Abbrechen';
+
+  @override
+  String get veliRequired => 'Elterliche Einwilligung ist erforderlich';
+
+  @override
+  String get veliValidEmail => 'Gib eine gültige E-Mail-Adresse ein';
+
+  @override
+  String get veliCheckConsent => 'Bitte aktiviere das Kästchen für die elterliche Einwilligung';
+
+  @override
+  String get veliCodeRequired => 'Gib den Bestätigungscode ein';
+
+  @override
+  String get veliSessionNotFound => 'Bestätigungssitzung nicht gefunden. Bitte versuche es erneut.';
+
+  @override
+  String get veliCodeExpired => 'Bestätigungscode abgelaufen. Bitte fordere einen neuen an.';
+
+  @override
+  String get veliWrongCode => 'Falscher Bestätigungscode.';
+
+  @override
+  String get veliInfoText => 'Die E-Mail der Eltern wird nur zum Senden der Einwilligungsbenachrichtigung verwendet.';
+
+  @override
+  String get veliRequestConsent => 'Einwilligung anfordern';
+
+  @override
+  String get veliEmailVerification => 'E-Mail-Bestätigung';
+
+  @override
+  String get veliStepVerification => 'Bestätigung';
+
+  @override
+  String get veliStepConsent => 'Einwilligung';
+
+  @override
+  String get kvkkFlowReset => 'KVKK-Einwilligung zurückgesetzt – App neu starten';
+
+  @override
+  String get kvkkReset => 'Zurücksetzen';
+
+  @override
+  String get kvkkSkip => 'Überspringen';
+
+  @override
+  String get consentManagementTitle => 'Einwilligungsverwaltung';
+
+  @override
+  String get consentManagementSubtitle => 'Deine expliziten Einwilligungspräferenzen';
+
+  @override
+  String get consentWithdrawInfo => 'Du kannst deine Einwilligung jederzeit widerrufen. Der Widerruf berührt nicht die Rechtmäßigkeit der aufgrund der Einwilligung bis zum Widerruf erfolgten Verarbeitung.';
+
+  @override
+  String get consentCamera => 'Kamera-Fotoaufnahme';
+
+  @override
+  String get consentAudio => 'Audioaufnahme';
+
+  @override
+  String get consentOcr => 'OCR-Texterkennung';
+
+  @override
+  String get consentPush => 'Push-Benachrichtigungen';
+
+  @override
+  String get consentCloud => 'Cloud-Backup (Optional)';
+
+  @override
+  String get consentLegalInfo => 'Rechtliche Informationen';
+
+  @override
+  String get consentLegalDesc => 'Gemäß KVKK Gesetz Nr. 6698 kannst du hier deine expliziten Einwilligungspräferenzen verwalten.';
+
+  @override
+  String get consentCameraDesc => 'Fotos aufnehmen und Dokumente scannen';
+
+  @override
+  String get consentAudioDesc => 'Sprachnotizen im Unterricht aufnehmen';
+
+  @override
+  String get consentOcrDesc => 'Text aus Bildern und PDFs extrahieren';
+
+  @override
+  String get consentPushDesc => 'Benachrichtigungen zu Fristen und Kursen erhalten';
+
+  @override
+  String get consentCloudDesc => 'Deine Daten sicher in der Cloud sichern';
+
+  @override
+  String get moodleSyncEnabled => 'Moodle-Hintergrundsync aktiviert!';
+
+  @override
+  String get moodleSyncDisabled => 'Moodle-Hintergrundsync deaktiviert!';
+
+  @override
+  String get moodleBackgroundSync => 'Moodle-Hintergrundsync';
+
+  @override
+  String get moodleSyncNotifications => 'Neue Aufgaben, Noten und Ankündigungen werden benachrichtigt';
+
+  @override
+  String get moodleSyncOff => 'Aus — manuelle Aktualisierung erforderlich';
+
+  @override
+  String get smartAttendanceSetLocationFirst => 'Lege zuerst deinen Schulstandort fest, um die intelligente Anwesenheit zu aktivieren.';
+
+  @override
+  String get smartAttendanceEnabled => 'Intelligente Anwesenheit aktiviert! Funktioniert im Hintergrund.';
+
+  @override
+  String get smartAttendanceDisabled => 'Intelligente Anwesenheit deaktiviert.';
+
+  @override
+  String get smartAttendanceSchoolLocation => 'Schulstandort';
+
+  @override
+  String get smartAttendanceLocationSet => 'Standort festgelegt';
+
+  @override
+  String get smartAttendanceLocationNotSet => 'Noch nicht festgelegt';
+
+  @override
+  String get smartAttendanceCurrentLocation => 'Dein aktueller Schulstandort wurde gespeichert.';
+
+  @override
+  String get smartAttendanceSetLocationPrompt => 'Möchtest du deinen aktuellen Standort als \"Universitätsstandort\" speichern?';
+
+  @override
+  String get smartAttendanceCancel => 'Abbrechen';
+
+  @override
+  String get smartAttendanceGettingLocation => 'Standort wird ermittelt...';
+
+  @override
+  String get smartAttendanceSaved => 'Schulstandort gespeichert!';
+
+  @override
+  String get smartAttendanceLocationError => 'Standort konnte nicht ermittelt werden. Überprüfe die Standortberechtigungen.';
+
+  @override
+  String get smartAttendanceUpdate => 'Aktualisieren';
+
+  @override
+  String get smartAttendanceYesImAtSchool => 'Ja, ich bin an der Schule';
+
+  @override
+  String get smartAttendanceTitle => 'Intelligente Anwesenheit';
+
+  @override
+  String get smartAttendanceActive => 'Aktiv — Abwesenheit wird nicht gezählt, wenn du während des Unterrichts in der Schule bist';
+
+  @override
+  String get smartAttendanceOff => 'Deaktiviert';
+
+  @override
+  String get deleteAccountTitle => 'Dein Konto wird gelöscht';
+
+  @override
+  String get deleteAccountIrreversible => 'Diese Aktion kann nicht rückgängig gemacht werden';
+
+  @override
+  String get deleteAccountDataToDelete => 'Zu löschende Daten:';
+
+  @override
+  String get deleteAccountNotes => 'Alle Kursnotizen';
+
+  @override
+  String get deleteAccountAudio => 'Audioaufnahmen';
+
+  @override
+  String get deleteAccountPhotos => 'Fotos und OCR-Daten';
+
+  @override
+  String get deleteAccountAttendance => 'Anwesenheits- und Notenaufzeichnungen';
+
+  @override
+  String get deleteAccountSessions => 'Lernsitzungen';
+
+  @override
+  String get deleteAccountMoodle => 'Moodle-Kontoverbindungen';
+
+  @override
+  String get deleteAccountFirebase => 'Firebase-Konto';
+
+  @override
+  String get deleteAccountRetention => 'Deine Daten werden innerhalb von 30 Tagen endgültig gelöscht.';
+
+  @override
+  String get deleteAccountConfirm => 'Ich bestätige, dass ich mein Konto löschen möchte.';
+
+  @override
+  String get deleteAccountCancel => 'Abbrechen';
+
+  @override
+  String get deleteAccountAction => 'Mein Konto löschen';
+
+  @override
+  String get aydinlatmaTitle => 'Aufklärungstext';
+
+  @override
+  String get aydinlatmaSubtitle => 'Informationen gemäß KVKK Gesetz Nr. 6698 Artikel 10';
+
+  @override
+  String get aydinlatmaSection1 => '1. Datenverantwortlicher';
+
+  @override
+  String get aydinlatmaControllerInfo => 'LessonTracker\nE-Mail: lessontracker@example.com';
+
+  @override
+  String get aydinlatmaSection2 => '2. Verarbeitete personenbezogene Daten';
+
+  @override
+  String get aydinlatmaSection3 => '3. Zwecke der Datenverarbeitung';
+
+  @override
+  String get aydinlatmaSection4 => '4. Übermittlung personenbezogener Daten';
+
+  @override
+  String get aydinlatmaSection5 => '5. Aufbewahrungsfrist';
+
+  @override
+  String get aydinlatmaSection6 => '6. Datensicherheit';
+
+  @override
+  String get aydinlatmaSection7 => '7. Deine Rechte (KVKK Artikel 11)';
+
+  @override
+  String get aydinlatmaSection8 => '8. Weitere Informationen';
+
+  @override
+  String get aydinlatmaConfirm => 'Ich habe den Aufklärungstext gelesen und wurde informiert.';
+
+  @override
+  String get aydinlatmaContinue => 'Ich verstehe, fortfahren';
+
+  @override
+  String get acikRizaTitle => 'Ausdrückliche Einwilligung';
+
+  @override
+  String get acikRizaSubtitle => 'Deine ausdrückliche Einwilligung ist für die folgenden Aktionen gesetzlich erforderlich (KVKK Artikel 5/1 und 6/2)';
+
+  @override
+  String get acikRizaImportant => 'Wichtige Informationen';
+
+  @override
+  String get acikRizaVoluntary => 'Die ausdrückliche Einwilligung ist vollkommen freiwillig. Du kannst die Einwilligung überspringen und die App im eingeschränkten Modus nutzen. Du kannst deine Einstellungen später in den Einstellungen ändern.';
+
+  @override
+  String get acikRizaGiveAndContinue => 'Einwilligen & Fortfahren';
+
+  @override
+  String get acikRizaSkip => 'Ohne Einwilligung fortfahren';
+
+  @override
+  String get acikRizaWarning => 'Wichtiger Hinweis';
+
+  @override
+  String get acikRizaFeaturesDisabled => 'Wenn du ohne Einwilligung fortfährst, stehen die folgenden Funktionen nicht zur Verfügung:';
+
+  @override
+  String get acikRizaFeatureCamera => 'Kamera-Fotoaufnahme';
+
+  @override
+  String get acikRizaFeatureAudio => 'Audioaufnahme';
+
+  @override
+  String get acikRizaFeatureOcr => 'OCR-Texterkennung';
+
+  @override
+  String get acikRizaSettingsNote => 'Du kannst diese Einstellungen später in den Einstellungen ändern.';
+
+  @override
+  String get acikRizaCancel => 'Abbrechen';
+
+  @override
+  String get acikRizaLimitedMode => 'Im eingeschränkten Modus fortfahren';
 }

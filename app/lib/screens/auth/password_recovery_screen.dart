@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 
 class SecurityQuestionService {
   static const String _collectionPath = 'users';
@@ -197,6 +198,7 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: isDark
@@ -259,30 +261,32 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
   }
 
   String _getStepTitle() {
+    final l10n = AppLocalizations.of(context)!;
     switch (_step) {
       case 1:
-        return 'Reset Password';
+        return l10n.resetPassword;
       case 2:
-        return 'Verify Email';
+        return l10n.recoveryStepEmail;
       case 3:
-        return 'Security Questions';
+        return l10n.recoveryStepQuestions;
       case 4:
-        return 'New Password';
+        return l10n.recoveryStepPassword;
       default:
-        return 'Reset Password';
+        return l10n.resetPassword;
     }
   }
 
   String _getStepSubtitle() {
+    final l10n = AppLocalizations.of(context)!;
     switch (_step) {
       case 1:
-        return 'Enter your email to start the recovery process';
+        return l10n.recoveryEmailDesc;
       case 2:
-        return 'We sent a verification code to your email';
+        return l10n.recoveryCodeSent;
       case 3:
-        return 'Answer your security questions to continue';
+        return l10n.recoveryQuestionsDesc;
       case 4:
-        return 'Create a new password for your account';
+        return l10n.recoveryNewPasswordDesc;
       default:
         return '';
     }
@@ -327,85 +331,88 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
   }
 
   Widget _buildEmailStep(bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         _buildTextField(
           controller: _emailController,
-          label: 'Email Address',
+          label: l10n.emailHint,
           icon: Icons.email_outlined,
           isDark: isDark,
           keyboardType: TextInputType.emailAddress,
           validator: (v) {
-            if (v == null || v.trim().isEmpty) return 'Email is required';
-            if (!v.contains('@')) return 'Enter a valid email';
+            if (v == null || v.trim().isEmpty) return l10n.emailIsRequired;
+            if (!v.contains('@')) return l10n.enterValidEmail;
             return null;
           },
         ),
         const SizedBox(height: 24),
-        _buildPrimaryButton('Send Code', _sendResetCode, isDark),
+        _buildPrimaryButton(l10n.sendCode, _sendResetCode, isDark),
       ],
     );
   }
 
   Widget _buildCodeStep(bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         _buildTextField(
           controller: _codeController,
-          label: 'Verification Code',
+          label: l10n.verificationCode,
           icon: Icons.lock_outline,
           isDark: isDark,
           keyboardType: TextInputType.number,
           validator: (v) {
-            if (v == null || v.trim().isEmpty) return 'Code is required';
+            if (v == null || v.trim().isEmpty) return l10n.codeIsRequired;
             return null;
           },
         ),
         const SizedBox(height: 24),
-        _buildPrimaryButton('Verify Code', _verifyCode, isDark),
+        _buildPrimaryButton(l10n.verifyCode, _verifyCode, isDark),
         const SizedBox(height: 12),
         TextButton(
           onPressed: _isLoading ? null : _sendResetCode,
-          child: const Text('Resend Code'),
+          child: Text(l10n.resendCode),
         ),
       ],
     );
   }
 
   Widget _buildSecurityQuestionsStep(bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         _buildQuestionDropdown(0, isDark),
         const SizedBox(height: 12),
         _buildTextField(
           controller: _answerControllers[0],
-          label: 'Your Answer',
+          label: l10n.yourAnswerLabel,
           icon: Icons.question_answer_outlined,
           isDark: isDark,
-          validator: (v) => v?.trim().isEmpty == true ? 'Required' : null,
+          validator: (v) => v?.trim().isEmpty == true ? l10n.required : null,
         ),
         const SizedBox(height: 16),
         _buildQuestionDropdown(1, isDark),
         const SizedBox(height: 12),
         _buildTextField(
           controller: _answerControllers[1],
-          label: 'Your Answer',
+          label: l10n.yourAnswerLabel,
           icon: Icons.question_answer_outlined,
           isDark: isDark,
-          validator: (v) => v?.trim().isEmpty == true ? 'Required' : null,
+          validator: (v) => v?.trim().isEmpty == true ? l10n.required : null,
         ),
         const SizedBox(height: 16),
         _buildQuestionDropdown(2, isDark),
         const SizedBox(height: 12),
         _buildTextField(
           controller: _answerControllers[2],
-          label: 'Your Answer',
+          label: l10n.yourAnswerLabel,
           icon: Icons.question_answer_outlined,
           isDark: isDark,
-          validator: (v) => v?.trim().isEmpty == true ? 'Required' : null,
+          validator: (v) => v?.trim().isEmpty == true ? l10n.required : null,
         ),
         const SizedBox(height: 24),
-        _buildPrimaryButton('Verify Answers', _verifySecurityQuestions, isDark),
+        _buildPrimaryButton(l10n.verifyAnswers, _verifySecurityQuestions, isDark),
       ],
     );
   }
@@ -415,10 +422,11 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
         ? _selectedQuestion1
         : (index == 1 ? _selectedQuestion2 : _selectedQuestion3);
 
+    final l10n = AppLocalizations.of(context)!;
     return DropdownButtonFormField<int>(
       value: selectedIndex,
       decoration: InputDecoration(
-        labelText: 'Security Question ${index + 1}',
+        labelText: l10n.securityQuestionN(index + 1),
         labelStyle: TextStyle(
           color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
         ),
@@ -430,9 +438,16 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
         fillColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
       ),
-      items: SecurityQuestionService.availableQuestions.asMap().entries.map((
-        entry,
-      ) {
+      items: [
+        l10n.securityQ1,
+        l10n.securityQ2,
+        l10n.securityQ3,
+        l10n.securityQ4,
+        l10n.securityQ5,
+        l10n.securityQ6,
+        l10n.securityQ7,
+        l10n.securityQ8,
+      ].asMap().entries.map((entry) {
         return DropdownMenuItem(
           value: entry.key,
           child: Text(
@@ -460,35 +475,36 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
   }
 
   Widget _buildNewPasswordStep(bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         _buildTextField(
           controller: _newPasswordController,
-          label: 'New Password',
+          label: l10n.newPassword,
           icon: Icons.lock_outline,
           isDark: isDark,
           isPassword: true,
           validator: (v) {
             if (v == null || v.length < 6)
-              return 'Password must be at least 6 characters';
+              return l10n.passwordLengthError;
             return null;
           },
         ),
         const SizedBox(height: 16),
         _buildTextField(
           controller: _confirmPasswordController,
-          label: 'Confirm Password',
+          label: l10n.confirmPasswordLabel,
           icon: Icons.lock_outline,
           isDark: isDark,
           isPassword: true,
           validator: (v) {
             if (v != _newPasswordController.text)
-              return 'Passwords do not match';
+              return l10n.passwordsDoNotMatchError;
             return null;
           },
         ),
         const SizedBox(height: 24),
-        _buildPrimaryButton('Reset Password', _resetPassword, isDark),
+        _buildPrimaryButton(l10n.resetPasswordButton, _resetPassword, isDark),
       ],
     );
   }
@@ -599,7 +615,7 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
       });
     } catch (e) {
       setState(() {
-        _error = 'Failed to send reset email. Please check your email address.';
+        _error = AppLocalizations.of(context)!.failedToSendReset;
       });
     } finally {
       setState(() => _isLoading = false);
@@ -616,8 +632,8 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Check your email and click the reset link'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.checkEmailForLink),
           backgroundColor: Colors.green,
         ),
       );
@@ -635,8 +651,8 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Check your email and click the reset link'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.checkEmailForLink),
           backgroundColor: Colors.green,
         ),
       );
@@ -659,12 +675,10 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'Password reset email sent! Note: If you have E2E encryption enabled, '
-              'changing your password may make your cloud data inaccessible. '
-              'Please also check your security questions.',
-            ),
-            backgroundColor: Colors.orange,
+          content: Text(
+            AppLocalizations.of(context)!.passwordResetEmailSent,
+          ),
+          backgroundColor: Colors.orange,
             duration: const Duration(seconds: 8),
           ),
         );
@@ -672,7 +686,7 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
       }
     } catch (e) {
       setState(() {
-        _error = 'Failed to reset password. Please try again.';
+        _error = AppLocalizations.of(context)!.failedToResetPassword;
       });
     } finally {
       setState(() => _isLoading = false);

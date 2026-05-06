@@ -8,6 +8,7 @@ import 'package:pdfx/pdfx.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/course.dart';
 import '../../models/note.dart';
@@ -160,12 +161,12 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Clear Canvas'),
-        content: const Text('Are you sure you want to clear all drawings?'),
+        title: Text(AppLocalizations.of(context)!.clearCanvas),
+        content: Text(AppLocalizations.of(context)!.clearCanvasConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -175,7 +176,7 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
                 _strokesByPage[_currentPdfPage] = [];
               });
             },
-            child: const Text('Clear', style: TextStyle(color: Colors.red)),
+            child: Text(AppLocalizations.of(context)!.clearAction, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -184,7 +185,7 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
 
   Future<void> _saveDrawing() async {
     if (_currentPageStrokes.isEmpty && _photoBytes == null && _pdfPath == null) {
-      _showError('Nothing to save. Please draw something first.');
+      _showError(AppLocalizations.of(context)!.nothingToSave);
       return;
     }
 
@@ -258,7 +259,7 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
         Navigator.pop(context, note);
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Drawing saved!')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.drawingSaved)));
       }
     } catch (e) {
       _showError('Failed to save: $e');
@@ -329,6 +330,7 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.grey[100],
@@ -361,16 +363,16 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
             TextButton.icon(
               onPressed: _saveDrawing,
               icon: const Icon(Icons.check, size: 20),
-              label: const Text('Save'),
+              label: Text(l10n.save),
             ),
         ],
       ),
       body: Column(
         children: [
           // Mode selector
-          _buildModeSelector(isDark),
+          _buildModeSelector(isDark, l10n),
           // Canvas area
-          Expanded(child: _buildCanvasArea(isDark)),
+          Expanded(child: _buildCanvasArea(isDark, l10n)),
           // Drawing toolbar
           DrawingToolbar(
             selectedColor: _currentColor,
@@ -387,17 +389,18 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
   }
 
   String _getTitle() {
+    final l10n = AppLocalizations.of(context)!;
     switch (_mode) {
       case CanvasMode.blank:
-        return 'Blank Paper';
+        return l10n.blankPaper;
       case CanvasMode.photo:
-        return 'Photo Annotation';
+        return l10n.photoAnnotation;
       case CanvasMode.pdf:
-        return 'PDF Annotation';
+        return l10n.pdfAnnotation;
     }
   }
 
-  Widget _buildModeSelector(bool isDark) {
+  Widget _buildModeSelector(bool isDark, AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -405,7 +408,7 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
         children: [
           _ModeChip(
             icon: Icons.article_outlined,
-            label: 'Blank',
+            label: l10n.blankLabel,
             isSelected: _mode == CanvasMode.blank,
             onTap: () => setState(() {
               _mode = CanvasMode.blank;
@@ -416,7 +419,7 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
           const SizedBox(width: 12),
           _ModeChip(
             icon: Icons.image_outlined,
-            label: 'Photo',
+            label: l10n.photoLabel,
             isSelected: _mode == CanvasMode.photo,
             onTap: _pickPhoto,
             isDark: isDark,
@@ -424,7 +427,7 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
           const SizedBox(width: 12),
           _ModeChip(
             icon: Icons.picture_as_pdf_outlined,
-            label: 'PDF',
+            label: l10n.pdfLabel,
             isSelected: _mode == CanvasMode.pdf,
             onTap: _pickPdf,
             isDark: isDark,
@@ -434,7 +437,7 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
     );
   }
 
-  Widget _buildCanvasArea(bool isDark) {
+  Widget _buildCanvasArea(bool isDark, AppLocalizations l10n) {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -443,9 +446,9 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
       case CanvasMode.blank:
         return _buildBlankCanvas(isDark);
       case CanvasMode.photo:
-        return _buildPhotoCanvas(isDark);
+        return _buildPhotoCanvas(isDark, l10n);
       case CanvasMode.pdf:
-        return _buildPdfCanvas(isDark);
+        return _buildPdfCanvas(isDark, l10n);
     }
   }
 
@@ -477,7 +480,7 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
     );
   }
 
-  Widget _buildPhotoCanvas(bool isDark) {
+  Widget _buildPhotoCanvas(bool isDark, AppLocalizations l10n) {
     if (_photoBytes == null) {
       return Center(
         child: Column(
@@ -490,7 +493,7 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Tap "Photo" to select an image',
+              l10n.tapPhotoHint,
               style: TextStyle(
                 color: isDark ? Colors.grey[400] : Colors.grey[600],
               ),
@@ -534,7 +537,7 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
     );
   }
 
-  Widget _buildPdfCanvas(bool isDark) {
+  Widget _buildPdfCanvas(bool isDark, AppLocalizations l10n) {
     if (_pdfController == null) {
       return Center(
         child: Column(
@@ -547,7 +550,7 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Tap "PDF" to select a document',
+              l10n.tapPdfHint,
               style: TextStyle(
                 color: isDark ? Colors.grey[400] : Colors.grey[600],
               ),

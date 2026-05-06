@@ -6,6 +6,7 @@ import '../../../models/moodle/moodle_calendar_event.dart';
 import '../../../providers/moodle_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/moodle_utils.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../../providers/language_provider.dart';
 
 class MoodleCalendarTab extends StatefulWidget {
@@ -31,6 +32,7 @@ class _MoodleCalendarTabState extends State<MoodleCalendarTab> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final provider = context.watch<MoodleProvider>();
     final allEvents = provider.allEvents;
 
@@ -79,7 +81,7 @@ class _MoodleCalendarTabState extends State<MoodleCalendarTab> {
           child: selectedEvents.isEmpty
               ? Center(
                   child: Text(
-                    'Bu gün için etkinlik yok',
+                    l10n.moodleNoEvents,
                     style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant),
                   ),
@@ -104,6 +106,7 @@ class _EventTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final langCode = context.watch<LanguageProvider>().locale.languageCode;
 
     final typeIcon = switch (event.eventType) {
@@ -168,7 +171,7 @@ class _EventTile extends StatelessWidget {
                           color: AppColors.primary)),
                 Text(
                   event.isAllDay
-                      ? 'Tüm gün'
+                      ? l10n.moodleAllDay
                       : DateFormat('HH:mm', 'tr').format(event.timeStart),
                   style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant),

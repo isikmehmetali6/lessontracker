@@ -33,6 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final provider = context.watch<AuthProvider>();
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: isDark
@@ -75,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 // Title
                 Text(
-                  'Welcome back!',
+                  l10n.welcomeBack,
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -84,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Log in to continue your learning journey.',
+                  l10n.loginSubtitle,
                   style: TextStyle(
                     fontSize: 16,
                     color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
@@ -128,16 +129,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Email Field
                 _buildTextField(
                   controller: _emailController,
-                  label: 'Email Address',
+                  label: l10n.emailAddress,
                   icon: Icons.email_outlined,
                   isDark: isDark,
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your email address';
+                      return l10n.emailRequired;
                     }
                     if (!AuthProvider.isValidEmail(value.trim())) {
-                      return 'Please enter a valid email address';
+                      return l10n.validEmailRequired;
                     }
                     return null;
                   },
@@ -147,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Password Field
                 _buildTextField(
                   controller: _passwordController,
-                  label: 'Password',
+                  label: l10n.newPassword,
                   icon: Icons.lock_outline,
                   isDark: isDark,
                   isPassword: true,
@@ -156,7 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       setState(() => _isPasswordVisible = !_isPasswordVisible),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
+                      return l10n.passwordRequired;
                     }
                     return null;
                   },
@@ -175,8 +176,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       );
                     },
-                    child: const Text(
-                      'Forgot Password?',
+                    child: Text(
+                      l10n.forgotPassword,
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
@@ -210,8 +211,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               strokeWidth: 2,
                             ),
                           )
-                        : const Text(
-                            'Log In',
+                        : Text(
+                            l10n.logIn,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 16,
@@ -234,7 +235,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
-                        'OR',
+                        l10n.orDivider,
                         style: TextStyle(
                           color: isDark
                               ? Colors.grey.shade500
@@ -259,7 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Don't have an account?",
+                      l10n.dontHaveAccount,
                       style: TextStyle(
                         color: isDark
                             ? Colors.grey.shade400
@@ -276,8 +277,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         );
                       },
-                      child: const Text(
-                        'Sign Up',
+                      child: Text(
+                        l10n.signUp,
                         style: TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,
@@ -294,7 +295,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () =>
                         _showGuestModeDialog(context, provider, isDark),
                     child: Text(
-                      'Continue as Guest',
+                      l10n.continueAsGuest,
                       style: TextStyle(
                         color: isDark
                             ? Colors.grey.shade600
@@ -345,6 +346,7 @@ class _LoginScreenState extends State<LoginScreen> {
     AuthProvider provider,
     bool isDark,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final resetEmailController = TextEditingController();
 
     showDialog(
@@ -353,7 +355,7 @@ class _LoginScreenState extends State<LoginScreen> {
         backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
-          'Reset Password',
+          l10n.resetPassword,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: isDark ? Colors.white : const Color(0xFF1A1F36),
@@ -363,7 +365,7 @@ class _LoginScreenState extends State<LoginScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Enter your email address and we\'ll send you a link to reset your password.',
+              l10n.resetPasswordDescription,
               style: TextStyle(
                 fontSize: 14,
                 color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
@@ -375,7 +377,7 @@ class _LoginScreenState extends State<LoginScreen> {
               keyboardType: TextInputType.emailAddress,
               style: TextStyle(color: isDark ? Colors.white : Colors.black87),
               decoration: InputDecoration(
-                hintText: 'Email address',
+                hintText: l10n.emailHint,
                 prefixIcon: Icon(
                   Icons.email_outlined,
                   color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
@@ -413,8 +415,8 @@ class _LoginScreenState extends State<LoginScreen> {
               if (success) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: const Text(
-                      'Password reset email sent! Check your inbox.',
+                    content: Text(
+                      l10n.passwordResetSent,
                     ),
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(
@@ -426,7 +428,7 @@ class _LoginScreenState extends State<LoginScreen> {
               } else {
                 ErrorHandler.handleError(
                   context,
-                  provider.error ?? 'Failed to send reset email.',
+                  provider.error ?? l10n.failedToSendReset,
                 );
               }
             },
@@ -436,8 +438,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text(
-              'Send Link',
+            child: Text(
+              l10n.sendLink,
               style: TextStyle(color: Colors.white),
             ),
           ),
@@ -451,20 +453,21 @@ class _LoginScreenState extends State<LoginScreen> {
     AuthProvider provider,
     bool isDark,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
-          'Continue as Guest',
+          l10n.continueAsGuest,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: isDark ? Colors.white : const Color(0xFF1A1F36),
           ),
         ),
         content: Text(
-          'Your data will be stored locally on this device only and won\'t sync to the cloud. You can create an account later to backup your data.',
+          l10n.guestDescription,
           style: TextStyle(
             fontSize: 14,
             color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
@@ -491,8 +494,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text(
-              'Continue',
+            child: Text(
+              l10n.continueAction,
               style: TextStyle(color: Colors.white),
             ),
           ),

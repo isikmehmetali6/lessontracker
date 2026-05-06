@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/course_provider.dart';
 import '../../course_detail/course_detail_screen.dart';
@@ -45,14 +46,15 @@ class _WeeklyTimetableScreenState extends State<WeeklyTimetableScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final weekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    final weekDays = [l10n.dayM, l10n.dayT, l10n.dayW, l10n.dayTh, l10n.dayF, l10n.daySa, l10n.daySu];
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF5F7FA), // Light grey bg for grid
       appBar: AppBar(
         title: Text(
-          'Weekly Timetable',
+          l10n.weeklyTimetable,
           style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 24,

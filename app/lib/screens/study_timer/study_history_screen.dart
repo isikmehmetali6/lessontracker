@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../repositories/study_session_repository.dart';
 import '../../models/study_session.dart';
@@ -36,6 +37,7 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final loc = AppLocalizations.of(context)!;
     final courses = context.select((CourseProvider p) => p.courses);
 
     // Toplam istatistikler
@@ -65,7 +67,7 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Study History',
+          loc.studyHistory,
           style: TextStyle(
             color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
             fontWeight: FontWeight.w700,
@@ -91,11 +93,11 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
                         // Range selector
                         Row(
                           children: [
-                            _buildRangeChip('7D', 7, isDark),
+                            _buildRangeChip(loc.range7D, 7, isDark),
                             const SizedBox(width: 8),
-                            _buildRangeChip('14D', 14, isDark),
+                            _buildRangeChip(loc.range14D, 14, isDark),
                             const SizedBox(width: 8),
-                            _buildRangeChip('30D', 30, isDark),
+                            _buildRangeChip(loc.range30D, 30, isDark),
                           ],
                         ),
                         const SizedBox(height: 24),
@@ -106,7 +108,7 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
                             Expanded(
                               child: _buildStatCard(
                                 '${totalHours.toStringAsFixed(1)}h',
-                                'Total Study',
+                                loc.totalStudy,
                                 Icons.timer,
                                 AppColors.primary,
                                 isDark,
@@ -116,7 +118,7 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
                             Expanded(
                               child: _buildStatCard(
                                 '${workSessions.length}',
-                                'Sessions',
+                                loc.sessionsLabel,
                                 Icons.repeat,
                                 AppColors.orange,
                                 isDark,
@@ -126,7 +128,7 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
                             Expanded(
                               child: _buildStatCard(
                                 '${avgPerDay.toStringAsFixed(0)}m',
-                                'Avg/Day',
+                                loc.avgPerDay,
                                 Icons.trending_up,
                                 AppColors.green,
                                 isDark,
@@ -145,7 +147,7 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Daily chart
-                        _buildSectionTitle('Daily Study Time', isDark),
+                        _buildSectionTitle(loc.dailyStudyTime, isDark),
                         const SizedBox(height: 12),
                         Container(
                           height: 200,
@@ -155,7 +157,7 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: dailyData.isEmpty
-                              ? const Center(child: Text('No data yet'))
+                              ? Center(child: Text(loc.noDataYet))
                               : BarChart(
                                   BarChartData(
                                     alignment: BarChartAlignment.spaceAround,
@@ -226,7 +228,7 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
                   SliverPadding(
                     padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
                     sliver: SliverToBoxAdapter(
-                      child: _buildSectionTitle('By Course', isDark),
+                      child: _buildSectionTitle(loc.byCourse, isDark),
                     ),
                   ),
                   SliverPadding(
@@ -238,7 +240,7 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
                         final course = entry.key != null
                             ? courses.where((c) => c.id == entry.key).firstOrNull
                             : null;
-                        final name = course?.name ?? 'General';
+                        final name = course?.name ?? loc.general;
                         final color = course?.color ?? Colors.grey;
                         final mins = entry.value;
                         final pct = totalMinutes > 0 ? (mins / totalMinutes * 100) : 0.0;
@@ -296,7 +298,7 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
                   sliver: SliverToBoxAdapter(
-                    child: _buildSectionTitle('Recent Sessions', isDark),
+                    child: _buildSectionTitle(loc.recentSessions, isDark),
                   ),
                 ),
                 if (workSessions.isEmpty)
@@ -309,7 +311,7 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
                             Icon(Icons.timer_off, size: 48, color: Colors.grey.shade400),
                             const SizedBox(height: 12),
                             Text(
-                              'No study sessions yet.\nStart a Pomodoro timer!',
+                              loc.noStudySessions,
                               textAlign: TextAlign.center,
                               style: TextStyle(color: Colors.grey.shade500),
                             ),
@@ -356,7 +358,7 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
-                                    course?.name ?? 'General',
+                                    course?.name ?? loc.general,
                                     style: TextStyle(
                                       fontWeight: FontWeight.w500,
                                       color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
@@ -391,20 +393,21 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
   }
 
   Future<bool> _confirmDeleteSession(BuildContext context, StudySession session) async {
+    final loc = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Session'),
-        content: Text('Delete this ${session.durationMinutes}m study session?'),
+        title: Text(loc.deleteSession),
+        content: Text(loc.deleteSessionConfirm(session.durationMinutes)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(loc.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(loc.delete),
           ),
         ],
       ),

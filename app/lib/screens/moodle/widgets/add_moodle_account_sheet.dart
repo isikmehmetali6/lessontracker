@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/moodle_universities.dart';
 import '../../../providers/moodle_provider.dart';
+import '../../../providers/language_provider.dart';
+import '../../../core/utils/moodle_utils.dart';
 
 /// 3-adımlı Moodle hesap ekleme bottom sheet.
 /// Adım 1: Üniversite seç (arama + liste)
@@ -96,9 +99,10 @@ class _AddMoodleAccountSheetState extends State<AddMoodleAccountSheet>
         final account = provider.accounts.last;
         final courseCount =
             provider.coursesFor(account.id).length;
-        _resultMessage = 'Hoş geldin, ${account.fullName}!';
+        final langCode = context.read<LanguageProvider>().locale.languageCode;
+        _resultMessage = 'Hoş geldin, ${MoodleUtils.parseMultilang(account.fullName, langCode)}!';
         _resultCoursesFound =
-            '${account.siteTitle} — $courseCount ders bulundu';
+            '${MoodleUtils.parseMultilang(account.siteTitle, langCode)} — $courseCount ders bulundu';
         _resultError = null;
       } else {
         _resultError = result.error;
@@ -167,6 +171,7 @@ class _AddMoodleAccountSheetState extends State<AddMoodleAccountSheet>
 
   // ====== ADIM 1: ÜNİVERSİTE ======
   Widget _buildUniversityPage(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -175,11 +180,11 @@ class _AddMoodleAccountSheetState extends State<AddMoodleAccountSheet>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Üniversitenizi Seçin',
+              Text(l10n.moodleSelectUniversity,
                   style: theme.textTheme.headlineSmall
                       ?.copyWith(fontWeight: FontWeight.w700)),
               const SizedBox(height: 4),
-              Text('Moodle hesabınızı bağlamak için üniversitenizi seçin',
+              Text(l10n.moodleSelectUniversityDesc,
                   style: theme.textTheme.bodyMedium
                       ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
               const SizedBox(height: 16),
@@ -188,7 +193,7 @@ class _AddMoodleAccountSheetState extends State<AddMoodleAccountSheet>
                 controller: _searchController,
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
-                  hintText: 'Üniversite ara...',
+                  hintText: l10n.moodleSearchUniversity,
                   prefixIcon: const Icon(Icons.search_rounded),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14)),
@@ -220,8 +225,8 @@ class _AddMoodleAccountSheetState extends State<AddMoodleAccountSheet>
               // Manuel giriş
               _UniversityTile(
                 icon: Icons.public_rounded,
-                title: 'Manuel URL Gir',
-                subtitle: 'Listede olmayan üniversiteler için',
+                title: l10n.moodleManualUrl,
+                subtitle: l10n.moodleManualUrlDesc,
                 selected: _useManualUrl,
                 onTap: () {
                   setState(() {
@@ -241,6 +246,7 @@ class _AddMoodleAccountSheetState extends State<AddMoodleAccountSheet>
 
   // ====== ADIM 2: GİRİŞ ======
   Widget _buildLoginPage(ThemeData theme, double bottomInset) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: EdgeInsets.fromLTRB(24, 0, 24, bottomInset + 24),
       child: Form(
@@ -252,16 +258,16 @@ class _AddMoodleAccountSheetState extends State<AddMoodleAccountSheet>
             TextButton.icon(
               onPressed: () => _goToStep(0),
               icon: const Icon(Icons.arrow_back_rounded, size: 18),
-              label: const Text('Geri'),
+              label: Text(l10n.moodleBack),
             ),
             const SizedBox(height: 8),
 
             if (_useManualUrl) ...[
-              Text('Moodle URL\'si',
+              Text(l10n.moodleUrl,
                   style: theme.textTheme.headlineSmall
                       ?.copyWith(fontWeight: FontWeight.w700)),
               const SizedBox(height: 4),
-              Text('Üniversitenizin Moodle adresini girin',
+              Text(l10n.moodleUrlHint,
                   style: theme.textTheme.bodyMedium
                       ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
               const SizedBox(height: 16),
@@ -269,20 +275,20 @@ class _AddMoodleAccountSheetState extends State<AddMoodleAccountSheet>
                 controller: _urlController,
                 keyboardType: TextInputType.url,
                 decoration: InputDecoration(
-                  labelText: 'Moodle URL\'si',
-                  hintText: 'örn. moodle.ogrenci.edu.tr',
+                  labelText: l10n.moodleUrl,
+                  hintText: l10n.moodleUrlHint,
                   prefixIcon: const Icon(Icons.link_rounded),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14)),
                 ),
                 validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'URL gerekli';
+                  if (v == null || v.trim().isEmpty) return l10n.moodleUrlRequired;
                   return null;
                 },
               ),
               const SizedBox(height: 16),
             ] else ...[
-              Text('Giriş Yapın',
+              Text(l10n.moodleLogin,
                   style: theme.textTheme.headlineSmall
                       ?.copyWith(fontWeight: FontWeight.w700)),
               const SizedBox(height: 4),
@@ -303,20 +309,20 @@ class _AddMoodleAccountSheetState extends State<AddMoodleAccountSheet>
             TextFormField(
               controller: _usernameController,
               decoration: InputDecoration(
-                labelText: 'Kullanıcı Adı',
+                labelText: l10n.moodleUsername,
                 prefixIcon: const Icon(Icons.person_rounded),
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
               ),
               validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Kullanıcı adı gerekli' : null,
+                  (v == null || v.trim().isEmpty) ? l10n.moodleUsernameRequired : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _passwordController,
               obscureText: _obscurePassword,
               decoration: InputDecoration(
-                labelText: 'Şifre',
+                labelText: l10n.moodlePassword,
                 prefixIcon: const Icon(Icons.lock_rounded),
                 suffixIcon: IconButton(
                   icon: Icon(_obscurePassword
@@ -329,11 +335,11 @@ class _AddMoodleAccountSheetState extends State<AddMoodleAccountSheet>
                     OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
               ),
               validator: (v) =>
-                  (v == null || v.isEmpty) ? 'Şifre gerekli' : null,
+                  (v == null || v.isEmpty) ? l10n.moodlePasswordRequired : null,
             ),
             const SizedBox(height: 8),
             Text(
-              '🔒 Şifreniz cihazınızda saklanmaz.',
+              l10n.moodlePasswordHint,
               style: theme.textTheme.bodySmall
                   ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
@@ -344,8 +350,8 @@ class _AddMoodleAccountSheetState extends State<AddMoodleAccountSheet>
               child: FilledButton.icon(
                 onPressed: _connect,
                 icon: const Icon(Icons.bolt_rounded),
-                label: const Text('Bağlan',
-                    style: TextStyle(
+                label: Text(l10n.moodleConnectButton,
+                    style: const TextStyle(
                         fontSize: 16, fontWeight: FontWeight.w600)),
               ),
             ),
@@ -357,6 +363,7 @@ class _AddMoodleAccountSheetState extends State<AddMoodleAccountSheet>
 
   // ====== ADIM 3: SONUÇ ======
   Widget _buildResultPage(ThemeData theme) {
+    final l10n = AppLocalizations.of(context)!;
     if (_isLoading) {
       return Center(
         child: Column(
@@ -364,7 +371,7 @@ class _AddMoodleAccountSheetState extends State<AddMoodleAccountSheet>
           children: [
             const CircularProgressIndicator(),
             const SizedBox(height: 20),
-            Text('Moodle\'a bağlanıyor...',
+            Text(l10n.moodleConnecting,
                 style: theme.textTheme.titleMedium
                     ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           ],
@@ -388,7 +395,7 @@ class _AddMoodleAccountSheetState extends State<AddMoodleAccountSheet>
                   size: 48, color: theme.colorScheme.error),
             ),
             const SizedBox(height: 20),
-            Text('Bağlantı Başarısız',
+            Text(l10n.moodleConnectionFailed,
                 style: theme.textTheme.headlineSmall
                     ?.copyWith(fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
@@ -400,7 +407,7 @@ class _AddMoodleAccountSheetState extends State<AddMoodleAccountSheet>
             OutlinedButton.icon(
               onPressed: () => _goToStep(1),
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Tekrar Dene'),
+              label: Text(l10n.moodleTryAgain),
             ),
           ],
         ),
@@ -423,7 +430,7 @@ class _AddMoodleAccountSheetState extends State<AddMoodleAccountSheet>
                 size: 48, color: theme.colorScheme.primary),
           ),
           const SizedBox(height: 20),
-          Text('Bağlantı Başarılı! 🎉',
+          Text(l10n.moodleConnectionSuccess,
               style: theme.textTheme.headlineSmall
                   ?.copyWith(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
@@ -443,8 +450,8 @@ class _AddMoodleAccountSheetState extends State<AddMoodleAccountSheet>
             height: 52,
             child: FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Harika!',
-                  style: TextStyle(
+              child: Text(l10n.moodleGreat,
+                  style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.w600)),
             ),
           ),

@@ -166,6 +166,7 @@ class _StorageScreenState extends State<StorageScreen> {
   }
 
   Future<void> _deepClean() async {
+    final loc = AppLocalizations.of(context)!;
     setState(() => _isLoading = true);
     try {
       // Inline cache clearing without showing its own snackbar
@@ -199,13 +200,13 @@ class _StorageScreenState extends State<StorageScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Row(
+            content: Row(
               children: [
-                Icon(Icons.rocket_launch_rounded, color: Colors.white),
-                SizedBox(width: 12),
+                const Icon(Icons.rocket_launch_rounded, color: Colors.white),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    'Derin hafıza optimizasyonu tamamlandı! Cihaz rahatlatıldı.',
+                  child: Text(loc.storageOptimized,
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
               ],
@@ -226,6 +227,7 @@ class _StorageScreenState extends State<StorageScreen> {
 
   void _showOptimizationMenu() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final loc = AppLocalizations.of(context)!;
 
     showModalBottomSheet(
       context: context,
@@ -271,7 +273,7 @@ class _StorageScreenState extends State<StorageScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Akıllı Depolama Yönetimi',
+                        loc.smartStorageManagement,
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
@@ -281,7 +283,7 @@ class _StorageScreenState extends State<StorageScreen> {
                         ),
                       ),
                       Text(
-                        'Cihazınızda yer açmak için seçenekler',
+                        loc.storageOptions,
                         style: TextStyle(
                           fontSize: 14,
                           color: isDark
@@ -324,7 +326,7 @@ class _StorageScreenState extends State<StorageScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Standart Temizlik',
+                            loc.standardCleanup,
                             style: TextStyle(
                               fontWeight: FontWeight.w700,
                               color: isDark ? Colors.white : Colors.black87,
@@ -333,7 +335,7 @@ class _StorageScreenState extends State<StorageScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Geçici dosyaları siler. (${_formatBytes(_cacheSize)})',
+                            loc.standardCleanupDesc(_formatBytes(_cacheSize)),
                             style: TextStyle(
                               color: isDark
                                   ? Colors.grey.shade400
@@ -379,7 +381,7 @@ class _StorageScreenState extends State<StorageScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Derinlemesine Optimizasyon',
+                            loc.deepOptimization,
                             style: TextStyle(
                               fontWeight: FontWeight.w700,
                               color: isDark ? Colors.white : Colors.black87,
@@ -388,7 +390,7 @@ class _StorageScreenState extends State<StorageScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Resim kalıntılarını ve bellek sızıntılarını boşaltır, cihazı hızlandırır.',
+                            loc.deepOptimizationDesc,
                             style: TextStyle(
                               color: isDark
                                   ? Colors.grey.shade400
@@ -645,9 +647,9 @@ class _StorageScreenState extends State<StorageScreen> {
                           color: Colors.white,
                         ),
                         const SizedBox(width: 12),
-                        const Text(
-                          'Depolamayı Optimize Et',
-                          style: TextStyle(
+                        Text(
+                          loc.optimizeStorage,
+                          style: const TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 16,
                             color: Colors.white,

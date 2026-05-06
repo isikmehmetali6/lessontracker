@@ -8,6 +8,7 @@ import '../../../../models/moodle/moodle_course.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/moodle_utils.dart';
 import '../../../../providers/language_provider.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../moodle_course_detail_screen.dart';
 
 class MoodleCoursesTab extends StatelessWidget {
@@ -52,6 +53,7 @@ class MoodleCoursesTab extends StatelessWidget {
 
   Widget _emptyState(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -59,11 +61,11 @@ class MoodleCoursesTab extends StatelessWidget {
           Icon(Icons.menu_book_rounded,
               size: 56, color: theme.colorScheme.outlineVariant),
           const SizedBox(height: 12),
-          Text('Ders bulunamadı',
+          Text(l10n.moodleNoCourses,
               style: theme.textTheme.titleMedium
                   ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           const SizedBox(height: 4),
-          Text('Moodle hesabınız senkronize ediliyor...',
+          Text(l10n.moodleSyncing,
               style: theme.textTheme.bodySmall
                   ?.copyWith(color: theme.colorScheme.outlineVariant)),
         ],
@@ -131,6 +133,7 @@ class _CourseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final langCode = context.watch<LanguageProvider>().locale.languageCode;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -221,7 +224,7 @@ class _CourseCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
-                          '$assignmentCount ödev',
+                          l10n.moodleAccountCourses(assignmentCount),
                           style: theme.textTheme.labelSmall?.copyWith(
                               color: AppColors.red,
                               fontWeight: FontWeight.w700),

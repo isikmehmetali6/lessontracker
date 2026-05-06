@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lesson_tracker/core/theme/app_colors.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:lesson_tracker/models/planner_event.dart';
 import 'package:lesson_tracker/providers/planner_event_provider.dart';
 import 'package:uuid/uuid.dart';
@@ -102,11 +103,11 @@ class _AddPlannerEventSheetState extends State<AddPlannerEventSheet> {
 
   String _getTypeName(PlannerEventType type) {
     switch (type) {
-      case PlannerEventType.study: return 'Study';
-      case PlannerEventType.meeting: return 'Meeting';
-      case PlannerEventType.coffee: return 'Coffee Break';
-      case PlannerEventType.personal: return 'Personal';
-      case PlannerEventType.other: return 'Other';
+      case PlannerEventType.study: return AppLocalizations.of(context)!.eventStudy;
+      case PlannerEventType.meeting: return AppLocalizations.of(context)!.eventMeeting;
+      case PlannerEventType.coffee: return AppLocalizations.of(context)!.eventCoffee;
+      case PlannerEventType.personal: return AppLocalizations.of(context)!.eventPersonal;
+      case PlannerEventType.other: return AppLocalizations.of(context)!.eventOther;
     }
   }
 
@@ -150,7 +151,7 @@ class _AddPlannerEventSheetState extends State<AddPlannerEventSheet> {
               ),
               const SizedBox(height: 24),
               Text(
-                'Add Plan Event',
+                AppLocalizations.of(context)!.addPlanEvent,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -164,11 +165,11 @@ class _AddPlannerEventSheetState extends State<AddPlannerEventSheet> {
                 controller: _titleController,
                 style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                 decoration: InputDecoration(
-                  labelText: 'Event Title (e.g., Meet up with Ali)',
+                  labelText: AppLocalizations.of(context)!.eventTitleHint,
                   prefixIcon: const Icon(Icons.title),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                validator: (val) => val == null || val.trim().isEmpty ? 'Please enter a title' : null,
+                validator: (val) => val == null || val.trim().isEmpty ? AppLocalizations.of(context)!.eventTitleRequired : null,
               ),
               const SizedBox(height: 16),
 
@@ -176,7 +177,7 @@ class _AddPlannerEventSheetState extends State<AddPlannerEventSheet> {
               DropdownButtonFormField<PlannerEventType>(
                 initialValue: _selectedType,
                 decoration: InputDecoration(
-                  labelText: 'Event Type',
+                  labelText: AppLocalizations.of(context)!.eventType,
                   prefixIcon: Icon(_getTypeIcon(_selectedType)),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                 ),
@@ -211,7 +212,7 @@ class _AddPlannerEventSheetState extends State<AddPlannerEventSheet> {
                             const Icon(Icons.access_time, size: 20, color: Colors.grey),
                             const SizedBox(width: 8),
                             Text(
-                              'Start: ${_startTime.format(context)}',
+                              AppLocalizations.of(context)!.startLabel(_startTime.format(context)),
                               style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                             ),
                           ],
@@ -235,7 +236,7 @@ class _AddPlannerEventSheetState extends State<AddPlannerEventSheet> {
                             const Icon(Icons.access_time_filled, size: 20, color: Colors.grey),
                             const SizedBox(width: 8),
                             Text(
-                              'End: ${_endTime.format(context)}',
+                              AppLocalizations.of(context)!.endLabel(_endTime.format(context)),
                               style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                             ),
                           ],
@@ -249,7 +250,7 @@ class _AddPlannerEventSheetState extends State<AddPlannerEventSheet> {
 
               // Colors
               Text(
-                'Color',
+                AppLocalizations.of(context)!.colorLabel,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -292,7 +293,7 @@ class _AddPlannerEventSheetState extends State<AddPlannerEventSheet> {
                 maxLines: 3,
                 style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                 decoration: InputDecoration(
-                  labelText: 'Notes (Optional)',
+                  labelText: AppLocalizations.of(context)!.notesOptional,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                   alignLabelWithHint: true,
                 ),
@@ -308,7 +309,7 @@ class _AddPlannerEventSheetState extends State<AddPlannerEventSheet> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
-                  child: const Text('Save Event', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
+                  child: Text(AppLocalizations.of(context)!.saveEvent, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
                 ),
               ),
             ],

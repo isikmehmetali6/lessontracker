@@ -4,6 +4,7 @@ import '../../../providers/moodle_provider.dart';
 import '../../../models/moodle/moodle_grade.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/moodle_utils.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../../providers/language_provider.dart';
 import '../widgets/academic_dashboard_widget.dart';
 
@@ -12,6 +13,7 @@ class MoodleGradesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final provider = context.watch<MoodleProvider>();
     final grades = provider.allGrades;
 
@@ -24,7 +26,7 @@ class MoodleGradesTab extends StatelessWidget {
                 size: 56,
                 color: Theme.of(context).colorScheme.outlineVariant),
             const SizedBox(height: 12),
-            Text('Not bulunamadı',
+            Text(l10n.moodleNoGrades,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant)),
           ],

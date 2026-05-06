@@ -5,6 +5,7 @@ import '../../../models/moodle/moodle_assignment.dart';
 import '../../../providers/moodle_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/moodle_utils.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../../providers/language_provider.dart';
 
 class MoodleAssignmentsTab extends StatelessWidget {
@@ -12,6 +13,7 @@ class MoodleAssignmentsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final provider = context.watch<MoodleProvider>();
     final overdue = provider.overdueAssignments;
     final thisWeek = provider.thisWeekAssignments;
@@ -20,8 +22,8 @@ class MoodleAssignmentsTab extends StatelessWidget {
     if (provider.allAssignments.isEmpty) {
       return _MoodleEmptyState(
         icon: Icons.assignment_rounded,
-        message: 'Bekleyen ödev bulunamadı',
-        sub: 'Harika! Hepsi tamamlanmış görünüyor.',
+        message: l10n.moodleNoAssignments,
+        sub: l10n.moodleAllDone,
       );
     }
 
@@ -29,19 +31,19 @@ class MoodleAssignmentsTab extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       children: [
         if (overdue.isNotEmpty) ...[
-          _SectionHeader('Vadesi Geçmiş', overdue.length,
+          _SectionHeader(l10n.moodleOverdue, overdue.length,
               color: AppColors.red),
           ...overdue.map((a) => _AssignmentCard(assignment: a)),
           const SizedBox(height: 12),
         ],
         if (thisWeek.isNotEmpty) ...[
-          _SectionHeader('Bu Hafta', thisWeek.length,
+          _SectionHeader(l10n.moodleThisWeek, thisWeek.length,
               color: AppColors.blue),
           ...thisWeek.map((a) => _AssignmentCard(assignment: a)),
           const SizedBox(height: 12),
         ],
         if (upcoming.isNotEmpty) ...[
-          _SectionHeader('Gelecek', upcoming.length),
+          _SectionHeader(l10n.moodleUpcoming, upcoming.length),
           ...upcoming.map((a) => _AssignmentCard(assignment: a)),
         ],
       ],
@@ -90,6 +92,7 @@ class _AssignmentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final langCode = context.watch<LanguageProvider>().locale.languageCode;
     final daysLeft = assignment.dueDate.difference(DateTime.now()).inDays;
     final isToday = assignment.isDueToday;
@@ -101,19 +104,19 @@ class _AssignmentCard extends StatelessWidget {
 
     if (assignment.submitted) {
       statusColor = AppColors.green;
-      statusText = 'Teslim Edildi';
+      statusText = l10n.moodleSubmitted;
       statusIcon = Icons.check_circle_rounded;
     } else if (isOverdue) {
       statusColor = AppColors.red;
-      statusText = 'Gecikmiş';
+      statusText = l10n.moodleLate;
       statusIcon = Icons.warning_rounded;
     } else if (isToday) {
       statusColor = AppColors.orange;
-      statusText = 'Bugün son gün!';
+      statusText = l10n.moodleDueToday;
       statusIcon = Icons.timer_rounded;
     } else {
       statusColor = AppColors.primary;
-      statusText = '$daysLeft gün kaldı';
+      statusText = l10n.moodleDaysLeft(daysLeft);
       statusIcon = Icons.schedule_rounded;
     }
 

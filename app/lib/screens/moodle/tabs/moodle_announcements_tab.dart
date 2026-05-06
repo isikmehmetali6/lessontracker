@@ -5,6 +5,7 @@ import '../../../models/moodle/moodle_announcement.dart';
 import '../../../providers/moodle_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/moodle_utils.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../../providers/language_provider.dart';
 
 class MoodleAnnouncementsTab extends StatelessWidget {
@@ -12,6 +13,7 @@ class MoodleAnnouncementsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final provider = context.watch<MoodleProvider>();
     final announcements = provider.allAnnouncements;
 
@@ -27,7 +29,7 @@ class MoodleAnnouncementsTab extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Duyuru bulunamadı',
+              l10n.moodleNoAnnouncements,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),

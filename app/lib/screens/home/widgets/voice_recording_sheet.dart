@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/note_provider.dart';
 
@@ -39,6 +40,7 @@ class _VoiceRecordingSheetState extends State<VoiceRecordingSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
@@ -81,7 +83,7 @@ class _VoiceRecordingSheetState extends State<VoiceRecordingSheet> {
           const SizedBox(height: 20),
 
           Text(
-            'Recording...',
+            l10n.recording,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
@@ -108,7 +110,7 @@ class _VoiceRecordingSheetState extends State<VoiceRecordingSheet> {
               TextButton.icon(
                 onPressed: () => Navigator.pop(context, false),
                 icon: const Icon(Icons.close),
-                label: const Text('Cancel'),
+                label: Text(l10n.cancel),
                 style: TextButton.styleFrom(
                   foregroundColor: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -119,7 +121,7 @@ class _VoiceRecordingSheetState extends State<VoiceRecordingSheet> {
               FilledButton.icon(
                 onPressed: () => Navigator.pop(context, true),
                 icon: const Icon(Icons.stop),
-                label: const Text('Stop & Save'),
+                label: Text(l10n.stopAndSave),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,

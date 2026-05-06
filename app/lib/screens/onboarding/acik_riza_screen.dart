@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 
 class AcikRizaScreen extends StatefulWidget {
@@ -27,6 +28,7 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: SafeArea(
@@ -53,7 +55,7 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'Açık Rıza',
+                      l10n.acikRizaTitle,
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
@@ -64,7 +66,7 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Aşağıdaki işlemler için açık rızanız kanunen gerekmektedir (KVKK Madde 5/1 ve 6/2)',
+                      l10n.acikRizaSubtitle,
                       style: TextStyle(
                         fontSize: 14,
                         height: 1.5,
@@ -78,9 +80,8 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
                       isDark: isDark,
                       icon: Icons.camera_alt,
                       iconColor: AppColors.orange,
-                      title: 'Kamera ile Fotoğraf Çekme',
-                      description:
-                          'Ders notlarınızı fotoğraflayarak kaydetmek için kamera erişimi gereklidir.',
+                      title: l10n.consentCamera,
+                      description: l10n.consentCameraDesc,
                       value: _cameraConsent,
                       onChanged: (v) =>
                           setState(() => _cameraConsent = v ?? false),
@@ -91,9 +92,8 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
                       isDark: isDark,
                       icon: Icons.mic,
                       iconColor: AppColors.purple,
-                      title: 'Ses Kaydı Alma',
-                      description:
-                          'Derslerin ses kaydını alarak notlarınızı zenginleştirmek için mikrofon erişimi gereklidir.',
+                      title: l10n.consentAudio,
+                      description: l10n.consentAudioDesc,
                       value: _audioConsent,
                       onChanged: (v) =>
                           setState(() => _audioConsent = v ?? false),
@@ -104,9 +104,8 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
                       isDark: isDark,
                       icon: Icons.document_scanner,
                       iconColor: AppColors.blue,
-                      title: 'OCR ile Metin Tanıma',
-                      description:
-                          'Fotoğraflardaki metinleri tanımak ve dijitalleştirmek için Google ML Kit kullanılır.',
+                      title: l10n.consentOcr,
+                      description: l10n.consentOcrDesc,
                       value: _ocrConsent,
                       onChanged: (v) =>
                           setState(() => _ocrConsent = v ?? false),
@@ -117,9 +116,8 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
                       isDark: isDark,
                       icon: Icons.notifications,
                       iconColor: AppColors.red,
-                      title: 'Push Bildirimleri',
-                      description:
-                          'Hatırlatmalar ve ödev bildirimleri için bildirim gönderimi.',
+                      title: l10n.consentPush,
+                      description: l10n.consentPushDesc,
                       value: _notificationsConsent,
                       onChanged: (v) =>
                           setState(() => _notificationsConsent = v ?? false),
@@ -130,9 +128,8 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
                       isDark: isDark,
                       icon: Icons.cloud_upload,
                       iconColor: AppColors.emerald,
-                      title: 'Bulut Yedekleme (Opsiyonel)',
-                      description:
-                          'Verilerinizi şifreli olarak bulutta yedeklemek için Firebase kullanılır.',
+                      title: l10n.consentCloud,
+                      description: l10n.consentCloudDesc,
                       value: _cloudBackupConsent,
                       onChanged: (v) =>
                           setState(() => _cloudBackupConsent = v ?? false),
@@ -164,7 +161,7 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'Önemli Bilgi',
+                                l10n.acikRizaImportant,
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
@@ -177,7 +174,7 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Açık rıza vermek tamamen isteğe bağlıdır. Rıza vermediğiniz işlemler için temel uygulama özellikleri kullanılabilecektir. İstediğiniz zaman Ayarlar\'dan rıza tercihlerinizi değiştirebilirsiniz.',
+                            l10n.acikRizaVoluntary,
                             style: TextStyle(
                               fontSize: 13,
                               height: 1.5,
@@ -224,8 +221,8 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      child: const Text(
-                        'Açık Rızayı Ver ve Devam Et',
+                      child: Text(
+                        l10n.acikRizaGiveAndContinue,
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
@@ -243,7 +240,7 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                         child: Text(
-                          'Rıza Vermeden Devam Et',
+                          l10n.acikRizaSkip,
                           style: TextStyle(
                             color: isDark
                                 ? AppColors.textSecondaryDark
@@ -292,6 +289,7 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
 
   Future<void> _showSkipDialog(BuildContext context) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     final result = await showDialog<bool>(
       context: context,
@@ -300,7 +298,7 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
         backgroundColor: isDark ? const Color(0xFF2C2C2E) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          'Önemli Uyarı',
+          l10n.acikRizaWarning,
           style: TextStyle(
             color: isDark
                 ? AppColors.textPrimaryDark
@@ -313,7 +311,7 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Rıza vermeden devam ederseniz aşağıdaki özellikler kullanılamayacaktır:',
+              l10n.acikRizaFeaturesDisabled,
               style: TextStyle(
                 color: isDark
                     ? AppColors.textSecondaryDark
@@ -323,18 +321,18 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
             const SizedBox(height: 12),
             _buildWarningItem(
               Icons.camera_alt,
-              'Kamera ile fotoğraf çekme',
+              l10n.acikRizaFeatureCamera,
               isDark,
             ),
-            _buildWarningItem(Icons.mic, 'Ses kaydı alma', isDark),
+            _buildWarningItem(Icons.mic, l10n.acikRizaFeatureAudio, isDark),
             _buildWarningItem(
               Icons.document_scanner,
-              'OCR ile metin tanıma',
+              l10n.acikRizaFeatureOcr,
               isDark,
             ),
             const SizedBox(height: 16),
             Text(
-              'Bu tercihleri daha sonra Ayarlar\'dan değiştirebilirsiniz.',
+              l10n.acikRizaSettingsNote,
               style: TextStyle(
                 fontSize: 12,
                 color: isDark
@@ -347,7 +345,7 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Vazgeç', style: TextStyle(color: AppColors.red)),
+            child: Text(l10n.acikRizaCancel, style: TextStyle(color: AppColors.red)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -358,7 +356,7 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text('Sınırlı Modda Devam Et'),
+            child: Text(l10n.acikRizaLimitedMode),
           ),
         ],
       ),

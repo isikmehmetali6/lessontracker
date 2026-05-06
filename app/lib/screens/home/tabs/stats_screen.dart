@@ -98,7 +98,7 @@ class _StatsScreenState extends State<StatsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _getLabel(context, 'atRisk'),
+                    l10n.atRisk,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -144,7 +144,7 @@ class _StatsScreenState extends State<StatsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _getLabel(context, 'coursePerformance'),
+                    l10n.coursePerformance,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -246,7 +246,7 @@ class _StatsScreenState extends State<StatsScreen> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
-                _getLabel(context, 'courseDetails'),
+                l10n.courseBreakdown,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -314,7 +314,7 @@ class _StatsScreenState extends State<StatsScreen> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  _getLabel(context, 'averageScore').replaceAll('{score}', avg.toStringAsFixed(1)),
+                                  '${l10n.averageShort}: ${avg.toStringAsFixed(1)}',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w500,
                                     color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
@@ -327,9 +327,7 @@ class _StatsScreenState extends State<StatsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                _getLabel(context, 'absenceStatus')
-                                  .replaceAll('{current}', course.currentAbsences.toString())
-                                  .replaceAll('{limit}', course.absenceLimit.toString()),
+                                l10n.absences(course.currentAbsences, course.absenceLimit),
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -368,60 +366,6 @@ class _StatsScreenState extends State<StatsScreen> {
     );
   }
 
-  String _getLabel(BuildContext context, String key) {
-    final locale = Localizations.localeOf(context).languageCode;
-    final Map<String, Map<String, String>> values = {
-      'en': {
-        'gpa': 'GPA',
-        'atRisk': 'Attendance Risk',
-        'coursePerformance': 'Course Performance',
-        'excellent': 'Excellent',
-        'good': 'Good',
-        'average': 'Average',
-        'improvementNeeded': 'Needs Improvement',
-        'courseDetails': 'Course Details',
-        'averageScore': 'Avg: {score}',
-        'absenceStatus': 'Absence: {current}/{limit}',
-      },
-      'tr': {
-        'gpa': 'GNO',
-        'atRisk': 'Riskli Devamsızlık',
-        'coursePerformance': 'Ders Performansı',
-        'excellent': 'Mükemmel',
-        'good': 'İyi',
-        'average': 'Orta',
-        'improvementNeeded': 'Geliştirilmeli',
-        'courseDetails': 'Ders Detayları',
-        'averageScore': 'Ort: {score}',
-        'absenceStatus': 'Devamsızlık: {current}/{limit}',
-      },
-      'de': {
-        'gpa': 'Notendurchschnitt',
-        'atRisk': 'Anwesenheitsrisiko',
-        'coursePerformance': 'Kursleistung',
-        'excellent': 'Ausgezeichnet',
-        'good': 'Gut',
-        'average': 'Durchschnitt',
-        'improvementNeeded': 'Verbesserungswürdig',
-        'courseDetails': 'Kursdetails',
-        'averageScore': 'Ø: {score}',
-        'absenceStatus': 'Abwesenheit: {current}/{limit}',
-      },
-      'es': {
-        'gpa': 'GPA',
-        'atRisk': 'Riesgo de Asistencia',
-        'coursePerformance': 'Rendimiento del Curso',
-        'excellent': 'Excelente',
-        'good': 'Bueno',
-        'average': 'Promedio',
-        'improvementNeeded': 'Necesita Mejora',
-        'courseDetails': 'Detalles del Curso',
-        'averageScore': 'Prom: {score}',
-        'absenceStatus': 'Ausencia: {current}/{limit}',
-      },
-    };
-    return values[locale]?[key] ?? values['en']![key]!;
-  }
 
 
 }

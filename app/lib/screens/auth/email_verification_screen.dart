@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/auth_provider.dart';
 
@@ -41,7 +42,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Verification email sent! Check your inbox.'),
+            content: Text(AppLocalizations.of(context)!.verificationEmailSent),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -55,6 +56,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final auth = context.watch<AuthProvider>();
     final user = auth.user;
@@ -85,7 +87,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
               ),
               const SizedBox(height: 32),
               Text(
-                'Verify Your Email',
+                l10n.verifyYourEmail,
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -121,8 +123,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        'Please check your inbox and click the verification link to activate your account.',
+                      child:                       Text(
+                        l10n.checkInbox,
                         style: TextStyle(
                           fontSize: 14,
                           color: isDark
@@ -146,17 +148,17 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                       color: Colors.green.withValues(alpha: 0.3),
                     ),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.check_circle_outline,
                         color: Colors.green,
                         size: 20,
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Email sent! Please check your inbox.',
+                          l10n.verificationEmailSent,
                           style: TextStyle(color: Colors.green, fontSize: 13),
                         ),
                       ),
@@ -184,8 +186,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                             strokeWidth: 2,
                           ),
                         )
-                      : const Text(
-                          'Resend Verification Email',
+                      : Text(
+                          l10n.resendVerification,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -201,7 +203,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                     await auth.signOut();
                   },
                   child: Text(
-                    'Sign Out',
+                    l10n.signOut,
                     style: TextStyle(
                       color: isDark
                           ? Colors.grey.shade500
@@ -216,7 +218,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                 child: TextButton(
                   onPressed: _checkVerification,
                   child: Text(
-                    'I verified my email → Continue',
+                    l10n.iVerifiedMyEmail,
                     style: TextStyle(
                       color: AppColors.primary,
                       fontSize: 14,

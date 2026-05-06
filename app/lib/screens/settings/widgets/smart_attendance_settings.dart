@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/services/location_service.dart';
 import '../../../core/services/attendance_automation_service.dart';
@@ -39,11 +40,12 @@ class _SmartAttendanceSettingsState extends State<SmartAttendanceSettings> {
   }
 
   Future<void> _toggleSmartAttendance(bool value) async {
+    final l10n = AppLocalizations.of(context)!;
     if (value && !_hasLocation) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Akıllı yoklamayı açmak için önce okul konumunuzu belirlemelisiniz.'),
+            content: Text(l10n.smartAttendanceSetLocationFirst),
             backgroundColor: AppColors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -69,8 +71,8 @@ class _SmartAttendanceSettingsState extends State<SmartAttendanceSettings> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(value 
-            ? 'Akıllı yoklama etkinleştirildi! Arka planda çalışacak.' 
-            : 'Akıllı yoklama kapatıldı.'),
+            ? l10n.smartAttendanceEnabled 
+            : l10n.smartAttendanceDisabled),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -78,6 +80,7 @@ class _SmartAttendanceSettingsState extends State<SmartAttendanceSettings> {
   }
 
   Future<void> _showLocationDialog() async {
+    final l10n = AppLocalizations.of(context)!;
     final locationService = LocationService();
     
     showDialog(
@@ -89,19 +92,19 @@ class _SmartAttendanceSettingsState extends State<SmartAttendanceSettings> {
           children: [
             Icon(Icons.school, color: AppColors.sky, size: 24),
             const SizedBox(width: 8),
-            Text('Okul Konumu', style: TextStyle(color: widget.isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight)),
+            Text(l10n.smartAttendanceSchoolLocation, style: TextStyle(color: widget.isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight)),
           ],
         ),
         content: Text(
           _hasLocation
-              ? 'Mevcut okul konumunuz kayıtlı. Şu anki konumunuzla güncellemek ister misiniz?'
-              : 'Şu anki konumunuzu "Üniversite Konumu" olarak kaydetmek ister misiniz?\n\nNot: Bu işlemi okulunuzun kampüsünden yapmalısınız.',
+              ? l10n.smartAttendanceCurrentLocation
+              : l10n.smartAttendanceSetLocationPrompt,
           style: TextStyle(color: widget.isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('İptal'),
+            child: Text(l10n.smartAttendanceCancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
@@ -110,7 +113,7 @@ class _SmartAttendanceSettingsState extends State<SmartAttendanceSettings> {
               
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Konum alınıyor...'), behavior: SnackBarBehavior.floating),
+                  SnackBar(content: Text(l10n.smartAttendanceGettingLocation), behavior: SnackBarBehavior.floating),
                 );
               }
               
@@ -121,7 +124,7 @@ class _SmartAttendanceSettingsState extends State<SmartAttendanceSettings> {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Okul konumu kaydedildi! (${pos.latitude.toStringAsFixed(4)}, ${pos.longitude.toStringAsFixed(4)})'),
+                      content: Text(l10n.smartAttendanceSaved),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -129,12 +132,12 @@ class _SmartAttendanceSettingsState extends State<SmartAttendanceSettings> {
               } else {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: const Text('Konum alınamadı. Konum izinlerini kontrol edin.'), backgroundColor: AppColors.red, behavior: SnackBarBehavior.floating),
+                    SnackBar(content: Text(l10n.smartAttendanceLocationError), backgroundColor: AppColors.red, behavior: SnackBarBehavior.floating),
                   );
                 }
               }
             },
-            child: Text(_hasLocation ? 'Güncelle' : 'Evet, Şu An Okuldayım'),
+            child: Text(_hasLocation ? l10n.smartAttendanceUpdate : l10n.smartAttendanceYesImAtSchool),
           ),
         ],
       ),
@@ -143,13 +146,14 @@ class _SmartAttendanceSettingsState extends State<SmartAttendanceSettings> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         SettingsTile(
           icon: Icons.school,
           iconColor: AppColors.sky,
-          title: 'Okul Konumu',
-          subtitle: _hasLocation ? '✓ Konum Ayarlandı' : 'Henüz ayarlanmadı',
+          title: l10n.smartAttendanceSchoolLocation,
+          subtitle: _hasLocation ? l10n.smartAttendanceLocationSet : l10n.smartAttendanceLocationNotSet,
           isDark: widget.isDark,
           onTap: _showLocationDialog,
         ),
@@ -157,10 +161,10 @@ class _SmartAttendanceSettingsState extends State<SmartAttendanceSettings> {
         SettingsTile(
           icon: Icons.fact_check,
           iconColor: AppColors.emerald,
-          title: 'Akıllı Yoklama',
+          title: l10n.smartAttendanceTitle,
           subtitle: _isEnabled 
-              ? 'Aktif — Ders saatinde okulda iseniz devamsızlık girilmez' 
-              : 'Kapalı',
+              ? l10n.smartAttendanceActive 
+              : l10n.smartAttendanceOff,
           isDark: widget.isDark,
           trailing: Switch(
             value: _isEnabled,

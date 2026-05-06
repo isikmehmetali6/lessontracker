@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 
 class DeleteAccountDialog extends StatefulWidget {
@@ -23,6 +24,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return AlertDialog(
       backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
@@ -44,7 +46,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Hesabı Silmek\nÜzeresiniz',
+              l10n.deleteAccountTitle,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
@@ -80,7 +82,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Bu işlem geri alınamaz',
+                        l10n.deleteAccountIrreversible,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -91,7 +93,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Silinecek veriler:',
+                    l10n.deleteAccountDataToDelete,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -101,13 +103,13 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  _buildBullet(isDark, 'Tüm ders notlarınız'),
-                  _buildBullet(isDark, 'Ses kayıtlarınız'),
-                  _buildBullet(isDark, 'Fotoğraflarınız ve OCR verileriniz'),
-                  _buildBullet(isDark, 'Yoklama ve not kayıtlarınız'),
-                  _buildBullet(isDark, 'Çalışma oturumlarınız'),
-                  _buildBullet(isDark, 'Moodle hesap bağlantılarınız'),
-                  _buildBullet(isDark, 'Firebase hesabınız'),
+                  _buildBullet(isDark, l10n.deleteAccountNotes),
+                  _buildBullet(isDark, l10n.deleteAccountAudio),
+                  _buildBullet(isDark, l10n.deleteAccountPhotos),
+                  _buildBullet(isDark, l10n.deleteAccountAttendance),
+                  _buildBullet(isDark, l10n.deleteAccountSessions),
+                  _buildBullet(isDark, l10n.deleteAccountMoodle),
+                  _buildBullet(isDark, l10n.deleteAccountFirebase),
                 ],
               ),
             ),
@@ -124,7 +126,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Verileriniz 30 gün içinde kalıcı olarak silinecektir.',
+                      l10n.deleteAccountRetention,
                       style: TextStyle(
                         fontSize: 13,
                         color: isDark
@@ -164,7 +166,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                     ),
                     Expanded(
                       child: Text(
-                        'Hesabımı silmek istediğimi onaylıyorum.',
+                        l10n.deleteAccountConfirm,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -185,7 +187,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
         TextButton(
           onPressed: _isDeleting ? null : widget.onCancel,
           child: Text(
-            'Vazgeç',
+            l10n.deleteAccountCancel,
             style: TextStyle(
               color: isDark
                   ? AppColors.textSecondaryDark
@@ -216,8 +218,8 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                     color: Colors.white,
                   ),
                 )
-              : const Text(
-                  'Hesabımı Sil',
+              : Text(
+                  l10n.deleteAccountAction,
                   style: TextStyle(fontWeight: FontWeight.w700),
                 ),
         ),

@@ -59,7 +59,7 @@ class _SettingsPreferencesSectionState
                 title: l10n.notifications,
                 isDark: isDark,
                 subtitle: courseProvider.notificationsEnabled
-                    ? '${l10n.notifications} • ${courseProvider.reminderMinutes}m'
+                    ? '${l10n.notifications} • ${courseProvider.reminderMinutes}'
                     : l10n.notifications,
                 onTap: () {
                   Navigator.push(
@@ -80,7 +80,7 @@ class _SettingsPreferencesSectionState
                 iconColor: AppColors.primary,
                 title: l10n.language,
                 subtitle: _getLanguageDisplayName(
-                  languageProvider.locale.languageCode,
+                  languageProvider.locale.languageCode, l10n,
                 ),
                 isDark: isDark,
                 onTap: () => _showLanguagePicker(context),
@@ -102,7 +102,7 @@ class _SettingsPreferencesSectionState
                     iconColor: AppColors.green,
                     title: l10n.appLock,
                     subtitle: isEnabled
-                        ? 'Face ID / Touch ID'
+                        ? l10n.faceId
                         : l10n.appLockDisabled,
                     isDark: isDark,
                     trailing: Switch(
@@ -138,10 +138,10 @@ class _SettingsPreferencesSectionState
               return SettingsTile(
                 icon: Icons.cloud_upload,
                 iconColor: AppColors.blue,
-                title: 'Bulut Yedekleme',
+                title: l10n.cloudBackup,
                 subtitle: isEnabled
-                    ? 'Şifreli yedekleme aktif'
-                    : 'Kapalı (varsayılan)',
+                    ? l10n.encryptedBackupActive
+                    : l10n.backupOffDefault,
                 isDark: isDark,
                 trailing: Switch(
                   value: isEnabled,
@@ -163,25 +163,25 @@ class _SettingsPreferencesSectionState
     );
   }
 
-  String _getLanguageDisplayName(String code) {
+  String _getLanguageDisplayName(String code, AppLocalizations l10n) {
     switch (code) {
       case 'tr':
-        return 'Türkçe';
+        return l10n.languageTurkish;
       case 'es':
-        return 'Español';
+        return l10n.languageSpanish;
       case 'de':
-        return 'Deutsch';
+        return l10n.languageGerman;
       case 'en':
       default:
-        return 'English';
+        return l10n.languageEnglish;
     }
   }
 
-  static const List<_LangData> _languages = [
-    _LangData(code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸'),
-    _LangData(code: 'tr', name: 'Turkish', nativeName: 'Türkçe', flag: '🇹🇷'),
-    _LangData(code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸'),
-    _LangData(code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪'),
+  static List<_LangData> _getLanguages(AppLocalizations l10n) => [
+    _LangData(code: 'en', name: 'English', nativeName: l10n.languageEnglish, flag: '🇺🇸'),
+    _LangData(code: 'tr', name: 'Turkish', nativeName: l10n.languageTurkish, flag: '🇹🇷'),
+    _LangData(code: 'es', name: 'Spanish', nativeName: l10n.languageSpanish, flag: '🇪🇸'),
+    _LangData(code: 'de', name: 'German', nativeName: l10n.languageGerman, flag: '🇩🇪'),
   ];
 
   void _showLanguagePicker(BuildContext context) {
@@ -233,7 +233,7 @@ class _SettingsPreferencesSectionState
               ),
               const SizedBox(height: 20),
               // Language options
-              ..._languages.map((lang) {
+              ..._getLanguages(l10n).map((lang) {
                 final isSelected = lang.code == currentCode;
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8),

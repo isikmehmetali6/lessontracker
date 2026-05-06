@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 
 class TermsOfServiceScreen extends StatelessWidget {
@@ -7,6 +8,7 @@ class TermsOfServiceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
@@ -24,7 +26,7 @@ class TermsOfServiceScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Kullanım Şartları',
+          l10n.termsOfService,
           style: TextStyle(
             color: isDark
                 ? AppColors.textPrimaryDark
@@ -39,7 +41,7 @@ class TermsOfServiceScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Kullanım Şartları',
+              l10n.termsOfService,
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w800,

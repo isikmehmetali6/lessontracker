@@ -7,11 +7,15 @@ class MoodleUtils {
     if (text.isEmpty) return text;
 
     // Eğer mlang etiketi yoksa direkt döndür
-    if (!text.contains('{mlang')) return text;
+    if (!text.contains('mlang')) return text;
 
     // RegEx ile dilleri ve içeriklerini ayıkla
     // {mlang ([a-z]+)}(.*?){mlang}
-    final regExp = RegExp(r'\{mlang ([a-z]+)\}(.*?)\{mlang\}', dotAll: true);
+    // Moodle multilang formatlarını destekler: {mlang tr}, (mlang tr), [mlang tr]
+    final regExp = RegExp(
+      r'[\{\(\[]mlang ([a-z]+)[\}\)\]](.*?)[\{\(\[]mlang[\}\)\]]',
+      dotAll: true,
+    );
     final matches = regExp.allMatches(text);
 
     if (matches.isEmpty) return text;
@@ -52,6 +56,11 @@ class MoodleUtils {
         .replaceAll('&quot;', '"')
         .replaceAll('&lt;', '<')
         .replaceAll('&gt;', '>')
+        .replaceAll('&#039;', "'")
+        .replaceAll('&rsquo;', "'")
+        .replaceAll('&lsquo;', "'")
+        .replaceAll('&ndash;', '-')
+        .replaceAll('&mdash;', '—')
         .trim();
         
     return stripped;

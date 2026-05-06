@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:lesson_tracker/core/theme/app_colors.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:lesson_tracker/models/course.dart';
 import 'package:lesson_tracker/models/deadline.dart';
 import 'package:lesson_tracker/providers/course_provider.dart';
@@ -50,9 +51,10 @@ class _WeeklyPlanScreenState extends State<WeeklyPlanScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final now = DateTime.now();
-    final weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final weekDays = [l10n.dayMon, l10n.dayTue, l10n.dayWed, l10n.dayThu, l10n.dayFri, l10n.daySat, l10n.daySun];
 
     return Consumer3<CourseProvider, DeadlineProvider, PlannerEventProvider>(
       builder: (context, courseProvider, deadlineProvider, plannerEventProvider, _) {
@@ -95,7 +97,7 @@ class _WeeklyPlanScreenState extends State<WeeklyPlanScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Daily Plan',
+                          l10n.dailyPlan,
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w700,
@@ -104,7 +106,7 @@ class _WeeklyPlanScreenState extends State<WeeklyPlanScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Your schedule at a glance',
+                          l10n.scheduleAtGlance,
                           style: TextStyle(
                             fontSize: 14,
                             color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
@@ -115,7 +117,7 @@ class _WeeklyPlanScreenState extends State<WeeklyPlanScreen> {
                     TextButton.icon(
                       icon: const Icon(Icons.add_circle, color: AppColors.primary, size: 24),
                       label: Text(
-                        'Add Plan',
+                        l10n.addPlan,
                         style: TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w700,
@@ -242,7 +244,7 @@ class _WeeklyPlanScreenState extends State<WeeklyPlanScreen> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
                 child: Text(
-                  'Schedule for $dateFormatter',
+                  l10n.scheduleFor(dateFormatter),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
@@ -308,7 +310,7 @@ class _WeeklyPlanScreenState extends State<WeeklyPlanScreen> {
                             ),
                             const SizedBox(height: 24),
                             Text(
-                              'It\'s a Free Day!',
+                              l10n.freeDay,
                               style: TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w800,
@@ -317,7 +319,7 @@ class _WeeklyPlanScreenState extends State<WeeklyPlanScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'You have no classes or deadlines scheduled. Enjoy your time off or plan ahead.',
+                              l10n.freeDayDescription,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 14,
@@ -605,16 +607,16 @@ class _WeeklyPlanScreenState extends State<WeeklyPlanScreen> {
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text('Delete Event?'),
-            content: Text('Do you want to delete "${event.title}"?'),
+            title: Text(AppLocalizations.of(context)!.deleteEventTitle),
+            content: Text(AppLocalizations.of(context)!.deleteEventConfirm(event.title)),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+              TextButton(onPressed: () => Navigator.pop(ctx), child: Text(AppLocalizations.of(context)!.cancel)),
               TextButton(
                 onPressed: () {
                   context.read<PlannerEventProvider>().deleteEvent(event.id);
                   Navigator.pop(ctx);
                 },
-                child: const Text('Delete', style: TextStyle(color: AppColors.red)),
+                child: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: AppColors.red)),
               ),
             ],
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/moodle_provider.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -10,6 +11,7 @@ class AcademicDashboardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final provider = context.watch<MoodleProvider>();
     final grades = provider.allGrades.where((g) => g.isGraded).toList();
     final assignments = provider.allAssignments;
@@ -88,7 +90,7 @@ class AcademicDashboardWidget extends StatelessWidget {
                     color: AppColors.primary, size: 22),
                 const SizedBox(width: 8),
                 Text(
-                  'Akademik Özet',
+                  l10n.moodleAcademicSummary,
                   style: theme.textTheme.titleMedium
                       ?.copyWith(fontWeight: FontWeight.w700),
                 ),
@@ -136,7 +138,7 @@ class AcademicDashboardWidget extends StatelessWidget {
                                 color: _gradeColor(overallAvg)),
                           ),
                           Text(
-                            'Ort.',
+                            l10n.moodleAvg,
                             style: theme.textTheme.labelSmall?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant),
                           ),
@@ -153,7 +155,7 @@ class AcademicDashboardWidget extends StatelessWidget {
                     children: [
                       _StatRow(
                         icon: Icons.assignment_rounded,
-                        label: 'Bu hafta ödev',
+                        label: l10n.moodleThisWeekTasks,
                         value: '$weekAssignments',
                         color: AppColors.primary,
                       ),
@@ -161,14 +163,14 @@ class AcademicDashboardWidget extends StatelessWidget {
                       if (overdueCount > 0)
                         _StatRow(
                           icon: Icons.warning_rounded,
-                          label: 'Gecikmiş',
+                          label: l10n.moodleOverdueTasks,
                           value: '$overdueCount',
                           color: AppColors.red,
                         ),
                       if (overdueCount > 0) const SizedBox(height: 6),
                       _StatRow(
                         icon: Icons.school_rounded,
-                        label: 'Ders sayısı',
+                        label: l10n.moodleCourseCount,
                         value: '${courseAvgs.length}',
                         color: AppColors.green,
                       ),
@@ -187,7 +189,7 @@ class AcademicDashboardWidget extends StatelessWidget {
                     Expanded(
                       child: _CoursePill(
                         emoji: '🏆',
-                        label: 'En İyi',
+                        label: l10n.moodleBest,
                         courseName: bestCourse.courseName,
                         pct: bestCourse.avg,
                       ),
@@ -198,7 +200,7 @@ class AcademicDashboardWidget extends StatelessWidget {
                     Expanded(
                       child: _CoursePill(
                         emoji: '⚠️',
-                        label: 'En Riskli',
+                        label: l10n.moodleWorst,
                         courseName: worstCourse.courseName,
                         pct: worstCourse.avg,
                       ),

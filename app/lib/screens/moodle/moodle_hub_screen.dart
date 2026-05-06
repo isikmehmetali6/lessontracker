@@ -10,6 +10,9 @@ import 'tabs/moodle_messages_tab.dart';
 import 'widgets/add_moodle_account_sheet.dart';
 import 'moodle_accounts_screen.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/moodle_utils.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
+import '../../providers/language_provider.dart';
 
 /// Moodle Hub — 5 sekmeli ana Moodle ekranı.
 /// HomeScreen'in IndexedStack'ine 5. eleman olarak eklenir.
@@ -24,19 +27,10 @@ class _MoodleHubScreenState extends State<MoodleHubScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  static const _tabs = [
-    ('Dersler', Icons.menu_book_rounded),
-    ('Ödevler', Icons.assignment_rounded),
-    ('Notlar', Icons.grade_rounded),
-    ('Duyurular', Icons.notifications_rounded),
-    ('Takvim', Icons.calendar_today_rounded),
-    ('Mesajlar', Icons.mail_rounded),
-  ];
-
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _tabs.length, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
   }
 
   @override
@@ -48,7 +42,18 @@ class _MoodleHubScreenState extends State<MoodleHubScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final provider = context.watch<MoodleProvider>();
+    final langCode = context.watch<LanguageProvider>().locale.languageCode;
+
+    final tabs = [
+      (l10n.moodleTabCourses, Icons.menu_book_rounded),
+      (l10n.moodleTabAssignments, Icons.assignment_rounded),
+      (l10n.moodleTabGrades, Icons.grade_rounded),
+      (l10n.moodleTabAnnouncements, Icons.notifications_rounded),
+      (l10n.moodleTabCalendar, Icons.calendar_today_rounded),
+      (l10n.moodleTabMessages, Icons.mail_rounded),
+    ];
 
     // Hiç hesap yoksa onboarding
     if (!provider.isLoading && !provider.hasAccounts) {
@@ -70,16 +75,18 @@ class _MoodleHubScreenState extends State<MoodleHubScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Moodle',
+                  provider.accounts.length == 1
+                      ? MoodleUtils.parseMultilang(
+                          provider.accounts.first.siteTitle, langCode)
+                      : l10n.moodleTitle,
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 if (provider.accounts.isNotEmpty)
                   Text(
-                    '${provider.accounts.length} hesap · '
-                    '${provider.allCourses.length} ders · '
-                    '${provider.unreadCount} okunmamış',
+                    l10n.moodleSummary(provider.accounts.length,
+                        provider.allCourses.length, provider.unreadCount),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                       fontSize: 12,
@@ -102,13 +109,13 @@ class _MoodleHubScreenState extends State<MoodleHubScreen>
               else
                 IconButton(
                   icon: const Icon(Icons.sync_rounded),
-                  tooltip: 'Tümünü Yenile',
+                  tooltip: l10n.moodleRefreshAll,
                   onPressed: () => provider.syncAll(),
                 ),
               // Hesapları yönet
               IconButton(
                 icon: const Icon(Icons.manage_accounts_rounded),
-                tooltip: 'Hesapları Yönet',
+                tooltip: l10n.moodleManageAccounts,
                 onPressed: () => _openAccountsScreen(context),
               ),
               // Hesap ekle
@@ -116,7 +123,7 @@ class _MoodleHubScreenState extends State<MoodleHubScreen>
                 padding: const EdgeInsets.only(right: 8.0),
                 child: IconButton(
                   icon: const Icon(Icons.person_add_rounded),
-                  tooltip: 'Hesap Ekle',
+                  tooltip: l10n.moodleAddAccount,
                   onPressed: () => _showAddAccount(context),
                 ),
               ),
@@ -125,15 +132,14 @@ class _MoodleHubScreenState extends State<MoodleHubScreen>
               controller: _tabController,
               isScrollable: true,
               tabAlignment: TabAlignment.start,
-              tabs: _tabs.map((t) {
+              tabs: tabs.map((t) {
                 final (label, icon) = t;
-                // Duyurular sekmesinde badge
                 Widget tab = Tab(
                   icon: Icon(icon, size: 18),
                   text: label,
                   iconMargin: const EdgeInsets.only(bottom: 2),
                 );
-                if (label == 'Duyurular' && provider.unreadCount > 0) {
+                if (label == l10n.moodleTabAnnouncements && provider.unreadCount > 0) {
                   return Tab(
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -161,7 +167,7 @@ class _MoodleHubScreenState extends State<MoodleHubScreen>
                     ),
                   );
                 }
-                if (label == 'Mesajlar' && provider.unreadMessageCount > 0) {
+                if (label == l10n.moodleTabMessages && provider.unreadMessageCount > 0) {
                   return Tab(
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -210,7 +216,7 @@ class _MoodleHubScreenState extends State<MoodleHubScreen>
       floatingActionButton: FloatingActionButton.small(
         heroTag: 'moodle_add_account',
         onPressed: () => _showAddAccount(context),
-        tooltip: 'Moodle Hesabı Ekle',
+        tooltip: l10n.moodleAddAccount,
         child: const Icon(Icons.add_rounded),
       ),
     );
@@ -219,16 +225,17 @@ class _MoodleHubScreenState extends State<MoodleHubScreen>
   // Hiç hesap yok — boş durum onboarding
   Widget _buildEmptyState(
       BuildContext context, ThemeData theme, MoodleProvider provider) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Moodle',
-            style: TextStyle(fontWeight: FontWeight.w800)),
+        title: Text(l10n.moodleTitle,
+            style: const TextStyle(fontWeight: FontWeight.w800)),
         backgroundColor: Colors.transparent,
         actions: [
           IconButton(
             icon: const Icon(Icons.manage_accounts_rounded),
-            tooltip: 'Hesapları Yönet',
+            tooltip: l10n.moodleManageAccounts,
             onPressed: () => _openAccountsScreen(context),
           ),
         ],
@@ -258,15 +265,14 @@ class _MoodleHubScreenState extends State<MoodleHubScreen>
               ),
               const SizedBox(height: 24),
               Text(
-                'Moodle\'ı Bağla',
+                l10n.moodleConnect,
                 style: theme.textTheme.headlineMedium
                     ?.copyWith(fontWeight: FontWeight.w800),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
               Text(
-                'Üniversitenizin Moodle sistemiyle bağlantı kurarak derslerinizi, '
-                'ödevlerinizi, notlarınızı ve duyurularınızı tek yerden takip edin.',
+                l10n.moodleConnectDesc,
                 style: theme.textTheme.bodyMedium
                     ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                 textAlign: TextAlign.center,
@@ -275,22 +281,22 @@ class _MoodleHubScreenState extends State<MoodleHubScreen>
               // Özellik kartları
               _FeatureRow(
                 icon: Icons.assignment_rounded,
-                title: 'Ödevler & Tarihler',
+                title: l10n.moodleFeatureAssignments,
                 subtitle: 'Son teslim tarihlerini kaçırma',
               ),
               _FeatureRow(
                 icon: Icons.grade_rounded,
-                title: 'Notlar',
+                title: l10n.moodleFeatureGrades,
                 subtitle: 'Tüm sınav sonuçlarını tek yerde gör',
               ),
               _FeatureRow(
                 icon: Icons.notifications_rounded,
-                title: 'Duyurular',
+                title: l10n.moodleFeatureAnnouncements,
                 subtitle: 'Hocalarının paylaşımlarını anında gör',
               ),
               _FeatureRow(
                 icon: Icons.people_rounded,
-                title: 'Çoklu Hesap',
+                title: l10n.moodleFeatureMultiAccount,
                 subtitle: 'Birden fazla üniversite desteği',
               ),
               const SizedBox(height: 32),
@@ -300,9 +306,9 @@ class _MoodleHubScreenState extends State<MoodleHubScreen>
                 child: FilledButton.icon(
                   onPressed: () => _showAddAccount(context),
                   icon: const Icon(Icons.add_rounded, color: Colors.white),
-                  label: const Text(
-                    'Moodle Hesabı Ekle',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
+                  label: Text(
+                    l10n.moodleAddAccount,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
                   ),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primary,
@@ -312,7 +318,7 @@ class _MoodleHubScreenState extends State<MoodleHubScreen>
               ),
               const SizedBox(height: 12),
               Text(
-                '🔒 Şifreniz asla cihazınızda saklanmaz',
+                l10n.moodlePasswordNotStored,
                 style: theme.textTheme.bodySmall
                     ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
@@ -337,7 +343,7 @@ class _MoodleHubScreenState extends State<MoodleHubScreen>
     if (added == true && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('✅ Moodle hesabı başarıyla bağlandı!'),
+          content: Text(AppLocalizations.of(context)!.moodleConnected),
           behavior: SnackBarBehavior.floating,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

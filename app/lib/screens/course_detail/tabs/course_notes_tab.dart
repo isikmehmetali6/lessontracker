@@ -183,14 +183,14 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
               const SizedBox(width: 8),
               _buildFilterChip(
                 NoteType.ocr,
-                'OCR',
+                l10n.ocrLabel,
                 Icons.document_scanner_outlined,
                 isDark,
               ),
               const SizedBox(width: 8),
               _buildFilterChip(
                 NoteType.drawing,
-                'Drawing',
+                l10n.drawingLabel,
                 Icons.draw_outlined,
                 isDark,
               ),
@@ -264,8 +264,8 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
               const SizedBox(width: 6),
               Text(
                 _selectedFilter != null || _searchQuery.isNotEmpty
-                    ? '${filteredNotes.length} of ${notes.length} Notes'
-                    : '${notes.length} Notes',
+                    ? l10n.ofNotes(filteredNotes.length, notes.length)
+                    : l10n.notesCount(notes.length),
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,

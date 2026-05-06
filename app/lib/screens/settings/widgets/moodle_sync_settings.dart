@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/services/moodle_background_service.dart';
 import '../../../core/theme/app_colors.dart';
 import 'settings_shared.dart';
@@ -41,12 +42,13 @@ class _MoodleSyncSettingsState extends State<MoodleSyncSettings> {
         _isEnabled = value;
         _isLoading = false;
       });
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             value
-                ? 'Moodle arka plan senkronizasyonu açıldı'
-                : 'Moodle arka plan senkronizasyonu kapatıldı',
+                ? l10n.moodleSyncEnabled
+                : l10n.moodleSyncDisabled,
           ),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 2),
@@ -57,13 +59,14 @@ class _MoodleSyncSettingsState extends State<MoodleSyncSettings> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SettingsTile(
       icon: Icons.cloud_sync_rounded,
       iconColor: AppColors.primary,
-      title: 'Moodle Arka Plan Sync',
+      title: l10n.moodleBackgroundSync,
       subtitle: _isEnabled
-          ? 'Yeni ödev, not ve duyurular bildirilecek'
-          : 'Kapalı — manuel yenileme gerekli',
+          ? l10n.moodleSyncNotifications
+          : l10n.moodleSyncOff,
       isDark: widget.isDark,
       trailing: _isLoading
           ? const SizedBox(

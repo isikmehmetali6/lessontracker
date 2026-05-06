@@ -14,14 +14,14 @@ class SettingsProfileSection extends StatelessWidget {
 
     return Consumer<AuthProvider>(
       builder: (context, auth, _) {
+        final l10n = AppLocalizations.of(context)!;
         final user = auth.user;
-        // Get initials or default to 'G' (Guest)
         String initials = 'G';
-        String displayName = 'Guest User';
-        String email = 'Sign in to sync data';
+        String displayName = l10n.guestUserLabel;
+        String email = l10n.signInToSync;
 
         if (user != null && !auth.isGuest) {
-          displayName = user.displayName ?? 'User';
+          displayName = user.displayName ?? l10n.userName;
           email = user.email ?? '';
           if (displayName.isNotEmpty) {
             initials = displayName
@@ -35,7 +35,7 @@ class SettingsProfileSection extends StatelessWidget {
             initials = 'U';
           }
         } else if (auth.isGuest) {
-          displayName = 'Guest Mode';
+          displayName = l10n.guestMode;
           initials = 'G';
         }
 

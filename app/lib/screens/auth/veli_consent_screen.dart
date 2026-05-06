@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'dart:convert';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 
 class VeliConsentScreen extends StatefulWidget {
@@ -37,6 +38,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: SafeArea(
@@ -68,8 +70,8 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
                     const SizedBox(height: 24),
                     Text(
                       _showVerificationStep
-                          ? 'E-posta Doğrulama'
-                          : 'Veli Onayı',
+                          ? l10n.veliEmailVerification
+                          : l10n.veliConsentTitle,
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
@@ -81,8 +83,8 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
                     const SizedBox(height: 8),
                     Text(
                       _showVerificationStep
-                          ? 'Veli e-postasına gönderilen doğrulama kodunu girin.'
-                          : '18 yaşın altındaki kullanıcıların uygulamayı kullanabilmesi için veli onayı gerekmektedir.',
+                          ? l10n.veliEnterCode
+                          : l10n.veliConsentDesc,
                       style: TextStyle(
                         fontSize: 14,
                         height: 1.5,
@@ -144,8 +146,8 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Text(
-                                'Doğrula ve Onayla',
+                            : Text(
+                                l10n.veliVerifyAndApprove,
                                 style: TextStyle(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 16,
@@ -162,7 +164,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                         child: Text(
-                          'Kodu Tekrar Gönder',
+                          l10n.veliResendCode,
                           style: TextStyle(
                             color: isDark
                                 ? AppColors.textSecondaryDark
@@ -189,7 +191,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                         child: Text(
-                          'Veli E-postasını Değiştir',
+                          l10n.veliChangeEmail,
                           style: TextStyle(
                             color: isDark
                                 ? AppColors.textSecondaryDark
@@ -225,8 +227,8 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Text(
-                                'Doğrulama Kodu Gönder',
+                            : Text(
+                                l10n.veliSendCode,
                                 style: TextStyle(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 16,
@@ -243,7 +245,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                         child: Text(
-                          'Vazgeç',
+                          l10n.veliCancel,
                           style: TextStyle(
                             color: isDark
                                 ? AppColors.textSecondaryDark
@@ -264,6 +266,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
   }
 
   Widget _buildEmailSection(bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -281,7 +284,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
               Icon(Icons.email_outlined, color: AppColors.primary, size: 24),
               const SizedBox(width: 12),
               Text(
-                'Veli E-posta Adresi',
+                l10n.veliEmailLabel,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -297,7 +300,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
             controller: _veliEmailController,
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
-              hintText: 'Veli e-posta adresini girin',
+              hintText: l10n.veliEmailHint,
               filled: true,
               fillColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
               border: OutlineInputBorder(
@@ -331,6 +334,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
   }
 
   Widget _buildConsentCheckbox(bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
     return InkWell(
       onTap: () => setState(() => _consentChecked = !_consentChecked),
       borderRadius: BorderRadius.circular(16),
@@ -362,7 +366,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Veli olduğumu ve çocuğumun bu uygulamayı kullanmasına izin verdiğimi onaylıyorum.',
+                    l10n.veliConfirmCheck,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -373,7 +377,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'KVKK ve 6698 sayılı kanun kapsamında veli onayı sağlıyorum.',
+                    l10n.veliKvkkCheck,
                     style: TextStyle(
                       fontSize: 12,
                       color: isDark
@@ -391,6 +395,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
   }
 
   Widget _buildSecurityInfo(bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -403,7 +408,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Veli e-postasına doğrulama kodu gönderilecektir. Onay verilmeden uygulama kullanılamaz.',
+              l10n.veliInfoText,
               style: TextStyle(
                 fontSize: 12,
                 color: isDark
@@ -418,6 +423,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
   }
 
   Widget _buildVerificationSection(bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -436,7 +442,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Doğrulama kodu $_pendingVeliEmail adresine gönderildi.',
+                  l10n.veliCodeSent(_pendingVeliEmail ?? ''),
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -502,15 +508,16 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
       _veliEmailController.text.trim().isNotEmpty && _consentChecked;
 
   Future<void> _handleSubmit() async {
+    final l10n = AppLocalizations.of(context)!;
     final email = _veliEmailController.text.trim();
 
     if (!_isValidEmail(email)) {
-      setState(() => _error = 'Geçerli bir e-posta adresi girin');
+      setState(() => _error = l10n.veliValidEmail);
       return;
     }
 
     if (!_consentChecked) {
-      setState(() => _error = 'Veli onayını işaretleyin');
+      setState(() => _error = l10n.veliCheckConsent);
       return;
     }
 
@@ -578,10 +585,11 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
   }
 
   Future<void> _verifyCode() async {
+    final l10n = AppLocalizations.of(context)!;
     final enteredCode = _veliEmailController.text.trim();
 
     if (enteredCode.length != 6) {
-      setState(() => _error = '6 haneli doğrulama kodu girin');
+      setState(() => _error = l10n.veliCodeRequired);
       return;
     }
 
@@ -596,7 +604,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
     if (pendingData == null) {
       setState(() {
         _isLoading = false;
-        _error = 'Doğrulama oturumu bulunamadı. Lütfen tekrar deneyin.';
+        _error = l10n.veliSessionNotFound;
       });
       return;
     }
@@ -608,7 +616,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
     if (DateTime.now().millisecondsSinceEpoch > expires) {
       setState(() {
         _isLoading = false;
-        _error = 'Doğrulama kodu süresi dolmuş. Lütfen tekrar kod isteyin.';
+        _error = l10n.veliCodeExpired;
       });
       prefs.remove('pending_veli_approval');
       return;
@@ -617,7 +625,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
     if (enteredCode != storedCode) {
       setState(() {
         _isLoading = false;
-        _error = 'Yanlış doğrulama kodu girdiniz.';
+        _error = l10n.veliWrongCode;
       });
       return;
     }
@@ -643,6 +651,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
   }
 
   Future<void> _resendCode() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_pendingVeliEmail == null) return;
 
     setState(() {
@@ -664,7 +673,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Yeni doğrulama kodu $_pendingVeliEmail adresine gönderildi.',
+            l10n.veliCodeSent(_pendingVeliEmail ?? ''),
           ),
           backgroundColor: AppColors.emerald,
         ),

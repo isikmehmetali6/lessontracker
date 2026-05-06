@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/moodle/moodle_account.dart';
 import '../../providers/moodle_provider.dart';
+import '../../providers/language_provider.dart';
+import '../../core/utils/moodle_utils.dart';
 import 'widgets/add_moodle_account_sheet.dart';
 
 /// Moodle hesaplarını yönetme ekranı — eklenen hesapları listeler ve çıkış yapma imkanı sunar.
@@ -21,15 +24,16 @@ class MoodleAccountsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final provider = context.watch<MoodleProvider>();
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
       appBar: AppBar(
-        title: const Text(
-          'Hesapları Yönet',
-          style: TextStyle(fontWeight: FontWeight.w800),
+        title: Text(
+          l10n.moodleAccountsManage,
+          style: const TextStyle(fontWeight: FontWeight.w800),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -50,9 +54,9 @@ class MoodleAccountsScreen extends StatelessWidget {
             child: FilledButton.icon(
               onPressed: () => _showAddAccount(context),
               icon: const Icon(Icons.add_rounded, color: Colors.white),
-              label: const Text(
-                'Moodle Hesabı Ekle',
-                style: TextStyle(
+              label: Text(
+                l10n.moodleAccountAdd,
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
@@ -72,6 +76,7 @@ class MoodleAccountsScreen extends StatelessWidget {
   }
 
   Widget _buildEmptyState(BuildContext context, bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -85,7 +90,7 @@ class MoodleAccountsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Bağlı hesap yok',
+              l10n.moodleNoAccounts,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -94,7 +99,7 @@ class MoodleAccountsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Aşağıdaki butondan Moodle hesabınızı ekleyin',
+              l10n.moodleNoAccountsDesc,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -129,34 +134,40 @@ class MoodleAccountsScreen extends StatelessWidget {
   Future<void> _confirmSignOut(BuildContext context, MoodleAccount account) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Hesaptan Çıkış'),
-        content: Text(
-          '${account.siteTitle}\n'
-          '(${account.username})\n\n'
-          'Bu hesaptan çıkış yapmak istediğinize emin misiniz?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('İptal'),
+      builder: (ctx) {
+        final langCode = ctx.read<LanguageProvider>().locale.languageCode;
+        return AlertDialog(
+          title: Text(AppLocalizations.of(ctx)!.moodleLogout),
+          content: Text(
+            AppLocalizations.of(ctx)!.moodleLogoutConfirm(
+              MoodleUtils.parseMultilang(account.siteTitle, langCode),
+            ),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.red),
-            child: const Text('Çıkış Yap'),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(AppLocalizations.of(ctx)!.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: TextButton.styleFrom(foregroundColor: AppColors.red),
+              child: Text(AppLocalizations.of(ctx)!.moodleLogout),
+            ),
+          ],
+        );
+      },
     );
 
     if (confirmed == true && context.mounted) {
       await context.read<MoodleProvider>().removeAccount(account.id);
       HapticFeedback.mediumImpact();
       if (context.mounted) {
+        final langCode = context.read<LanguageProvider>().locale.languageCode;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${account.siteTitle} hesabından çıkış yapıldı'),
+            content: Text(AppLocalizations.of(context)!.moodleLogoutDone(
+              MoodleUtils.parseMultilang(account.siteTitle, langCode),
+            )),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
@@ -170,7 +181,7 @@ class MoodleAccountsScreen extends StatelessWidget {
     if (added == true && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('✅ Moodle hesabı başarıyla bağlandı!'),
+          content: Text(AppLocalizations.of(context)!.moodleConnected),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
@@ -192,6 +203,7 @@ class _AccountCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 0,
@@ -225,7 +237,10 @@ class _AccountCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    account.siteTitle,
+                    MoodleUtils.parseMultilang(
+                      account.siteTitle,
+                      context.watch<LanguageProvider>().locale.languageCode,
+                    ),
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -257,8 +272,8 @@ class _AccountCard extends StatelessWidget {
             TextButton.icon(
               onPressed: onSignOut,
               icon: const Icon(Icons.logout_rounded, size: 18, color: AppColors.red),
-              label: const Text(
-                'Çıkış',
+              label: Text(
+                l10n.moodleLogout,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: AppColors.red,

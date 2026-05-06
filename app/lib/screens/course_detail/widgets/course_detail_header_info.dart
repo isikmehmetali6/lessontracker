@@ -19,6 +19,7 @@ class CourseDetailHeaderInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
@@ -104,7 +105,7 @@ class CourseDetailHeaderInfo extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (_) => Scaffold(
                           appBar: AppBar(
-                            title: Text(AppLocalizations.of(context)?.absenceCalendar ?? 'Absence Calendar'),
+                            title: Text(l10n.absenceCalendar),
                             backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
                             foregroundColor: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
                           ),
@@ -148,7 +149,7 @@ class CourseDetailHeaderInfo extends StatelessWidget {
                         const SizedBox(width: 16),
                         Expanded(
                           child: Text(
-                            AppLocalizations.of(context)?.viewAbsenceCalendar ?? 'View Absence Calendar',
+                            l10n.viewAbsenceCalendar,
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,

@@ -332,7 +332,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                           if (mounted) {
                             Navigator.pop(this.context);
                             ScaffoldMessenger.of(this.context).showSnackBar(
-                              const SnackBar(content: Text('Course archived')),
+                              SnackBar(content: Text(AppLocalizations.of(this.context)!.courseArchived)),
                             );
                           }
                         },
@@ -359,8 +359,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                           provider.toggleNotifications(!enabled);
                           _showSnackBar(
                             enabled
-                                ? 'Notifications disabled'
-                                : 'Notifications enabled',
+                                ? AppLocalizations.of(this.context)!.notificationsDisabled
+                                : AppLocalizations.of(this.context)!.notificationsEnabled,
                           );
                         },
                       ),
@@ -403,7 +403,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
           );
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Deadline added successfully!')),
+              SnackBar(content: Text(AppLocalizations.of(context)!.deadlineAdded)),
             );
           }
         },
@@ -415,7 +415,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
     final success = await context.read<CourseProvider>().addFile(course.id);
     if (success) {
       _loadFiles();
-      _showSnackBar('File added successfully');
+      _showSnackBar(AppLocalizations.of(context)!.fileAdded);
     }
   }
 
@@ -457,7 +457,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Add Link',
+                  AppLocalizations.of(context)!.addLink,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
@@ -470,7 +470,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                 TextField(
                   controller: nameController,
                   decoration: InputDecoration(
-                    hintText: 'Link Name',
+                    hintText: AppLocalizations.of(context)!.linkName,
                     prefixIcon: const Icon(Icons.label_outline),
                     filled: true,
                     fillColor: isDark
@@ -486,7 +486,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                 TextField(
                   controller: urlController,
                   decoration: InputDecoration(
-                    hintText: 'https://...',
+                    hintText: AppLocalizations.of(context)!.webLink,
                     prefixIcon: const Icon(Icons.link),
                     filled: true,
                     fillColor: isDark
@@ -515,7 +515,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                       if (mounted) {
                         Navigator.pop(context);
                         _loadFiles();
-                        _showSnackBar('Link added');
+                        _showSnackBar(AppLocalizations.of(context)!.linkAdded);
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -526,7 +526,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text('Add Link'),
+                    child: Text(AppLocalizations.of(context)!.addLink),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -602,7 +602,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
           }
           if (mounted) {
             HapticFeedback.mediumImpact();
-            _showSnackBar('$saved photos saved!');
+            _showSnackBar(AppLocalizations.of(context)!.photoSaved(saved));
           }
         }
       } else {
@@ -656,7 +656,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
 
       if (image == null || !mounted) return;
 
-      _showSnackBar('Processing OCR...');
+      _showSnackBar(AppLocalizations.of(context)!.processingOcr);
 
       final note = await context.read<NoteProvider>().addOcrNote(
         courseId: course.id,
@@ -670,7 +670,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
 
       if (note != null) {
         HapticFeedback.mediumImpact();
-        _showSnackBar('📝 OCR note saved!');
+        _showSnackBar(AppLocalizations.of(context)!.ocrNoteSaved);
       } else {
         ErrorHandler.handleError(
           context,
@@ -707,7 +707,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
 
           if (note != null) {
             HapticFeedback.mediumImpact();
-            _showSnackBar('Note saved!');
+            _showSnackBar(AppLocalizations.of(context)!.noteSaved);
           }
         },
       ),
@@ -834,7 +834,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                       if (!context.mounted) return;
                       Navigator.pop(context);
                       HapticFeedback.mediumImpact();
-                      _showSnackBar('Note saved!');
+                      _showSnackBar(AppLocalizations.of(context)!.noteSaved);
                     }
                   },
                 ),
@@ -880,7 +880,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
     ).then((savedNote) {
       if (savedNote != null) {
         _loadNotes();
-        _showSnackBar('Drawing saved!');
+        _showSnackBar(AppLocalizations.of(context)!.drawingSaved);
       }
     });
   }
@@ -975,7 +975,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
       _loadGrades();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Grade deleted'),
+          content: Text(AppLocalizations.of(context)!.gradeDeleted),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),

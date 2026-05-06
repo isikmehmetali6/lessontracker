@@ -219,7 +219,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                 Icons.sync,
                 color: Theme.of(context).colorScheme.primary,
               ),
-              tooltip: 'Moodle\'dan Senkronize Et',
+              tooltip: AppLocalizations.of(context)!.syncFromMoodle,
             ),
           Text(
             widget.courseToEdit != null
@@ -241,8 +241,8 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
 
     if (courses.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Önce Moodle hesabınızı senkronize edin'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.moodleSyncFirst),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -275,7 +275,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${moodleCourse.fullName} seçildi — ders bilgilerini düzenleyin',
+            AppLocalizations.of(context)!.moodleCourseSelected(moodleCourse.fullName),
           ),
           behavior: SnackBarBehavior.floating,
         ),
@@ -541,6 +541,7 @@ class _MoodleCoursePickerSheetState extends State<_MoodleCoursePickerSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
@@ -568,7 +569,7 @@ class _MoodleCoursePickerSheetState extends State<_MoodleCoursePickerSheet> {
             child: Row(
               children: [
                 Text(
-                  'Moodle\'dan Seç',
+                  l10n.selectFromMoodle,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -576,7 +577,7 @@ class _MoodleCoursePickerSheetState extends State<_MoodleCoursePickerSheet> {
                 const Spacer(),
                 TextButton(
                   onPressed: () => Navigator.pop(context, <MoodleCourse>[]),
-                  child: const Text('İptal'),
+                  child: Text(l10n.cancelMoodle),
                 ),
                 const SizedBox(width: 8),
                 FilledButton(
@@ -588,7 +589,7 @@ class _MoodleCoursePickerSheetState extends State<_MoodleCoursePickerSheet> {
                               .toList();
                           Navigator.pop(context, selected);
                         },
-                  child: Text('Ekle (${_selectedIds.length})'),
+                  child: Text(l10n.addSelected(_selectedIds.length)),
                 ),
               ],
             ),
@@ -599,7 +600,7 @@ class _MoodleCoursePickerSheetState extends State<_MoodleCoursePickerSheet> {
             child: TextField(
               onChanged: (v) => setState(() => _searchQuery = v),
               decoration: InputDecoration(
-                hintText: 'Ders ara...',
+                hintText: l10n.searchCourse,
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),

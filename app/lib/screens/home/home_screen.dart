@@ -206,9 +206,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Kayıtlı Veriler Bulundu',
+                  AppLocalizations.of(ctx)!.savedDataFound,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                 ),
               ),
@@ -219,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Bu hesapta daha önce kaydedilmiş $courseCount ders bulunuyor.',
+                AppLocalizations.of(ctx)!.savedDataDescription(courseCount),
                 style: TextStyle(
                   fontSize: 15,
                   color: isDark ? Colors.grey[300] : Colors.grey[700],
@@ -249,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Verilerinizi yüklemek ders, not ve deadline bilgilerinizi bu cihaza aktarır.',
+                        AppLocalizations.of(ctx)!.loadDataDescription,
                         style: TextStyle(
                           fontSize: 13,
                           color: isDark ? Colors.grey[400] : Colors.grey[600],
@@ -272,9 +272,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   await SyncService().clearCloudData();
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
-                      const SnackBar(
+                      SnackBar(
                         content: Text(
-                          'Eski bulut kayıtları temizlendi. Yeni sayfa açık.',
+                          AppLocalizations.of(ctx)!.cloudDataCleared,
                         ),
                         backgroundColor: AppColors.green,
                         duration: Duration(seconds: 3),
@@ -286,7 +286,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
               },
               child: Text(
-                'Sıfırdan Başla',
+                AppLocalizations.of(ctx)!.startFresh,
                 style: TextStyle(
                   color: isDark ? Colors.grey[400] : Colors.grey[600],
                   fontWeight: FontWeight.w600,
@@ -296,7 +296,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ElevatedButton.icon(
               onPressed: () => Navigator.of(ctx).pop(true),
               icon: const Icon(Icons.cloud_download_rounded, size: 18),
-              label: const Text('Verileri Yükle'),
+              label: Text(AppLocalizations.of(ctx)!.loadData),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
@@ -331,14 +331,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   horizontal: 16,
                 ),
                 color: Colors.orange.shade800,
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.wifi_off, color: Colors.white, size: 16),
-                    SizedBox(width: 8),
+                    const Icon(Icons.wifi_off, color: Colors.white, size: 16),
+                    const SizedBox(width: 8),
                     Text(
-                      'You are offline',
-                      style: TextStyle(
+                      AppLocalizations.of(context)!.youAreOffline,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
@@ -404,9 +404,9 @@ class _HomeScreenState extends State<HomeScreen> {
       // Show processing indicator
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Row(
+          content: Row(
             children: [
-              SizedBox(
+              const SizedBox(
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(
@@ -414,8 +414,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.white,
                 ),
               ),
-              SizedBox(width: 12),
-              Text('Processing OCR...'),
+              const SizedBox(width: 12),
+              Text(AppLocalizations.of(context)!.processingOcr),
             ],
           ),
           behavior: SnackBarBehavior.floating,
@@ -444,7 +444,7 @@ class _HomeScreenState extends State<HomeScreen> {
         HapticFeedback.mediumImpact();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('📝 OCR note saved!'),
+            content: Text(AppLocalizations.of(context)!.ocrNoteSaved),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -470,7 +470,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (courses.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('No courses available. Add a course first!'),
+          content: Text(AppLocalizations.of(context)!.noCoursesAddFirst),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -507,7 +507,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 20),
               Text(
-                'Select Course',
+                AppLocalizations.of(context)!.selectCourseTitle,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -518,7 +518,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Choose where to save this note',
+                AppLocalizations.of(context)!.chooseSaveLocation,
                 style: TextStyle(
                   fontSize: 14,
                   color: isDark

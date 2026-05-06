@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 
 class AydinlatmaScreen extends StatelessWidget {
@@ -9,6 +10,7 @@ class AydinlatmaScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: SafeArea(
@@ -35,7 +37,7 @@ class AydinlatmaScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'Aydınlatma Metni',
+                      l10n.aydinlatmaTitle,
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
@@ -46,7 +48,7 @@ class AydinlatmaScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '6698 sayılı KVKK Madde 10 kapsamında bilgilendirme',
+                      l10n.aydinlatmaSubtitle,
                       style: TextStyle(
                         fontSize: 14,
                         color: isDark
@@ -57,16 +59,15 @@ class AydinlatmaScreen extends StatelessWidget {
                     const SizedBox(height: 32),
                     _buildSection(
                       isDark: isDark,
-                      title: '1. Veri Sorumlusu',
+                      title: l10n.aydinlatmaSection1,
                       icon: Icons.business,
                       iconColor: AppColors.primary,
-                      content:
-                          'LessonTracker\nE-posta: lessontracker@example.com\nWeb: www.lessontracker.com',
+                      content: l10n.aydinlatmaControllerInfo,
                     ),
                     const SizedBox(height: 20),
                     _buildSection(
                       isDark: isDark,
-                      title: '2. İşlenen Kişisel Veriler',
+                      title: l10n.aydinlatmaSection2,
                       icon: Icons.storage,
                       iconColor: AppColors.orange,
                       content: '''
@@ -79,7 +80,7 @@ class AydinlatmaScreen extends StatelessWidget {
                     const SizedBox(height: 20),
                     _buildSection(
                       isDark: isDark,
-                      title: '3. Kişisel Verilerin İşlenme Amaçları',
+                      title: l10n.aydinlatmaSection3,
                       icon: Icons.track_changes,
                       iconColor: AppColors.purple,
                       content: '''
@@ -94,7 +95,7 @@ class AydinlatmaScreen extends StatelessWidget {
                     const SizedBox(height: 20),
                     _buildSection(
                       isDark: isDark,
-                      title: '4. Kişisel Verilerin Aktarılması',
+                      title: l10n.aydinlatmaSection4,
                       icon: Icons.sync_alt,
                       iconColor: AppColors.emerald,
                       content: '''
@@ -111,7 +112,7 @@ Kişisel verileriniz aşağıdaki üçüncü taraflara aktarılabilir:
                     const SizedBox(height: 20),
                     _buildSection(
                       isDark: isDark,
-                      title: '5. Saklama Süresi',
+                      title: l10n.aydinlatmaSection5,
                       icon: Icons.timer,
                       iconColor: AppColors.amber,
                       content: '''
@@ -122,7 +123,7 @@ Kişisel verileriniz aşağıdaki üçüncü taraflara aktarılabilir:
                     const SizedBox(height: 20),
                     _buildSection(
                       isDark: isDark,
-                      title: '6. Veri Güvenliği',
+                      title: l10n.aydinlatmaSection6,
                       icon: Icons.security,
                       iconColor: AppColors.red,
                       content: '''
@@ -134,7 +135,7 @@ Kişisel verileriniz aşağıdaki üçüncü taraflara aktarılabilir:
                     const SizedBox(height: 20),
                     _buildSection(
                       isDark: isDark,
-                      title: '7. Haklarınız (KVKK Madde 11)',
+                      title: l10n.aydinlatmaSection7,
                       icon: Icons.gavel,
                       iconColor: AppColors.blue,
                       content: '''
@@ -152,7 +153,7 @@ Bu haklarınızı kullanmak için lessontracker@example.com adresinden bize ula�
                     const SizedBox(height: 20),
                     _buildSection(
                       isDark: isDark,
-                      title: '8. Daha Fazla Bilgi',
+                      title: l10n.aydinlatmaSection8,
                       icon: Icons.help_outline,
                       iconColor: AppColors.emerald,
                       content: '''
@@ -182,7 +183,7 @@ Bu haklarınızı kullanmak için lessontracker@example.com adresinden bize ula�
               child: Column(
                 children: [
                   Text(
-                    'Aydınlatma metnini okudum ve bilgilendirildim.',
+                    l10n.aydinlatmaConfirm,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
@@ -204,8 +205,8 @@ Bu haklarınızı kullanmak için lessontracker@example.com adresinden bize ula�
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      child: const Text(
-                        'Anladım, Devam Et',
+                      child: Text(
+                        l10n.aydinlatmaContinue,
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 16,

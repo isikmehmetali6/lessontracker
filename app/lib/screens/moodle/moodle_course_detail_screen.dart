@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -50,7 +51,7 @@ class _MoodleCourseDetailScreenState extends State<MoodleCourseDetailScreen> {
       final token = await _tokenStorage.getToken(widget.course.accountId);
       if (token == null) {
         setState(() {
-          _error = 'Token bulunamadı — hesabınızı tekrar bağlayın';
+          _error = AppLocalizations.of(context)!.moodleTokenNotFound;
           _isLoading = false;
         });
         return;
@@ -66,7 +67,7 @@ class _MoodleCourseDetailScreenState extends State<MoodleCourseDetailScreen> {
 
       if (account == null) {
         setState(() {
-          _error = 'Hesap bulunamadı';
+          _error = AppLocalizations.of(context)!.moodleAccountNotFound;
           _isLoading = false;
         });
         return;
@@ -84,7 +85,7 @@ class _MoodleCourseDetailScreenState extends State<MoodleCourseDetailScreen> {
       });
     } catch (e) {
       setState(() {
-        _error = 'İçerik yüklenemedi: $e';
+        _error = AppLocalizations.of(context)!.moodleContentError(e.toString());
         _isLoading = false;
       });
     }
@@ -114,13 +115,13 @@ class _MoodleCourseDetailScreenState extends State<MoodleCourseDetailScreen> {
 
   Widget _buildBody(ThemeData theme) {
     if (_isLoading) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Ders içeriği yükleniyor...'),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(AppLocalizations.of(context)!.moodleContentLoading),
           ],
         ),
       );
@@ -143,7 +144,7 @@ class _MoodleCourseDetailScreenState extends State<MoodleCourseDetailScreen> {
               const SizedBox(height: 20),
               OutlinedButton.icon(
                 icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Tekrar Dene'),
+                label: Text(AppLocalizations.of(context)!.moodleTryAgain),
                 onPressed: _loadContents,
               ),
             ],
@@ -160,7 +161,7 @@ class _MoodleCourseDetailScreenState extends State<MoodleCourseDetailScreen> {
             Icon(Icons.folder_open_rounded,
                 size: 56, color: theme.colorScheme.outlineVariant),
             const SizedBox(height: 12),
-            Text('İçerik bulunamadı',
+            Text(AppLocalizations.of(context)!.moodleContentNotFound,
                 style: theme.textTheme.titleMedium
                     ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           ],
@@ -312,7 +313,7 @@ class _ModuleTileState extends State<_ModuleTile> {
         OpenFilex.open(path);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('İndirme başarısız oldu veya dosya çok büyük.')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.moodleDownloadFailed)),
         );
       }
     }
@@ -349,8 +350,8 @@ class _ModuleTileState extends State<_ModuleTile> {
                   ),
                   child: const Icon(Icons.drive_file_move_rounded, color: AppColors.primary),
                 ),
-                title: const Text('Derslerime Aktar'),
-                subtitle: const Text('Bu dosyayı uygulamadaki derslerinden birine kaydet'),
+                title: Text(AppLocalizations.of(context)!.moodleTransferToCourse),
+                subtitle: Text(AppLocalizations.of(context)!.moodleTransferDesc),
                 onTap: () {
                   Navigator.pop(context);
                   _showCourseSelectionDialog(context);
@@ -400,7 +401,7 @@ class _ModuleTileState extends State<_ModuleTile> {
                       const Icon(Icons.menu_book_rounded, color: AppColors.primary),
                       const SizedBox(width: 8),
                       Text(
-                        'Ders Seçin',
+                        AppLocalizations.of(context)!.moodleSelectCourse,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],
@@ -410,8 +411,8 @@ class _ModuleTileState extends State<_ModuleTile> {
                 Expanded(
                   child: courses.isEmpty
                       ? Center(
-                          child: Text(
-                            'Henüz hiç ders eklemediniz.',
+                          child:                           Text(
+                            AppLocalizations.of(context)!.moodleNoLocalCourses,
                             style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                           ),
                         )
@@ -458,7 +459,7 @@ class _ModuleTileState extends State<_ModuleTile> {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(success ? "Dosya başarıyla '$cName' dersine kaydedildi!" : "Dosya kaydedilirken bir hata oluştu."),
+          content: Text(success ? AppLocalizations.of(context)!.moodleSavedToCourse(cName) : AppLocalizations.of(context)!.moodleSaveError),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           backgroundColor: success ? AppColors.green : AppColors.red,

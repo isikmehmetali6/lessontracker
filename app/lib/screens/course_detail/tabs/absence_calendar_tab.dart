@@ -75,16 +75,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
   }
 
   String _reasonLabel(String reason) {
-    final l10n = AppLocalizations.of(context);
-    if (l10n == null) {
-      switch (reason) {
-        case 'unexcused': return 'Unexcused';
-        case 'medical': return 'Medical';
-        case 'excused': return 'Excused';
-        case 'personal': return 'Personal';
-        default: return reason;
-      }
-    }
+    final l10n = AppLocalizations.of(context)!;
     switch (reason) {
       case 'unexcused': return l10n.absenceUnexcused;
       case 'medical': return l10n.absenceMedical;
@@ -100,6 +91,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
       return const Center(child: CircularProgressIndicator());
     }
 
+    final l10n = AppLocalizations.of(context)!;
     final absenceLimit = widget.course?.absenceLimit ?? 0;
 
     return SingleChildScrollView(
@@ -127,7 +119,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        AppLocalizations.of(context)?.absenceOverview ?? 'Attendance Overview',
+                        l10n.absenceOverview,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -137,8 +129,8 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
                       const SizedBox(height: 4),
                       Text(
                         absenceLimit > 0
-                            ? '$totalAbsences / $absenceLimit ${AppLocalizations.of(context)?.absencesUsed ?? 'absences used'}'
-                            : '$totalAbsences ${AppLocalizations.of(context)?.totalAbsences ?? 'total absences'}',
+                            ? '$totalAbsences / $absenceLimit ${l10n.absencesUsed}'
+                            : '$totalAbsences ${l10n.totalAbsences}',
                         style: TextStyle(
                           fontSize: 13,
                           color: totalAbsences >= absenceLimit && absenceLimit > 0
@@ -270,7 +262,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
             child: OutlinedButton.icon(
               onPressed: () => _showAddAbsenceSheet(context),
               icon: const Icon(Icons.add),
-              label: Text(AppLocalizations.of(context)?.addAbsence ?? 'Add Absence'),
+              label: Text(l10n.addAbsence),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.primary,
                 padding: const EdgeInsets.symmetric(vertical: 14),
@@ -330,6 +322,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
   }
 
   Widget _buildSelectedDayDetails() {
+    final l10n = AppLocalizations.of(context)!;
     final events = _getEventsForDay(_selectedDay!);
     if (events.isEmpty) {
       return Container(
@@ -339,7 +332,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
           borderRadius: BorderRadius.circular(16),
         ),
         child: Text(
-          AppLocalizations.of(context)?.noAbsencesOnDay ?? 'No absences on this day',
+          l10n.noAbsencesOnDay,
           style: TextStyle(
             color: widget.isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
           ),
@@ -399,6 +392,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
   }
 
   void _showAddAbsenceSheet(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final selectedDate = _selectedDay ?? DateTime.now();
     String selectedReason = 'unexcused';
 
@@ -426,7 +420,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    AppLocalizations.of(context)?.addAbsence ?? 'Add Absence',
+                    l10n.addAbsence,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
@@ -443,7 +437,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    AppLocalizations.of(context)?.selectReason ?? 'Select reason:',
+                    l10n.selectReason,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -505,7 +499,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: Text(AppLocalizations.of(context)?.save ?? 'Save'),
+                      child: Text(l10n.save),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -519,6 +513,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
   }
 
   void _showEditReasonSheet(String absenceId, String currentReason) {
+    final l10n = AppLocalizations.of(context)!;
     String selectedReason = currentReason;
 
     showModalBottomSheet(
@@ -545,7 +540,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    AppLocalizations.of(context)?.editAbsence ?? 'Edit Absence',
+                    l10n.editAbsence,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
@@ -606,7 +601,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: Text(AppLocalizations.of(context)?.save ?? 'Save'),
+                    child: Text(l10n.save),
                     ),
                   ),
                 ],
@@ -619,20 +614,21 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
   }
 
   Future<void> _confirmDelete(String absenceId) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(AppLocalizations.of(context)?.deleteAbsence ?? 'Delete Absence'),
-        content: Text(AppLocalizations.of(context)?.thisActionCannotBeUndone ?? 'This action cannot be undone.'),
+        title: Text(l10n.deleteAbsence),
+        content: Text(l10n.thisActionCannotBeUndone),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(
-              AppLocalizations.of(context)?.delete ?? 'Delete',
+              l10n.delete,
               style: const TextStyle(color: AppColors.red),
             ),
           ),

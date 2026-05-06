@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/services/e2e_key_service.dart';
 import '../../../core/services/biometric_service.dart';
@@ -52,41 +53,43 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
   }
 
   Future<void> _toggleBiometric(bool value) async {
+    final l10n = AppLocalizations.of(context)!;
     if (value) {
       final biometricService = BiometricService();
       final authenticated = await biometricService.authenticate(
-        reason: 'Authenticate to enable $_biometricType',
+        reason: l10n.biometricAuthReason(_biometricType),
       );
 
       if (authenticated) {
         await E2EKeyService().setBiometricEnabled(true);
         setState(() => _isBiometricEnabled = true);
         if (mounted) {
-          _showSnackBar('$_biometricType enabled successfully', Colors.green);
+          _showSnackBar(l10n.biometricEnabled(_biometricType), Colors.green);
         }
       }
     } else {
       await E2EKeyService().setBiometricEnabled(false);
       setState(() => _isBiometricEnabled = false);
       if (mounted) {
-        _showSnackBar('$_biometricType disabled', Colors.orange);
+        _showSnackBar(l10n.biometricDisabled(_biometricType), Colors.orange);
       }
     }
   }
 
   Future<void> _startMigration() async {
+    final l10n = AppLocalizations.of(context)!;
     final migrationService = E2EMigrationService();
 
     final needsMigration = await migrationService.isMigrationNeeded();
     if (!needsMigration) {
-      _showSnackBar('All files are already encrypted', Colors.green);
+      _showSnackBar(l10n.alreadyEncrypted, Colors.green);
       return;
     }
 
     setState(() {
       _isMigrating = true;
       _migrationProgress = 0.0;
-      _migrationMessage = 'Starting migration...';
+      _migrationMessage = l10n.startingMigration;
     });
 
     migrationService.onProgress = (message, progress) {
@@ -103,18 +106,18 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
       if (mounted) {
         setState(() {
           _isMigrating = false;
-          _migrationMessage = 'Migration completed!';
+          _migrationMessage = l10n.migrationComplete;
           _migrationProgress = 1.0;
         });
-        _showSnackBar('All files encrypted successfully!', Colors.green);
+        _showSnackBar(l10n.allEncrypted, Colors.green);
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _isMigrating = false;
-          _migrationMessage = 'Migration failed';
+          _migrationMessage = l10n.migrationFailed;
         });
-        _showSnackBar('Migration failed: $e', Colors.red);
+        _showSnackBar(l10n.migrationFailedDetail('$e'), Colors.red);
       }
     }
   }
@@ -198,13 +201,14 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
   }
 
   Widget _buildE2EStatusTile(bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
     return SettingsTile(
       icon: Icons.shield_outlined,
       iconColor: _isE2EEnabled ? AppColors.emerald : AppColors.orange,
-      title: 'End-to-End Encryption',
+      title: l10n.e2eEncryption,
       subtitle: _isE2EEnabled
-          ? 'Your files are securely encrypted'
-          : 'Enable to encrypt your files',
+          ? l10n.e2eDescription
+          : l10n.e2eDescription,
       isDark: isDark,
       trailing: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -224,7 +228,7 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
             ),
             const SizedBox(width: 4),
             Text(
-              _isE2EEnabled ? 'Active' : 'Inactive',
+              _isE2EEnabled ? l10n.active : l10n.inactive,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -239,13 +243,14 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
   }
 
   Widget _buildBiometricTile(bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
     return SettingsTile(
       icon: Icons.fingerprint,
       iconColor: AppColors.blue,
       title: _biometricType,
       subtitle: _biometricAvailable
-          ? (_isBiometricEnabled ? 'Enabled' : 'Use $_biometricType to unlock')
-          : 'Not available on this device',
+          ? (_isBiometricEnabled ? l10n.enabled : l10n.faceIdSubtitle)
+          : l10n.notAvailableOnDevice,
       isDark: isDark,
       trailing: Switch(
         value: _isBiometricEnabled,
@@ -256,11 +261,12 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
   }
 
   Widget _buildSecurityQuestionsTile(bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
     return SettingsTile(
       icon: Icons.help_outline,
       iconColor: AppColors.purple,
-      title: 'Security Questions',
-      subtitle: 'For password recovery',
+      title: l10n.securityQuestions,
+      subtitle: l10n.setUpSecurityQuestions,
       isDark: isDark,
       trailing: Icon(
         Icons.chevron_right,
@@ -271,6 +277,7 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
   }
 
   Widget _buildMigrationTile(bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -297,7 +304,7 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Encrypt Existing Files',
+                      l10n.encryptExistingFiles,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -310,7 +317,7 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
                     Text(
                       _migrationMessage.isNotEmpty
                           ? _migrationMessage
-                          : 'Backup your files to cloud',
+                          : l10n.backupFilesToCloud,
                       style: TextStyle(
                         fontSize: 12,
                         color: isDark
@@ -334,7 +341,7 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
               else
                 TextButton(
                   onPressed: _startMigration,
-                  child: const Text('Start'),
+                  child: Text(l10n.start),
                 ),
             ],
           ),
@@ -364,6 +371,7 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
   }
 
   void _showE2EInfoDialog(bool isDark) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -374,7 +382,7 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
             const Icon(Icons.shield_outlined, color: AppColors.emerald),
             const SizedBox(width: 8),
             Text(
-              'End-to-End Encryption',
+              l10n.e2eEncryption,
               style: TextStyle(
                 color: isDark ? Colors.white : const Color(0xFF1A1F36),
               ),
@@ -386,20 +394,20 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Your files are encrypted on your device before being uploaded to the cloud.',
+              l10n.e2eDescription,
               style: TextStyle(
                 color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
               ),
             ),
             const SizedBox(height: 16),
-            _buildInfoRow(Icons.key, 'Encryption Key', 'AES-256-CBC', isDark),
+            _buildInfoRow(Icons.key, l10n.encryptionKey, l10n.aes256, isDark),
             const SizedBox(height: 8),
-            _buildInfoRow(Icons.lock, 'Key Storage', 'Device Keychain', isDark),
+            _buildInfoRow(Icons.lock, l10n.keyStorage, l10n.deviceKeychain, isDark),
             const SizedBox(height: 8),
             _buildInfoRow(
               Icons.cloud_off,
-              'Cloud Access',
-              'Only encrypted data',
+              l10n.cloudAccess,
+              l10n.encryptedOnly,
               isDark,
             ),
             const SizedBox(height: 16),
@@ -419,7 +427,7 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Even app developers cannot access your files',
+                      l10n.evenDevCantAccess,
                       style: TextStyle(fontSize: 12, color: AppColors.emerald),
                     ),
                   ),
@@ -431,7 +439,7 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(l10n.close),
           ),
         ],
       ),
@@ -522,9 +530,10 @@ class _SecurityQuestionsSheetState extends State<_SecurityQuestionsSheet> {
   }
 
   Future<void> _saveQuestions() async {
+    final loc = AppLocalizations.of(context)!;
     for (final c in _answerControllers) {
       if (c.text.trim().isEmpty) {
-        setState(() => _error = 'All answers are required');
+        setState(() => _error = loc.allAnswersRequired);
         return;
       }
     }
@@ -543,14 +552,14 @@ class _SecurityQuestionsSheetState extends State<_SecurityQuestionsSheet> {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Security questions saved'),
+          SnackBar(
+            content: Text(loc.questionsSaved),
             backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
-      setState(() => _error = 'Failed to save questions');
+      setState(() => _error = loc.questionsSaveFailed);
     } finally {
       setState(() => _isSaving = false);
     }
@@ -558,6 +567,7 @@ class _SecurityQuestionsSheetState extends State<_SecurityQuestionsSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Container(
       padding: EdgeInsets.fromLTRB(
         24,
@@ -588,7 +598,7 @@ class _SecurityQuestionsSheetState extends State<_SecurityQuestionsSheet> {
               ),
             ),
             Text(
-              'Security Questions',
+              loc.securityQuestions,
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -597,7 +607,7 @@ class _SecurityQuestionsSheetState extends State<_SecurityQuestionsSheet> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Set up 3 security questions to recover your account if you forget your password.',
+              loc.setUpSecurityQuestions,
               style: TextStyle(
                 fontSize: 14,
                 color: widget.isDark
@@ -619,7 +629,7 @@ class _SecurityQuestionsSheetState extends State<_SecurityQuestionsSheet> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Security questions are already configured',
+                        loc.questionsAlreadyConfigured,
                         style: TextStyle(
                           color: widget.isDark
                               ? Colors.white
@@ -645,9 +655,9 @@ class _SecurityQuestionsSheetState extends State<_SecurityQuestionsSheet> {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: const Text(
-                    'Reset Questions',
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                  child: Text(
+                    loc.resetQuestions,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -698,8 +708,8 @@ class _SecurityQuestionsSheetState extends State<_SecurityQuestionsSheet> {
                             strokeWidth: 2,
                           ),
                         )
-                      : const Text(
-                          'Save Questions',
+                      : Text(
+                          loc.saveQuestions,
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
@@ -715,6 +725,7 @@ class _SecurityQuestionsSheetState extends State<_SecurityQuestionsSheet> {
   }
 
   Widget _buildQuestionDropdown(int index) {
+    final loc = AppLocalizations.of(context)!;
     final selectedIndex = index == 0
         ? _selectedQuestion1
         : (index == 1 ? _selectedQuestion2 : _selectedQuestion3);
@@ -722,14 +733,14 @@ class _SecurityQuestionsSheetState extends State<_SecurityQuestionsSheet> {
     return DropdownButtonFormField<int>(
       initialValue: selectedIndex,
       decoration: InputDecoration(
-        labelText: 'Question ${index + 1}',
+        labelText: loc.questionLabel(index + 1),
         filled: true,
         fillColor: widget.isDark
             ? AppColors.backgroundDark
             : AppColors.backgroundLight,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
       ),
-      items: _SecurityQService.availableQuestions.asMap().entries.map((entry) {
+      items: _SecurityQService.availableQuestions(loc).asMap().entries.map((entry) {
         return DropdownMenuItem(
           value: entry.key,
           child: Text(entry.value, style: const TextStyle(fontSize: 14)),
@@ -751,11 +762,12 @@ class _SecurityQuestionsSheetState extends State<_SecurityQuestionsSheet> {
   }
 
   Widget _buildAnswerField(int index) {
+    final loc = AppLocalizations.of(context)!;
     return TextField(
       controller: _answerControllers[index],
       style: TextStyle(color: widget.isDark ? Colors.white : Colors.black87),
       decoration: InputDecoration(
-        labelText: 'Your Answer',
+        labelText: loc.yourAnswer,
         filled: true,
         fillColor: widget.isDark
             ? AppColors.backgroundDark
@@ -767,15 +779,15 @@ class _SecurityQuestionsSheetState extends State<_SecurityQuestionsSheet> {
 }
 
 class _SecurityQService {
-  static const List<String> availableQuestions = [
-    'What is your pet\'s name?',
-    'What was your first teacher\'s name?',
-    'What city were you born in?',
-    'What is your favorite movie?',
-    'What was your first phone number?',
-    'What is your mother\'s maiden name?',
-    'What was the name of your first school?',
-    'What is your favorite book?',
+  static List<String> availableQuestions(AppLocalizations l10n) => [
+    l10n.securityQ1,
+    l10n.securityQ2,
+    l10n.securityQ3,
+    l10n.securityQ4,
+    l10n.securityQ5,
+    l10n.securityQ6,
+    l10n.securityQ7,
+    l10n.securityQ8,
   ];
 
   static Future<bool> hasSecurityQuestions() async {

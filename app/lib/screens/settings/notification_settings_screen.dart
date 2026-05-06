@@ -11,6 +11,7 @@ class NotificationSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
@@ -37,18 +38,18 @@ class NotificationSettingsScreen extends StatelessWidget {
               _buildSection(
                 context: context,
                 isDark: isDark,
-                title: 'General',
+                title: loc.notificationGeneral,
                 children: [
                    SwitchListTile.adaptive(
                     title: Text(
-                      AppLocalizations.of(context)!.notifications,
+                      loc.notifications,
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
                       ),
                     ),
                     subtitle: Text(
-                      'Turn off all app notifications',
+                      loc.turnOffAllNotifications,
                       style: TextStyle(
                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                          fontSize: 13,
@@ -71,12 +72,12 @@ class NotificationSettingsScreen extends StatelessWidget {
                 _buildSection(
                   context: context, 
                   isDark: isDark, 
-                  title: 'Reminder Timing',
+                  title: loc.reminderTiming,
                   children: [
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(
-                        'Remind me before class',
+                        loc.remindBeforeClass,
                          style: TextStyle(
                             fontWeight: FontWeight.w500,
                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
@@ -86,13 +87,13 @@ class NotificationSettingsScreen extends StatelessWidget {
                         value: provider.reminderMinutes,
                         dropdownColor: isDark ? AppColors.surfaceDark : Colors.white,
                         underline: const SizedBox(),
-                        items: const [
-                          DropdownMenuItem(value: 5, child: Text('5 minutes')),
-                          DropdownMenuItem(value: 10, child: Text('10 minutes')),
-                          DropdownMenuItem(value: 15, child: Text('15 minutes')),
-                          DropdownMenuItem(value: 30, child: Text('30 minutes')),
-                          DropdownMenuItem(value: 60, child: Text('1 hour')),
-                          DropdownMenuItem(value: 120, child: Text('2 hours')),
+                        items: [
+                          DropdownMenuItem(value: 5, child: Text(loc.reminder5min)),
+                          DropdownMenuItem(value: 10, child: Text(loc.reminder10min)),
+                          DropdownMenuItem(value: 15, child: Text(loc.reminder15min)),
+                          DropdownMenuItem(value: 30, child: Text(loc.reminder30min)),
+                          DropdownMenuItem(value: 60, child: Text(loc.reminder1hour)),
+                          DropdownMenuItem(value: 120, child: Text(loc.reminder2hours)),
                         ],
                         onChanged: (value) {
                           if (value != null) {
@@ -109,7 +110,7 @@ class NotificationSettingsScreen extends StatelessWidget {
                  _buildSection(
                     context: context,
                     isDark: isDark,
-                    title: 'Course Customization',
+                    title: loc.courseCustomization,
                     children: [
                        ...provider.courses.map((course) {
                          return SwitchListTile.adaptive(
@@ -121,7 +122,7 @@ class NotificationSettingsScreen extends StatelessWidget {
                              ),
                            ),
                            subtitle: Text(
-                              _getNotificationTime(course, provider.reminderMinutes),
+                               _getNotificationTime(context, course, provider.reminderMinutes),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
@@ -145,7 +146,8 @@ class NotificationSettingsScreen extends StatelessWidget {
     );
   }
 
-  String _getNotificationTime(Course course, int minutesBefore) {
+  String _getNotificationTime(BuildContext context, Course course, int minutesBefore) {
+     final loc = AppLocalizations.of(context)!;
      int h = course.startTime.hour;
      int m = course.startTime.minute - minutesBefore;
      while (m < 0) {
@@ -154,7 +156,7 @@ class NotificationSettingsScreen extends StatelessWidget {
      }
      if (h < 0) h += 24;
      final timeStr = '${h.toString().padLeft(2,'0')}:${m.toString().padLeft(2,'0')}';
-     return 'Alert at $timeStr';
+     return loc.alertAt(timeStr);
   }
 
   Widget _buildSection({
