@@ -52,7 +52,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get goodEvening => 'İyi Akşamlar,';
 
   @override
-  String get weeklySchedule => 'Haftalık Program';
+  String get weeklySchedule => 'Program';
 
   @override
   String get todaysClasses => 'Bugünün Dersleri';

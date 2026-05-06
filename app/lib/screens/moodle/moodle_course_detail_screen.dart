@@ -10,6 +10,8 @@ import '../../providers/moodle_provider.dart';
 import '../../services/moodle/moodle_api_service.dart';
 import '../../services/moodle/moodle_token_storage.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/moodle_utils.dart';
+import '../../providers/language_provider.dart';
 
 /// Bir Moodle dersinin içeriğini gösteren detay ekranı.
 /// PDF'ler, slaytlar, dosyalar, URL'ler — hepsi burada.
@@ -91,12 +93,16 @@ class _MoodleCourseDetailScreenState extends State<MoodleCourseDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final langCode = context.watch<LanguageProvider>().locale.languageCode;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
         title: Text(
-          widget.course.shortName,
+          MoodleUtils.parseMultilang(
+            widget.course.shortName,
+            langCode,
+          ),
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
         backgroundColor: Colors.transparent,
@@ -201,6 +207,7 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final langCode = context.watch<LanguageProvider>().locale.languageCode;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -208,7 +215,10 @@ class _SectionCard extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Text(
-            section.name,
+            MoodleUtils.parseMultilang(
+              section.name,
+              langCode,
+            ),
             style: theme.textTheme.titleSmall
                 ?.copyWith(fontWeight: FontWeight.w700),
           ),
@@ -460,6 +470,7 @@ class _ModuleTileState extends State<_ModuleTile> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final langCode = context.watch<LanguageProvider>().locale.languageCode;
     final isDark = theme.brightness == Brightness.dark;
     final file = widget.module.primaryFile;
 
@@ -507,7 +518,10 @@ class _ModuleTileState extends State<_ModuleTile> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.module.name,
+                        MoodleUtils.parseMultilang(
+                          widget.module.name,
+                          langCode,
+                        ),
                         style: theme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: isDark

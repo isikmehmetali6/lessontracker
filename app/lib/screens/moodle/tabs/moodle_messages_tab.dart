@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../../providers/moodle_provider.dart';
 import '../../../models/moodle/moodle_message.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/moodle_utils.dart';
+import '../../../../providers/language_provider.dart';
 
 /// Moodle mesajları (gelen kutusu) sekmesi.
 class MoodleMessagesTab extends StatelessWidget {
@@ -54,6 +56,7 @@ class _MessageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final langCode = context.watch<LanguageProvider>().locale.languageCode;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -144,7 +147,10 @@ class _MessageCard extends StatelessWidget {
                       if (message.subject != null) ...[
                         const SizedBox(height: 2),
                         Text(
-                          message.subject!,
+                          MoodleUtils.parseMultilang(
+                            message.subject!,
+                            langCode,
+                          ),
                           style: theme.textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -154,7 +160,12 @@ class _MessageCard extends StatelessWidget {
                       ],
                       const SizedBox(height: 4),
                       Text(
-                        message.preview,
+                        MoodleUtils.stripHtml(
+                          MoodleUtils.parseMultilang(
+                            message.message,
+                            langCode,
+                          ),
+                        ),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),

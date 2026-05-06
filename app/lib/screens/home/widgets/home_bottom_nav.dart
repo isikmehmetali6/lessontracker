@@ -112,17 +112,14 @@ class _HomeNavItem extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
-        padding: EdgeInsets.symmetric(
-          horizontal: isSelected ? 12 : 8,
-          vertical: 8,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
         decoration: BoxDecoration(
-          color: isSelected 
-              ? AppColors.primary.withValues(alpha: 0.15) 
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.15)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
         ),
-        child: Row(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -131,23 +128,21 @@ class _HomeNavItem extends StatelessWidget {
               color: isSelected
                   ? AppColors.primary
                   : (isDark ? Colors.grey.shade500 : Colors.grey.shade400),
-              size: isSelected ? 24 : 26,
+              size: 24,
             ),
-            if (isSelected) ...[
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                   color: AppColors.primary,
-                  ),
-                ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected
+                    ? AppColors.primary
+                    : (isDark ? Colors.grey.shade500 : Colors.grey.shade400),
               ),
-            ]
+            ),
           ],
         ),
       ),

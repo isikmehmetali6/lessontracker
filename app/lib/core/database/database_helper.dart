@@ -62,8 +62,6 @@ class DatabaseHelper {
       encryptionKey = key.base64;
     }
 
-    // Note: isWeb check is done in get database getter, not here
-    // This method only handles mobile/desktop SQLite with encryption
     return await sqlcipher.openDatabase(
       path,
       version: 17,

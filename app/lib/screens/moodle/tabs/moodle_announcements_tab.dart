@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../../../models/moodle/moodle_announcement.dart';
 import '../../../providers/moodle_provider.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/moodle_utils.dart';
+import '../../../../providers/language_provider.dart';
 
 class MoodleAnnouncementsTab extends StatelessWidget {
   const MoodleAnnouncementsTab({super.key});
@@ -18,13 +20,18 @@ class MoodleAnnouncementsTab extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.notifications_none_rounded,
-                size: 56,
-                color: Theme.of(context).colorScheme.outlineVariant),
+            Icon(
+              Icons.notifications_none_rounded,
+              size: 56,
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
             const SizedBox(height: 12),
-            Text('Duyuru bulunamadı',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            Text(
+              'Duyuru bulunamadı',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
           ],
         ),
       );
@@ -49,6 +56,7 @@ class _AnnouncementCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isUnread = !announcement.isRead;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final langCode = context.watch<LanguageProvider>().locale.languageCode;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -57,7 +65,9 @@ class _AnnouncementCard extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () {
-            context.read<MoodleProvider>().markAnnouncementRead(announcement.id);
+            context.read<MoodleProvider>().markAnnouncementRead(
+              announcement.id,
+            );
             _showDetail(context);
           },
           child: AnimatedContainer(
@@ -69,10 +79,13 @@ class _AnnouncementCard extends StatelessWidget {
                   : (isDark ? AppColors.surfaceDark : Colors.white),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                  color: isUnread
-                      ? AppColors.primary.withValues(alpha: 0.3)
-                      : (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade200),
-                  width: 1),
+                color: isUnread
+                    ? AppColors.primary.withValues(alpha: 0.3)
+                    : (isDark
+                          ? Colors.white.withValues(alpha: 0.1)
+                          : Colors.grey.shade200),
+                width: 1,
+              ),
               boxShadow: [
                 if (!isUnread && !isDark)
                   BoxShadow(
@@ -102,42 +115,82 @@ class _AnnouncementCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Ders adı
-                      Text(announcement.courseName,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w700)),
+                      Text(
+                        MoodleUtils.parseMultilang(
+                          announcement.courseName,
+                          langCode,
+                        ),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                       const SizedBox(height: 2),
                       // Konu
-                      Text(announcement.subject,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: isUnread ? FontWeight.w700 : FontWeight.w600,
-                              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis),
+                      Text(
+                        MoodleUtils.parseMultilang(
+                          announcement.subject,
+                          langCode,
+                        ),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: isUnread
+                              ? FontWeight.w700
+                              : FontWeight.w600,
+                          color: isDark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimaryLight,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       const SizedBox(height: 4),
                       // Önizleme
-                      Text(announcement.plainTextPreview,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis),
+                      Text(
+                        MoodleUtils.stripHtml(
+                          MoodleUtils.parseMultilang(
+                            announcement.message,
+                            langCode,
+                          ),
+                        ),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       const SizedBox(height: 8),
                       // Yazar + tarih
                       Row(
                         children: [
-                          Icon(Icons.person_outline_rounded,
-                              size: 14,
-                              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+                          Icon(
+                            Icons.person_outline_rounded,
+                            size: 14,
+                            color: isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondaryLight,
+                          ),
                           const SizedBox(width: 4),
-                          Text(announcement.authorName,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
+                          Text(
+                            announcement.authorName,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: isDark
+                                  ? AppColors.textSecondaryDark
+                                  : AppColors.textSecondaryLight,
+                            ),
+                          ),
                           const Spacer(),
                           Text(
-                            DateFormat('d MMM', 'tr').format(announcement.created),
+                            DateFormat(
+                              'd MMM',
+                              'tr',
+                            ).format(announcement.created),
                             style: theme.textTheme.labelSmall?.copyWith(
-                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+                              color: isDark
+                                  ? AppColors.textSecondaryDark
+                                  : AppColors.textSecondaryLight,
+                            ),
                           ),
                         ],
                       ),
@@ -155,13 +208,15 @@ class _AnnouncementCard extends StatelessWidget {
   void _showDetail(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final langCode = context.read<LanguageProvider>().locale.languageCode;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (_) => DraggableScrollableSheet(
         initialChildSize: 0.7,
         maxChildSize: 0.95,
@@ -171,37 +226,76 @@ class _AnnouncementCard extends StatelessWidget {
           controller: scrollController,
           padding: const EdgeInsets.all(24),
           children: [
-            Text(announcement.courseName,
-                style: theme.textTheme.labelMedium?.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w700)),
+            Text(
+              MoodleUtils.parseMultilang(
+                announcement.courseName,
+                langCode,
+              ),
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
             const SizedBox(height: 8),
-            Text(announcement.subject,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight)),
+            Text(
+              MoodleUtils.parseMultilang(
+                announcement.subject,
+                langCode,
+              ),
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: isDark
+                    ? AppColors.textPrimaryDark
+                    : AppColors.textPrimaryLight,
+              ),
+            ),
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.person_outline_rounded,
-                    size: 14, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+                Icon(
+                  Icons.person_outline_rounded,
+                  size: 14,
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : AppColors.textSecondaryLight,
+                ),
                 const SizedBox(width: 4),
-                Text(announcement.authorName,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
+                Text(
+                  announcement.authorName,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: isDark
+                        ? AppColors.textSecondaryDark
+                        : AppColors.textSecondaryLight,
+                  ),
+                ),
                 const SizedBox(width: 12),
                 Text(
-                  DateFormat('d MMMM yyyy, HH:mm', 'tr').format(announcement.created),
+                  DateFormat(
+                    'd MMMM yyyy, HH:mm',
+                    'tr',
+                  ).format(announcement.created),
                   style: theme.textTheme.bodySmall?.copyWith(
-                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+                    color: isDark
+                        ? AppColors.textSecondaryDark
+                        : AppColors.textSecondaryLight,
+                  ),
                 ),
               ],
             ),
             const Divider(height: 24),
-            Text(announcement.plainTextPreview,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-                )),
+            Text(
+              MoodleUtils.stripHtml(
+                MoodleUtils.parseMultilang(
+                  announcement.message,
+                  langCode,
+                ),
+              ),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: isDark
+                    ? AppColors.textPrimaryDark
+                    : AppColors.textPrimaryLight,
+              ),
+            ),
           ],
         ),
       ),

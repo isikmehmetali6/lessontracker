@@ -852,11 +852,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
 
   void _showNoteDetail(Note note) {
     if (note.type == NoteType.drawing || note.drawingData != null) {
-      final courses = context.read<CourseProvider>().courses;
-      final course = courses.firstWhere(
-        (c) => c.id == note.courseId,
-        orElse: () => widget.course,
-      );
+      final course = context.read<CourseProvider>().coursesById[note.courseId] ??
+          widget.course;
       Navigator.push(
         context,
         MaterialPageRoute(

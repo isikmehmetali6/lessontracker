@@ -42,12 +42,8 @@ class CourseProvider extends ChangeNotifier {
   List<Course> get courses => List.unmodifiable(_courses);
 
   /// O(1) lookup by course id
-  Map<String, Course> get coursesById {
-    if (_coursesByIdCache == null || _coursesByIdCache!.length != _courses.length) {
-      _coursesByIdCache = {for (var c in _courses) c.id: c};
-    }
-    return _coursesByIdCache!;
-  }
+  Map<String, Course> get coursesById =>
+      _coursesByIdCache ??= {for (var c in _courses) c.id: c};
 
   Map<String, Course>? _coursesByIdCache;
 
@@ -143,43 +139,33 @@ class CourseProvider extends ChangeNotifier {
     if (!_notificationsEnabled) return;
     if (_mutedCourseIds.contains(course.id)) return;
 
-    // We want to notify BEFORE the class.
-    // Logic: If class is at 10:00 and reminder is 15 mins, notify at 09:45.
+    try {
+      for (var day in course.scheduleDays) {
+        int notifyHour = course.startTime.hour;
+        int notifyMinute = course.startTime.minute - _reminderMinutes;
 
-    for (var day in course.scheduleDays) {
-      // Calculate notification time
-      // This is basic calculation assuming same day.
-      // NotificationService usually takes hour/minute.
+        while (notifyMinute < 0) {
+          notifyMinute += 60;
+          notifyHour -= 1;
+        }
+        int notifyDay = day;
+        if (notifyHour < 0) {
+          notifyHour += 24;
+          notifyDay = (day - 1) < 0 ? 6 : (day - 1);
+        }
 
-      int notifyHour = course.startTime.hour;
-      int notifyMinute = course.startTime.minute - _reminderMinutes;
-
-      // Handle underflow (e.g. 10:00 - 15m = 09:45)
-      while (notifyMinute < 0) {
-        notifyMinute += 60;
-        notifyHour -= 1;
+        await NotificationService().scheduleClassNotification(
+          courseId: course.id,
+          courseName: course.name,
+          location: course.location,
+          dayOfWeek: notifyDay,
+          hour: notifyHour,
+          minute: notifyMinute,
+          reminderMinutes: _reminderMinutes,
+        );
       }
-      // Handle day wrap backward? (e.g. 00:10 - 20m = 23:50 prev day)
-      // NotificationService typically schedules repeating weekly.
-      // Complex logic needed if wrapping to previous day.
-      // For MVP, if hour < 0, we might skip or handle if service supports "dayOffset".
-      // Assuming simple case for now or just clamp to 00:00 if needed, but wrapping is better.
-      // If hour < 0, it means previous day.
-      int notifyDay = day;
-      if (notifyHour < 0) {
-        notifyHour += 24;
-        notifyDay = (day - 1) < 0 ? 6 : (day - 1);
-      }
-
-      await NotificationService().scheduleClassNotification(
-        courseId: course.id,
-        courseName: course.name,
-        location: course.location,
-        dayOfWeek: notifyDay,
-        hour: notifyHour,
-        minute: notifyMinute,
-        reminderMinutes: _reminderMinutes,
-      );
+    } catch (e) {
+      debugPrint('NotificationService: Failed to schedule for course ${course.id}: $e');
     }
   }
 
@@ -290,10 +276,11 @@ class CourseProvider extends ChangeNotifier {
       _error = e.toString();
     } finally {
       _isLoading = false;
-      _coursesByIdCache = null; // Invalidate cache
+      _coursesByIdCache = null;
       notifyListeners();
     }
   }
+
 
   /// Ders ekle
   Future<bool> addCourse({
@@ -350,12 +337,7 @@ class CourseProvider extends ChangeNotifier {
 
       await _courseRepo.insertCourse(course);
       await loadCourses();
-
-      try {
-        await _scheduleForCourse(course);
-      } catch (e) {
-        debugPrint('NotificationService: Failed to schedule for course ${course.id}: $e');
-      }
+      await _scheduleForCourse(course);
 
       return true;
     } catch (e) {
@@ -390,12 +372,7 @@ class CourseProvider extends ChangeNotifier {
 
       await _courseRepo.updateCourse(course);
       await loadCourses();
-
-      try {
-        await _scheduleForCourse(course);
-      } catch (e) {
-        debugPrint('NotificationService: Failed to schedule for course ${course.id}: $e');
-      }
+      await _scheduleForCourse(course);
 
       return true;
     } catch (e) {
@@ -412,12 +389,7 @@ class CourseProvider extends ChangeNotifier {
       final courseWithId = course.copyWith(id: _uuid.v4());
       await _courseRepo.insertCourse(courseWithId);
       await loadCourses();
-
-      try {
-        await _scheduleForCourse(courseWithId);
-      } catch (e) {
-        debugPrint('NotificationService: Failed to schedule for course ${courseWithId.id}: $e');
-      }
+      await _scheduleForCourse(courseWithId);
 
       return true;
     } catch (e) {
@@ -566,6 +538,7 @@ class CourseProvider extends ChangeNotifier {
       await _courseRepo.updateCourse(updatedCourse);
 
       _courses[courseIndex] = updatedCourse;
+      _coursesByIdCache = null;
       notifyListeners();
     }
   }
@@ -598,6 +571,7 @@ class CourseProvider extends ChangeNotifier {
       await _courseRepo.updateCourse(updatedCourse);
 
       _courses[courseIndex] = updatedCourse;
+      _coursesByIdCache = null;
       notifyListeners();
     }
   }
@@ -807,8 +781,9 @@ class CourseProvider extends ChangeNotifier {
       String type = 'link';
       if (url.endsWith('.pdf')) {
         type = 'pdf';
-      } else if (url.contains('youtube') || url.contains('vimeo'))
+      } else if (url.contains('youtube') || url.contains('vimeo')) {
         type = 'video';
+      }
 
       final courseFile = CourseFile(
         id: fileId,
@@ -956,6 +931,7 @@ class CourseProvider extends ChangeNotifier {
     _todayCourses = [];
     _priorityCourses = [];
     _mutedCourseIds = {};
+    _coursesByIdCache = null;
     _error = null;
     _isLoading = false;
     notifyListeners();

@@ -133,9 +133,6 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
           document: PdfDocument.openFile(_pdfPath!),
         );
 
-        _strokesByPage.clear();
-        _currentPageStrokes = [];
-
         setState(() {
           _mode = CanvasMode.pdf;
           _strokesByPage.clear();

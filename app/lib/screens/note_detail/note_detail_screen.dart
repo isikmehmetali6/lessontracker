@@ -948,34 +948,45 @@ class _AudioPlayerWidgetState extends State<_AudioPlayerWidget> {
   }
 }
 
-class _DrawingDisplayWidget extends StatelessWidget {
+class _DrawingDisplayWidget extends StatefulWidget {
   final String drawingData;
   final bool isDark;
 
   const _DrawingDisplayWidget({required this.drawingData, required this.isDark});
 
   @override
-  Widget build(BuildContext context) {
-    List<DrawingStroke> strokes = [];
+  State<_DrawingDisplayWidget> createState() => _DrawingDisplayWidgetState();
+}
+
+class _DrawingDisplayWidgetState extends State<_DrawingDisplayWidget> {
+  late final List<DrawingStroke> _strokes = _parseStrokes(widget.drawingData);
+
+  static List<DrawingStroke> _parseStrokes(String drawingData) {
     try {
-      final Map<String, dynamic> decoded = jsonDecode(drawingData);
-      if (decoded.containsKey('strokesByPage')) {
-        final strokesByPage = decoded['strokesByPage'] as Map<String, dynamic>;
-        if (strokesByPage.containsKey('1')) {
-          final pageStrokes = strokesByPage['1'] as List;
-          strokes = pageStrokes
-              .map((e) => DrawingStroke.fromMap(e as Map<String, dynamic>))
-              .toList();
+      final decoded = jsonDecode(drawingData);
+      List? pageStrokes;
+      if (decoded is Map<String, dynamic>) {
+        final strokesByPage = decoded['strokesByPage'];
+        if (strokesByPage is Map<String, dynamic>) {
+          pageStrokes = strokesByPage['1'] as List?;
         }
-      } else {
-        final List<dynamic> jsonList = jsonDecode(drawingData);
-        strokes = jsonList
-            .map((e) => DrawingStroke.fromMap(e as Map<String, dynamic>))
-            .toList();
+      } else if (decoded is List) {
+        pageStrokes = decoded;
       }
+      if (pageStrokes == null) return const [];
+      return pageStrokes
+          .map((e) => DrawingStroke.fromMap(e as Map<String, dynamic>))
+          .toList(growable: false);
     } catch (e) {
       debugPrint('Error parsing drawing data: $e');
+      return const [];
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final strokes = _strokes;
+    final isDark = widget.isDark;
 
     if (strokes.isEmpty) {
       return Container(
@@ -1028,6 +1039,7 @@ class _PdfDisplayWidget extends StatefulWidget {
 
 class _PdfDisplayWidgetState extends State<_PdfDisplayWidget> {
   String? _resolvedPath;
+  bool _fileExists = false;
   bool _isLoading = true;
 
   @override
@@ -1038,9 +1050,11 @@ class _PdfDisplayWidgetState extends State<_PdfDisplayWidget> {
 
   Future<void> _resolvePath() async {
     final resolved = await FileService().resolveFilePath(widget.pdfPath);
+    final exists = resolved != null && await File(resolved).exists();
     if (mounted) {
       setState(() {
         _resolvedPath = resolved;
+        _fileExists = exists;
         _isLoading = false;
       });
     }
@@ -1059,7 +1073,7 @@ class _PdfDisplayWidgetState extends State<_PdfDisplayWidget> {
       );
     }
 
-    if (_resolvedPath == null || !File(_resolvedPath!).existsSync()) {
+    if (!_fileExists) {
       return Container(
         height: 200,
         decoration: BoxDecoration(

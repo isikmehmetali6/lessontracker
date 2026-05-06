@@ -51,7 +51,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get goodEvening => 'Buenas Noches,';
 
   @override
-  String get weeklySchedule => 'Horario Semanal';
+  String get weeklySchedule => 'Horario';
 
   @override
   String get todaysClasses => 'Clases de Hoy';

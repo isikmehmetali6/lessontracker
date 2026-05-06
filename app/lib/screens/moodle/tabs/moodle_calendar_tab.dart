@@ -5,6 +5,8 @@ import 'package:table_calendar/table_calendar.dart';
 import '../../../models/moodle/moodle_calendar_event.dart';
 import '../../../providers/moodle_provider.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/moodle_utils.dart';
+import '../../../../providers/language_provider.dart';
 
 class MoodleCalendarTab extends StatefulWidget {
   const MoodleCalendarTab({super.key});
@@ -102,6 +104,7 @@ class _EventTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final langCode = context.watch<LanguageProvider>().locale.languageCode;
 
     final typeIcon = switch (event.eventType) {
       'course' => Icons.menu_book_rounded,
@@ -144,7 +147,11 @@ class _EventTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(event.name,
+                Text(
+                    MoodleUtils.parseMultilang(
+                      event.name,
+                      langCode,
+                    ),
                     style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
@@ -152,7 +159,11 @@ class _EventTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 2),
                 if (event.courseName != null)
-                  Text(event.courseName!,
+                  Text(
+                      MoodleUtils.parseMultilang(
+                        event.courseName!,
+                        langCode,
+                      ),
                       style: theme.textTheme.bodySmall?.copyWith(
                           color: AppColors.primary)),
                 Text(

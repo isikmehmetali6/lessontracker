@@ -67,6 +67,10 @@ class AttendanceAutomationService {
       final now = DateTime.now();
       final todayStr = '${now.year}-${now.month}-${now.day}';
 
+      // Batch-load absences so we don't run N queries inside the loop.
+      final absenceRepo = AbsenceRepository();
+      final allAbsences = await absenceRepo.getAllAbsences();
+
       for (final course in todayCourses) {
         // 4. Ders şu an mı?
         if (!_isTimeWithinClass(course, now)) continue;
@@ -87,11 +91,8 @@ class AttendanceAutomationService {
           );
         } else {
           // 7b. Kampüste DEĞİLSE - DEVAMSIZLIK EKLE
-          final absenceRepo = AbsenceRepository();
           final date = DateTime(now.year, now.month, now.day);
-          final existingAbsences = await absenceRepo.getAbsencesByCourse(
-            course.id,
-          );
+          final existingAbsences = allAbsences[course.id] ?? const <DateTime>[];
           final alreadyAbsent = existingAbsences.any(
             (a) =>
                 a.year == date.year &&
@@ -143,93 +144,58 @@ class AttendanceAutomationService {
   // ──────────────────────────────────────────────
   // Bildirim
   // ──────────────────────────────────────────────
-  Future<void> _showAttendanceNotification(String courseName) async {
-    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
-    const androidDetails = AndroidNotificationDetails(
-      'smart_attendance_channel',
-      'Akıllı Yoklama',
-      channelDescription: 'Otomatik yoklama bildirimleri',
-      importance: Importance.high,
-      priority: Priority.high,
-    );
-
-    const iosDetails = DarwinNotificationDetails();
-
+  Future<void> _showSmartAttendanceNotification({
+    required String courseName,
+    required String idSuffix,
+    required String title,
+    required String body,
+  }) async {
     const details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
+      android: AndroidNotificationDetails(
+        'smart_attendance_channel',
+        'Akıllı Yoklama',
+        channelDescription: 'Otomatik yoklama bildirimleri',
+        importance: Importance.high,
+        priority: Priority.high,
+      ),
+      iOS: DarwinNotificationDetails(),
     );
 
-    final notifId = '$courseName${DateTime.now().day}'.hashCode;
+    final notifId = '$courseName$idSuffix${DateTime.now().day}'.hashCode;
 
-    await flutterLocalNotificationsPlugin.show(
-      notifId,
-      'Yoklama Onaylandı ✔️',
-      '$courseName dersi için okulda olduğunuz tespit edildi. '
+    await FlutterLocalNotificationsPlugin().show(notifId, title, body, details);
+  }
+
+  Future<void> _showAttendanceNotification(String courseName) {
+    return _showSmartAttendanceNotification(
+      courseName: courseName,
+      idSuffix: '',
+      title: 'Yoklama Onaylandı ✔️',
+      body: '$courseName dersi için okulda olduğunuz tespit edildi. '
           'Devamsızlık girilmedi. Değiştirmek isterseniz uygulamayı açın.',
-      details,
     );
   }
 
-  Future<void> _showAbsenceNotification(String courseName) async {
-    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
-    const androidDetails = AndroidNotificationDetails(
-      'smart_attendance_channel',
-      'Akıllı Yoklama',
-      channelDescription: 'Otomatik yoklama bildirimleri',
-      importance: Importance.high,
-      priority: Priority.high,
-    );
-
-    const iosDetails = DarwinNotificationDetails();
-
-    const details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
-    final notifId = '${courseName}absence${DateTime.now().day}'.hashCode;
-
-    await flutterLocalNotificationsPlugin.show(
-      notifId,
-      'Devamsızlık Eklendi ⚠️',
-      '$courseName dersi için okulda olmadığınız tespit edildi. '
+  Future<void> _showAbsenceNotification(String courseName) {
+    return _showSmartAttendanceNotification(
+      courseName: courseName,
+      idSuffix: 'absence',
+      title: 'Devamsızlık Eklendi ⚠️',
+      body: '$courseName dersi için okulda olmadığınız tespit edildi. '
           'Devamsızlık kaydı oluşturuldu. Değiştirmek isterseniz uygulamayı açın.',
-      details,
     );
   }
 
   Future<void> _showAbsenceLimitWarningNotification(
     String courseName,
     int limit,
-  ) async {
-    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
-    const androidDetails = AndroidNotificationDetails(
-      'smart_attendance_channel',
-      'Akıllı Yoklama',
-      channelDescription: 'Otomatik yoklama bildirimleri',
-      importance: Importance.high,
-      priority: Priority.high,
-    );
-
-    const iosDetails = DarwinNotificationDetails();
-
-    const details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
-    final notifId = '${courseName}risk${DateTime.now().day}'.hashCode;
-
-    await flutterLocalNotificationsPlugin.show(
-      notifId,
-      '⚠️ Devamsızlık Riski!',
-      '$courseName dersi için devamsızlık limiti ($limit) aşılmak üzere! '
+  ) {
+    return _showSmartAttendanceNotification(
+      courseName: courseName,
+      idSuffix: 'risk',
+      title: '⚠️ Devamsızlık Riski!',
+      body: '$courseName dersi için devamsızlık limiti ($limit) aşılmak üzere! '
           'Bu dersi kaçırmamanız önemli.',
-      details,
     );
   }
 }

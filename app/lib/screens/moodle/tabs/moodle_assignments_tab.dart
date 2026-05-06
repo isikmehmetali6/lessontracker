@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../../../models/moodle/moodle_assignment.dart';
 import '../../../providers/moodle_provider.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/moodle_utils.dart';
+import '../../../../providers/language_provider.dart';
 
 class MoodleAssignmentsTab extends StatelessWidget {
   const MoodleAssignmentsTab({super.key});
@@ -88,6 +90,7 @@ class _AssignmentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final langCode = context.watch<LanguageProvider>().locale.languageCode;
     final daysLeft = assignment.dueDate.difference(DateTime.now()).inDays;
     final isToday = assignment.isDueToday;
     final isOverdue = assignment.isOverdue;
@@ -151,14 +154,22 @@ class _AssignmentCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(assignment.name,
+                  Text(
+                      MoodleUtils.parseMultilang(
+                        assignment.name,
+                        langCode,
+                      ),
                       style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 2),
-                  Text(assignment.courseName,
+                  Text(
+                      MoodleUtils.parseMultilang(
+                        assignment.courseName,
+                        langCode,
+                      ),
                       style: theme.textTheme.bodySmall?.copyWith(
                           color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
                   const SizedBox(height: 4),

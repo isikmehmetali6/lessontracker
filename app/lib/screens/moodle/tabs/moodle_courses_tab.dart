@@ -6,6 +6,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../providers/moodle_provider.dart';
 import '../../../../models/moodle/moodle_course.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/moodle_utils.dart';
+import '../../../../providers/language_provider.dart';
 import '../moodle_course_detail_screen.dart';
 
 class MoodleCoursesTab extends StatelessWidget {
@@ -78,6 +80,7 @@ class _AccountHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final langCode = context.watch<LanguageProvider>().locale.languageCode;
     final account =
         provider.accounts.where((a) => a.id == accountId).firstOrNull;
     if (account == null) return const SizedBox.shrink();
@@ -100,7 +103,11 @@ class _AccountHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(account.siteTitle,
+              Text(
+                  MoodleUtils.parseMultilang(
+                    account.siteTitle,
+                    langCode,
+                  ),
                   style: theme.textTheme.titleSmall
                       ?.copyWith(fontWeight: FontWeight.w700)),
               Text(
@@ -124,7 +131,7 @@ class _CourseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
+    final langCode = context.watch<LanguageProvider>().locale.languageCode;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
@@ -183,12 +190,20 @@ class _CourseCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(course.shortName,
+                          Text(
+                              MoodleUtils.parseMultilang(
+                                course.shortName,
+                                langCode,
+                              ),
                               style: theme.textTheme.labelMedium?.copyWith(
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.w700)),
                           const SizedBox(height: 2),
-                          Text(course.fullName,
+                          Text(
+                              MoodleUtils.parseMultilang(
+                                course.fullName,
+                                langCode,
+                              ),
                               style: theme.textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                   color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),

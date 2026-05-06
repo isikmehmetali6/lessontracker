@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../../providers/moodle_provider.dart';
 import '../../../models/moodle/moodle_grade.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/moodle_utils.dart';
+import '../../../../providers/language_provider.dart';
 import '../widgets/academic_dashboard_widget.dart';
 
 class MoodleGradesTab extends StatelessWidget {
@@ -57,6 +59,7 @@ class _GradeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final langCode = context.watch<LanguageProvider>().locale.languageCode;
     final courseName = grades.first.courseName;
     final avg = grades.isNotEmpty
         ? grades
@@ -92,7 +95,11 @@ class _GradeCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(courseName,
+                  child: Text(
+                      MoodleUtils.parseMultilang(
+                        courseName,
+                        langCode,
+                      ),
                       style: theme.textTheme.titleSmall
                           ?.copyWith(fontWeight: FontWeight.w700),
                       maxLines: 1,
@@ -130,6 +137,7 @@ class _GradeBarRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final langCode = context.watch<LanguageProvider>().locale.languageCode;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final pct = grade.percentage;
     final barColor = pct >= 85
@@ -148,7 +156,11 @@ class _GradeBarRow extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(grade.itemName,
+                child: Text(
+                    MoodleUtils.parseMultilang(
+                      grade.itemName,
+                      langCode,
+                    ),
                     style: theme.textTheme.bodySmall,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis),
