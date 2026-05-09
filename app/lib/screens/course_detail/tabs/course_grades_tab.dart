@@ -90,7 +90,7 @@ class CourseGradesTab extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: totalWeight > 100
                           ? AppColors.red.withValues(alpha: 0.15)
-                          : (isDark ? AppColors.surfaceDark : Colors.white),
+                          : (isDark ? AppColors.surfaceDark : AppColors.surfaceLight),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: totalWeight > 100
@@ -167,7 +167,7 @@ class CourseGradesTab extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.surfaceDark : Colors.white,
+              color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
@@ -191,7 +191,7 @@ class CourseGradesTab extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.surfaceDark : Colors.white,
+                color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
                   color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,

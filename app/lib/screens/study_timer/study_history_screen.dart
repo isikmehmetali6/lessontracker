@@ -153,8 +153,8 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
                           height: 200,
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: isDark ? AppColors.surfaceDark : Colors.white,
-                            borderRadius: BorderRadius.circular(20),
+                          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+                          borderRadius: BorderRadius.circular(20),
                           ),
                           child: dailyData.isEmpty
                               ? Center(child: Text(loc.noDataYet))
@@ -249,7 +249,7 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
                           margin: const EdgeInsets.only(bottom: 8),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: isDark ? AppColors.surfaceDark : Colors.white,
+                            color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Row(
@@ -308,12 +308,12 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
                         padding: const EdgeInsets.all(32),
                         child: Column(
                           children: [
-                            Icon(Icons.timer_off, size: 48, color: Colors.grey.shade400),
+                            Icon(Icons.timer_off, size: 48, color: isDark ? Colors.grey.shade600 : Colors.grey.shade400),
                             const SizedBox(height: 12),
                             Text(
                               loc.noStudySessions,
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.grey.shade500),
+                              style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade500),
                             ),
                           ],
                         ),
@@ -349,7 +349,7 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
                             margin: const EdgeInsets.only(bottom: 6),
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             decoration: BoxDecoration(
-                              color: isDark ? AppColors.surfaceDark : Colors.white,
+                              color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Row(
@@ -448,7 +448,7 @@ class _StudyHistoryScreenState extends State<StudyHistoryScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
+        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(

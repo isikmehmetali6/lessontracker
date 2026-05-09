@@ -133,7 +133,7 @@ class _AddPlannerEventSheetState extends State<AddPlannerEventSheet> {
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
+        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Form(
@@ -146,7 +146,7 @@ class _AddPlannerEventSheetState extends State<AddPlannerEventSheet> {
               Center(
                 child: Container(
                   width: 40, height: 4,
-                  decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+                  decoration: BoxDecoration(color: isDark ? Colors.grey.shade600 : Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
                 ),
               ),
               const SizedBox(height: 24),
@@ -181,7 +181,7 @@ class _AddPlannerEventSheetState extends State<AddPlannerEventSheet> {
                   prefixIcon: Icon(_getTypeIcon(_selectedType)),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                dropdownColor: isDark ? AppColors.surfaceDark : Colors.white,
+                    dropdownColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
                 items: PlannerEventType.values.map((type) {
                   return DropdownMenuItem(
                     value: type,
@@ -204,7 +204,7 @@ class _AddPlannerEventSheetState extends State<AddPlannerEventSheet> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade400),
+                          border: Border.all(color: isDark ? Colors.grey.shade600 : Colors.grey.shade400),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Row(
@@ -228,7 +228,7 @@ class _AddPlannerEventSheetState extends State<AddPlannerEventSheet> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade400),
+                          border: Border.all(color: isDark ? Colors.grey.shade600 : Colors.grey.shade400),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Row(

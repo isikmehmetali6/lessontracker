@@ -92,7 +92,7 @@ class _AddDeadlineDialogState extends State<AddDeadlineDialog> {
         top: 32,
       ),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDarkBlue : Colors.white,
+        color: isDark ? AppColors.surfaceDarkBlue : AppColors.surfaceLight,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         boxShadow: [
            BoxShadow(
@@ -175,7 +175,7 @@ class _AddDeadlineDialogState extends State<AddDeadlineDialog> {
                   hint: Text(AppLocalizations.of(context)!.selectCourse),
                   isExpanded: true,
                   icon: Icon(Icons.keyboard_arrow_down, color: isDark ? Colors.white70 : Colors.grey.shade600),
-                  dropdownColor: isDark ? AppColors.surfaceDark : Colors.white,
+                  dropdownColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
                   items: courses.map((course) {
                     return DropdownMenuItem(
                       value: course.id,

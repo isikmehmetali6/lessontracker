@@ -50,6 +50,12 @@ class AppColors {
   // Vurgu renkleri
   static const Color indigoAccent = Color(0xFF6366F1);
 
+  // Gradyan renkleri (ses notu kartları)
+  static const Color gradientAudioDarkStart = Color(0xFF1A1A2E);
+  static const Color gradientAudioDarkEnd = Color(0xFF16213E);
+  static const Color gradientAudioLightStart = Color(0xFFF0F4FF);
+  static const Color gradientAudioLightEnd = Color(0xFFE8EEFF);
+
   // Gölge ve Overlay
   static const Color shadowLight = Color(0x14000000);
   static const Color shadowDark = Color(0x33000000);

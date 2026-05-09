@@ -111,7 +111,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.surfaceDark : Colors.white,
+                color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.05),
@@ -130,8 +130,8 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
-                          disabledBackgroundColor: Colors.grey.shade300,
-                          disabledForegroundColor: Colors.grey.shade500,
+                          disabledBackgroundColor: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
+                          disabledForegroundColor: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
@@ -211,8 +211,8 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
-                          disabledBackgroundColor: Colors.grey.shade300,
-                          disabledForegroundColor: Colors.grey.shade500,
+                          disabledBackgroundColor: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
+                          disabledForegroundColor: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
@@ -302,7 +302,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
             decoration: InputDecoration(
               hintText: l10n.veliEmailHint,
               filled: true,
-              fillColor: isDark ? AppColors.surfaceDark : Colors.white,
+              fillColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
@@ -473,7 +473,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
               ),
               counterText: '',
               filled: true,
-              fillColor: isDark ? AppColors.surfaceDark : Colors.white,
+              fillColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(

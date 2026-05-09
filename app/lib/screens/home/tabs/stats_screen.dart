@@ -161,7 +161,7 @@ class _StatsScreenState extends State<StatsScreen> {
                         barTouchData: BarTouchData(
                           enabled: true,
                           touchTooltipData: BarTouchTooltipData(
-                            getTooltipColor: (_) => isDark ? AppColors.surfaceDark : Colors.white,
+                            getTooltipColor: (_) => isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
                             getTooltipItem: (group, groupIndex, rod, rodIndex) {
                               return BarTooltipItem(
                                 '${courses[group.x.toInt()].name}\n',
@@ -279,7 +279,7 @@ class _StatsScreenState extends State<StatsScreen> {
                       margin: const EdgeInsets.only(bottom: 12),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.surfaceDark : Colors.white,
+                        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                            BoxShadow(

@@ -156,7 +156,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                         vertical: 24,
                       ),
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.surfaceDarkBlue : Colors.white,
+                        color: isDark ? AppColors.surfaceDarkBlue : AppColors.surfaceLight,
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
@@ -341,7 +341,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          color: isDark ? AppColors.surfaceDark : Colors.white,
+          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
           onSelected: (value) async {
             try {
               switch (value) {
@@ -611,7 +611,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         return Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.surfaceDark : Colors.white,
+            color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           ),
           child: Column(
@@ -623,14 +623,14 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
               const SizedBox(height: 20),
               Text(
-                AppLocalizations.of(context)!.moveToCourse,
+                  AppLocalizations.of(context)!.moveToCourse,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -894,7 +894,7 @@ class _AudioPlayerWidgetState extends State<_AudioPlayerWidget> {
                       value: value,
                       max: max > 0 ? max : 1.0,
                       activeColor: AppColors.primary,
-                      inactiveColor: Colors.grey.shade300,
+                      inactiveColor: widget.isDark ? Colors.grey.shade600 : Colors.grey.shade300,
                       onChanged: (val) {
                         context.read<NoteProvider>().seekAudio(
                           Duration(milliseconds: val.toInt()),
@@ -927,8 +927,8 @@ class _AudioPlayerWidgetState extends State<_AudioPlayerWidget> {
                           },
                           backgroundColor: widget.isDark
                               ? Colors.grey.shade700
-                              : Colors.white,
-                          side: BorderSide(color: Colors.grey.shade300),
+                              : AppColors.surfaceLight,
+                          side: BorderSide(color: widget.isDark ? Colors.grey.shade600 : Colors.grey.shade300),
                         );
                       }).toList(),
                     ),
@@ -1004,7 +1004,7 @@ class _DrawingDisplayWidgetState extends State<_DrawingDisplayWidget> {
     return Container(
       height: 300,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -1020,7 +1020,7 @@ class _DrawingDisplayWidgetState extends State<_DrawingDisplayWidget> {
           strokes: strokes,
           currentColor: Colors.black,
           currentSize: 4.0,
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.surfaceLight,
         ),
       ),
     );

@@ -247,10 +247,10 @@ class _StorageScreenState extends State<StorageScreen> {
               child: Container(
                 width: 40,
                 height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
               ),
             ),
             const SizedBox(height: 24),

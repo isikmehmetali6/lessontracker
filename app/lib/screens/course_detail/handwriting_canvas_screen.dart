@@ -335,7 +335,7 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
     return Scaffold(
       backgroundColor: isDark ? AppColors.canvasDark : Colors.grey[100],
       appBar: AppBar(
-        backgroundColor: isDark ? AppColors.canvasDark : Colors.white,
+        backgroundColor: isDark ? AppColors.canvasDark : AppColors.surfaceLight,
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.pop(context),
@@ -456,7 +456,7 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -472,7 +472,7 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
           strokes: _currentPageStrokes,
           currentColor: _currentColor,
           currentSize: _currentSize,
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.surfaceLight,
           onStrokesChanged: (newStrokes) =>
               setState(() => _currentPageStrokes = newStrokes),
         ),

@@ -322,7 +322,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: isDark ? AppColors.surfaceDark : Colors.white,
+            color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,

@@ -28,7 +28,7 @@ class PriorityCoursesList extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.surfaceDark : Colors.white,
+              color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: AppColors.primary.withValues(alpha: 0.2),

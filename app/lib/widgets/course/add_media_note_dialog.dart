@@ -49,7 +49,7 @@ class _AddMediaNoteDialogState extends State<AddMediaNoteDialog> {
         right: 24,
       ),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
+        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Column(
@@ -61,7 +61,7 @@ class _AddMediaNoteDialogState extends State<AddMediaNoteDialog> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),

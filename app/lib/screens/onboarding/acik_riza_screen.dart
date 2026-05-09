@@ -214,8 +214,8 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
-                        disabledBackgroundColor: Colors.grey.shade300,
-                        disabledForegroundColor: Colors.grey.shade500,
+                        disabledBackgroundColor: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
+                        disabledForegroundColor: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),

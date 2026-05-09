@@ -51,7 +51,7 @@ class CourseDetailsForm extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
+        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -143,7 +143,7 @@ class CourseDetailsForm extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
+        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -302,7 +302,7 @@ class _CounterButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: isPrimary 
               ? AppColors.primary 
-              : (isDark ? AppColors.surfaceDark : Colors.white),
+              : (isDark ? AppColors.surfaceDark : AppColors.surfaceLight),
           shape: BoxShape.circle,
           boxShadow: [
             if (!isPrimary)

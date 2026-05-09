@@ -138,7 +138,7 @@ class CourseFilesTab extends StatelessWidget {
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.surfaceDark : Colors.white,
+            color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,

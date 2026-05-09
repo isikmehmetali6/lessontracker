@@ -88,7 +88,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.surfaceDark : Colors.white,
+                        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(

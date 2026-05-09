@@ -184,7 +184,7 @@ class _WeeklyPlanScreenState extends State<WeeklyPlanScreen> {
                         decoration: BoxDecoration(
                           color: isSelected 
                               ? AppColors.primary 
-                              : (isDark ? AppColors.surfaceDark : Colors.white),
+                              : (isDark ? AppColors.surfaceDark : AppColors.surfaceLight),
                           borderRadius: BorderRadius.circular(16),
                           border: isToday && !isSelected 
                               ? Border.all(color: AppColors.primary, width: 2) 
@@ -453,7 +453,7 @@ class _WeeklyPlanScreenState extends State<WeeklyPlanScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isDark ? AppColors.surfaceDark : Colors.white,
+          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: course.color.withValues(alpha: 0.3)),
           boxShadow: [
@@ -533,7 +533,7 @@ class _WeeklyPlanScreenState extends State<WeeklyPlanScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isDark ? AppColors.surfaceDark : Colors.white,
+          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: AppColors.red.withValues(alpha: 0.3)),
           boxShadow: [
@@ -625,7 +625,7 @@ class _WeeklyPlanScreenState extends State<WeeklyPlanScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isDark ? AppColors.surfaceDark : Colors.white,
+          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: event.color.withValues(alpha: 0.3)),
           boxShadow: [

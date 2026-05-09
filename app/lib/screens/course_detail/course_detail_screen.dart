@@ -217,7 +217,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                   controller: _tabController,
                   indicator: BoxDecoration(
                     borderRadius: BorderRadius.circular(25),
-                    color: isDark ? AppColors.primary : Colors.white,
+                    color: isDark ? AppColors.primary : AppColors.surfaceLight,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.1),
@@ -279,7 +279,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
           builder: (_, scrollController) => Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.surfaceDark : Colors.white,
+              color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(28),
               ),
@@ -290,7 +290,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -436,7 +436,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.surfaceDark : Colors.white,
+              color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(28),
               ),
@@ -450,7 +450,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
+                      color: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -731,7 +731,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.surfaceDark : Colors.white,
+              color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(28),
               ),
@@ -745,7 +745,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
+                      color: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -1024,7 +1024,7 @@ class _OptionTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.surfaceDarkElevated : Colors.white,
+            color: isDark ? AppColors.surfaceDarkElevated : AppColors.surfaceLight,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isDark ? Colors.white10 : Colors.grey.shade200,

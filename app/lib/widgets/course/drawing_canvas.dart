@@ -229,7 +229,7 @@ class DrawingToolbar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDarkElevated : Colors.white,
+        color: isDark ? AppColors.surfaceDarkElevated : AppColors.surfaceLight,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.1),
@@ -270,7 +270,7 @@ class DrawingToolbar extends StatelessWidget {
                         color: color,
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: isSelected ? AppColors.primary : Colors.grey.shade300,
+                          color: isSelected ? AppColors.primary : (isDark ? Colors.grey.shade600 : Colors.grey.shade300),
                           width: isSelected ? 3 : 1,
                         ),
                         boxShadow: color == Colors.white

@@ -216,7 +216,7 @@ class HomeStatsSummary extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
+        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -594,12 +594,12 @@ class PriorityCourseCard extends StatelessWidget {
                             horizontal: 8,
                             vertical: 4,
                           ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Text(
-                            'EXAM',
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'EXAM',
                             style: TextStyle(
                               color: AppColors.red,
                               fontSize: 10,
@@ -613,12 +613,12 @@ class PriorityCourseCard extends StatelessWidget {
                             horizontal: 8,
                             vertical: 4,
                           ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Text(
-                            'BEHIND',
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'BEHIND',
                             style: TextStyle(
                               color: AppColors.red,
                               fontSize: 10,
@@ -663,10 +663,10 @@ class PriorityCourseCard extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       widthFactor: (course.progress / 100).clamp(0.0, 1.0),
                       child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
+                          decoration: BoxDecoration(
+                             color: isDark ? AppColors.surfaceDarkElevated : AppColors.surfaceLight,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
                       ),
                     ),
                   ),
@@ -752,7 +752,7 @@ class _QuickCaptureButton extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.backgroundDark : Colors.white,
+                  color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(

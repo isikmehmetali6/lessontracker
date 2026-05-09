@@ -346,7 +346,7 @@ class _StudyTimerScreenState extends State<StudyTimerScreen> with TickerProvider
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.surfaceDark : Colors.white,
+                  color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Column(
@@ -373,7 +373,7 @@ class _StudyTimerScreenState extends State<StudyTimerScreen> with TickerProvider
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       ),
-                      dropdownColor: isDark ? AppColors.surfaceDark : Colors.white,
+                      dropdownColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
                       items: [
                         DropdownMenuItem<String?>(
                           value: null,
@@ -409,7 +409,7 @@ class _StudyTimerScreenState extends State<StudyTimerScreen> with TickerProvider
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.surfaceDark : Colors.white,
+                  color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Column(

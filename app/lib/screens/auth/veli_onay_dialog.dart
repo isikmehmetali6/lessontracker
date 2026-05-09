@@ -34,7 +34,7 @@ class _VeliOnayDialogState extends State<VeliOnayDialog> {
     final l10n = AppLocalizations.of(context)!;
 
     return AlertDialog(
-      backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
+      backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       title: Row(
         children: [

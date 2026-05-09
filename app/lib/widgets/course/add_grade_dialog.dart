@@ -57,7 +57,7 @@ class _AddGradeDialogState extends State<AddGradeDialog> {
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: isDark ? AppColors.surfaceDark : Colors.white,
+          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: Column(
@@ -69,7 +69,7 @@ class _AddGradeDialogState extends State<AddGradeDialog> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -118,7 +118,7 @@ class _AddGradeDialogState extends State<AddGradeDialog> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text('/', style: TextStyle(fontSize: 20, color: Colors.grey.shade400)),
+                Text('/', style: TextStyle(fontSize: 20, color: isDark ? Colors.grey.shade600 : Colors.grey.shade400)),
                 const SizedBox(width: 8),
                 Expanded(
                   child: TextField(

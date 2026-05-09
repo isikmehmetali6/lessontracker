@@ -40,7 +40,7 @@ class AbsenceTrackerCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
+        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -192,7 +192,7 @@ class AbsenceTrackerCard extends StatelessWidget {
                  margin: const EdgeInsets.only(top: 12),
                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                  decoration: BoxDecoration(
-                   color: isDark ? AppColors.surfaceDarkElevated : Colors.white, // Slightly different shade
+                    color: isDark ? AppColors.surfaceDarkElevated : AppColors.surfaceLight, // Slightly different shade
                    borderRadius: BorderRadius.circular(12),
                    border: Border.all(
                      color: isDark ? Colors.white12 : Colors.black12,
@@ -275,7 +275,7 @@ class AbsenceTrackerCard extends StatelessWidget {
   void _showHistoryDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
+      backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),

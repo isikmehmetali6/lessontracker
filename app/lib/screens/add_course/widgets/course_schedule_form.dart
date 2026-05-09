@@ -51,7 +51,7 @@ class CourseScheduleForm extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
+        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -125,13 +125,13 @@ class CourseScheduleForm extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.surfaceDark : Colors.white,
+                          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<int>(
                             value: item.day,
-                            dropdownColor: isDark ? AppColors.surfaceDark : Colors.white,
+                            dropdownColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
                             items: List.generate(7, (i) {
                               return DropdownMenuItem(
                                 value: i,
@@ -188,7 +188,7 @@ class CourseScheduleForm extends StatelessWidget {
                         },
                       ),
                       const SizedBox(width: 12),
-                      Icon(Icons.arrow_forward, size: 20, color: Colors.grey.shade400),
+                      Icon(Icons.arrow_forward, size: 20, color: isDark ? Colors.grey.shade600 : Colors.grey.shade400),
                       const SizedBox(width: 12),
                       _TimePickerField(
                         label: 'End',
@@ -268,7 +268,7 @@ class _TimePickerField extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isDark ? AppColors.surfaceDark : Colors.white,
+          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
@@ -332,7 +332,7 @@ class _TextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
+        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextFormField(

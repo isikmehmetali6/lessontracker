@@ -330,8 +330,8 @@ class CourseNoteCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: isDark
-              ? [const Color(0xFF1A1A2E), const Color(0xFF16213E)]
-              : [const Color(0xFFF0F4FF), const Color(0xFFE8EEFF)],
+              ? [AppColors.gradientAudioDarkStart, AppColors.gradientAudioDarkEnd]
+              : [AppColors.gradientAudioLightStart, AppColors.gradientAudioLightEnd],
         ),
         boxShadow: [
           BoxShadow(
@@ -489,7 +489,7 @@ class CourseNoteCard extends StatelessWidget {
   Widget _buildImageCard(BuildContext context, bool isDark) {
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
+        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -674,7 +674,7 @@ class CourseNoteCard extends StatelessWidget {
   Widget _buildTextCard(BuildContext context, bool isDark) {
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : Colors.white,
+        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(

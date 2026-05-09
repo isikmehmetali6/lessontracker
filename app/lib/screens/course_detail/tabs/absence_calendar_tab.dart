@@ -102,7 +102,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: widget.isDark ? AppColors.surfaceDark : Colors.white,
+              color: widget.isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -174,7 +174,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
           // Calendar
           Container(
             decoration: BoxDecoration(
-              color: widget.isDark ? AppColors.surfaceDark : Colors.white,
+              color: widget.isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
@@ -288,7 +288,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: widget.isDark ? AppColors.surfaceDark : Colors.white,
+        color: widget.isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Wrap(
@@ -328,7 +328,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: widget.isDark ? AppColors.surfaceDark : Colors.white,
+          color: widget.isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Text(
@@ -343,7 +343,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: widget.isDark ? AppColors.surfaceDark : Colors.white,
+        color: widget.isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -405,7 +405,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
             return Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: widget.isDark ? AppColors.surfaceDark : Colors.white,
+                color: widget.isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
               ),
               child: Column(
@@ -415,13 +415,13 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
                   Center(
                     child: Container(
                       width: 40, height: 4,
-                      decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+                      decoration: BoxDecoration(color: widget.isDark ? Colors.grey.shade600 : Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
                     ),
                   ),
                   const SizedBox(height: 20),
                   Text(
                     l10n.addAbsence,
-                    style: TextStyle(
+                      style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
                       color: widget.isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
@@ -525,7 +525,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
             return Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: widget.isDark ? AppColors.surfaceDark : Colors.white,
+                color: widget.isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
               ),
               child: Column(
@@ -535,13 +535,13 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
                   Center(
                     child: Container(
                       width: 40, height: 4,
-                      decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+                      decoration: BoxDecoration(color: widget.isDark ? Colors.grey.shade600 : Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
                     ),
                   ),
                   const SizedBox(height: 20),
                   Text(
                     l10n.editAbsence,
-                    style: TextStyle(
+                      style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
                       color: widget.isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,

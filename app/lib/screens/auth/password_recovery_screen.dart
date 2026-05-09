@@ -436,7 +436,7 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
           color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
         ),
         filled: true,
-        fillColor: isDark ? AppColors.surfaceDark : Colors.white,
+        fillColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
       ),
       items: [
@@ -543,7 +543,7 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
               color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
             ),
             filled: true,
-            fillColor: isDark ? AppColors.surfaceDark : Colors.white,
+            fillColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide.none,

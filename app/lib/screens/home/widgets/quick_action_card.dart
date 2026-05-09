@@ -24,7 +24,7 @@ class QuickActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: isDark ? AppColors.surfaceDark : Colors.white,
+      color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: () {
