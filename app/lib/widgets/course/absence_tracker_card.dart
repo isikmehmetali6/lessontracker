@@ -192,7 +192,7 @@ class AbsenceTrackerCard extends StatelessWidget {
                  margin: const EdgeInsets.only(top: 12),
                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                  decoration: BoxDecoration(
-                   color: isDark ? const Color(0xFF2C3628) : const Color(0xFFF0F5ED), // Slightly different shade
+                   color: isDark ? AppColors.surfaceDarkElevated : Colors.white, // Slightly different shade
                    borderRadius: BorderRadius.circular(12),
                    border: Border.all(
                      color: isDark ? Colors.white12 : Colors.black12,

@@ -384,7 +384,7 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
             Text(
               l10n.e2eEncryption,
               style: TextStyle(
-                color: isDark ? Colors.white : const Color(0xFF1A1F36),
+                color: isDark ? Colors.white : AppColors.textHeadingLight,
               ),
             ),
           ],
@@ -602,7 +602,7 @@ class _SecurityQuestionsSheetState extends State<_SecurityQuestionsSheet> {
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: widget.isDark ? Colors.white : const Color(0xFF1A1F36),
+                color: widget.isDark ? Colors.white : AppColors.textHeadingLight,
               ),
             ),
             const SizedBox(height: 8),
@@ -633,7 +633,7 @@ class _SecurityQuestionsSheetState extends State<_SecurityQuestionsSheet> {
                         style: TextStyle(
                           color: widget.isDark
                               ? Colors.white
-                              : const Color(0xFF1A1F36),
+                              : AppColors.textHeadingLight,
                         ),
                       ),
                     ),

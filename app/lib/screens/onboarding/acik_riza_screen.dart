@@ -140,7 +140,7 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: isDark
-                            ? const Color(0xFF2C2C2E)
+                            ? AppColors.surfaceDarkElevated
                             : Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
@@ -295,7 +295,7 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: isDark ? const Color(0xFF2C2C2E) : Colors.white,
+        backgroundColor: isDark ? AppColors.surfaceDarkElevated : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           l10n.acikRizaWarning,
@@ -414,7 +414,7 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
+        color: isDark ? AppColors.surfaceDarkElevated : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: value

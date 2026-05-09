@@ -156,7 +156,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                         vertical: 24,
                       ),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1E1E2C) : Colors.white,
+                        color: isDark ? AppColors.surfaceDarkBlue : Colors.white,
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(

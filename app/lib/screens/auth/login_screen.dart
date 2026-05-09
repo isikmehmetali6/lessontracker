@@ -37,8 +37,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       backgroundColor: isDark
-          ? const Color(0xFF121212)
-          : const Color(0xFFF5F7FA),
+          ? AppColors.backgroundDark
+          : AppColors.backgroundLight,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
@@ -80,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : const Color(0xFF1A1F36),
+                    color: isDark ? Colors.white : AppColors.textHeadingLight,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -352,13 +352,13 @@ class _LoginScreenState extends State<LoginScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           l10n.resetPassword,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : const Color(0xFF1A1F36),
+            color: isDark ? Colors.white : AppColors.textHeadingLight,
           ),
         ),
         content: Column(
@@ -457,13 +457,13 @@ class _LoginScreenState extends State<LoginScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           l10n.continueAsGuest,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : const Color(0xFF1A1F36),
+            color: isDark ? Colors.white : AppColors.textHeadingLight,
           ),
         ),
         content: Text(
@@ -531,7 +531,7 @@ class _LoginScreenState extends State<LoginScreen> {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            color: isDark ? AppColors.surfaceDark : Colors.white,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,

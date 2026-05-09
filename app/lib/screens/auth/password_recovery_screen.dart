@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
+import '../../core/theme/app_colors.dart';
 
 class SecurityQuestionService {
   static const String _collectionPath = 'users';
@@ -202,8 +203,8 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
 
     return Scaffold(
       backgroundColor: isDark
-          ? const Color(0xFF121212)
-          : const Color(0xFFF5F7FA),
+          ? AppColors.backgroundDark
+          : AppColors.backgroundLight,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -245,7 +246,7 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : const Color(0xFF1A1F36),
+            color: isDark ? Colors.white : AppColors.textHeadingLight,
           ),
         ),
         const SizedBox(height: 8),
@@ -435,7 +436,7 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
           color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
         ),
         filled: true,
-        fillColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        fillColor: isDark ? AppColors.surfaceDark : Colors.white,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
       ),
       items: [
@@ -542,7 +543,7 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
               color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
             ),
             filled: true,
-            fillColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            fillColor: isDark ? AppColors.surfaceDark : Colors.white,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide.none,
@@ -550,7 +551,7 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: const BorderSide(
-                color: Color(0xFF6366F1),
+                color: AppColors.indigoAccent,
                 width: 1.5,
               ),
             ),
@@ -570,7 +571,7 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
       child: ElevatedButton(
         onPressed: _isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF6366F1),
+          backgroundColor: AppColors.indigoAccent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),

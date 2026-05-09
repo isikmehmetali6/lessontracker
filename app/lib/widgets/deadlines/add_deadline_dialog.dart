@@ -92,7 +92,7 @@ class _AddDeadlineDialogState extends State<AddDeadlineDialog> {
         top: 32,
       ),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
+        color: isDark ? AppColors.surfaceDarkBlue : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         boxShadow: [
            BoxShadow(

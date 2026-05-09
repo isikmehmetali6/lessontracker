@@ -64,7 +64,7 @@ class ConsentUtils {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF2C2C2E) : Colors.grey.shade100,
+                color: isDark ? AppColors.surfaceDarkElevated : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(

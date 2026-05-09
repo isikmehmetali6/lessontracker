@@ -39,6 +39,17 @@ class AppColors {
   static const Color tagExam = Color(0xFFFF9500);
   static const Color tagBehind = Color(0xFFEF4444);
   
+  // Yüzey varyantları (dark mode)
+  static const Color surfaceDarkElevated = Color(0xFF2C2C2E);
+  static const Color surfaceDarkBlue = Color(0xFF1E1E2E);
+  static const Color canvasDark = Color(0xFF1C1C1E);
+  
+  // Metin varyantları (light mode)
+  static const Color textHeadingLight = Color(0xFF1A1F36);
+  
+  // Vurgu renkleri
+  static const Color indigoAccent = Color(0xFF6366F1);
+
   // Gölge ve Overlay
   static const Color shadowLight = Color(0x14000000);
   static const Color shadowDark = Color(0x33000000);

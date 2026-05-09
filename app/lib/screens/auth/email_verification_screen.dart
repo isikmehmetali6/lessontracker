@@ -63,8 +63,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
 
     return Scaffold(
       backgroundColor: isDark
-          ? const Color(0xFF121212)
-          : const Color(0xFFF5F7FA),
+          ? AppColors.backgroundDark
+          : AppColors.backgroundLight,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
@@ -91,7 +91,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : const Color(0xFF1A1F36),
+                  color: isDark ? Colors.white : AppColors.textHeadingLight,
                 ),
                 textAlign: TextAlign.center,
               ),

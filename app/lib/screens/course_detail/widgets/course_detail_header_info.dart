@@ -122,7 +122,7 @@ class CourseDetailHeaderInfo extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
+                      color: isDark ? AppColors.surfaceDarkElevated : Colors.white,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: isDark ? Colors.white10 : Colors.grey.shade200,

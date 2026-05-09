@@ -31,7 +31,7 @@ class CourseBottomToolbar extends StatelessWidget {
         height: 64,
         decoration: BoxDecoration(
           color: isDark
-              ? const Color(0xFF1E1E2E).withValues(alpha: 0.95)
+              ? AppColors.surfaceDarkBlue.withValues(alpha: 0.95)
               : Colors.white.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(32),
           border: Border.all(

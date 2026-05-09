@@ -133,7 +133,7 @@ class _VeliOnayDialogState extends State<VeliOnayDialog> {
                 hintText: l10n.veliEmailHint,
                 filled: true,
                 fillColor: isDark
-                    ? const Color(0xFF2C2C2E)
+                    ? AppColors.surfaceDarkElevated
                     : Colors.grey.shade100,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -153,7 +153,7 @@ class _VeliOnayDialogState extends State<VeliOnayDialog> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF2C2C2E) : Colors.grey.shade100,
+                color: isDark ? AppColors.surfaceDarkElevated : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(

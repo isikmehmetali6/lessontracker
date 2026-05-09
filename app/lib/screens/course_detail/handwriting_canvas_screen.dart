@@ -333,9 +333,9 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.grey[100],
+      backgroundColor: isDark ? AppColors.canvasDark : Colors.grey[100],
       appBar: AppBar(
-        backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        backgroundColor: isDark ? AppColors.canvasDark : Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.pop(context),
@@ -621,7 +621,7 @@ class _ModeChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primary
-              : (isDark ? const Color(0xFF2C2C2E) : Colors.grey[200]),
+              : (isDark ? AppColors.surfaceDarkElevated : Colors.grey[200]),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(

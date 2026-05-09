@@ -270,7 +270,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2C2C2E) : Colors.grey.shade50,
+        color: isDark ? AppColors.surfaceDarkElevated : Colors.grey.shade50,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isDark ? Colors.white10 : Colors.grey.shade200,
@@ -302,7 +302,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
             decoration: InputDecoration(
               hintText: l10n.veliEmailHint,
               filled: true,
-              fillColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+              fillColor: isDark ? AppColors.surfaceDark : Colors.white,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
@@ -399,7 +399,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2C2C2E) : Colors.grey.shade100,
+        color: isDark ? AppColors.surfaceDarkElevated : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -427,7 +427,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2C2C2E) : Colors.grey.shade50,
+        color: isDark ? AppColors.surfaceDarkElevated : Colors.grey.shade50,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isDark ? Colors.white10 : Colors.grey.shade200,
@@ -473,7 +473,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
               ),
               counterText: '',
               filled: true,
-              fillColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+              fillColor: isDark ? AppColors.surfaceDark : Colors.white,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(

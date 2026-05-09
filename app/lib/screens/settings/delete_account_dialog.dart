@@ -117,7 +117,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF2C2C2E) : Colors.grey.shade100,
+                color: isDark ? AppColors.surfaceDarkElevated : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(

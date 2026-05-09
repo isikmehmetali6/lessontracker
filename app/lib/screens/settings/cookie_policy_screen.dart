@@ -169,7 +169,7 @@ www.kvkk.gov.tr''',
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2C2C2E) : Colors.grey.shade50,
+        color: isDark ? AppColors.surfaceDarkElevated : Colors.grey.shade50,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isDark ? Colors.white10 : Colors.grey.shade200,

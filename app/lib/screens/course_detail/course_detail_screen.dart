@@ -209,8 +209,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                 height: 50,
                 decoration: BoxDecoration(
                   color: isDark
-                      ? const Color(0xFF2C2C2E)
-                      : const Color(0xFFE5E5EA), // Premium background style
+                      ? AppColors.surfaceDarkElevated
+                      : AppColors.surfaceLight, // Premium background style
                   borderRadius: BorderRadius.circular(25),
                 ),
                 child: TabBar(
@@ -1024,7 +1024,7 @@ class _OptionTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
+            color: isDark ? AppColors.surfaceDarkElevated : Colors.white,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isDark ? Colors.white10 : Colors.grey.shade200,

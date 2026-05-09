@@ -51,7 +51,7 @@ class _WeeklyTimetableScreenState extends State<WeeklyTimetableScreen> {
     final weekDays = [l10n.dayM, l10n.dayT, l10n.dayW, l10n.dayTh, l10n.dayF, l10n.daySa, l10n.daySu];
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF5F7FA), // Light grey bg for grid
+      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight, // Light grey bg for grid
       appBar: AppBar(
         title: Text(
           l10n.weeklyTimetable,

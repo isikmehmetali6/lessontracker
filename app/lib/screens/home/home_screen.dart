@@ -190,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          backgroundColor: isDark ? const Color(0xFF1E1E2E) : Colors.white,
+          backgroundColor: isDark ? AppColors.surfaceDarkBlue : Colors.white,
           title: Row(
             children: [
               Container(

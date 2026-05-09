@@ -68,7 +68,7 @@ class _DeadlineScreenState extends State<DeadlineScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF141414) : Colors.white,
+      backgroundColor: isDark ? AppColors.backgroundDark : Colors.white,
       body: SafeArea(
         child: Consumer2<DeadlineProvider, CourseProvider>(
           builder: (context, deadlineProvider, courseProvider, _) {
@@ -240,7 +240,7 @@ class _DeadlineScreenState extends State<DeadlineScreen> {
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
                                 color: isDark
-                                    ? const Color(0xFF1E1E2E)
+                                    ? AppColors.surfaceDarkBlue
                                     : Colors.white,
                                 borderRadius: BorderRadius.circular(24),
                                 border: Border.all(
