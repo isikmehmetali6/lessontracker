@@ -2,17 +2,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lesson_tracker/providers/note_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:lesson_tracker/core/database/database_helper.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../test_helpers.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-  
   setUpAll(() {
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
+    setupTestInfrastructure();
+    setupSecureStorageMock();
+    setupSqlCipherMock();
     DatabaseHelper.dbName = 'test_notes.db';
-    
-    // Mock audio channel
+
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       const MethodChannel('com.llfbandit.record/messages'),
       (message) async => null,

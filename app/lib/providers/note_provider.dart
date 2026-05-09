@@ -5,7 +5,6 @@ import '../repositories/note_repository.dart';
 import '../core/services/ocr_service.dart';
 import '../core/services/file_service.dart';
 import '../core/services/audio_service.dart';
-import '../core/services/watermark_service.dart';
 import '../models/note.dart';
 import 'package:uuid/uuid.dart';
 

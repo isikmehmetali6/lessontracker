@@ -27,7 +27,6 @@ import 'package:workmanager/workmanager.dart';
 
 import 'screens/home/home_screen.dart';
 import 'screens/auth/login_screen.dart';
-import 'screens/auth/email_verification_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'screens/onboarding/kvkk_flow.dart';
 import 'firebase_options.dart';

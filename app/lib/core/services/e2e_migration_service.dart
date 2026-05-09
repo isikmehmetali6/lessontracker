@@ -1,12 +1,10 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'e2e_crypto_service.dart';
-import 'e2e_file_service.dart';
 import 'e2e_key_service.dart';
 import 'file_service.dart';
 import 'image_compressor_service.dart';

@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lesson_tracker/providers/course_provider.dart';
 import 'package:lesson_tracker/core/database/database_helper.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../test_helpers.dart';
 
 void main() {
   setUpAll(() {
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
+    setupTestInfrastructure();
+    setupSecureStorageMock();
+    setupSqlCipherMock();
     DatabaseHelper.dbName = 'test_absences.db';
-    SharedPreferences.setMockInitialValues({});
   });
 
   group('Absence Management - Business Logic Tests', () {

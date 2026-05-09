@@ -474,7 +474,10 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
           currentSize: _currentSize,
           backgroundColor: AppColors.surfaceLight,
           onStrokesChanged: (newStrokes) =>
-              setState(() => _currentPageStrokes = newStrokes),
+              setState(() {
+                _currentPageStrokes = newStrokes;
+                _strokesByPage[1] = newStrokes;
+              }),
         ),
       ),
     );
@@ -529,7 +532,10 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
               currentSize: _currentSize,
               backgroundColor: Colors.transparent,
               onStrokesChanged: (newStrokes) =>
-                  setState(() => _currentPageStrokes = newStrokes),
+                  setState(() {
+                    _currentPageStrokes = newStrokes;
+                    _strokesByPage[1] = newStrokes;
+                  }),
             ),
           ],
         ),
@@ -569,6 +575,8 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
           onDocumentLoaded: (document) {
             setState(() {
               _totalPdfPages = document.pagesCount;
+              _currentPdfPage = 1;
+              _currentPageStrokes = _strokesByPage[1] ?? [];
             });
           },
           onPageChanged: (page) {
