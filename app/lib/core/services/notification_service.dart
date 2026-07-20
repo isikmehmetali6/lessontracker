@@ -49,7 +49,7 @@ class NotificationService {
       onDidReceiveNotificationResponse: (details) {
         // Handle notification tap
         if (kDebugMode) {
-          print('Notification payload: ${details.payload}');
+          debugPrint('Notification payload: ${details.payload}');
         }
       },
     );

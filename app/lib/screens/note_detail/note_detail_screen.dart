@@ -959,36 +959,59 @@ class _DrawingDisplayWidget extends StatefulWidget {
 }
 
 class _DrawingDisplayWidgetState extends State<_DrawingDisplayWidget> {
-  late final List<DrawingStroke> _strokes = _parseStrokes(widget.drawingData);
+  late final Map<int, List<DrawingStroke>> _strokesByPage =
+      _parseStrokes(widget.drawingData);
+  final PageController _pageController = PageController();
+  int _currentPage = 1;
 
-  static List<DrawingStroke> _parseStrokes(String drawingData) {
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  /// drawingData JSON'unu parse edip her sayfa için ayrı stroke listesi döner.
+  /// Veri formatı 1: {"strokesByPage": {"1": [...], "2": [...]}}
+  /// Veri formatı 2 (geriye uyumlu): doğrudan düz liste → sayfa 1 olarak kabul et
+  static Map<int, List<DrawingStroke>> _parseStrokes(String drawingData) {
     try {
       final decoded = jsonDecode(drawingData);
-      List? pageStrokes;
+      final Map<int, List<DrawingStroke>> result = {};
+
       if (decoded is Map<String, dynamic>) {
         final strokesByPage = decoded['strokesByPage'];
         if (strokesByPage is Map<String, dynamic>) {
-          pageStrokes = strokesByPage['1'] as List?;
+          strokesByPage.forEach((key, value) {
+            final pageNum = int.tryParse(key.toString());
+            if (pageNum == null || value is! List) return;
+            result[pageNum] = value
+                .map((e) => DrawingStroke.fromMap(e as Map<String, dynamic>))
+                .toList(growable: false);
+          });
+          if (result.isNotEmpty) return result;
         }
-      } else if (decoded is List) {
-        pageStrokes = decoded;
       }
-      if (pageStrokes == null) return const [];
-      return pageStrokes
-          .map((e) => DrawingStroke.fromMap(e as Map<String, dynamic>))
-          .toList(growable: false);
+
+      if (decoded is List) {
+        result[1] = decoded
+            .map((e) => DrawingStroke.fromMap(e as Map<String, dynamic>))
+            .toList(growable: false);
+        return result;
+      }
+
+      return result;
     } catch (e) {
       debugPrint('Error parsing drawing data: $e');
-      return const [];
+      return const {};
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final strokes = _strokes;
     final isDark = widget.isDark;
+    final pageNumbers = _strokesByPage.keys.toList()..sort();
 
-    if (strokes.isEmpty) {
+    if (pageNumbers.isEmpty) {
       return Container(
         height: 200,
         decoration: BoxDecoration(
@@ -1001,8 +1024,77 @@ class _DrawingDisplayWidgetState extends State<_DrawingDisplayWidget> {
       );
     }
 
+    if (pageNumbers.length == 1) {
+      // Tek sayfa: göstergesiz göster
+      return _buildPageCanvas(
+        pageNumber: pageNumbers.first,
+        strokes: _strokesByPage[pageNumbers.first]!,
+        isDark: isDark,
+        showIndicator: false,
+      );
+    }
+
+    // Çoklu sayfa: PageView + alt gösterge
+    return Column(
+      children: [
+        SizedBox(
+          height: 320,
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: pageNumbers.length,
+            onPageChanged: (index) {
+              setState(() => _currentPage = pageNumbers[index]);
+            },
+            itemBuilder: (context, index) {
+              final pageNum = pageNumbers[index];
+              return _buildPageCanvas(
+                pageNumber: pageNum,
+                strokes: _strokesByPage[pageNum]!,
+                isDark: isDark,
+                showIndicator: false,
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.chevron_left),
+              onPressed: _currentPage > pageNumbers.first
+                  ? () => _pageController.previousPage(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeInOut,
+                      )
+                  : null,
+            ),
+            Text(
+              '${pageNumbers.indexOf(_currentPage) + 1} / ${pageNumbers.length}',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            IconButton(
+              icon: const Icon(Icons.chevron_right),
+              onPressed: _currentPage < pageNumbers.last
+                  ? () => _pageController.nextPage(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeInOut,
+                      )
+                  : null,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPageCanvas({
+    required int pageNumber,
+    required List<DrawingStroke> strokes,
+    required bool isDark,
+    required bool showIndicator,
+  }) {
     return Container(
-      height: 300,
       decoration: BoxDecoration(
         color: AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(16),
@@ -1016,11 +1108,32 @@ class _DrawingDisplayWidgetState extends State<_DrawingDisplayWidget> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: DrawingCanvas(
-          strokes: strokes,
-          currentColor: Colors.black,
-          currentSize: 4.0,
-          backgroundColor: AppColors.surfaceLight,
+        child: Stack(
+          children: [
+            DrawingCanvas(
+              strokes: strokes,
+              currentColor: Colors.black,
+              currentSize: 4.0,
+              backgroundColor: AppColors.surfaceLight,
+            ),
+            if (showIndicator)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Sayfa $pageNumber',
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

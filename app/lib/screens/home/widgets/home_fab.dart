@@ -11,17 +11,22 @@ class HomeFAB extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(top: 32),
-      child: FloatingActionButton(
-        onPressed: () {
-          HapticFeedback.mediumImpact();
-          Navigator.push(
-            context,
-            CupertinoPageRoute(builder: (_) => const AddCourseScreen()),
-          );
-        },
-        backgroundColor: AppColors.textPrimaryLight,
-        elevation: 8,
-        child: const Icon(Icons.add, size: 32, color: AppColors.primary),
+      child: Semantics(
+        label: 'Yeni ders ekle',
+        button: true,
+        hint: 'Yeni bir ders oluşturmak için dokunun',
+        child: FloatingActionButton(
+          onPressed: () {
+            HapticFeedback.mediumImpact();
+            Navigator.push(
+              context,
+              CupertinoPageRoute(builder: (_) => const AddCourseScreen()),
+            );
+          },
+          backgroundColor: AppColors.textPrimaryLight,
+          elevation: 8,
+          child: const Icon(Icons.add, size: 32, color: AppColors.primary),
+        ),
       ),
     );
   }

@@ -8,6 +8,7 @@ import '../../models/moodle/moodle_course.dart';
 import '../../models/moodle/moodle_course_content.dart';
 import '../../providers/course_provider.dart';
 import '../../providers/moodle_provider.dart';
+import '../../providers/note_provider.dart';
 import '../../services/moodle/moodle_api_service.dart';
 import '../../services/moodle/moodle_token_storage.dart';
 import '../../core/theme/app_colors.dart';
@@ -650,8 +651,13 @@ class _ModuleTileState extends State<_ModuleTile> {
     // İndirilebilir Dosya
     if (file != null) {
       if (_isDownloaded && _localPath != null) {
-        // İndirilmişse yerel dosyayı aç
-        OpenFilex.open(_localPath!);
+        // İndirilmişse: kullanıcıya dışarı aç veya nota ekle seçeneği sun
+        final action = await _showOpenActionSheet(context);
+        if (action == _OpenAction.external) {
+          await OpenFilex.open(_localPath!);
+        } else if (action == _OpenAction.addAsNote) {
+          await _addDownloadedFileAsNote(context);
+        }
       } else {
         // İndirilmemişse indir
         await _handleDownload();
@@ -670,4 +676,128 @@ class _ModuleTileState extends State<_ModuleTile> {
       }
     }
   }
+
+  Future<_OpenAction?> _showOpenActionSheet(BuildContext context) async {
+    final locale = Localizations.localeOf(context).languageCode;
+    final openLabel = locale == 'tr' ? 'Dışarıda aç' : 'Open externally';
+    final addAsNoteLabel =
+        locale == 'tr' ? 'Nota ekle' : 'Add as note';
+    final addAsNoteHint =
+        locale == 'tr' ? 'Derslerim notlarına kaydet' : 'Save to course notes';
+
+    return showModalBottomSheet<_OpenAction>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.open_in_new),
+              title: Text(openLabel),
+              onTap: () => Navigator.pop(ctx, _OpenAction.external),
+            ),
+            ListTile(
+              leading: const Icon(Icons.note_add_outlined),
+              title: Text(addAsNoteLabel),
+              subtitle: Text(addAsNoteHint),
+              onTap: () => Navigator.pop(ctx, _OpenAction.addAsNote),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _addDownloadedFileAsNote(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    if (_localPath == null) return;
+
+    // Kullanıcıdan bir ders seçmesini iste. Moodle kursu ile local ders eşleşmiyor
+    // olabilir; bu nedenle tüm aktif dersler listelenir.
+    final courseProvider = context.read<CourseProvider>();
+    final courses = courseProvider.courses;
+
+    if (!context.mounted) return;
+
+    if (courses.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.noCoursesAvailable)),
+      );
+      return;
+    }
+
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                l10n.selectCourseTitle,
+                style: Theme.of(ctx).textTheme.titleMedium,
+              ),
+            ),
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: courses.length,
+                itemBuilder: (ctx, i) {
+                  final c = courses[i];
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: Color(c.color.toARGB32()),
+                      child: Text(
+                        c.name.isNotEmpty ? c.name[0].toUpperCase() : '?',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    title: Text(c.name),
+                    onTap: () => Navigator.pop(ctx, c.id),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (selected == null || !context.mounted) return;
+
+    final noteProvider = context.read<NoteProvider>();
+    final fileName = widget.module.name;
+    final result = await noteProvider.addPdfNote(
+      courseId: selected,
+      title: fileName,
+      localPath: _localPath!,
+    );
+
+    if (!context.mounted) return;
+    final locale = Localizations.localeOf(context).languageCode;
+    final successMsg =
+        locale == 'tr' ? 'Nota eklendi' : 'Added as note';
+    final errorFallback =
+        locale == 'tr' ? 'Bir hata oluştu' : 'An error occurred';
+
+    if (result != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(successMsg)),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(noteProvider.error ?? errorFallback)),
+      );
+    }
+  }
 }
+
+enum _OpenAction { external, addAsNote }

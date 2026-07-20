@@ -1,12 +1,33 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:lesson_tracker/core/database/database_helper.dart';
 
 void setupTestInfrastructure() {
   TestWidgetsFlutterBinding.ensureInitialized();
   sqfliteFfiInit();
   databaseFactory = databaseFactoryFfi;
+
+  testOpenDatabaseOverride = (
+    String path,
+    int version, {
+    required Future<void> Function(Database) onConfigure,
+    required Future<void> Function(Database, int) onCreate,
+    required Future<void> Function(Database, int, int) onUpgrade,
+  }) async {
+    return databaseFactory.openDatabase(
+      path,
+      options: OpenDatabaseOptions(
+        version: version,
+        onConfigure: onConfigure,
+        onCreate: onCreate,
+        onUpgrade: onUpgrade,
+      ),
+    );
+  };
+
   SharedPreferences.setMockInitialValues({});
 }
 

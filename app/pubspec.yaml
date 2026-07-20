@@ -42,12 +42,6 @@ dependencies:
   uuid: ^4.5.1
   intl: ^0.20.2
   
-  # Haptic Feedback (built into Flutter)
-  vibration: ^2.0.0
-  
-  # Search
-  flutter_typeahead: ^5.2.0
-  
   # Animations
   animations: ^2.0.11
   fl_chart: ^1.1.1
@@ -78,16 +72,15 @@ dependencies:
   table_calendar: ^3.2.0
   blur: ^4.0.2
   workmanager: ^0.9.0+3
-  flutter_background_service: ^5.1.0
   flutter_image_compress: ^2.3.0
   crypto: ^3.0.6
   
   # PDF Viewing & Annotation
   pdfx: ^2.9.0
-  syncfusion_flutter_pdfviewer: ^28.2.5
   
   # Drawing / Handwriting
   perfect_freehand: ^2.3.0
+  firebase_crashlytics: ^5.2.6
 
 
 

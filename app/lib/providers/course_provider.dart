@@ -506,41 +506,78 @@ class CourseProvider extends ChangeNotifier {
   Future<void> addAbsence(
     String courseId, {
     String reason = 'unexcused',
+  }) {
+    return addAbsenceAt(courseId, DateTime.now(), reason: reason);
+  }
+
+  /// Tarihli devamsızlık ekle (takvim sekmesi için)
+  /// Mevcut `addAbsence` (DateTime.now()) kullanımını bozmamak için ayrı metod.
+  Future<void> addAbsenceAt(
+    String courseId,
+    DateTime date, {
+    String reason = 'unexcused',
   }) async {
     final courseIndex = _courses.indexWhere((c) => c.id == courseId);
-    if (courseIndex != -1) {
-      final course = _courses[courseIndex];
-      final newDate = DateTime.now();
+    if (courseIndex == -1) return;
 
-      // DB Insert
-      await _absenceRepo.insertAbsence(
-        _uuid.v4(),
-        courseId,
-        newDate,
-        reason: reason,
-      );
+    final course = _courses[courseIndex];
+    final newDate = date;
 
-      // Local Update
-      final updatedDates = List<DateTime>.from(course.absenceDates)
-        ..add(newDate);
-      // Sort: Newest first usually better for history, but typically lists are oldest first?
-      // Let's keep internal list sorted by date if needed, but DB query does DESC.
-      // Let's stick to what DB returns or valid logic.
-      updatedDates.sort((a, b) => b.compareTo(a)); // Descending
+    await _absenceRepo.insertAbsence(
+      _uuid.v4(),
+      courseId,
+      newDate,
+      reason: reason,
+    );
 
-      final updatedCourse = course.copyWith(
-        absenceDates: updatedDates,
-        currentAbsences: updatedDates.length, // Always sync count with list
-      );
+    final updatedDates = List<DateTime>.from(course.absenceDates)
+      ..add(newDate);
+    updatedDates.sort((a, b) => b.compareTo(a));
 
-      // Also update course record for legacy support / redundancy if needed, or just rely on list.
-      // We still update the course record in DB to keep 'currentAbsences' column in sync just in case
-      await _courseRepo.updateCourse(updatedCourse);
+    final updatedCourse = course.copyWith(
+      absenceDates: updatedDates,
+      currentAbsences: updatedDates.length,
+    );
 
-      _courses[courseIndex] = updatedCourse;
-      _coursesByIdCache = null;
-      notifyListeners();
-    }
+    await _courseRepo.updateCourse(updatedCourse);
+
+    _courses[courseIndex] = updatedCourse;
+    _coursesByIdCache = null;
+    notifyListeners();
+  }
+
+  /// ID ile devamsızlık sil (takvim sekmesi için)
+  Future<void> removeAbsenceById(String courseId, String absenceId) async {
+    final courseIndex = _courses.indexWhere((c) => c.id == courseId);
+    if (courseIndex == -1) return;
+
+    final course = _courses[courseIndex];
+
+    await _absenceRepo.deleteAbsence(absenceId);
+
+    final allAbsences = await _absenceRepo.getAbsencesWithReasonByCourse(courseId);
+    final updatedDates = allAbsences.map((a) {
+      final dateStr = a['date'];
+      return dateStr is DateTime ? dateStr : DateTime.parse(dateStr as String);
+    }).toList();
+    updatedDates.sort((a, b) => b.compareTo(a));
+
+    final updatedCourse = course.copyWith(
+      absenceDates: updatedDates,
+      currentAbsences: updatedDates.length,
+    );
+
+    await _courseRepo.updateCourse(updatedCourse);
+
+    _courses[courseIndex] = updatedCourse;
+    _coursesByIdCache = null;
+    notifyListeners();
+  }
+
+  /// Devamsızlık sebebini güncelle (takvim sekmesi için)
+  Future<void> updateAbsenceReasonById(String absenceId, String reason) async {
+    await _absenceRepo.updateAbsenceReason(absenceId, reason);
+    notifyListeners();
   }
 
   /// Son devamsızlığı sil

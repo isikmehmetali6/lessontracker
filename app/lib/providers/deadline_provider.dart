@@ -23,6 +23,7 @@ class DeadlineProvider with ChangeNotifier {
 
   Future<void> loadDeadlines() async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
 
     try {
@@ -37,6 +38,7 @@ class DeadlineProvider with ChangeNotifier {
   }
 
   Future<void> addDeadline(Deadline deadline) async {
+    _error = null;
     try {
       await _deadlineRepo.insertDeadline(deadline);
       _deadlines.add(deadline);
@@ -45,10 +47,12 @@ class DeadlineProvider with ChangeNotifier {
     } catch (e) {
       _error = e.toString();
       debugPrint('Error adding deadline: $e');
+      notifyListeners();
     }
   }
 
   Future<bool> updateDeadline(Deadline deadline) async {
+    _error = null;
     try {
       await _deadlineRepo.updateDeadline(deadline);
       await loadDeadlines();
@@ -62,13 +66,16 @@ class DeadlineProvider with ChangeNotifier {
   }
 
   Future<bool> deleteDeadline(String id) async {
+    _error = null;
     try {
       await _deadlineRepo.deleteDeadline(id);
       _deadlines.removeWhere((d) => d.id == id);
       notifyListeners();
       return true;
     } catch (e) {
+      _error = e.toString();
       debugPrint('Error deleting deadline: $e');
+      notifyListeners();
       return false;
     }
   }
@@ -128,6 +135,7 @@ class DeadlineProvider with ChangeNotifier {
   void clear() {
     _deadlines = [];
     _isLoading = false;
+    _error = null;
     notifyListeners();
   }
 }

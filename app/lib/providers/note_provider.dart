@@ -113,6 +113,47 @@ class NoteProvider extends ChangeNotifier {
     }
   }
 
+  /// PDF notu ekle (Moodle'dan indirilen dosya gibi).
+  /// Not tipi olarak NoteType.image kullanılır; note_detail_screen dosya uzantısına
+  /// göre (.pdf) görüntülemeyi otomatik seçer (satır 142).
+  /// [localPath] indirilen veya seçilen PDF'in mutlak yerel yoludur.
+  Future<Note?> addPdfNote({
+    required String courseId,
+    required String title,
+    required String localPath,
+    String? thumbnailPath,
+    List<String>? tags,
+  }) async {
+    _error = null;
+    try {
+      if (kIsWeb) {
+        _error = 'PDF notes are not supported on web';
+        return null;
+      }
+      final note = Note(
+        id: _uuid.v4(),
+        courseId: courseId,
+        type: NoteType.image,
+        title: title,
+        filePath: localPath,
+        thumbnailPath: thumbnailPath,
+        tags: tags ?? [],
+      );
+
+      await _noteRepo.insertNoteWithFile(
+        note,
+        attachedFile: File(localPath),
+      );
+      await loadNotes();
+      await loadCourseNotes(courseId);
+      return note;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return null;
+    }
+  }
+
   /// OCR notu ekle (resimden metin çıkar)
   Future<Note?> addOcrNote({
     required String courseId,

@@ -1,0 +1,119 @@
+# LessonTracker — kök .gitignore
+# Bu dosya tüm depo için geçerlidir. app/.gitignore'daki kuralları ezer/üst sınıf olur.
+
+# ────────────────────────────────────────────────────────────────
+# Flutter / Dart / Pub
+# ────────────────────────────────────────────────────────────────
+**/build/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/.pub-cache/
+**/.pub/
+**/pubspec.lock
+**/.last_build_id
+
+# Test / coverage artifacts
+**/coverage/
+**/.test_coverage.dart
+
+# ────────────────────────────────────────────────────────────────
+# IDE
+# ────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+**/.idea/
+**/.vscode/
+*.iml
+*.ipr
+*.iws
+*.swp
+
+# ────────────────────────────────────────────────────────────────
+# OS
+# ────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ────────────────────────────────────────────────────────────────
+# Logs & temporary output (kök + app/)
+# ────────────────────────────────────────────────────────────────
+*.log
+flutter_*.log
+run_*.log
+test_run_*.log
+test_run*.log
+
+# app/ altındaki geçici analiz/test çıktıları
+app/current_analysis*.txt
+app/run_log*.txt
+app/test_results*.txt
+app/run_chrome_test.log
+app/run_windows_test.log
+app/test_run_full.log
+app/analyze_output.txt
+app/dart_analysis.txt
+app/dart_files.txt
+app/test_logs.txt
+app/test_output.txt
+app/xcodebuild_log.txt
+app/scratch_*.txt
+app/temp_*.txt
+app/tmp_*.txt
+
+# ────────────────────────────────────────────────────────────────
+# Environment secrets
+# ────────────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ────────────────────────────────────────────────────────────────
+# Kişisel / projeyle ilgisiz dosyalar
+# ────────────────────────────────────────────────────────────────
+# Kök dizine yanlışlıkla bırakılmış PDF'ler vb.
+*.pdf
+!app/assets/**/*.pdf
+
+# Eski plan notları
+moodleentegrasyonplani
+
+# ────────────────────────────────────────────────────────────────
+# Tasarım aracı dışa aktarım klasörleri
+# (v0 / benzeri araçların ham ekran çıktıları; Flutter kaynak koduyla
+# hiçbir ilişkisi yok, referans amaçlı bırakılmış)
+# ────────────────────────────────────────────────────────────────
+add_new_course_screen/
+course_detail_multimodal_tools/
+course_detail_multimodal_view_1/
+course_detail_multimodal_view_2/
+course_detail_multimodal_view_3/
+course_materials_&_tools_view/
+priority_focus_home_screen/
+study_tracker_main_home_screen/
+
+# ────────────────────────────────────────────────────────────────
+# Build artifacts (Android/iOS)
+# ────────────────────────────────────────────────────────────────
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
+**/android/.gradle/
+**/android/local.properties
+**/android/key.properties
+**/android/app/upload-keystore.jks
+
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Runner.xcworkspace/xcuserdata/
+**/ios/Runner.xcodeproj/xcuserdata/
+
+# ────────────────────────────────────────────────────────────────
+# Symbols / obfuscation
+# ────────────────────────────────────────────────────────────────
+**/app.*.symbols
+**/app.*.map.json

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:uuid/uuid.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../repositories/absence_repository.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/course.dart';
+import '../../../providers/course_provider.dart';
 
 class AbsenceCalendarTab extends StatefulWidget {
   final String courseId;
@@ -487,8 +488,12 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () async {
-                        final id = const Uuid().v4();
-                        await _absenceRepo.insertAbsence(id, widget.courseId, selectedDate, reason: selectedReason);
+                        final provider = context.read<CourseProvider>();
+                        await provider.addAbsenceAt(
+                          widget.courseId,
+                          selectedDate,
+                          reason: selectedReason,
+                        );
                         HapticFeedback.mediumImpact();
                         if (mounted) Navigator.pop(ctx);
                         _loadAbsences();
@@ -590,7 +595,9 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () async {
-                        await _absenceRepo.updateAbsenceReason(absenceId, selectedReason);
+                        final provider = context.read<CourseProvider>();
+                        await provider.updateAbsenceReasonById(
+                            absenceId, selectedReason);
                         HapticFeedback.mediumImpact();
                         if (mounted) Navigator.pop(ctx);
                         _loadAbsences();
@@ -637,7 +644,8 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
     );
 
     if (confirmed == true) {
-      await _absenceRepo.deleteAbsence(absenceId);
+      final provider = context.read<CourseProvider>();
+      await provider.removeAbsenceById(widget.courseId, absenceId);
       HapticFeedback.mediumImpact();
       _loadAbsences();
     }

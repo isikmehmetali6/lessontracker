@@ -1,11 +1,14 @@
+import 'dart:ui' show PlatformDispatcher;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
 
 import 'core/theme/app_theme.dart';
 import 'providers/theme_provider.dart';
@@ -94,6 +97,16 @@ Future<void> main() async {
   // Firebase initialized — start connectivity listener for auto-sync retry
   if (firebaseReady) {
     AutoSyncService().init();
+
+    // Crashlytics: Flutter framework hatalarını ve async error'ları yakala.
+    // Sadece release modda aktif (debug'da noisy olur).
+    if (!kDebugMode) {
+      FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+      PlatformDispatcher.instance.onError = (error, stack) {
+        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+        return true;
+      };
+    }
   }
 
   if (!kIsWeb) {
@@ -151,18 +164,6 @@ class LessonTrackerApp extends StatelessWidget {
 
           // Home Wrapper
           home: const AuthWrapper(),
-
-          // Builder for global accessibilities etc
-          builder: (context, child) {
-            return MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                textScaler: TextScaler.linear(
-                  MediaQuery.of(context).textScaler.scale(1.0).clamp(0.8, 1.2),
-                ),
-              ),
-              child: child!,
-            );
-          },
         );
       },
     );

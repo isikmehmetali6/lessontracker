@@ -10,7 +10,7 @@ plugins {
 
 android {
     namespace = "com.lessontracker.lesson_tracker"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

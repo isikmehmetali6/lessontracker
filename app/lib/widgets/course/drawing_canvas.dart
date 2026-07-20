@@ -1,4 +1,5 @@
-import 'dart:ui' as ui;
+import 'dart:ui' show PointerDeviceKind;
+
 import 'package:flutter/material.dart';
 import 'package:perfect_freehand/perfect_freehand.dart';
 
@@ -52,6 +53,7 @@ class StrokeWidget extends StatelessWidget {
         thinning: 0.5,
         smoothing: 0.5,
         streamline: 0.5,
+        simulatePressure: false,
         start: StrokeEndOptions.start(
           taperEnabled: true,
           cap: true,
@@ -129,25 +131,61 @@ class DrawingCanvas extends StatefulWidget {
 
 class _DrawingCanvasState extends State<DrawingCanvas> {
   List<PointVector> _currentPoints = [];
+  int _activePointer = -1;
+  bool _isDrawing = false;
 
-  void _onPanStart(DragStartDetails details) {
+  void _onPointerDown(PointerDownEvent event) {
+    // Palm rejection: stylus dışı ve fare dışı girişleri yoksay.
+    // Sadece stylus ve invertedStylus (bazı kalemler) ve fare (test/desktop) kabul.
+    if (event.kind != PointerDeviceKind.stylus &&
+        event.kind != PointerDeviceKind.invertedStylus &&
+        event.kind != PointerDeviceKind.mouse &&
+        event.kind != PointerDeviceKind.touch) {
+      return;
+    }
+    // Touch için: palm rejection — çok büyük dokunma alanı avuç içi sayılır.
+    if (event.kind == PointerDeviceKind.touch && event.radiusMajor > 25) {
+      return;
+    }
+
+    _activePointer = event.pointer;
+    _isDrawing = true;
     setState(() {
       _currentPoints = [
-        PointVector(details.localPosition.dx, details.localPosition.dy),
+        PointVector(
+          event.localPosition.dx,
+          event.localPosition.dy,
+          _normalizedPressure(event.pressure),
+        ),
       ];
     });
   }
 
-  void _onPanUpdate(DragUpdateDetails details) {
+  void _onPointerMove(PointerMoveEvent event) {
+    if (!_isDrawing || event.pointer != _activePointer) return;
+
     setState(() {
       _currentPoints.add(
-        PointVector(details.localPosition.dx, details.localPosition.dy),
+        PointVector(
+          event.localPosition.dx,
+          event.localPosition.dy,
+          _normalizedPressure(event.pressure),
+        ),
       );
     });
   }
 
-  void _onPanEnd(DragEndDetails details) {
-    if (_currentPoints.isEmpty) return;
+  void _onPointerUp(PointerEvent event) {
+    if (event.pointer != _activePointer) return;
+    _finishStroke();
+  }
+
+  void _finishStroke() {
+    if (_currentPoints.isEmpty) {
+      _isDrawing = false;
+      _activePointer = -1;
+      return;
+    }
 
     final newStroke = DrawingStroke(
       points: List.from(_currentPoints),
@@ -158,15 +196,25 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
     widget.onStrokesChanged?.call([...widget.strokes, newStroke]);
     setState(() {
       _currentPoints = [];
+      _isDrawing = false;
+      _activePointer = -1;
     });
+  }
+
+  /// Pointer.pressure her zaman 0.0–1.0 arasında değil; bazı cihazlar
+  /// 0 döner (dokunma), bazıları >1.0 (force touch). Bunu 0.0–1.0'a sıkıştır.
+  double _normalizedPressure(double p) {
+    if (p <= 0) return 0.5; // bilinmiyor
+    return p.clamp(0.0, 1.0).toDouble();
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onPanStart: _onPanStart,
-      onPanUpdate: _onPanUpdate,
-      onPanEnd: _onPanEnd,
+    return Listener(
+      onPointerDown: _onPointerDown,
+      onPointerMove: _onPointerMove,
+      onPointerUp: _onPointerUp,
+      onPointerCancel: _onPointerUp,
       child: Container(
         color: widget.backgroundColor,
         child: Stack(
@@ -174,7 +222,7 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
             // Existing strokes
             ...widget.strokes.map((s) => StrokeWidget(stroke: s)),
             // Current stroke being drawn
-            if (_currentPoints.isNotEmpty) ...[
+            if (_currentPoints.isNotEmpty)
               StrokeWidget(
                 stroke: DrawingStroke(
                   points: _currentPoints,
@@ -182,7 +230,6 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
                   size: widget.currentSize,
                 ),
               ),
-            ],
           ],
         ),
       ),
@@ -326,53 +373,4 @@ class DrawingToolbar extends StatelessWidget {
   }
 }
 
-/// Export canvas to image
-Future<ui.Image?> exportCanvasToImage(
-  List<DrawingStroke> strokes,
-  Size size,
-) async {
-  final recorder = ui.PictureRecorder();
-  final canvas = Canvas(recorder);
 
-  // Draw white background
-  canvas.drawRect(
-    Rect.fromLTWH(0, 0, size.width, size.height),
-    Paint()..color = Colors.white,
-  );
-
-  // Draw all strokes
-  for (final stroke in strokes) {
-    if (stroke.points.isEmpty) continue;
-
-    final outlinePoints = getStroke(
-      stroke.points,
-      options: StrokeOptions(
-        size: stroke.size,
-        thinning: 0.5,
-        smoothing: 0.5,
-        streamline: 0.5,
-        start: StrokeEndOptions.start(taperEnabled: true, cap: true),
-        end: StrokeEndOptions.end(taperEnabled: true, cap: true),
-      ),
-    );
-
-    final path = Path();
-    if (outlinePoints.isNotEmpty) {
-      path.moveTo(outlinePoints.first.dx, outlinePoints.first.dy);
-      for (int i = 1; i < outlinePoints.length; i++) {
-        path.lineTo(outlinePoints[i].dx, outlinePoints[i].dy);
-      }
-      path.close();
-    }
-
-    canvas.drawPath(
-      path,
-      Paint()
-        ..color = stroke.color
-        ..style = PaintingStyle.fill,
-    );
-  }
-
-  final picture = recorder.endRecording();
-  return picture.toImage(size.width.toInt(), size.height.toInt());
-}

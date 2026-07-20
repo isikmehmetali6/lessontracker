@@ -41,8 +41,6 @@ class ErrorHandler {
     } else if (error is FormatException) {
       return 'Unexpected data format encountered.';
     } else {
-      // In production, you might not want to show raw errors, just returning a standard one
-      // return 'An unexpected error occurred. Please try again.';
       final strError = error.toString();
       if (strError.length > 100) {
         return '${strError.substring(0, 100)}...';

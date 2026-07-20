@@ -2,13 +2,25 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart'
-    show getDatabasesPath, Database;
+    show getDatabasesPath, Database, databaseFactory, OpenDatabaseOptions;
 import 'package:sqflite_sqlcipher/sqflite.dart' as sqlcipher;
 import 'package:path/path.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 
 import '../../models/note.dart';
+
+/// Test ortamı için override hook'u.
+/// Testlerde bu fonksiyon set edilerek SqlCipher atlanıp FFI kullanılır.
+/// Prod'da null kalır.
+Future<Database> Function(
+  String path,
+  int version, {
+  required Future<void> Function(Database) onConfigure,
+  required Future<void> Function(Database, int) onCreate,
+  required Future<void> Function(Database, int, int) onUpgrade,
+})?
+    testOpenDatabaseOverride;
 
 const String _keyDbEncryptionKey = 'db_encryption_key';
 const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
@@ -54,6 +66,21 @@ class DatabaseHelper {
   Future<Database> _initDatabase() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, dbName);
+
+    // Test ortamı: FFI factory atanmışsa (test_helpers.dart → databaseFactoryFfi),
+    // SqlCipher'ı bypass et ve platform-conditional FFI helper'ı kullan.
+    final override = testOpenDatabaseOverride;
+    if (override != null) {
+      return await override(
+        path,
+        17,
+        onConfigure: (db) async {
+          await db.execute('PRAGMA foreign_keys = ON');
+        },
+        onCreate: _onCreate,
+        onUpgrade: _onUpgrade,
+      );
+    }
 
     String? encryptionKey = await _secureStorage.read(key: _keyDbEncryptionKey);
     if (encryptionKey == null) {
