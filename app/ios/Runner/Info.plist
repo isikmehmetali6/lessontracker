@@ -37,24 +37,45 @@
 	<string>Lesson Tracker needs camera access to scan your notes and capture whiteboard content for OCR text recognition.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Lesson Tracker uses Face ID to protect your data with biometric authentication.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Lesson Tracker uses your location to automatically track attendance at your class locations.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Lesson Tracker needs background location access to automatically mark you as present when you arrive at your university during class hours, even if the app is closed.</string>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>location</string>
-		<string>fetch</string>
-		<string>processing</string>
-	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Lesson Tracker uses your location to automatically track attendance at your class locations.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Lesson Tracker needs microphone access to record voice memos and lecture audio for your notes.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Lesson Tracker needs permission to save scanned notes to your photo library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Lesson Tracker needs photo library access to import images of your notes and study materials.</string>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneClassName</key>
+					<string>UIWindowScene</string>
+					<key>UISceneConfigurationName</key>
+					<string>flutter</string>
+					<key>UISceneDelegateClassName</key>
+					<string>FlutterSceneDelegate</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>fetch</string>
+		<string>processing</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
