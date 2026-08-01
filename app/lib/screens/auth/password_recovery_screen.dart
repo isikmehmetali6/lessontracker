@@ -421,7 +421,7 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
 
     final l10n = AppLocalizations.of(context)!;
     return DropdownButtonFormField<int>(
-      value: selectedIndex,
+      initialValue: selectedIndex,
       decoration: InputDecoration(
         labelText: l10n.securityQuestionN(index + 1),
         labelStyle: TextStyle(
