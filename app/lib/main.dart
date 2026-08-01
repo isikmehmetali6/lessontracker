@@ -59,8 +59,8 @@ void callbackDispatcher() {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load Env
-  await dotenv.load(fileName: ".env");
+  // Load Env (optional: app boots even without .env present)
+  await dotenv.load(fileName: ".env", isOptional: true);
 
   // Status bar
   SystemChrome.setSystemUIOverlayStyle(
