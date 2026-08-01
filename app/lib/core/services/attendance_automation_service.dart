@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../models/course.dart';
 import '../../repositories/course_repository.dart';
 import '../../repositories/absence_repository.dart';
+import '../utils/absence_change_bus.dart';
 import 'location_service.dart';
 
 class AttendanceAutomationService {
@@ -115,6 +116,7 @@ class AttendanceAutomationService {
                 course.id,
                 date,
               );
+              AbsenceChangeBus.instance.fire(course.id);
               await prefs.setBool(checkKey, true);
               await _showAbsenceNotification(course.name);
               debugPrint(

@@ -15,6 +15,7 @@ import '../../repositories/deadline_repository.dart';
 import '../../repositories/grade_repository.dart';
 import '../../repositories/file_repository.dart';
 import '../../repositories/absence_repository.dart';
+import '../utils/absence_change_bus.dart';
 import '../../models/course.dart';
 import '../../models/note.dart';
 import '../../models/deadline.dart';
@@ -783,6 +784,7 @@ class SyncService {
             final date = DateTime.parse(dateStr as String);
             await _absenceRepo.insertAbsence(uuid.v4(), courseId, date);
           }
+          AbsenceChangeBus.instance.fire(courseId);
         } catch (e) {
           debugPrint('Error restoring absences for ${doc.id}: $e');
         }
