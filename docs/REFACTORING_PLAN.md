@@ -542,7 +542,7 @@ Her iş kalemi şu şablonu kullanır: **Amaç · Dosyalar · Adımlar · Kabul 
 | **Kabul** | 3 ardışık 72/72 (veya N/N) |
 | **Not** | Constructor injection sonrası fake repo örnekleri Faz 2’de |
 
-- [ ] **1.3** Test altyapısı standardize; 3× yeşil suite
+- [x] **1.3** Test altyapısı standardize; 3× yeşil suite
 
 #### 1.4 CI (GitHub Actions)
 
