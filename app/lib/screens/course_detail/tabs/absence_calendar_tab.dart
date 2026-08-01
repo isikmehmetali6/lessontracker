@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
-import '../../../repositories/absence_repository.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/course.dart';
 import '../../../providers/course_provider.dart';
@@ -25,7 +24,6 @@ class AbsenceCalendarTab extends StatefulWidget {
 }
 
 class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
-  final AbsenceRepository _absenceRepo = AbsenceRepository();
   Map<DateTime, List<Map<String, dynamic>>> _absenceEvents = {};
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
@@ -54,7 +52,9 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
   }
 
   Future<void> _loadAbsences() async {
-    final absences = await _absenceRepo.getAbsencesWithReasonByCourse(widget.courseId);
+    final absences = await context
+        .read<CourseProvider>()
+        .loadAbsencesForCourse(widget.courseId);
     final events = <DateTime, List<Map<String, dynamic>>>{};
     for (final a in absences) {
       final dateStr = a['date'];

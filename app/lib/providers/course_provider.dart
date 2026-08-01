@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:async';
 import '../repositories/course_repository.dart';
 import '../repositories/absence_repository.dart';
 import '../repositories/grade_repository.dart';
@@ -9,6 +10,7 @@ import '../models/grade.dart';
 import '../core/theme/app_colors.dart';
 import '../core/services/notification_service.dart';
 import '../core/services/file_service.dart';
+import '../core/utils/absence_change_bus.dart';
 import 'package:uuid/uuid.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
@@ -34,7 +36,9 @@ class CourseProvider extends ChangeNotifier {
         _absenceRepo = absenceRepo ?? AbsenceRepository(),
         _gradeRepo = gradeRepo ?? GradeRepository(),
         _fileRepo = fileRepo ?? FileRepository(),
-        _notificationService = notificationService ?? NotificationService();
+        _notificationService = notificationService ?? NotificationService() {
+    _absenceBusSub = AbsenceChangeBus.instance.stream.listen(_onAbsenceChanged);
+  }
 
   final CourseRepository _courseRepo;
   final AbsenceRepository _absenceRepo;
@@ -42,6 +46,7 @@ class CourseProvider extends ChangeNotifier {
   final FileRepository _fileRepo;
   final NotificationService _notificationService;
   final _uuid = const Uuid();
+  StreamSubscription<String>? _absenceBusSub;
 
   List<Course> _courses = [];
   List<Course> _todayCourses = [];
@@ -50,6 +55,24 @@ class CourseProvider extends ChangeNotifier {
   String? _error;
   String? _warning;
   Set<String> _mutedCourseIds = {};
+
+  Future<void> _onAbsenceChanged(String courseId) async {
+    final idx = _courses.indexWhere((c) => c.id == courseId);
+    if (idx < 0) return;
+    final absences = await _absenceRepo.getAbsencesWithReasonByCourse(courseId);
+    final dates = absences.map((a) {
+      final d = a['date'];
+      return d is DateTime ? d : DateTime.parse(d as String);
+    }).toList();
+    _courses[idx] = _courses[idx].copyWith(absenceDates: dates);
+    notifyListeners();
+  }
+
+  /// Public read path used by AbsenceCalendarTab so it doesn't keep a
+  /// private AbsenceRepository instance.
+  Future<List<Map<String, dynamic>>> loadAbsencesForCourse(String courseId) {
+    return _absenceRepo.getAbsencesWithReasonByCourse(courseId);
+  }
 
   // Getters
   List<Course> get courses => List.unmodifiable(_courses);
@@ -989,6 +1012,7 @@ class CourseProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _absenceBusSub?.cancel();
     _notificationService.cancelAllNotifications();
     super.dispose();
   }
