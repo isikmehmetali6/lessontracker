@@ -413,7 +413,7 @@ Her iş kalemi şu şablonu kullanır: **Amaç · Dosyalar · Adımlar · Kabul 
 | **Risk** | Yanlış dosya/lisans; eski path referansı kalırsa (grep `assets/fonts`) |
 | **Doğrulama** | `file app/fonts/Lexend-*.ttf`; `test ! -d app/assets/fonts` |
 
-- [ ] **0.1** Lexend gerçek TTF + `assets/fonts/` yinelenenini kaldır
+- [x] **0.1** Lexend gerçek TTF + `assets/fonts/` yinelenenini kaldır
 
 #### 0.2 App icon & splash
 
@@ -439,7 +439,7 @@ Her iş kalemi şu şablonu kullanır: **Amaç · Dosyalar · Adımlar · Kabul 
 | **Risk** | History’de büyük blob kalır ( purging ayrı iş ); `fix_opacity.py` ileride lazımsa önce `scripts/`’e taşı |
 | **Doğrulama** | `git ls-files` + `du -sh app/*.txt app/*log* 2>/dev/null` |
 
-- [ ] **0.3** Git çöpü: `.kilo`, logs, `.DS_Store`, `v`, PDF, bak, macOS `* 2`
+- [x] **0.3** Git çöpü: `.kilo`, logs, `.DS_Store`, `v`, PDF, bak, macOS `* 2`
 
 #### 0.4 `.env` asset + optional load
 
@@ -452,7 +452,7 @@ Her iş kalemi şu şablonu kullanır: **Amaç · Dosyalar · Adımlar · Kabul 
 | **Risk** | Env yokken throw eden path’ler — grep ile tarama zorunlu |
 | **Doğrulama** | `rg '\.env' app/pubspec.yaml`; app cold start without env |
 
-- [ ] **0.4** `.env` asset’ten çıkar + `isOptional: true`
+- [x] **0.4** `.env` asset’ten çıkar + `isOptional: true`
 
 #### 0.5 Kırık / flaky testler
 
@@ -491,7 +491,7 @@ Her iş kalemi şu şablonu kullanır: **Amaç · Dosyalar · Adımlar · Kabul 
 | **Risk** | Düşük |
 | **Doğrulama** | `ls app/assets/`; `rg 'assets/models' app/pubspec.yaml` |
 
-- [ ] **0.7** Ölü `assets/models` + docs/`build` hijyeni; asset ağacı net
+- [x] **0.7** Ölü `assets/models` + docs/`build` hijyeni; asset ağacı net
 
 **Faz 0 gate (güncel):** 0.1 + 0.3 + 0.4 + 0.7 zorunlu; 0.2/0.6 asset/keystore’a bağlı; 0.5 yeşil test.
 
