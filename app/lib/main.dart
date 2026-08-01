@@ -80,7 +80,7 @@ Future<void> main() async {
     NotificationService().init();
 
     // Init Workmanager for Background Tasks (only on mobile)
-    Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
+    Workmanager().initialize(callbackDispatcher);
   }
 
   // Initialize Firebase — must succeed before sync/auth services

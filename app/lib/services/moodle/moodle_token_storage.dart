@@ -11,7 +11,7 @@ class MoodleTokenStorage {
   static const _passwordPrefix = 'moodle_password_';
 
   static const _storage = FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    aOptions: AndroidOptions(),
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
   );
 
