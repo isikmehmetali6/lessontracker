@@ -595,7 +595,7 @@ ChangeNotifierProvider(create: (_) => CourseProvider()),
 
 **Kapsam dışı bu fazda:** Repository’lere `DatabaseHelper` constructor DI (test hook `testOpenDatabaseOverride` yeterli).
 
-- [ ] **2.0** DI standardını tüm ana provider’lara uygula (breaking yok; default repo)
+- [x] **2.0** DI standardını tüm ana provider’lara uygula (breaking yok; default repo)
 
 #### 2.1 CourseProvider / Note / Moodle bölme
 
