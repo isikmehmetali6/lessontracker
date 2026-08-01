@@ -19,7 +19,10 @@ class _DeadlineScreenState extends State<DeadlineScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<DeadlineProvider>().loadDeadlines());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<DeadlineProvider>().loadDeadlines();
+    });
   }
 
   void _showAddDialog() {

@@ -272,6 +272,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       });
 
       if (!mounted) return;
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(

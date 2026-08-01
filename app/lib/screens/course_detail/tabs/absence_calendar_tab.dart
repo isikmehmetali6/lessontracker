@@ -495,7 +495,9 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
                           reason: selectedReason,
                         );
                         HapticFeedback.mediumImpact();
-                        if (mounted) Navigator.pop(ctx);
+                        if (!mounted) return;
+                        if (!context.mounted) return;
+                        Navigator.pop(ctx);
                         _loadAbsences();
                       },
                       style: ElevatedButton.styleFrom(
@@ -599,7 +601,9 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
                         await provider.updateAbsenceReasonById(
                             absenceId, selectedReason);
                         HapticFeedback.mediumImpact();
-                        if (mounted) Navigator.pop(ctx);
+                        if (!mounted) return;
+                        if (!context.mounted) return;
+                        Navigator.pop(ctx);
                         _loadAbsences();
                       },
                       style: ElevatedButton.styleFrom(
@@ -644,9 +648,13 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
     );
 
     if (confirmed == true) {
+      if (!mounted) return;
+      if (!context.mounted) return;
       final provider = context.read<CourseProvider>();
       await provider.removeAbsenceById(widget.courseId, absenceId);
       HapticFeedback.mediumImpact();
+      if (!mounted) return;
+      if (!context.mounted) return;
       _loadAbsences();
     }
   }

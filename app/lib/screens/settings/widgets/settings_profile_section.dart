@@ -244,6 +244,7 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
     });
     final success = await widget.auth.updateUserPassword(current, newPass);
     if (mounted) {
+      if (!context.mounted) return;
       if (success) {
         try {
           final e2eEnabled = await E2EKeyService().isE2EEnabled();
@@ -257,6 +258,8 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
         _currentPasswordController.clear();
         _newPasswordController.clear();
         _confirmPasswordController.clear();
+        if (!mounted) return;
+        if (!context.mounted) return;
         setState(() => _showPasswordSection = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

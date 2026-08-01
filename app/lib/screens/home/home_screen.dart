@@ -398,8 +398,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (image == null || !mounted) return;
 
+      if (!context.mounted) return;
       final courseId = await _showCourseSelectionDialog(context);
       if (courseId == null || !mounted) return;
+      if (!context.mounted) return;
+      if (!mounted) return;
 
       // Show processing indicator
       ScaffoldMessenger.of(context).showSnackBar(
@@ -430,6 +433,8 @@ class _HomeScreenState extends State<HomeScreen> {
       final course = await courseProvider.getCourseById(courseId);
       final userName = 'User';
 
+      if (!mounted) return;
+      if (!context.mounted) return;
       final note = await context.read<NoteProvider>().addOcrNote(
         courseId: courseId,
         imageFile: File(image.path),
@@ -438,10 +443,12 @@ class _HomeScreenState extends State<HomeScreen> {
       );
 
       if (!mounted) return;
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
       if (note != null) {
         HapticFeedback.mediumImpact();
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(AppLocalizations.of(context)!.ocrNoteSaved),
@@ -459,6 +466,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       if (mounted) {
+        if (!context.mounted) return;
         ErrorHandler.handleError(context, e, customMessage: 'Error: $e');
       }
     }

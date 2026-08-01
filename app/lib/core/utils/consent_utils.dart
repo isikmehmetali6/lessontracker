@@ -13,6 +13,7 @@ class ConsentUtils {
         ? await consentService.hasAudioConsent()
         : await consentService.hasCameraConsent();
 
+    if (!context.mounted) return null;
     if (hasConsent) return true;
     
     return showDialog<bool>(
