@@ -465,7 +465,7 @@ Her iş kalemi şu şablonu kullanır: **Amaç · Dosyalar · Adımlar · Kabul 
 | **Risk** | Locale sabitleme bilinçli EN test ortamı demektir |
 | **Doğrulama** | `cd app && flutter test` ×3 |
 
-- [ ] **0.5** auth_flow mocktail + locale; flakiness gider; 72/72 ×3
+- [x] **0.5** auth_flow mocktail + locale; flakiness gider; 72/72 ×3
 
 #### 0.6 Android release imzalama
 
@@ -531,7 +531,7 @@ Her iş kalemi şu şablonu kullanır: **Amaç · Dosyalar · Adımlar · Kabul 
 | **Kabul** | `flutter pub get` + analyze’da `depend_on_referenced_packages` = 0 |
 | **Doğrulama** | `cd app && flutter pub get && flutter analyze` |
 
-- [ ] **1.2** Eksik deps ekle; ölü `sqflite_common_ffi_web` kaldır
+- [x] **1.2** Eksik deps ekle; ölü `sqflite_common_ffi_web` kaldır
 
 #### 1.3 Test altyapısı
 
