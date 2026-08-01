@@ -661,7 +661,7 @@ Mevcut `course_provider.dart` (~982) kümeleri:
 | **Dosyalar** | `attendance_automation_service.dart`, `course_provider.dart`, opsiyonel `absence_change_bus.dart`, `sync_service.dart` |
 | **Kabul** | Simüle insert + event sonrası home/course kartı **restart olmadan** güncellenir |
 
-- [ ] **2.3.1** Automation/restore → CourseProvider senkronu (bus veya dirty reload)
+- [x] **2.3.1** Automation/restore → CourseProvider senkronu (bus veya dirty reload)
 
 ##### 2.3.2 AbsenceCalendarTab dual read
 
@@ -672,7 +672,7 @@ Mevcut `course_provider.dart` (~982) kümeleri:
 | **Kabul** | Takvim + header kart aynı absence sayısı |
 
 - [x] Takvim **yazma** → CourseProvider (`addAbsenceAt` / `removeAbsenceById`) — *01.08.2026*
-- [ ] **2.3.2** Takvim **okuma** tek kaynaktan (provider)
+- [x] **2.3.2** Takvim **okuma** tek kaynaktan (provider)
 
 ##### 2.3.3 Drawing (Faz 3’e devir)
 
