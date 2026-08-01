@@ -41,7 +41,7 @@ void main() {
     when(() => mockAuthProvider.loginAsGuest()).thenAnswer((_) async {});
   });
 
-  Future<void> _pumpScreen(WidgetTester tester, Widget screen) async {
+  Future<void> pumpScreen(WidgetTester tester, Widget screen) async {
     tester.view.physicalSize = const Size(1080, 1920);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() => tester.view.resetPhysicalSize());
@@ -54,7 +54,7 @@ void main() {
     testWidgets('Login Screen UI elements are present', (
       WidgetTester tester,
     ) async {
-      await _pumpScreen(tester, const LoginScreen());
+      await pumpScreen(tester, const LoginScreen());
 
       expect(find.text('Email Address'), findsOneWidget);
       expect(find.text('Log In'), findsOneWidget);
@@ -65,7 +65,7 @@ void main() {
     testWidgets('Guest Mode shows local data warning', (
       WidgetTester tester,
     ) async {
-      await _pumpScreen(tester, const LoginScreen());
+      await pumpScreen(tester, const LoginScreen());
 
       await tester.tap(find.text('Continue as Guest'));
       await tester.pumpAndSettle();
@@ -79,7 +79,7 @@ void main() {
     testWidgets('Invalid Login triggers validation errors', (
       WidgetTester tester,
     ) async {
-      await _pumpScreen(tester, const LoginScreen());
+      await pumpScreen(tester, const LoginScreen());
 
       await tester.tap(find.text('Log In'));
       await tester.pumpAndSettle();
@@ -89,7 +89,7 @@ void main() {
     });
 
     testWidgets('Sign Up Error validations', (WidgetTester tester) async {
-      await _pumpScreen(tester, const SignUpScreen());
+      await pumpScreen(tester, const SignUpScreen());
 
       final emailField = find.widgetWithText(
         TextFormField,

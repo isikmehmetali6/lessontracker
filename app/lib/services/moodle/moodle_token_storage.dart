@@ -36,7 +36,7 @@ class MoodleTokenStorage {
     final expiry = DateTime.parse(expiryStr);
     return DateTime.now().isAfter(
       expiry.subtract(
-        Duration(minutes: AppConstants.TOKEN_REFRESH_BEFORE_MINUTES),
+        Duration(minutes: AppConstants.tokenRefreshBeforeMinutes),
       ),
     );
   }

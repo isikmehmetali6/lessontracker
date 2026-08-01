@@ -74,7 +74,7 @@ class MoodleCacheRepository {
     final sizeBytes = sizeResult.first['size'] as int? ?? 0;
     final sizeMB = sizeBytes ~/ (1024 * 1024);
 
-    if (sizeMB > AppConstants.MAX_CACHE_SIZE_MB) {
+    if (sizeMB > AppConstants.maxCacheSizeMb) {
       final deleteCount = await db.rawDelete(
         '''
         DELETE FROM moodle_cache 

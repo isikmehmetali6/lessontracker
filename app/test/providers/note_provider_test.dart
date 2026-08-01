@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lesson_tracker/providers/note_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:lesson_tracker/core/database/database_helper.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../test_helpers.dart';
 
 void main() {
