@@ -10,10 +10,20 @@ import 'package:uuid/uuid.dart';
 
 /// Not yönetimi provider
 class NoteProvider extends ChangeNotifier {
-  final NoteRepository _noteRepo = NoteRepository();
-  final OcrService _ocr = OcrService();
-  final FileService _fileService = FileService();
-  final AudioService _audioService = AudioService();
+  NoteProvider({
+    NoteRepository? noteRepo,
+    OcrService? ocr,
+    FileService? fileService,
+    AudioService? audioService,
+  })  : _noteRepo = noteRepo ?? NoteRepository(),
+        _ocr = ocr ?? OcrService(),
+        _fileService = fileService ?? FileService(),
+        _audioService = audioService ?? AudioService();
+
+  final NoteRepository _noteRepo;
+  final OcrService _ocr;
+  final FileService _fileService;
+  final AudioService _audioService;
   final _uuid = const Uuid();
 
   // Audio Streams

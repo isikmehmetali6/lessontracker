@@ -19,10 +19,20 @@ enum MoodleSyncStatus { idle, syncing, error, success }
 /// Birden fazla hesabı destekler; her hesabın verisi ayrı tutulur.
 /// Aggregated getter'lar tüm hesapların verilerini birleştirir.
 class MoodleProvider extends ChangeNotifier {
-  final MoodleAccountRepository _accountRepo = MoodleAccountRepository();
-  final MoodleSyncService _syncService = MoodleSyncService();
-  final MoodleApiService _api = MoodleApiService();
-  final MoodleTokenStorage _tokenStorage = MoodleTokenStorage();
+  MoodleProvider({
+    MoodleAccountRepository? accountRepo,
+    MoodleSyncService? syncService,
+    MoodleApiService? api,
+    MoodleTokenStorage? tokenStorage,
+  })  : _accountRepo = accountRepo ?? MoodleAccountRepository(),
+        _syncService = syncService ?? MoodleSyncService(),
+        _api = api ?? MoodleApiService(),
+        _tokenStorage = tokenStorage ?? MoodleTokenStorage();
+
+  final MoodleAccountRepository _accountRepo;
+  final MoodleSyncService _syncService;
+  final MoodleApiService _api;
+  final MoodleTokenStorage _tokenStorage;
   final _uuid = const Uuid();
 
   // ==================== STATE ====================
