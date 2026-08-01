@@ -515,7 +515,7 @@ Her iş kalemi şu şablonu kullanır: **Amaç · Dosyalar · Adımlar · Kabul 
 | **Kabul** | `flutter analyze` → No issues found (veya gerekçeli satır ignore ≤5) |
 | **Doğrulama** | `cd app && flutter analyze` |
 
-- [ ] **1.1** Analyze 69 → 0 (async gap, deprecated, unused, logging politikası)
+- [x] **1.1** Analyze 69 → 0 (async gap, deprecated, unused, logging politikası)
 
 #### 1.2 `pubspec.yaml` bağımlılıkları
 
