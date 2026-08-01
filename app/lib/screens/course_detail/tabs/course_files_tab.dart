@@ -167,7 +167,7 @@ class CourseFilesTab extends StatelessWidget {
                               File(resolvedPath),
                               fit: BoxFit.cover,
                               cacheWidth: 200, // Optimize memory footprint
-                              errorBuilder: (_, _, _) => Icon(icon, color: color),
+                              errorBuilder: (_, __, ___) => Icon(icon, color: color),
                             ),
                           );
                         }

@@ -101,7 +101,8 @@ Future<void> main() async {
     // Crashlytics: Flutter framework hatalarını ve async error'ları yakala.
     // Sadece release modda aktif (debug'da noisy olur).
     if (!kDebugMode) {
-      FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+      FlutterError.onError =
+          FirebaseCrashlytics.instance.recordFlutterFatalError;
       PlatformDispatcher.instance.onError = (error, stack) {
         FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
         return true;

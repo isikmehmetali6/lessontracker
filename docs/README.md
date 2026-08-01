@@ -8,8 +8,10 @@ Bu klasör, LessonTracker Flutter uygulamasının tüm dokümantasyonunu içerir
 
 | Dosya | Açıklama |
 |---|---|
-| [`AUDIT_REPORT_2026-07-17.md`](AUDIT_REPORT_2026-07-17.md) | **Ana denetim raporu.** Uygulama gerçekten çalıştırıldı, tüm test paketi koşuldu, 6 temel özellik kaynak koddan uçtan uca izlendi. |
-| [`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md) | Denetim raporundaki 13 maddelik aksiyon planı. Her madde: kanıt + uygulama adımı + sizden beklenen kararlar. |
+| [`REFACTORING_PLAN.md`](REFACTORING_PLAN.md) | **Aktif yol haritası (Ağustos 2026).** Mevcut durum (§01–§03), detaylı fazlar (§04), PR dilimi (§06), **nasıl uygulanır (§08)**. İşe buradan başla. |
+| [`SRS.md`](SRS.md) | Yazılım gereksinimleri özeti. |
+| [`AUDIT_REPORT_2026-07-17.md`](AUDIT_REPORT_2026-07-17.md) | Temmuz 2026 denetim raporu (tarihsel referans). |
+| [`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md) | Eski 13 maddelik aksiyon planı — içerik `REFACTORING_PLAN` ile birleştirildi/aşıldı; arşiv niteliğinde. |
 
 ---
 
@@ -48,6 +50,6 @@ Bu raporlar 2026 Şubat-Mayıs arası üretilmiş, birbirinin yerine geçen veya
 
 ## Yapı Sorgusu
 
-- **Güncel denetim:** 17 Temmuz 2026 (`AUDIT_REPORT_2026-07-17.md`)
-- **Güncel aksiyon planı:** `IMPLEMENTATION_PLAN.md`
+- **Aktif plan:** `REFACTORING_PLAN.md` (§08 = uygulama kılavuzu; ilk iş: PR-0a)
+- **Güncel denetim (tarihsel):** 17 Temmuz 2026 (`AUDIT_REPORT_2026-07-17.md`)
 - **Kök dizinde rapor dosyası:** 0 (yeniden organizasyon öncesi 17 idi)
