@@ -24,10 +24,23 @@ import '../models/course_file.dart';
 
 /// Ders yönetimi provider
 class CourseProvider extends ChangeNotifier {
-  final CourseRepository _courseRepo = CourseRepository();
-  final AbsenceRepository _absenceRepo = AbsenceRepository();
-  final GradeRepository _gradeRepo = GradeRepository();
-  final FileRepository _fileRepo = FileRepository();
+  CourseProvider({
+    CourseRepository? courseRepo,
+    AbsenceRepository? absenceRepo,
+    GradeRepository? gradeRepo,
+    FileRepository? fileRepo,
+    NotificationService? notificationService,
+  })  : _courseRepo = courseRepo ?? CourseRepository(),
+        _absenceRepo = absenceRepo ?? AbsenceRepository(),
+        _gradeRepo = gradeRepo ?? GradeRepository(),
+        _fileRepo = fileRepo ?? FileRepository(),
+        _notificationService = notificationService ?? NotificationService();
+
+  final CourseRepository _courseRepo;
+  final AbsenceRepository _absenceRepo;
+  final GradeRepository _gradeRepo;
+  final FileRepository _fileRepo;
+  final NotificationService _notificationService;
   final _uuid = const Uuid();
 
   List<Course> _courses = [];
@@ -123,13 +136,13 @@ class CourseProvider extends ChangeNotifier {
     if (_notificationsEnabled) {
       await _rescheduleAllNotifications();
     } else {
-      await NotificationService().cancelAllNotifications();
+      await _notificationService.cancelAllNotifications();
     }
     notifyListeners();
   }
 
   Future<void> _rescheduleAllNotifications() async {
-    await NotificationService().cancelAllNotifications();
+    await _notificationService.cancelAllNotifications();
     for (var course in _courses) {
       await _scheduleForCourse(course);
     }
@@ -154,7 +167,7 @@ class CourseProvider extends ChangeNotifier {
           notifyDay = (day - 1) < 0 ? 6 : (day - 1);
         }
 
-        await NotificationService().scheduleClassNotification(
+        await _notificationService.scheduleClassNotification(
           courseId: course.id,
           courseName: course.name,
           location: course.location,
@@ -171,7 +184,7 @@ class CourseProvider extends ChangeNotifier {
 
   Future<void> _cancelForCourse(Course course) async {
     for (var day in course.scheduleDays) {
-      await NotificationService().cancelClassNotification(course.id, day);
+      await _notificationService.cancelClassNotification(course.id, day);
     }
   }
 
@@ -976,7 +989,7 @@ class CourseProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    NotificationService().cancelAllNotifications();
+    _notificationService.cancelAllNotifications();
     super.dispose();
   }
 }

@@ -8,8 +8,17 @@ import 'deadline_provider.dart';
 /// [reloadCallbacks] restore sonrası çağrılarak kurs, not ve deadline
 /// verilerinin UI'a yansımasını sağlar.
 class SyncProvider extends ChangeNotifier {
-  final SyncService _syncService = SyncService();
-  
+  SyncProvider({SyncService? syncService})
+      : _syncService = syncService ?? SyncService() {
+    _syncService.onProgress = (msg, val) {
+      _statusMessage = msg;
+      _progress = val;
+      notifyListeners();
+    };
+  }
+
+  final SyncService _syncService;
+
   bool _isSyncing = false;
   double _progress = 0.0;
   String? _statusMessage;
@@ -23,14 +32,6 @@ class SyncProvider extends ChangeNotifier {
   /// Restore sonrası diğer provider'ları yeniden yüklemek için callback'ler.
   /// main.dart'ta veya settings ekranında set edilir.
   List<Future<void> Function()> reloadCallbacks = [];
-
-  SyncProvider() {
-    _syncService.onProgress = (msg, val) {
-      _statusMessage = msg;
-      _progress = val;
-      notifyListeners();
-    };
-  }
 
   void registerProviders(CourseProvider courseProvider, NoteProvider noteProvider, DeadlineProvider deadlineProvider) {
     reloadCallbacks = [
