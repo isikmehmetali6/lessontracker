@@ -25,7 +25,6 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
   bool _isLoading = false;
   String? _error;
   bool _consentChecked = false;
-  String? _verificationCode;
   bool _showVerificationStep = false;
   String? _pendingVeliEmail;
 
@@ -183,7 +182,6 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
                             : () {
                                 setState(() {
                                   _showVerificationStep = false;
-                                  _verificationCode = null;
                                   _pendingVeliEmail = null;
                                 });
                               },
@@ -529,7 +527,6 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
     HapticFeedback.mediumImpact();
 
     final generatedCode = _generateVerificationCode();
-    _verificationCode = generatedCode;
     _pendingVeliEmail = email;
 
     await _sendVerificationEmail(email, generatedCode);
@@ -660,7 +657,6 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
     });
 
     final generatedCode = _generateVerificationCode();
-    _verificationCode = generatedCode;
 
     await _sendVerificationEmail(_pendingVeliEmail!, generatedCode);
 

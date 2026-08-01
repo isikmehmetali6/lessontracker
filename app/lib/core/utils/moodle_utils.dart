@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class MoodleUtils {
   /// Moodle'dan gelen çoklu dil etiketli metinleri ayrıştırır.
   /// Örn: {mlang tr}Türkçe{mlang}{mlang en}English{mlang}

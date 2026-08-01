@@ -178,9 +178,6 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
   int _selectedQuestion3 = 2;
 
   bool _isLoading = false;
-  bool _emailSent = false;
-  bool _codeVerified = false;
-  bool _securityQuestionsVerified = false;
   String? _error;
   int _step = 1;
 
@@ -199,7 +196,6 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: isDark
@@ -486,8 +482,9 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
           isDark: isDark,
           isPassword: true,
           validator: (v) {
-            if (v == null || v.length < 6)
+            if (v == null || v.length < 6) {
               return l10n.passwordLengthError;
+            }
             return null;
           },
         ),
@@ -499,8 +496,9 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
           isDark: isDark,
           isPassword: true,
           validator: (v) {
-            if (v != _newPasswordController.text)
+            if (v != _newPasswordController.text) {
               return l10n.passwordsDoNotMatchError;
+            }
             return null;
           },
         ),
@@ -611,7 +609,6 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
       setState(() {
-        _emailSent = true;
         _step = 2;
       });
     } catch (e) {

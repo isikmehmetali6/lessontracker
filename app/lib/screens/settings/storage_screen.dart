@@ -122,8 +122,9 @@ class _StorageScreenState extends State<StorageScreen> {
           try {
             if (entity is File) {
               await entity.delete();
-            } else if (entity is Directory)
+            } else if (entity is Directory) {
               await entity.delete(recursive: true);
+            }
           } catch (e, stackTrace) {
             debugPrint('Error deleting temp entity: $e\nStack: $stackTrace');
           }
@@ -176,8 +177,9 @@ class _StorageScreenState extends State<StorageScreen> {
           try {
             if (entity is File) {
               await entity.delete();
-            } else if (entity is Directory)
+            } else if (entity is Directory) {
               await entity.delete(recursive: true);
+            }
           } catch (e, stackTrace) {
             debugPrint(
               'Error deleting temp entity in deep clean: $e\nStack: $stackTrace',

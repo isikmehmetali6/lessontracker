@@ -1,7 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:lesson_tracker/core/database/database_helper.dart';
 
@@ -35,9 +34,6 @@ void setupSecureStorageMock() {
   const channel = MethodChannel('plugins.it_nomads.com/flutter_secure_storage');
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-    final args = methodCall.arguments as Map<dynamic, dynamic>?;
-    final key = args?['key'] as String?;
-
     switch (methodCall.method) {
       case 'read':
         return '';

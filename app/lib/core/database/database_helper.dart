@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:sqflite/sqflite.dart'
-    show getDatabasesPath, Database, databaseFactory, OpenDatabaseOptions;
+import 'package:sqflite/sqflite.dart' show getDatabasesPath, Database;
 import 'package:sqflite_sqlcipher/sqflite.dart' as sqlcipher;
 import 'package:path/path.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
