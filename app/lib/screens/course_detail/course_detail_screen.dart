@@ -413,6 +413,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
 
   Future<void> _addFile(Course course) async {
     final success = await context.read<CourseProvider>().addFile(course.id);
+    if (!mounted) return;
     if (success) {
       _loadFiles();
       _showSnackBar(AppLocalizations.of(context)!.fileAdded);
@@ -513,6 +514,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                       final provider = this.context.read<CourseProvider>();
                       await provider.addLink(course.id, name, url);
                       if (mounted) {
+                        if (!context.mounted) return;
                         Navigator.pop(context);
                         _loadFiles();
                         _showSnackBar(AppLocalizations.of(context)!.linkAdded);
@@ -705,8 +707,11 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
             userName: 'User',
           );
 
+          if (!context.mounted) return;
           if (note != null) {
             HapticFeedback.mediumImpact();
+            if (!mounted) return;
+            if (!context.mounted) return;
             _showSnackBar(AppLocalizations.of(context)!.noteSaved);
           }
         },
@@ -878,8 +883,11 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
         builder: (_) => HandwritingCanvasScreen(course: course),
       ),
     ).then((savedNote) {
+      if (!context.mounted) return;
       if (savedNote != null) {
         _loadNotes();
+        if (!mounted) return;
+        if (!context.mounted) return;
         _showSnackBar(AppLocalizations.of(context)!.drawingSaved);
       }
     });

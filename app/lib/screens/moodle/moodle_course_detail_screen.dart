@@ -60,6 +60,8 @@ class _MoodleCourseDetailScreenState extends State<MoodleCourseDetailScreen> {
 
       _token = token;
 
+      if (!mounted) return;
+      if (!context.mounted) return;
       final account = context
           .read<MoodleProvider>()
           .accounts
@@ -652,7 +654,11 @@ class _ModuleTileState extends State<_ModuleTile> {
     if (file != null) {
       if (_isDownloaded && _localPath != null) {
         // İndirilmişse: kullanıcıya dışarı aç veya nota ekle seçeneği sun
+        if (!mounted) return;
+        if (!context.mounted) return;
         final action = await _showOpenActionSheet(context);
+        if (!mounted) return;
+        if (!context.mounted) return;
         if (action == _OpenAction.external) {
           await OpenFilex.open(_localPath!);
         } else if (action == _OpenAction.addAsNote) {

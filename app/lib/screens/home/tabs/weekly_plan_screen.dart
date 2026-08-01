@@ -46,7 +46,10 @@ class _WeeklyPlanScreenState extends State<WeeklyPlanScreen> {
   void initState() {
     super.initState();
     // Ensure deadlines are loaded
-    Future.microtask(() => context.read<DeadlineProvider>().loadDeadlines());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<DeadlineProvider>().loadDeadlines();
+    });
   }
 
   @override
