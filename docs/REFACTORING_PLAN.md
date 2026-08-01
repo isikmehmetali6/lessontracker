@@ -554,7 +554,7 @@ Her iş kalemi şu şablonu kullanır: **Amaç · Dosyalar · Adımlar · Kabul 
 | **Kabul** | Workflow yeşil; analyze fail merge’i engeller |
 | **Not** | Release imza job’u 0.6 + secrets sonrası |
 
-- [ ] **1.4** GitHub Actions CI ekle
+- [x] **1.4** GitHub Actions CI ekle
 
 ---
 
