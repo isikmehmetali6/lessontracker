@@ -27,6 +27,7 @@ import 'widgets/course_detail_header_info.dart';
 import 'widgets/course_bottom_toolbar.dart';
 import 'widgets/add_text_note_sheet.dart';
 import 'widgets/add_link_sheet.dart';
+import 'widgets/course_options_sheet.dart';
 import '../../core/utils/error_handler.dart';
 import '../../core/utils/consent_utils.dart';
 import 'handwriting_canvas_screen.dart';
@@ -266,122 +267,42 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
   }
 
   void _showCourseOptions(Course course) {
-    showModalBottomSheet(
+    final courseProvider = context.read<CourseProvider>();
+    showCourseOptionsSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        return DraggableScrollableSheet(
-          initialChildSize: 0.6,
-          minChildSize: 0.4,
-          maxChildSize: 0.9,
-          builder: (_, scrollController) => Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(28),
-              ),
-            ),
-            child: Column(
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Expanded(
-                  child: ListView(
-                    controller: scrollController,
-                    children: [
-                      _OptionTile(
-                        icon: Icons.edit,
-                        title:
-                            AppLocalizations.of(context)?.editCourse ??
-                            'Edit Course',
-                        onTap: () async {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  AddCourseScreen(courseToEdit: course),
-                            ),
-                          ).then((_) {
-                            _loadData();
-                          });
-                        },
-                      ),
-
-                      _OptionTile(
-                        icon: Icons.archive,
-                        title:
-                            AppLocalizations.of(context)?.archiveCourse ??
-                            'Archive Course',
-                        onTap: () async {
-                          Navigator.pop(context);
-                          final updated = course.copyWith(status: 'archived');
-                          await this.context
-                              .read<CourseProvider>()
-                              .updateCourse(updated);
-                          if (mounted) {
-                            Navigator.pop(this.context);
-                            ScaffoldMessenger.of(this.context).showSnackBar(
-                              SnackBar(content: Text(AppLocalizations.of(this.context)!.courseArchived)),
-                            );
-                          }
-                        },
-                      ),
-                      _OptionTile(
-                        icon: Icons.event_available,
-                        title:
-                            AppLocalizations.of(context)?.addDeadlineTitle ??
-                            'Add Deadline',
-                        color: AppColors.primary,
-                        onTap: () {
-                          Navigator.pop(context);
-                          _showAddDeadlineDialog(course);
-                        },
-                      ),
-
-                      _OptionTile(
-                        icon: Icons.notifications,
-                        title: AppLocalizations.of(context)!.notifications,
-                        onTap: () {
-                          Navigator.pop(context);
-                          final provider = this.context.read<CourseProvider>();
-                          final enabled = provider.notificationsEnabled;
-                          provider.toggleNotifications(!enabled);
-                          _showSnackBar(
-                            enabled
-                                ? AppLocalizations.of(this.context)!.notificationsDisabled
-                                : AppLocalizations.of(this.context)!.notificationsEnabled,
-                          );
-                        },
-                      ),
-                      _OptionTile(
-                        icon: Icons.delete_outline,
-                        title: AppLocalizations.of(context)!.deleteCourse,
-                        color: AppColors.red,
-                        onTap: () {
-                          Navigator.pop(context);
-                          _deleteCourse(course);
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+      course: course,
+      notificationsEnabled: () => courseProvider.notificationsEnabled,
+      onEdit: (c) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AddCourseScreen(courseToEdit: c),
           ),
+        ).then((_) {
+          _loadData();
+        });
+      },
+      onArchive: (updated) async {
+        await courseProvider.updateCourse(updated);
+        if (mounted) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context)!.courseArchived)),
+          );
+        }
+      },
+      onAddDeadline: () => _showAddDeadlineDialog(course),
+      onToggleNotifications: (newState) {
+        courseProvider.toggleNotifications(newState);
+      },
+      showSnack: (previousState) {
+        _showSnackBar(
+          previousState
+              ? AppLocalizations.of(context)!.notificationsDisabled
+              : AppLocalizations.of(context)!.notificationsEnabled,
         );
       },
+      onDelete: () => _deleteCourse(course),
     );
   }
 
@@ -765,84 +686,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
         content: Text(message),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
-  }
-}
-
-class _OptionTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final VoidCallback onTap;
-  final Color? color;
-
-  const _OptionTile({
-    required this.icon,
-    required this.title,
-    required this.onTap,
-    this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = color ?? (isDark ? Colors.white : AppColors.primary);
-    final textColor =
-        color ?? (isDark ? Colors.white : AppColors.textPrimaryLight);
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.surfaceDarkElevated : AppColors.surfaceLight,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark ? Colors.white10 : Colors.grey.shade200,
-              width: 1,
-            ),
-            boxShadow: isDark
-                ? []
-                : [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: baseColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: baseColor, size: 22),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: textColor,
-                  ),
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
