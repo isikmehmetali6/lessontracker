@@ -26,6 +26,7 @@ import 'widgets/course_detail_app_bar.dart';
 import 'widgets/course_detail_header_info.dart';
 import 'widgets/course_bottom_toolbar.dart';
 import 'widgets/add_text_note_sheet.dart';
+import 'widgets/add_link_sheet.dart';
 import '../../core/utils/error_handler.dart';
 import '../../core/utils/consent_utils.dart';
 import 'handwriting_canvas_screen.dart';
@@ -420,126 +421,16 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
   }
 
   void _showAddLinkDialog(Course course) {
-    final urlController = TextEditingController();
-    final nameController = TextEditingController();
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    showModalBottomSheet(
+    showAddLinkSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(28),
-              ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  AppLocalizations.of(context)!.addLink,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: isDark
-                        ? AppColors.textPrimaryDark
-                        : AppColors.textPrimaryLight,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: nameController,
-                  decoration: InputDecoration(
-                    hintText: AppLocalizations.of(context)!.linkName,
-                    prefixIcon: const Icon(Icons.label_outline),
-                    filled: true,
-                    fillColor: isDark
-                        ? Colors.grey.shade800
-                        : Colors.grey.shade100,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: urlController,
-                  decoration: InputDecoration(
-                    hintText: AppLocalizations.of(context)!.webLink,
-                    prefixIcon: const Icon(Icons.link),
-                    filled: true,
-                    fillColor: isDark
-                        ? Colors.grey.shade800
-                        : Colors.grey.shade100,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                  keyboardType: TextInputType.url,
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      final url = urlController.text.trim();
-                      if (url.isEmpty) return;
-                      final name = nameController.text.trim().isNotEmpty
-                          ? nameController.text.trim()
-                          : url;
-
-                      final provider = this.context.read<CourseProvider>();
-                      await provider.addLink(course.id, name, url);
-                      if (mounted) {
-                        if (!context.mounted) return;
-                        Navigator.pop(context);
-                        _loadFiles();
-                        _showSnackBar(AppLocalizations.of(context)!.linkAdded);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(AppLocalizations.of(context)!.addLink),
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-        );
+      course: course,
+      onSaved: () {
+        if (mounted) {
+          _loadFiles();
+          _showSnackBar(AppLocalizations.of(context)!.linkAdded);
+        }
       },
-    ).then((_) {
-      urlController.dispose();
-      nameController.dispose();
-    });
+    );
   }
 
   Future<void> _deleteFile(CourseFile file) async {
