@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -12,8 +11,8 @@ import '../../models/course.dart';
 import '../../providers/note_provider.dart';
 import '../../providers/course_provider.dart';
 import '../../core/services/file_service.dart';
-import '../../widgets/course/drawing_canvas.dart';
 import 'widgets/note_audio_player.dart';
+import 'widgets/note_drawing_display.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 
 class NoteDetailScreen extends StatefulWidget {
@@ -131,7 +130,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                   if (widget.note.type == NoteType.drawing &&
                       widget.note.drawingData != null &&
                       widget.note.drawingData!.isNotEmpty) ...[
-                    _DrawingDisplayWidget(
+                    NoteDrawingDisplay(
                       drawingData: widget.note.drawingData!,
                       isDark: isDark,
                     ),
@@ -754,198 +753,6 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       );
       Navigator.pop(context); // Return to course detail
     }
-  }
-}
-
-class _DrawingDisplayWidget extends StatefulWidget {
-  final String drawingData;
-  final bool isDark;
-
-  const _DrawingDisplayWidget({required this.drawingData, required this.isDark});
-
-  @override
-  State<_DrawingDisplayWidget> createState() => _DrawingDisplayWidgetState();
-}
-
-class _DrawingDisplayWidgetState extends State<_DrawingDisplayWidget> {
-  late final Map<int, List<DrawingStroke>> _strokesByPage =
-      _parseStrokes(widget.drawingData);
-  final PageController _pageController = PageController();
-  int _currentPage = 1;
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  /// drawingData JSON'unu parse edip her sayfa için ayrı stroke listesi döner.
-  /// Veri formatı 1: {"strokesByPage": {"1": [...], "2": [...]}}
-  /// Veri formatı 2 (geriye uyumlu): doğrudan düz liste → sayfa 1 olarak kabul et
-  static Map<int, List<DrawingStroke>> _parseStrokes(String drawingData) {
-    try {
-      final decoded = jsonDecode(drawingData);
-      final Map<int, List<DrawingStroke>> result = {};
-
-      if (decoded is Map<String, dynamic>) {
-        final strokesByPage = decoded['strokesByPage'];
-        if (strokesByPage is Map<String, dynamic>) {
-          strokesByPage.forEach((key, value) {
-            final pageNum = int.tryParse(key.toString());
-            if (pageNum == null || value is! List) return;
-            result[pageNum] = value
-                .map((e) => DrawingStroke.fromMap(e as Map<String, dynamic>))
-                .toList(growable: false);
-          });
-          if (result.isNotEmpty) return result;
-        }
-      }
-
-      if (decoded is List) {
-        result[1] = decoded
-            .map((e) => DrawingStroke.fromMap(e as Map<String, dynamic>))
-            .toList(growable: false);
-        return result;
-      }
-
-      return result;
-    } catch (e) {
-      debugPrint('Error parsing drawing data: $e');
-      return const {};
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = widget.isDark;
-    final pageNumbers = _strokesByPage.keys.toList()..sort();
-
-    if (pageNumbers.isEmpty) {
-      return Container(
-        height: 200,
-        decoration: BoxDecoration(
-          color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Center(
-          child: Text(AppLocalizations.of(context)!.noDrawingData),
-        ),
-      );
-    }
-
-    if (pageNumbers.length == 1) {
-      // Tek sayfa: göstergesiz göster
-      return _buildPageCanvas(
-        pageNumber: pageNumbers.first,
-        strokes: _strokesByPage[pageNumbers.first]!,
-        isDark: isDark,
-        showIndicator: false,
-      );
-    }
-
-    // Çoklu sayfa: PageView + alt gösterge
-    return Column(
-      children: [
-        SizedBox(
-          height: 320,
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: pageNumbers.length,
-            onPageChanged: (index) {
-              setState(() => _currentPage = pageNumbers[index]);
-            },
-            itemBuilder: (context, index) {
-              final pageNum = pageNumbers[index];
-              return _buildPageCanvas(
-                pageNumber: pageNum,
-                strokes: _strokesByPage[pageNum]!,
-                isDark: isDark,
-                showIndicator: false,
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.chevron_left),
-              onPressed: _currentPage > pageNumbers.first
-                  ? () => _pageController.previousPage(
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.easeInOut,
-                      )
-                  : null,
-            ),
-            Text(
-              '${pageNumbers.indexOf(_currentPage) + 1} / ${pageNumbers.length}',
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-            IconButton(
-              icon: const Icon(Icons.chevron_right),
-              onPressed: _currentPage < pageNumbers.last
-                  ? () => _pageController.nextPage(
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.easeInOut,
-                      )
-                  : null,
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPageCanvas({
-    required int pageNumber,
-    required List<DrawingStroke> strokes,
-    required bool isDark,
-    required bool showIndicator,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Stack(
-          children: [
-            DrawingCanvas(
-              strokes: strokes,
-              currentColor: Colors.black,
-              currentSize: 4.0,
-              backgroundColor: AppColors.surfaceLight,
-            ),
-            if (showIndicator)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.black54,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    'Sayfa $pageNumber',
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
   }
 }
 
