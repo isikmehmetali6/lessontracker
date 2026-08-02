@@ -12,6 +12,7 @@ import '../../core/services/file_service.dart';
 import 'widgets/note_audio_player.dart';
 import 'widgets/note_drawing_display.dart';
 import 'widgets/note_pdf_display.dart';
+import 'widgets/full_screen_image_viewer.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 
 class NoteDetailScreen extends StatefulWidget {
@@ -458,7 +459,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   void _openFullScreenImage(BuildContext context, String imagePath) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => _FullScreenImageViewer(imagePath: imagePath),
+        builder: (context) => FullScreenImageViewer(imagePath: imagePath),
       ),
     );
   }
@@ -752,33 +753,6 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       );
       Navigator.pop(context); // Return to course detail
     }
-  }
-}
-
-class _FullScreenImageViewer extends StatelessWidget {
-  final String imagePath;
-
-  const _FullScreenImageViewer({required this.imagePath});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Scaffold(
-      backgroundColor: isDark ? Colors.black : Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      extendBodyBehindAppBar: true,
-      body: Center(
-        child: InteractiveViewer(
-          minScale: 0.5,
-          maxScale: 4.0,
-          child: Image.file(File(imagePath), fit: BoxFit.contain),
-        ),
-      ),
-    );
   }
 }
 
