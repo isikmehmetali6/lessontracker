@@ -10,7 +10,6 @@ import '../../models/note.dart';
 import '../../providers/course_provider.dart';
 import '../../providers/note_provider.dart';
 import '../../models/course_file.dart';
-import '../../widgets/common/common_widgets.dart';
 import '../../widgets/common/sliver_app_bar_delegate.dart';
 import '../note_detail/note_detail_screen.dart';
 import '../../models/grade.dart';
@@ -20,13 +19,13 @@ import '../../providers/deadline_provider.dart';
 import '../../widgets/deadlines/add_deadline_dialog.dart';
 import '../add_course/add_course_screen.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
-import '../../core/utils/note_templates.dart';
 import 'tabs/course_notes_tab.dart';
 import 'tabs/course_grades_tab.dart';
 import 'tabs/course_files_tab.dart';
 import 'widgets/course_detail_app_bar.dart';
 import 'widgets/course_detail_header_info.dart';
 import 'widgets/course_bottom_toolbar.dart';
+import 'widgets/add_text_note_sheet.dart';
 import '../../core/utils/error_handler.dart';
 import '../../core/utils/consent_utils.dart';
 import 'handwriting_canvas_screen.dart';
@@ -720,139 +719,15 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
   }
 
   void _showTextNoteDialog(Course course) {
-    final titleController = TextEditingController();
-    final contentController = TextEditingController();
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    showModalBottomSheet(
+    showAddTextNoteSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(28),
-              ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  AppLocalizations.of(context)!.newNote,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: isDark
-                        ? AppColors.textPrimaryDark
-                        : AppColors.textPrimaryLight,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: titleController,
-                  decoration: InputDecoration(
-                    hintText: AppLocalizations.of(context)!.title,
-                    filled: true,
-                    fillColor: isDark
-                        ? Colors.grey.shade800
-                        : Colors.grey.shade100,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: contentController,
-                  maxLines: 4,
-                  decoration: InputDecoration(
-                    hintText: AppLocalizations.of(context)!.writeYourNote,
-                    filled: true,
-                    fillColor: isDark
-                        ? Colors.grey.shade800
-                        : Colors.grey.shade100,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                // Template selector
-                SizedBox(
-                  height: 40,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: NoteTemplates.templates.length,
-                    itemBuilder: (context, index) {
-                      final template = NoteTemplates.templates[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: ActionChip(
-                          avatar: Text(template.icon),
-                          label: Text(
-                            template.name,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          onPressed: () {
-                            contentController.text = template.content;
-                            if (titleController.text.isEmpty) {
-                              titleController.text = template.name;
-                            }
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 12),
-                PrimaryButton(
-                  text: AppLocalizations.of(context)!.saveNote,
-                  icon: Icons.check,
-                  onPressed: () async {
-                    if (titleController.text.isNotEmpty) {
-                      await context.read<NoteProvider>().addTextNote(
-                        courseId: course.id,
-                        title: titleController.text,
-                        content: contentController.text,
-                      );
-                      if (!context.mounted) return;
-                      Navigator.pop(context);
-                      HapticFeedback.mediumImpact();
-                      _showSnackBar(AppLocalizations.of(context)!.noteSaved);
-                    }
-                  },
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-        );
+      course: course,
+      onSaved: () {
+        if (mounted) {
+          _showSnackBar(AppLocalizations.of(context)!.noteSaved);
+        }
       },
-    ).then((_) {
-      titleController.dispose();
-      contentController.dispose();
-    });
+    );
   }
 
   void _showNoteDetail(Note note) {
