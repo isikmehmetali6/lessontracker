@@ -6,7 +6,6 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:path/path.dart' as p;
 import '../../core/database/database_helper.dart';
 import '../../repositories/course_repository.dart';
@@ -28,41 +27,18 @@ import 'e2e_file_service.dart';
 import 'e2e_key_service.dart';
 import 'e2e_upload_service.dart';
 import 'dart:async';
-import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
+import 'sync_encryption.dart';
+import 'sync_batch_utils.dart';
 
 /// Birden çok batch'e bölme limiti (Firestore max 500)
-const int _kBatchChunkSize = 400;
+const int _kBatchChunkSize = kSyncBatchChunkSize;
 
-bool _isNetworkError(Object error) {
-  final msg = error.toString().toLowerCase();
-  return msg.contains('socketexception') ||
-      msg.contains('timeoutexception') ||
-      msg.contains('handshakeexception') ||
-      msg.contains('connection') ||
-      msg.contains('network') ||
-      msg.contains('clientexception') ||
-      msg.contains('httpexception') ||
-      msg.contains('cloud_firestore') ||
-      msg.contains('firestore');
-}
-
-Future<T> _withRetry<T>(Future<T> Function() operation, int maxAttempts) async {
-  int attempt = 0;
-  while (true) {
-    try {
-      return await operation();
-    } catch (e) {
-      attempt++;
-      if (attempt >= maxAttempts || !_isNetworkError(e)) {
-        rethrow;
-      }
-      final delay = Duration(seconds: (1 << (attempt - 1)));
-      debugPrint('Retry $attempt/$maxAttempts after ${delay.inSeconds}s: $e');
-      await Future.delayed(delay);
-    }
-  }
-}
+Future<T> _withRetry<T>(
+  Future<T> Function() operation,
+  int maxAttempts,
+) =>
+    withSyncRetry(operation, maxAttempts: maxAttempts);
 
 class SyncService {
   final CourseRepository _courseRepo = CourseRepository();
@@ -76,57 +52,19 @@ class SyncService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FileService _fileService = FileService();
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  final SyncEncryption _encryption;
 
   static const String _keyCloudBackupEnabled = 'cloud_backup_enabled';
-  static const String _keyEncryptionKey = 'backup_encryption_key';
-  static const String _keyBackupIV = 'backup_encryption_iv';
 
   Function(String message, double progress)? onProgress;
 
-  Future<encrypt.Key> _getEncryptionKey() async {
-    final keyBase64 = await _secureStorage.read(key: _keyEncryptionKey);
-    if (keyBase64 == null) {
-      throw Exception(
-        'Encryption key not found. Please enable cloud backup first.',
-      );
-    }
-    return encrypt.Key.fromBase64(keyBase64);
-  }
+  SyncService({SyncEncryption? encryption})
+      : _encryption = encryption ?? SyncEncryption();
 
-  Future<encrypt.IV> _getOrCreateIV() async {
-    String? ivBase64 = await _secureStorage.read(key: _keyBackupIV);
-    if (ivBase64 == null) {
-      final iv = encrypt.IV.fromSecureRandom(16);
-      await _secureStorage.write(key: _keyBackupIV, value: iv.base64);
-      return iv;
-    }
-    return encrypt.IV.fromBase64(ivBase64);
-  }
-
-  Future<String> _encryptData(Map<String, dynamic> data) async {
-    final key = await _getEncryptionKey();
-    final iv = await _getOrCreateIV();
-    final encrypter = encrypt.Encrypter(
-      encrypt.AES(key, mode: encrypt.AESMode.cbc),
-    );
-    final jsonString = jsonEncode(data);
-    final encrypted = encrypter.encrypt(jsonString, iv: iv);
-    return encrypted.base64;
-  }
-
-  Future<Map<String, dynamic>> _decryptData(String encryptedBase64) async {
-    final key = await _getEncryptionKey();
-    final ivBase64 = await _secureStorage.read(key: _keyBackupIV);
-    if (ivBase64 == null) {
-      throw Exception('Backup IV not found. Cannot decrypt data.');
-    }
-    final iv = encrypt.IV.fromBase64(ivBase64);
-    final encrypter = encrypt.Encrypter(
-      encrypt.AES(key, mode: encrypt.AESMode.cbc),
-    );
-    final decrypted = encrypter.decrypt64(encryptedBase64, iv: iv);
-    return jsonDecode(decrypted) as Map<String, dynamic>;
-  }
+  Future<String> _encryptData(Map<String, dynamic> data) =>
+      _encryption.encryptData(data);
+  Future<Map<String, dynamic>> _decryptData(String encryptedBase64) =>
+      _encryption.decryptData(encryptedBase64);
 
   Future<bool> isCloudBackupEnabled() async {
     final prefs = await SharedPreferences.getInstance();
@@ -137,18 +75,7 @@ class SyncService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_keyCloudBackupEnabled, enabled);
     if (enabled) {
-      await _ensureEncryptionKeyExists();
-    }
-  }
-
-  Future<void> _ensureEncryptionKeyExists() async {
-    String? key = await _secureStorage.read(key: _keyEncryptionKey);
-    if (key == null) {
-      final generatedKey = encrypt.Key.fromSecureRandom(32);
-      await _secureStorage.write(
-        key: _keyEncryptionKey,
-        value: generatedKey.base64,
-      );
+      await _encryption.ensureEncryptionKeyExists();
     }
   }
 
