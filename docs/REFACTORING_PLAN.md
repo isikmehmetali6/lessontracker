@@ -647,7 +647,7 @@ Mevcut `course_provider.dart` (~982) kümeleri:
 | **Kabul** | `SyncProvider` + home restore aynı imzaları çağırır |
 | **Dosyalar** | `lib/core/services/sync_service.dart` + yeni modüller aynı klasörde |
 
-- [ ] **2.2** SyncService facade + modül split
+- [x] **2.2** SyncService facade + modül split (encryption + batch retry — part 1/2)
 
 #### 2.3 State desync — kalanlar
 
