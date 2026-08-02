@@ -1,10 +1,8 @@
 import 'dart:io';
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'package:pdfx/pdfx.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/note.dart';
 import '../../models/course.dart';
@@ -13,6 +11,7 @@ import '../../providers/course_provider.dart';
 import '../../core/services/file_service.dart';
 import 'widgets/note_audio_player.dart';
 import 'widgets/note_drawing_display.dart';
+import 'widgets/note_pdf_display.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 
 class NoteDetailScreen extends StatefulWidget {
@@ -140,7 +139,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                   // PDF display
                   if (widget.note.filePath != null &&
                       widget.note.filePath!.toLowerCase().endsWith('.pdf')) ...[
-                    _PdfDisplayWidget(
+                    NotePdfDisplay(
                       pdfPath: widget.note.filePath!,
                       isDark: isDark,
                     ),
@@ -753,136 +752,6 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       );
       Navigator.pop(context); // Return to course detail
     }
-  }
-}
-
-class _PdfDisplayWidget extends StatefulWidget {
-  final String pdfPath;
-  final bool isDark;
-
-  const _PdfDisplayWidget({required this.pdfPath, required this.isDark});
-
-  @override
-  State<_PdfDisplayWidget> createState() => _PdfDisplayWidgetState();
-}
-
-class _PdfDisplayWidgetState extends State<_PdfDisplayWidget> {
-  String? _resolvedPath;
-  bool _fileExists = false;
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _resolvePath();
-  }
-
-  Future<void> _resolvePath() async {
-    final resolved = await FileService().resolveFilePath(widget.pdfPath);
-    final exists = resolved != null && await File(resolved).exists();
-    if (mounted) {
-      setState(() {
-        _resolvedPath = resolved;
-        _fileExists = exists;
-        _isLoading = false;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Container(
-        height: 200,
-        decoration: BoxDecoration(
-          color: widget.isDark ? Colors.grey.shade800 : Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: const Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (!_fileExists) {
-      return Container(
-        height: 200,
-        decoration: BoxDecoration(
-          color: widget.isDark ? Colors.grey.shade800 : Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.picture_as_pdf,
-                size: 48,
-                color: widget.isDark ? Colors.grey : Colors.grey.shade600,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                AppLocalizations.of(context)!.pdfFileNotFound,
-                style: TextStyle(
-                  color: widget.isDark ? Colors.grey : Colors.grey.shade600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      height: 400,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: _PdfViewer(filePath: _resolvedPath!),
-      ),
-    );
-  }
-}
-
-class _PdfViewer extends StatefulWidget {
-  final String filePath;
-
-  const _PdfViewer({required this.filePath});
-
-  @override
-  State<_PdfViewer> createState() => _PdfViewerState();
-}
-
-class _PdfViewerState extends State<_PdfViewer> {
-  PdfControllerPinch? _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = PdfControllerPinch(
-      document: PdfDocument.openFile(widget.filePath),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_controller == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    return PdfViewPinch(controller: _controller!);
   }
 }
 
