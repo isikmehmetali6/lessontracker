@@ -1,6 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:lesson_tracker/core/theme/app_colors.dart';
+import 'package:lesson_tracker/core/utils/drawing_data_codec.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:lesson_tracker/widgets/course/drawing_canvas.dart';
 
@@ -20,7 +20,7 @@ class NoteDrawingDisplay extends StatefulWidget {
 
 class _NoteDrawingDisplayState extends State<NoteDrawingDisplay> {
   late final Map<int, List<DrawingStroke>> _strokesByPage =
-      _parseStrokes(widget.drawingData);
+      DrawingDataCodec.decode(widget.drawingData);
   final PageController _pageController = PageController();
   int _currentPage = 1;
 
@@ -28,39 +28,6 @@ class _NoteDrawingDisplayState extends State<NoteDrawingDisplay> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
-  }
-
-  static Map<int, List<DrawingStroke>> _parseStrokes(String drawingData) {
-    try {
-      final decoded = jsonDecode(drawingData);
-      final Map<int, List<DrawingStroke>> result = {};
-
-      if (decoded is Map<String, dynamic>) {
-        final strokesByPage = decoded['strokesByPage'];
-        if (strokesByPage is Map<String, dynamic>) {
-          strokesByPage.forEach((key, value) {
-            final pageNum = int.tryParse(key.toString());
-            if (pageNum == null || value is! List) return;
-            result[pageNum] = value
-                .map((e) => DrawingStroke.fromMap(e as Map<String, dynamic>))
-                .toList(growable: false);
-          });
-          if (result.isNotEmpty) return result;
-        }
-      }
-
-      if (decoded is List) {
-        result[1] = decoded
-            .map((e) => DrawingStroke.fromMap(e as Map<String, dynamic>))
-            .toList(growable: false);
-        return result;
-      }
-
-      return result;
-    } catch (e) {
-      debugPrint('Error parsing drawing data: $e');
-      return const {};
-    }
   }
 
   @override

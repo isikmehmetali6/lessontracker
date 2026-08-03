@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +9,7 @@ import 'package:uuid/uuid.dart';
 
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/drawing_data_codec.dart';
 import '../../models/course.dart';
 import '../../models/note.dart';
 import '../../providers/note_provider.dart';
@@ -62,28 +62,14 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
     if (widget.existingNote != null &&
         widget.existingNote!.drawingData != null) {
       try {
-        final drawingDataStr = widget.existingNote!.drawingData!;
-        final decoded = jsonDecode(drawingDataStr);
-
-        if (decoded is List) {
-          final List<dynamic> jsonList = decoded;
-          final strokes = jsonList
-              .map((e) => DrawingStroke.fromMap(e as Map<String, dynamic>))
-              .toList();
-          if (strokes.isNotEmpty) {
-            _strokesByPage[1] = strokes;
-            _currentPageStrokes = strokes;
-          }
-        } else if (decoded is Map && decoded.containsKey('strokesByPage')) {
-          final strokesByPage = decoded['strokesByPage'] as Map<String, dynamic>;
-          strokesByPage.forEach((pageStr, strokesList) {
-            final page = int.parse(pageStr);
-            final strokes = (strokesList as List)
-                .map((e) => DrawingStroke.fromMap(e as Map<String, dynamic>))
-                .toList();
-            _strokesByPage[page] = strokes;
-          });
-          _totalPdfPages = decoded['totalPages'] ?? _strokesByPage.keys.length;
+        final decoded = DrawingDataCodec.decode(
+          widget.existingNote!.drawingData!,
+        );
+        if (decoded.isNotEmpty) {
+          _strokesByPage
+            ..clear()
+            ..addAll(decoded);
+          _totalPdfPages = _strokesByPage.keys.length;
           _currentPageStrokes = _strokesByPage[1] ?? [];
         }
       } catch (e, stackTrace) {
@@ -230,13 +216,7 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
       }
 
       // Convert strokes per-page to JSON for storage
-      final Map<String, dynamic> drawingData = {
-        'strokesByPage': _strokesByPage.map(
-          (page, strokes) => MapEntry(page.toString(), strokes.map((s) => s.toMap()).toList()),
-        ),
-        'totalPages': _totalPdfPages,
-      };
-      final drawingJson = jsonEncode(drawingData);
+      final drawingJson = DrawingDataCodec.encode(_strokesByPage);
 
       final note = Note(
         id: noteId,
