@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/directory_size_utils.dart';
 import '../../core/database/database_helper.dart';
 import '../../repositories/course_repository.dart';
 import '../../repositories/note_repository.dart';
@@ -53,7 +54,7 @@ class _StorageScreenState extends State<StorageScreen> {
       int mediaSize = 0;
       try {
         final appDir = await getApplicationDocumentsDirectory();
-        mediaSize = await _getDirectorySize(appDir);
+        mediaSize = await DirectorySizeUtils.directorySize(appDir);
       } catch (e, stackTrace) {
         debugPrint('Error calculating media size: $e\nStack: $stackTrace');
       }
@@ -62,7 +63,7 @@ class _StorageScreenState extends State<StorageScreen> {
       int cacheSize = 0;
       try {
         final tempDir = await getTemporaryDirectory();
-        cacheSize = await _getDirectorySize(tempDir);
+        cacheSize = await DirectorySizeUtils.directorySize(tempDir);
       } catch (e, stackTrace) {
         debugPrint('Error calculating cache size: $e\nStack: $stackTrace');
       }
@@ -81,36 +82,6 @@ class _StorageScreenState extends State<StorageScreen> {
         setState(() => _isLoading = false);
       }
     }
-  }
-
-  Future<int> _getDirectorySize(Directory dir) async {
-    int size = 0;
-    try {
-      if (await dir.exists()) {
-        await for (var entity in dir.list(
-          recursive: true,
-          followLinks: false,
-        )) {
-          if (entity is File) {
-            size += await entity.length();
-          }
-        }
-      }
-    } catch (e, stackTrace) {
-      debugPrint(
-        'Error getting directory size for ${dir.path}: $e\nStack: $stackTrace',
-      );
-    }
-    return size;
-  }
-
-  String _formatBytes(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    if (bytes < 1024 * 1024 * 1024) {
-      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-    }
-    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
   }
 
   Future<void> _clearCache() async {
@@ -337,7 +308,7 @@ class _StorageScreenState extends State<StorageScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            loc.standardCleanupDesc(_formatBytes(_cacheSize)),
+                            loc.standardCleanupDesc(DirectorySizeUtils.formatBytes(_cacheSize)),
                             style: TextStyle(
                               color: isDark
                                   ? Colors.grey.shade400
@@ -467,7 +438,7 @@ class _StorageScreenState extends State<StorageScreen> {
                       const Icon(Icons.storage, color: Colors.white, size: 40),
                       const SizedBox(height: 12),
                       Text(
-                        _formatBytes(totalSize),
+                        DirectorySizeUtils.formatBytes(totalSize),
                         style: const TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.w800,
@@ -721,7 +692,7 @@ class _StorageScreenState extends State<StorageScreen> {
                     ),
                   ),
                   Text(
-                    _formatBytes(bytes),
+                    DirectorySizeUtils.formatBytes(bytes),
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
