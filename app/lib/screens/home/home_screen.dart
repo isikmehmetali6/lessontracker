@@ -10,13 +10,10 @@ import '../../core/theme/app_colors.dart';
 import '../../models/course.dart';
 import '../../providers/course_provider.dart';
 import '../../providers/note_provider.dart';
-import '../../widgets/home/home_widgets.dart';
 import '../course_detail/course_detail_screen.dart';
 import 'tabs/weekly_plan_screen.dart';
 import 'tabs/weekly_timetable_screen.dart';
 import '../settings/settings_screen.dart';
-import '../study_timer/study_timer_screen.dart';
-import '../gpa/gpa_calculator_screen.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../core/services/notification_service.dart';
 import '../../providers/auth_provider.dart';
@@ -25,14 +22,8 @@ import '../../providers/sync_provider.dart';
 import '../../core/services/sync_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/secure_storage_service.dart';
-import 'widgets/quick_action_card.dart';
-import 'widgets/today_schedule_list.dart';
-import 'widgets/priority_courses_list.dart';
-import 'widgets/attendance_overview_list.dart';
-import 'widgets/recent_notes_list.dart';
+import 'widgets/home_content.dart';
 import 'widgets/home_bottom_nav.dart';
-import 'widgets/home_header.dart';
-import 'widgets/home_search_bar.dart';
 import '../../core/utils/error_handler.dart';
 import '../moodle/moodle_hub_screen.dart';
 import '../../core/utils/consent_utils.dart';
@@ -351,7 +342,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: IndexedStack(
                 index: _currentIndex,
                 children: [
-                  _HomeContent(
+                  HomeContent(
                     onScanTap: () => _quickCaptureOcr(context),
                     onCourseTap: (course) => _navigateToCourse(course),
                   ),
@@ -616,197 +607,3 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 /// Ana sayfa içeriği
-class _HomeContent extends StatelessWidget {
-  final VoidCallback onScanTap;
-  final Function(Course) onCourseTap;
-
-  const _HomeContent({required this.onScanTap, required this.onCourseTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    // Trigger widget update efficiently (e.g. at provider level when courses change)
-    // Removed adPostFrameCallback here to prevent excessive calls during every rebuild.
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        await context.read<CourseProvider>().loadCourses();
-        if (!context.mounted) return;
-        await context.read<NoteProvider>().loadNotes();
-      },
-      child: CustomScrollView(
-        slivers: [
-          // Header
-          const SliverToBoxAdapter(child: HomeHeader()),
-
-          // Arama çubuğu
-          const SliverToBoxAdapter(child: HomeSearchBar()),
-
-          // Stats Summary (New)
-          const SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 24),
-            sliver: SliverToBoxAdapter(child: HomeStatsSummary()),
-          ),
-
-          // Today's Schedule
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-              child: Text(
-                AppLocalizations.of(context)!.todaySchedule,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: isDark
-                      ? AppColors.textPrimaryDark
-                      : AppColors.textPrimaryLight,
-                ),
-              ),
-            ),
-          ),
-
-          TodayScheduleList(onCourseTap: onCourseTap),
-
-          // Priority Focus Başlık
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-              child: Text(
-                AppLocalizations.of(context)!.priorityFocus,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: isDark
-                      ? AppColors.textPrimaryDark
-                      : AppColors.textPrimaryLight,
-                ),
-              ),
-            ),
-          ),
-
-          // Priority Courses
-          PriorityCoursesList(onCourseTap: onCourseTap),
-
-          // Quick Capture
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 12),
-              child: Text(
-                AppLocalizations.of(context)!.quickCapture,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: isDark
-                      ? AppColors.textPrimaryDark
-                      : AppColors.textPrimaryLight,
-                ),
-              ),
-            ),
-          ),
-
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: QuickCaptureButtons(onScanTap: onScanTap),
-            ),
-          ),
-
-          // Quick Actions (Timer & GPA)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-              child: Text(
-                AppLocalizations.of(context)!.quickActions,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: isDark
-                      ? AppColors.textPrimaryDark
-                      : AppColors.textPrimaryLight,
-                ),
-              ),
-            ),
-          ),
-
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: QuickActionCard(
-                      icon: Icons.timer,
-                      title: AppLocalizations.of(context)!.studyTimer,
-                      subtitle: AppLocalizations.of(context)!.studyTimerDesc,
-                      color: AppColors.orange,
-                      isDark: isDark,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const StudyTimerScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: QuickActionCard(
-                      icon: Icons.analytics,
-                      title: AppLocalizations.of(context)!.gpaCalculator,
-                      subtitle: AppLocalizations.of(context)!.gpaCalcDesc,
-                      color: AppColors.purple,
-                      isDark: isDark,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const GPACalculatorScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Attendance Overview
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 32, 24, 12),
-              child: Text(
-                AppLocalizations.of(context)!.attendanceStatus,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: isDark
-                      ? AppColors.textPrimaryDark
-                      : AppColors.textPrimaryLight,
-                ),
-              ),
-            ),
-          ),
-
-          const AttendanceOverviewList(),
-
-          // Recent Notes
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 32, 24, 12),
-              child: Text(
-                AppLocalizations.of(context)!.recentNotes,
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
-              ),
-            ),
-          ),
-
-          RecentNotesList(onCourseTap: onCourseTap),
-        ],
-      ),
-    );
-  }
-}
