@@ -24,6 +24,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/secure_storage_service.dart';
 import 'widgets/home_content.dart';
 import 'widgets/home_bottom_nav.dart';
+import 'widgets/restore_cloud_dialog.dart';
 import '../../core/utils/error_handler.dart';
 import '../moodle/moodle_hub_screen.dart';
 import '../../core/utils/consent_utils.dart';
@@ -172,136 +173,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Yeni cihazda bulut verisi bulunduğunda gösterilen dialog
   Future<bool?> _showRestoreDialog(int courseCount) {
-    return showDialog<bool>(
+    return showRestoreCloudDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          backgroundColor: isDark ? AppColors.surfaceDarkBlue : AppColors.surfaceLight,
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.cloud_download_rounded,
-                  color: AppColors.primary,
-                  size: 28,
-                ),
+      courseCount: courseCount,
+      onStartFresh: () async {
+        try {
+          await SyncService().clearCloudData();
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(AppLocalizations.of(context)!.cloudDataCleared),
+                backgroundColor: AppColors.green,
+                duration: const Duration(seconds: 3),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  AppLocalizations.of(ctx)!.savedDataFound,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-                ),
-              ),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppLocalizations.of(ctx)!.savedDataDescription(courseCount),
-                style: TextStyle(
-                  fontSize: 15,
-                  color: isDark ? Colors.grey[300] : Colors.grey[700],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : Colors.grey[50],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.1)
-                        : Colors.grey[200]!,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      size: 18,
-                      color: AppColors.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        AppLocalizations.of(ctx)!.loadDataDescription,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: isDark ? Colors.grey[400] : Colors.grey[600],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                // Return 'false' to dismiss dialog
-                Navigator.of(ctx).pop(false);
-
-                // Arka planda buluttaki eski verileri siliyoruz
-                try {
-                  await SyncService().clearCloudData();
-                  if (ctx.mounted) {
-                    ScaffoldMessenger.of(ctx).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          AppLocalizations.of(ctx)!.cloudDataCleared,
-                        ),
-                        backgroundColor: AppColors.green,
-                        duration: Duration(seconds: 3),
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  debugPrint('Bulut silme hatası: $e');
-                }
-              },
-              child: Text(
-                AppLocalizations.of(ctx)!.startFresh,
-                style: TextStyle(
-                  color: isDark ? Colors.grey[400] : Colors.grey[600],
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            ElevatedButton.icon(
-              onPressed: () => Navigator.of(ctx).pop(true),
-              icon: const Icon(Icons.cloud_download_rounded, size: 18),
-              label: Text(AppLocalizations.of(ctx)!.loadData),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-              ),
-            ),
-          ],
-        );
+            );
+          }
+        } catch (e) {
+          debugPrint('Bulut silme hatası: $e');
+        }
       },
     );
   }
