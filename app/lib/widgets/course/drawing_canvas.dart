@@ -5,31 +5,56 @@ import 'package:perfect_freehand/perfect_freehand.dart';
 
 import '../../core/theme/app_colors.dart';
 
-/// Drawing stroke data for serialization
+/// Drawing stroke data for serialization.
+///
+/// `v2` format adds an optional per-point `pressures` list (aligned
+/// with `points`); legacy `v1` strokes without pressure fall back to
+/// [defaultPressure] (0.5). The codec wraps these in
+/// `{"v":2,"strokesByPage":{...}}`; see DrawingDataCodec.
 class DrawingStroke {
+  static const double defaultPressure = 0.5;
+
   final List<PointVector> points;
   final Color color;
   final double size;
+  final List<double>? pressures;
 
   DrawingStroke({
     required this.points,
     required this.color,
     required this.size,
+    this.pressures,
   });
+
+  bool get hasPressure => pressures != null && pressures!.length == points.length;
+
+  double pressureAt(int i) {
+    final p = pressures;
+    if (p == null || i >= p.length) return defaultPressure;
+    return p[i];
+  }
 
   Map<String, dynamic> toMap() {
     return {
       'points': points.map((p) => {'x': p.x, 'y': p.y}).toList(),
+      if (pressures != null) 'pressures': pressures,
       'color': color.toARGB32(),
       'size': size,
     };
   }
 
   factory DrawingStroke.fromMap(Map<String, dynamic> map) {
+    final points = (map['points'] as List)
+        .map((p) => PointVector(p['x'] as double, p['y'] as double))
+        .toList();
+    List<double>? pressures;
+    final raw = map['pressures'];
+    if (raw is List) {
+      pressures = raw.map<double>((e) => (e as num).toDouble()).toList();
+    }
     return DrawingStroke(
-      points: (map['points'] as List)
-          .map((p) => PointVector(p['x'] as double, p['y'] as double))
-          .toList(),
+      points: points,
+      pressures: pressures,
       color: Color(map['color'] as int),
       size: map['size'] as double,
     );
@@ -131,33 +156,29 @@ class DrawingCanvas extends StatefulWidget {
 
 class _DrawingCanvasState extends State<DrawingCanvas> {
   List<PointVector> _currentPoints = [];
+  List<double> _currentPressures = [];
   int _activePointer = -1;
   bool _isDrawing = false;
 
   void _onPointerDown(PointerDownEvent event) {
-    // Palm rejection: stylus dışı ve fare dışı girişleri yoksay.
-    // Sadece stylus ve invertedStylus (bazı kalemler) ve fare (test/desktop) kabul.
     if (event.kind != PointerDeviceKind.stylus &&
         event.kind != PointerDeviceKind.invertedStylus &&
         event.kind != PointerDeviceKind.mouse &&
         event.kind != PointerDeviceKind.touch) {
       return;
     }
-    // Touch için: palm rejection — çok büyük dokunma alanı avuç içi sayılır.
     if (event.kind == PointerDeviceKind.touch && event.radiusMajor > 25) {
       return;
     }
 
     _activePointer = event.pointer;
     _isDrawing = true;
+    final p = _normalizedPressure(event.pressure);
     setState(() {
       _currentPoints = [
-        PointVector(
-          event.localPosition.dx,
-          event.localPosition.dy,
-          _normalizedPressure(event.pressure),
-        ),
+        PointVector(event.localPosition.dx, event.localPosition.dy),
       ];
+      _currentPressures = [p];
     });
   }
 
@@ -166,12 +187,9 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
 
     setState(() {
       _currentPoints.add(
-        PointVector(
-          event.localPosition.dx,
-          event.localPosition.dy,
-          _normalizedPressure(event.pressure),
-        ),
+        PointVector(event.localPosition.dx, event.localPosition.dy),
       );
+      _currentPressures.add(_normalizedPressure(event.pressure));
     });
   }
 
@@ -189,6 +207,7 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
 
     final newStroke = DrawingStroke(
       points: List.from(_currentPoints),
+      pressures: List.from(_currentPressures),
       color: widget.currentColor,
       size: widget.currentSize,
     );
@@ -196,6 +215,7 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
     widget.onStrokesChanged?.call([...widget.strokes, newStroke]);
     setState(() {
       _currentPoints = [];
+      _currentPressures = [];
       _isDrawing = false;
       _activePointer = -1;
     });
