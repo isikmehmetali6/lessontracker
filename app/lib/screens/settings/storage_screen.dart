@@ -10,6 +10,7 @@ import '../../repositories/grade_repository.dart';
 import '../../repositories/deadline_repository.dart';
 import '../../repositories/absence_repository.dart';
 import '../../repositories/file_repository.dart';
+import 'widgets/storage_breakdown_widgets.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import '../../core/utils/error_handler.dart';
@@ -460,7 +461,7 @@ class _StorageScreenState extends State<StorageScreen> {
                 const SizedBox(height: 24),
 
                 // Breakdown
-                _buildSectionTitle(isDark, loc.storageBreakdown),
+                StorageSectionTitle(title: loc.storageBreakdown, isDark: isDark),
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -470,31 +471,31 @@ class _StorageScreenState extends State<StorageScreen> {
                   ),
                   child: Column(
                     children: [
-                      _buildStorageRow(
-                        isDark,
-                        Icons.data_usage,
-                        AppColors.primary,
-                        loc.database,
-                        _dbSize,
-                        totalSize,
+                      StorageRow(
+                        isDark: isDark,
+                        icon: Icons.data_usage,
+                        color: AppColors.primary,
+                        label: loc.database,
+                        bytes: _dbSize,
+                        total: totalSize,
                       ),
                       const SizedBox(height: 16),
-                      _buildStorageRow(
-                        isDark,
-                        Icons.perm_media,
-                        AppColors.purple,
-                        loc.mediaFiles,
-                        _mediaSize,
-                        totalSize,
+                      StorageRow(
+                        isDark: isDark,
+                        icon: Icons.perm_media,
+                        color: AppColors.purple,
+                        label: loc.mediaFiles,
+                        bytes: _mediaSize,
+                        total: totalSize,
                       ),
                       const SizedBox(height: 16),
-                      _buildStorageRow(
-                        isDark,
-                        Icons.cached,
-                        AppColors.orange,
-                        loc.cache,
-                        _cacheSize,
-                        totalSize,
+                      StorageRow(
+                        isDark: isDark,
+                        icon: Icons.cached,
+                        color: AppColors.orange,
+                        label: loc.cache,
+                        bytes: _cacheSize,
+                        total: totalSize,
                       ),
                     ],
                   ),
@@ -503,7 +504,7 @@ class _StorageScreenState extends State<StorageScreen> {
                 const SizedBox(height: 24),
 
                 // Data Stats
-                _buildSectionTitle(isDark, loc.dataStats),
+                StorageSectionTitle(title: loc.dataStats, isDark: isDark),
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -513,12 +514,12 @@ class _StorageScreenState extends State<StorageScreen> {
                   ),
                   child: Column(
                     children: [
-                      _buildStatRow(
-                        isDark,
-                        Icons.school,
-                        AppColors.primary,
-                        loc.totalCourses,
-                        _stats['courses'] ?? 0,
+                      StatRow(
+                        isDark: isDark,
+                        icon: Icons.school,
+                        color: AppColors.primary,
+                        label: loc.totalCourses,
+                        count: _stats['courses'] ?? 0,
                       ),
                       Divider(
                         height: 20,
@@ -526,12 +527,12 @@ class _StorageScreenState extends State<StorageScreen> {
                             ? Colors.grey.shade800
                             : Colors.grey.shade200,
                       ),
-                      _buildStatRow(
-                        isDark,
-                        Icons.note,
-                        AppColors.blue,
-                        loc.totalNotes,
-                        _stats['notes'] ?? 0,
+                      StatRow(
+                        isDark: isDark,
+                        icon: Icons.note,
+                        color: AppColors.blue,
+                        label: loc.totalNotes,
+                        count: _stats['notes'] ?? 0,
                       ),
                       Divider(
                         height: 20,
@@ -539,12 +540,12 @@ class _StorageScreenState extends State<StorageScreen> {
                             ? Colors.grey.shade800
                             : Colors.grey.shade200,
                       ),
-                      _buildStatRow(
-                        isDark,
-                        Icons.grade,
-                        AppColors.orange,
-                        loc.gradesTab,
-                        _stats['grades'] ?? 0,
+                      StatRow(
+                        isDark: isDark,
+                        icon: Icons.grade,
+                        color: AppColors.orange,
+                        label: loc.gradesTab,
+                        count: _stats['grades'] ?? 0,
                       ),
                       Divider(
                         height: 20,
@@ -552,12 +553,12 @@ class _StorageScreenState extends State<StorageScreen> {
                             ? Colors.grey.shade800
                             : Colors.grey.shade200,
                       ),
-                      _buildStatRow(
-                        isDark,
-                        Icons.insert_drive_file,
-                        AppColors.purple,
-                        loc.filesTab,
-                        _stats['course_files'] ?? 0,
+                      StatRow(
+                        isDark: isDark,
+                        icon: Icons.insert_drive_file,
+                        color: AppColors.purple,
+                        label: loc.filesTab,
+                        count: _stats['course_files'] ?? 0,
                       ),
                       Divider(
                         height: 20,
@@ -565,12 +566,12 @@ class _StorageScreenState extends State<StorageScreen> {
                             ? Colors.grey.shade800
                             : Colors.grey.shade200,
                       ),
-                      _buildStatRow(
-                        isDark,
-                        Icons.event,
-                        AppColors.pink,
-                        loc.deadlinesHeader,
-                        _stats['deadlines'] ?? 0,
+                      StatRow(
+                        isDark: isDark,
+                        icon: Icons.event,
+                        color: AppColors.pink,
+                        label: loc.deadlinesHeader,
+                        count: _stats['deadlines'] ?? 0,
                       ),
                       Divider(
                         height: 20,
@@ -578,12 +579,12 @@ class _StorageScreenState extends State<StorageScreen> {
                             ? Colors.grey.shade800
                             : Colors.grey.shade200,
                       ),
-                      _buildStatRow(
-                        isDark,
-                        Icons.event_busy,
-                        AppColors.red,
-                        loc.absenceLabel,
-                        _stats['absences'] ?? 0,
+                      StatRow(
+                        isDark: isDark,
+                        icon: Icons.event_busy,
+                        color: AppColors.red,
+                        label: loc.absenceLabel,
+                        count: _stats['absences'] ?? 0,
                       ),
                     ],
                   ),
@@ -636,139 +637,6 @@ class _StorageScreenState extends State<StorageScreen> {
                 const SizedBox(height: 60),
               ],
             ),
-    );
-  }
-
-  Widget _buildSectionTitle(bool isDark, String title) {
-    return Text(
-      title.toUpperCase(),
-      style: TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 1.2,
-        color: isDark
-            ? AppColors.textSecondaryDark
-            : AppColors.textSecondaryLight,
-      ),
-    );
-  }
-
-  Widget _buildStorageRow(
-    bool isDark,
-    IconData icon,
-    Color color,
-    String label,
-    int bytes,
-    int total,
-  ) {
-    final fraction = total > 0 ? bytes / total : 0.0;
-    return Row(
-      children: [
-        Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(icon, color: color, size: 20),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: isDark
-                          ? AppColors.textPrimaryDark
-                          : AppColors.textPrimaryLight,
-                    ),
-                  ),
-                  Text(
-                    DirectorySizeUtils.formatBytes(bytes),
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: isDark
-                          ? AppColors.textSecondaryDark
-                          : AppColors.textSecondaryLight,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: fraction,
-                  backgroundColor: isDark
-                      ? Colors.grey.shade800
-                      : Colors.grey.shade200,
-                  color: color,
-                  minHeight: 6,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatRow(
-    bool isDark,
-    IconData icon,
-    Color color,
-    String label,
-    int count,
-  ) {
-    return Row(
-      children: [
-        Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(icon, color: color, size: 20),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-              color: isDark
-                  ? AppColors.textPrimaryDark
-                  : AppColors.textPrimaryLight,
-            ),
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            '$count',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: color,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
