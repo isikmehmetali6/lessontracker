@@ -6,6 +6,10 @@ import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/course.dart';
 import '../../../providers/course_provider.dart';
+import 'absence_reason.dart' show absenceReasonColors, absenceReasonIcons;
+import 'widgets/absence_day_details.dart';
+import 'widgets/absence_legend.dart';
+import 'widgets/absence_confirm_delete.dart';
 
 class AbsenceCalendarTab extends StatefulWidget {
   final String courseId;
@@ -28,20 +32,6 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   bool _isLoading = true;
-
-  static const Map<String, Color> reasonColors = {
-    'unexcused': AppColors.red,
-    'medical': Colors.blue,
-    'excused': AppColors.emerald,
-    'personal': AppColors.orange,
-  };
-
-  static const Map<String, IconData> reasonIcons = {
-    'unexcused': Icons.cancel,
-    'medical': Icons.local_hospital,
-    'excused': Icons.check_circle,
-    'personal': Icons.person,
-  };
 
   int get totalAbsences => _absenceEvents.values.fold(0, (sum, list) => sum + list.length);
 
@@ -237,7 +227,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
                         margin: const EdgeInsets.symmetric(horizontal: 1),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: reasonColors[reason] ?? AppColors.red,
+                          color: absenceReasonColors[reason] ?? AppColors.red,
                         ),
                       );
                     }).toList(),
@@ -286,109 +276,29 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
   }
 
   Widget _buildLegend() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: widget.isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Wrap(
-        spacing: 16,
-        runSpacing: 8,
-        children: reasonColors.entries.map((e) {
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 12,
-                height: 12,
-                decoration: BoxDecoration(
-                  color: e.value,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                _reasonLabel(e.key),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: widget.isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                ),
-              ),
-            ],
-          );
-        }).toList(),
-      ),
-    );
+    return AbsenceLegend(isDark: widget.isDark, reasonLabel: _reasonLabel);
   }
 
   Widget _buildSelectedDayDetails() {
-    final l10n = AppLocalizations.of(context)!;
     final events = _getEventsForDay(_selectedDay!);
-    if (events.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: widget.isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Text(
-          l10n.noAbsencesOnDay,
-          style: TextStyle(
-            color: widget.isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: widget.isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: events.map((a) {
-          final reason = (a['reason'] as String?) ?? 'unexcused';
-          final color = reasonColors[reason] ?? AppColors.red;
-          final icon = reasonIcons[reason] ?? Icons.cancel;
-          final id = a['id'] as String?;
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              children: [
-                Icon(icon, color: color, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    _reasonLabel(reason),
-                    style: TextStyle(
-                      color: widget.isDark ? Colors.white : Colors.black,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                if (id != null) ...[
-                  IconButton(
-                    icon: Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
-                    onPressed: () => _showEditReasonSheet(id, reason),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.red),
-                    onPressed: () => _confirmDelete(id),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                ],
-              ],
-            ),
-          );
-        }).toList(),
-      ),
+    return AbsenceDayDetails(
+      isDark: widget.isDark,
+      events: events,
+      reasonLabel: _reasonLabel,
+      onEditReason: _showEditReasonSheet,
+      onConfirmDelete: (id) async {
+        if (!mounted) return;
+        final ok = await confirmAbsenceDelete(context);
+        if (!ok) return;
+        if (!mounted) return;
+        if (!context.mounted) return;
+        final provider = context.read<CourseProvider>();
+        await provider.removeAbsenceById(widget.courseId, id);
+        HapticFeedback.mediumImpact();
+        if (!mounted) return;
+        if (!context.mounted) return;
+        _loadAbsences();
+      },
     );
   }
 
@@ -446,7 +356,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  ...reasonColors.entries.map((e) {
+                  ...absenceReasonColors.entries.map((e) {
                     final isSelected = selectedReason == e.key;
                     return GestureDetector(
                       onTap: () => setSheetState(() => selectedReason = e.key),
@@ -465,7 +375,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
                         ),
                         child: Row(
                           children: [
-                            Icon(reasonIcons[e.key], color: e.value, size: 22),
+                            Icon(absenceReasonIcons[e.key], color: e.value, size: 22),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
@@ -555,7 +465,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  ...reasonColors.entries.map((e) {
+                  ...absenceReasonColors.entries.map((e) {
                     final isSelected = selectedReason == e.key;
                     return GestureDetector(
                       onTap: () => setSheetState(() => selectedReason = e.key),
@@ -574,7 +484,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
                         ),
                         child: Row(
                           children: [
-                            Icon(reasonIcons[e.key], color: e.value, size: 22),
+                            Icon(absenceReasonIcons[e.key], color: e.value, size: 22),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
@@ -624,38 +534,4 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
     );
   }
 
-  Future<void> _confirmDelete(String absenceId) async {
-    final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.deleteAbsence),
-        content: Text(l10n.thisActionCannotBeUndone),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              l10n.delete,
-              style: const TextStyle(color: AppColors.red),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      if (!mounted) return;
-      if (!context.mounted) return;
-      final provider = context.read<CourseProvider>();
-      await provider.removeAbsenceById(widget.courseId, absenceId);
-      HapticFeedback.mediumImpact();
-      if (!mounted) return;
-      if (!context.mounted) return;
-      _loadAbsences();
-    }
-  }
 }
