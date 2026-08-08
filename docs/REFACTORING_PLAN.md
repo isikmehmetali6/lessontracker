@@ -627,10 +627,10 @@ Mevcut `course_provider.dart` (~982) kümeleri:
 | **Kabul** | `course_provider_test` / grade / absence testleri yeşil; home + course detail smoke |
 | **Risk** | Çok `watch<CourseProvider>` — ilk geçişte **facade** daha güvenli |
 
-- [ ] **2.1a** Constructor DI (Course/Note/Moodle/Sync)
-- [ ] **2.1b** GradeProvider (veya facade delege)
-- [ ] **2.1c** AttendanceProvider
-- [ ] **2.1d** CourseFileService (url_launcher/open_filex dışarı)
+- [x] **2.1a** Constructor DI (Course/Note/Moodle/Sync) — *PR-2a*
+- [x] **2.1b** GradeProvider (veya facade delege) — *PR-2d.1, PR-2d.2*
+- [x] **2.1c** AttendanceProvider — *PR-2d.1, PR-2d.2*
+- [x] **2.1d** CourseFileService (url_launcher/open_filex dışarı) — *PR-2d.3*
 
 #### 2.2 SyncService bölme (facade)
 
