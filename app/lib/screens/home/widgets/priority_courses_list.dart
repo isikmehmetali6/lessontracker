@@ -4,7 +4,7 @@ import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../models/course.dart';
 import '../../../../providers/course_provider.dart';
-import '../../../../widgets/home/home_widgets.dart';
+import '../../../../widgets/home/priority_course_card.dart';
 
 class PriorityCoursesList extends StatelessWidget {
   final Function(Course) onCourseTap;

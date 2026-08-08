@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lesson_tracker/models/course.dart';
-import 'package:lesson_tracker/widgets/home/home_widgets.dart';
+import 'package:lesson_tracker/widgets/home/schedule_card.dart';
 import 'package:provider/provider.dart';
 import 'package:lesson_tracker/providers/theme_provider.dart';
 

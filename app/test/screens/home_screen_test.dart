@@ -12,6 +12,7 @@ import 'package:lesson_tracker/providers/moodle_provider.dart';
 import 'package:lesson_tracker/providers/planner_event_provider.dart';
 import 'package:lesson_tracker/screens/home/home_screen.dart';
 import 'package:lesson_tracker/widgets/home/home_widgets.dart';
+import 'package:lesson_tracker/widgets/home/schedule_card.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
