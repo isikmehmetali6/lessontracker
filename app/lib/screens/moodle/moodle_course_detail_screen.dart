@@ -8,7 +8,7 @@ import '../../models/moodle/moodle_course.dart';
 import '../../models/moodle/moodle_course_content.dart';
 import '../../providers/course_provider.dart';
 import '../../providers/moodle_provider.dart';
-import '../../providers/note_provider.dart';
+import 'widgets/moodle_module_options_sheet.dart';import '../../providers/note_provider.dart';
 import '../../services/moodle/moodle_api_service.dart';
 import '../../services/moodle/moodle_token_storage.dart';
 import '../../core/theme/app_colors.dart';
@@ -323,48 +323,9 @@ class _ModuleTileState extends State<_ModuleTile> {
   }
 
   void _showOptionsBottomSheet(BuildContext context) {
-    showModalBottomSheet(
+    showMoodleModuleOptionsSheet(
       context: context,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 8),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.drive_file_move_rounded, color: AppColors.primary),
-                ),
-                title: Text(AppLocalizations.of(context)!.moodleTransferToCourse),
-                subtitle: Text(AppLocalizations.of(context)!.moodleTransferDesc),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showCourseSelectionDialog(context);
-                },
-              ),
-              const SizedBox(height: 16),
-            ],
-          ),
-        );
-      },
+      onTransferToCourse: () => _showCourseSelectionDialog(context),
     );
   }
 
