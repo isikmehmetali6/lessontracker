@@ -10,17 +10,16 @@ import '../models/grade.dart';
 import '../core/theme/app_colors.dart';
 import '../core/services/notification_service.dart';
 import '../core/services/file_service.dart';
+import '../core/services/course_file_service.dart';
 import '../core/utils/absence_change_bus.dart';
 import 'grade_provider.dart';
 import 'attendance_provider.dart';
 import 'package:uuid/uuid.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import '../repositories/note_repository.dart';
 import '../core/services/sync_service.dart';
 import '../core/services/auto_sync_service.dart';
-import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,16 +33,19 @@ class CourseProvider extends ChangeNotifier {
     GradeRepository? gradeRepo,
     FileRepository? fileRepo,
     NotificationService? notificationService,
+    CourseFileService? courseFileService,
   })  : _courseRepo = courseRepo ?? CourseRepository(),
         _absenceRepo = absenceRepo ?? AbsenceRepository(),
         _gradeRepo = gradeRepo ?? GradeRepository(),
         _fileRepo = fileRepo ?? FileRepository(),
-        _notificationService = notificationService ?? NotificationService() {
+        _notificationService = notificationService ?? NotificationService(),
+        _fileService = courseFileService ?? CourseFileService() {
     _absenceBusSub = AbsenceChangeBus.instance.stream.listen(_onAbsenceChanged);
   }
 
   final CourseRepository _courseRepo;
   final AbsenceRepository _absenceRepo;
+  final CourseFileService _fileService;
   final GradeRepository _gradeRepo;
   final FileRepository _fileRepo;
   final NotificationService _notificationService;
@@ -919,27 +921,9 @@ class CourseProvider extends ChangeNotifier {
   /// Dosyayı aç
   Future<void> openFile(CourseFile file) async {
     try {
-      if (file.url != null && file.url!.isNotEmpty) {
-        // Auto-prepend https:// if scheme is missing
-        var urlStr = file.url!;
-        if (!urlStr.startsWith('http://') && !urlStr.startsWith('https://')) {
-          urlStr = 'https://$urlStr';
-        }
-        final uri = Uri.tryParse(urlStr);
-        if (uri != null) {
-          // Use launchUrl directly — canLaunchUrl is unreliable on iOS
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
-        } else {
-          _error = 'Could not open link: ${file.name}';
-          notifyListeners();
-        }
-        return;
-      }
-      final resolvedPath = await FileService().resolveFilePath(file.path);
-      if (resolvedPath != null) {
-        await OpenFilex.open(resolvedPath);
-      } else {
-        _error = 'File not found: ${file.name}';
+      final error = await _fileService.open(file);
+      if (error != null) {
+        _error = error;
         notifyListeners();
       }
     } catch (e) {
