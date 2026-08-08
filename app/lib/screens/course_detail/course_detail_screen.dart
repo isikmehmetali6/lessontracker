@@ -25,6 +25,7 @@ import 'widgets/add_link_sheet.dart';
 import 'widgets/course_options_sheet.dart';
 import 'widgets/course_add_deadline_sheet.dart';
 import 'widgets/course_image_note_sheet.dart';
+import 'widgets/confirm_action_dialog.dart';
 import '../../core/utils/error_handler.dart';
 
 /// Ders detay sayfası
@@ -370,28 +371,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
   }
 
   Future<void> _deleteFile(CourseFile file) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.delete),
-        content: Text(AppLocalizations.of(context)!.thisActionCannotBeUndone),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(AppLocalizations.of(context)!.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              AppLocalizations.of(context)!.delete,
-              style: const TextStyle(color: AppColors.red),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
+    final confirm = await showConfirmActionDialog(context);
+    if (confirm) {
       if (!mounted) return;
       await context.read<CourseProvider>().deleteFile(file);
       _loadFiles();
@@ -418,28 +399,13 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
   }
 
   void _deleteCourse(Course course) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.deleteCourse),
-        content: Text(AppLocalizations.of(context)!.deleteCourseConfirmation),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(AppLocalizations.of(context)!.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              AppLocalizations.of(context)!.delete,
-              style: const TextStyle(color: AppColors.red),
-            ),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmActionDialog(
+      context,
+      title: AppLocalizations.of(context)!.deleteCourse,
+      message: AppLocalizations.of(context)!.deleteCourseConfirmation,
     );
 
-    if (confirmed == true) {
+    if (confirmed) {
       if (!context.mounted) return;
       // ignore: use_build_context_synchronously
       await context.read<CourseProvider>().deleteCourse(course.id);
