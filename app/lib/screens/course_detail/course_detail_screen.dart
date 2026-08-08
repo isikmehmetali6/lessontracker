@@ -26,6 +26,7 @@ import 'widgets/course_options_sheet.dart';
 import 'widgets/course_add_deadline_sheet.dart';
 import 'widgets/course_image_note_sheet.dart';
 import 'widgets/confirm_action_dialog.dart';
+import 'widgets/course_add_grade_sheet.dart';
 import '../../core/utils/error_handler.dart';
 
 /// Ders detay sayfası
@@ -415,40 +416,11 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
     }
   }
 
-  void _showAddGradeDialog(Course course) {
-    showModalBottomSheet(
+void _showAddGradeDialog(Course course) {
+    showCourseAddGradeSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => AddGradeDialog(
-        onSave: (name, score, maxScore, weight) async {
-          final provider = context.read<CourseProvider>();
-          await provider.addGrade(
-            courseId: course.id,
-            name: name,
-            score: score,
-            maxScore: maxScore,
-            weight: weight,
-          );
-          _loadGrades(); // Refresh list
-
-          // Ağırlık uyarısı kontrolü
-          if (provider.warning != null && mounted) {
-            ScaffoldMessenger.of(this.context).showSnackBar(
-              SnackBar(
-                content: Text(provider.warning!),
-                backgroundColor: Colors.amber.shade700,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                duration: const Duration(seconds: 4),
-              ),
-            );
-            provider.clearWarning();
-          }
-        },
-      ),
+      course: course,
+      onGradesChanged: _loadGrades,
     );
   }
 
