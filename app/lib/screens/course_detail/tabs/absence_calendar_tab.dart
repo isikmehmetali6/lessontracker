@@ -6,10 +6,11 @@ import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/course.dart';
 import '../../../providers/course_provider.dart';
-import 'absence_reason.dart' show absenceReasonColors, absenceReasonIcons;
+import 'absence_reason.dart' show absenceReasonColors;
 import 'widgets/absence_day_details.dart';
 import 'widgets/absence_legend.dart';
 import 'widgets/absence_confirm_delete.dart';
+import 'widgets/absence_reason_sheets.dart';
 
 class AbsenceCalendarTab extends StatefulWidget {
   final String courseId;
@@ -251,7 +252,14 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () => _showAddAbsenceSheet(context),
+              onPressed: () => showAbsenceAddSheet(
+                context: context,
+                courseId: widget.courseId,
+                selectedDate: _selectedDay ?? DateTime.now(),
+                isDark: widget.isDark,
+                labelBuilder: _reasonLabel,
+                onSaved: _loadAbsences,
+              ),
               icon: const Icon(Icons.add),
               label: Text(l10n.addAbsence),
               style: OutlinedButton.styleFrom(
@@ -285,7 +293,14 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
       isDark: widget.isDark,
       events: events,
       reasonLabel: _reasonLabel,
-      onEditReason: _showEditReasonSheet,
+      onEditReason: (id, reason) => showAbsenceEditSheet(
+        context: context,
+        absenceId: id,
+        currentReason: reason,
+        isDark: widget.isDark,
+        labelBuilder: _reasonLabel,
+        onSaved: _loadAbsences,
+      ),
       onConfirmDelete: (id) async {
         if (!mounted) return;
         final ok = await confirmAbsenceDelete(context);
@@ -302,236 +317,5 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
     );
   }
 
-  void _showAddAbsenceSheet(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final selectedDate = _selectedDay ?? DateTime.now();
-    String selectedReason = 'unexcused';
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setSheetState) {
-            return Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: widget.isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40, height: 4,
-                      decoration: BoxDecoration(color: widget.isDark ? Colors.grey.shade600 : Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    l10n.addAbsence,
-                      style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: widget.isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: widget.isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    l10n.selectReason,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: widget.isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  ...absenceReasonColors.entries.map((e) {
-                    final isSelected = selectedReason == e.key;
-                    return GestureDetector(
-                      onTap: () => setSheetState(() => selectedReason = e.key),
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? e.value.withValues(alpha: 0.15)
-                              : (widget.isDark ? Colors.grey.shade800 : Colors.grey.shade50),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected ? e.value : Colors.transparent,
-                            width: 2,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(absenceReasonIcons[e.key], color: e.value, size: 22),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                _reasonLabel(e.key),
-                                style: TextStyle(
-                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                                  color: widget.isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-                                ),
-                              ),
-                            ),
-                            if (isSelected)
-                              Icon(Icons.check_circle, color: e.value, size: 22),
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        final provider = context.read<CourseProvider>();
-                        await provider.addAbsenceAt(
-                          widget.courseId,
-                          selectedDate,
-                          reason: selectedReason,
-                        );
-                        HapticFeedback.mediumImpact();
-                        if (!mounted) return;
-                        if (!context.mounted) return;
-                        Navigator.pop(ctx);
-                        _loadAbsences();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: Text(l10n.save),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _showEditReasonSheet(String absenceId, String currentReason) {
-    final l10n = AppLocalizations.of(context)!;
-    String selectedReason = currentReason;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setSheetState) {
-            return Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: widget.isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40, height: 4,
-                      decoration: BoxDecoration(color: widget.isDark ? Colors.grey.shade600 : Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    l10n.editAbsence,
-                      style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: widget.isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  ...absenceReasonColors.entries.map((e) {
-                    final isSelected = selectedReason == e.key;
-                    return GestureDetector(
-                      onTap: () => setSheetState(() => selectedReason = e.key),
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? e.value.withValues(alpha: 0.15)
-                              : (widget.isDark ? Colors.grey.shade800 : Colors.grey.shade50),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected ? e.value : Colors.transparent,
-                            width: 2,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(absenceReasonIcons[e.key], color: e.value, size: 22),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                _reasonLabel(e.key),
-                                style: TextStyle(
-                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                                  color: widget.isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-                                ),
-                              ),
-                            ),
-                            if (isSelected)
-                              Icon(Icons.check_circle, color: e.value, size: 22),
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        final provider = context.read<CourseProvider>();
-                        await provider.updateAbsenceReasonById(
-                            absenceId, selectedReason);
-                        HapticFeedback.mediumImpact();
-                        if (!mounted) return;
-                        if (!context.mounted) return;
-                        Navigator.pop(ctx);
-                        _loadAbsences();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    child: Text(l10n.save),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
 
 }
