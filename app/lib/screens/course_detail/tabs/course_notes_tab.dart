@@ -6,6 +6,7 @@ import '../../../../models/course.dart';
 import '../../../../models/note.dart';
 import '../../../../providers/note_provider.dart';
 import '../../../../widgets/course/note_cards.dart';
+import '../widgets/confirm_action_dialog.dart';
 
 class CourseNotesTab extends StatefulWidget {
   final Course course;
@@ -314,25 +315,9 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
                         ),
                       ),
                       confirmDismiss: (direction) async {
-                        return await showDialog<bool>(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text(l10n.deleteNoteTitle),
-                            content: Text(l10n.thisActionCannotBeUndone),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, false),
-                                child: Text(l10n.cancel),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, true),
-                                child: Text(
-                                  l10n.delete,
-                                  style: const TextStyle(color: AppColors.red),
-                                ),
-                              ),
-                            ],
-                          ),
+                        return await showConfirmActionDialog(
+                          context,
+                          title: l10n.deleteNoteTitle,
                         );
                       },
                       onDismissed: (direction) {
