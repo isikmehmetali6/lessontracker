@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/theme/app_colors.dart';
-import '../../providers/course_provider.dart';
-import '../../providers/deadline_provider.dart';
+import 'package:lesson_tracker/core/theme/app_colors.dart';
+import 'package:lesson_tracker/providers/course_provider.dart';
+import 'package:lesson_tracker/providers/deadline_provider.dart';
 
-
-/// Home Stats Summary Widget (New)
 class HomeStatsSummary extends StatelessWidget {
   const HomeStatsSummary({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  Widget build(BuildContext context) {    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Consumer2<CourseProvider, DeadlineProvider>(
       builder: (context, courseProvider, deadlineProvider, _) {
@@ -137,4 +134,3 @@ class HomeStatsSummary extends StatelessWidget {
 }
 
 /// Bugünkü program kartı
-/// Hızlı yakalama butonları
