@@ -27,6 +27,7 @@ import 'widgets/add_text_note_sheet.dart';
 import 'widgets/add_link_sheet.dart';
 import 'widgets/course_options_sheet.dart';
 import 'widgets/course_add_deadline_sheet.dart';
+import 'widgets/course_image_note_sheet.dart';
 import '../../core/utils/error_handler.dart';
 import '../../core/utils/consent_utils.dart';
 import 'handwriting_canvas_screen.dart';
@@ -406,35 +407,15 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
 
 
   void _showImageNoteDialog(File imageFile, Course course) {
-    showModalBottomSheet(
+    showCourseImageNoteSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) => AddMediaNoteDialog(
-        imageFile: imageFile,
-        onSave: (title, content, tags) async {
-          final noteProvider = context.read<NoteProvider>();
-          Navigator.pop(sheetContext);
-
-          final note = await noteProvider.addImageNote(
-            courseId: course.id,
-            imageFile: imageFile,
-            customTitle: title.isNotEmpty ? title : null,
-            content: content?.isNotEmpty == true ? content : null,
-            tags: tags,
-            courseName: course.name,
-            userName: 'User',
-          );
-
-          if (!context.mounted) return;
-          if (note != null) {
-            HapticFeedback.mediumImpact();
-            if (!mounted) return;
-            if (!context.mounted) return;
-            _showSnackBar(AppLocalizations.of(context)!.noteSaved);
-          }
-        },
-      ),
+      imageFile: imageFile,
+      course: course,
+      onSaved: () {
+        if (mounted) {
+          _showSnackBar(AppLocalizations.of(context)!.noteSaved);
+        }
+      },
     );
   }
 
