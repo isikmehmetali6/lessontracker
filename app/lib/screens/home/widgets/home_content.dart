@@ -12,7 +12,7 @@ import 'home_header.dart';
 import 'home_search_bar.dart';
 import 'priority_courses_list.dart';
 import 'quick_action_card.dart';
-import 'package:lesson_tracker/widgets/home/home_widgets.dart' show HomeStatsSummary;
+import 'package:lesson_tracker/widgets/home/home_stats_summary.dart';
 import 'package:lesson_tracker/widgets/home/quick_capture_buttons.dart';
 import 'recent_notes_list.dart';
 import 'today_schedule_list.dart';
