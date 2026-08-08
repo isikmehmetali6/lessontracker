@@ -229,6 +229,10 @@ class SyncService {
   }
 
   Future<void> backupData() async {
+    await _runBackup();
+  }
+
+  Future<void> _runBackup() async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('User not logged in');
 
@@ -237,7 +241,6 @@ class SyncService {
         'Cloud backup is disabled. Please enable it in Settings.',
       );
     }
-
     // B3 fix: İnternet kontrolü
     if (!await _checkConnectivity()) {
       throw Exception(
@@ -448,6 +451,10 @@ class SyncService {
   }
 
   Future<void> restoreData() async {
+    await _runRestore();
+  }
+
+  Future<void> _runRestore() async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('User not logged in');
 
@@ -823,6 +830,10 @@ class SyncService {
 
   /// Tüm kullanıcı verilerini sil (KVKK Madde 7 - Silme Hakkı)
   Future<void> deleteAllUserData() async {
+    await _runDeleteAllUserData();
+  }
+
+  Future<void> _runDeleteAllUserData() async {
     final user = _auth.currentUser;
     if (user == null) {
       throw Exception('Kullanıcı giriş yapmamış');
