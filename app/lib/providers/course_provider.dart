@@ -11,6 +11,8 @@ import '../core/theme/app_colors.dart';
 import '../core/services/notification_service.dart';
 import '../core/services/file_service.dart';
 import '../core/utils/absence_change_bus.dart';
+import 'grade_provider.dart';
+import 'attendance_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
@@ -548,6 +550,7 @@ class CourseProvider extends ChangeNotifier {
 
   /// Tarihli devamsızlık ekle (takvim sekmesi için)
   /// Mevcut `addAbsence` (DateTime.now()) kullanımını bozmamak için ayrı metod.
+  /// AttendanceProvider'a delege eder; local state mutasyonu kalır.
   Future<void> addAbsenceAt(
     String courseId,
     DateTime date, {
@@ -559,8 +562,7 @@ class CourseProvider extends ChangeNotifier {
     final course = _courses[courseIndex];
     final newDate = date;
 
-    await _absenceRepo.insertAbsence(
-      _uuid.v4(),
+    await AttendanceProvider(absenceRepo: _absenceRepo).addAbsenceAt(
       courseId,
       newDate,
       reason: reason,
@@ -583,13 +585,17 @@ class CourseProvider extends ChangeNotifier {
   }
 
   /// ID ile devamsızlık sil (takvim sekmesi için)
+  /// AttendanceProvider'a delege eder; local state mutasyonu kalır.
   Future<void> removeAbsenceById(String courseId, String absenceId) async {
     final courseIndex = _courses.indexWhere((c) => c.id == courseId);
     if (courseIndex == -1) return;
 
     final course = _courses[courseIndex];
 
-    await _absenceRepo.deleteAbsence(absenceId);
+    await AttendanceProvider(absenceRepo: _absenceRepo).removeAbsenceById(
+      courseId,
+      absenceId,
+    );
 
     final allAbsences = await _absenceRepo.getAbsencesWithReasonByCourse(courseId);
     final updatedDates = allAbsences.map((a) {
@@ -611,8 +617,10 @@ class CourseProvider extends ChangeNotifier {
   }
 
   /// Devamsızlık sebebini güncelle (takvim sekmesi için)
+  /// AttendanceProvider'a delege eder.
   Future<void> updateAbsenceReasonById(String absenceId, String reason) async {
-    await _absenceRepo.updateAbsenceReason(absenceId, reason);
+    await AttendanceProvider(absenceRepo: _absenceRepo)
+        .updateAbsenceReasonById('', absenceId, reason);
     notifyListeners();
   }
 
@@ -676,7 +684,8 @@ class CourseProvider extends ChangeNotifier {
     return total;
   }
 
-  /// Puan ekle
+  /// Puan ekle (facade). Asıl iş GradeProvider'da; local state
+  /// mutasyonu CourseProvider'da kalır (Course.absenceDates/grades burada).
   Future<Grade?> addGrade({
     required String courseId,
     required String name,
@@ -687,10 +696,8 @@ class CourseProvider extends ChangeNotifier {
     _error = null;
     _warning = null;
     try {
-      // Toplam ağırlık kontrolü — bilgilendirme amaçlı, engelleme yok
       final currentTotal = await getTotalWeight(courseId);
       final newTotal = currentTotal + weight;
-
       final grade = Grade(
         id: _uuid.v4(),
         courseId: courseId,
@@ -700,15 +707,23 @@ class CourseProvider extends ChangeNotifier {
         weight: weight,
         createdAt: DateTime.now(),
       );
-
-      await _gradeRepo.insertGrade(grade);
-
+      await GradeProvider(
+        gradeRepo: _gradeRepo,
+        uuid: _uuid,
+      ).addGrade(
+        courseId: courseId,
+        name: name,
+        score: score,
+        maxScore: maxScore,
+        weight: weight,
+        currentTotalWeight: currentTotal,
+      );
+      // _warning'i GradeProvider'dan okumak yerine yerel hesap korunur.
       if (newTotal > 100) {
         _warning =
             'Total weight is ${newTotal.toStringAsFixed(0)}% (exceeds 100%). '
             'This may affect weighted average calculation.';
       }
-
       notifyListeners();
       return grade;
     } catch (e) {
@@ -718,11 +733,11 @@ class CourseProvider extends ChangeNotifier {
     }
   }
 
-  /// Puan güncelle
+  /// Puan güncelle (facade).
   Future<bool> updateGrade(Grade grade) async {
     _error = null;
     try {
-      await _gradeRepo.updateGrade(grade);
+      await GradeProvider(gradeRepo: _gradeRepo).updateGrade(grade);
       notifyListeners();
       return true;
     } catch (e) {
@@ -732,10 +747,10 @@ class CourseProvider extends ChangeNotifier {
     }
   }
 
-  /// Puan sil
+  /// Puan sil (facade).
   Future<bool> deleteGrade(String gradeId) async {
     try {
-      await _gradeRepo.deleteGrade(gradeId);
+      await GradeProvider(gradeRepo: _gradeRepo).deleteGrade(gradeId);
       notifyListeners();
       return true;
     } catch (e) {
