@@ -15,8 +15,6 @@ import '../note_detail/note_detail_screen.dart';
 import '../../models/grade.dart';
 import '../../widgets/course/add_grade_dialog.dart';
 import '../../widgets/course/add_media_note_dialog.dart';
-import '../../providers/deadline_provider.dart';
-import '../../widgets/deadlines/add_deadline_dialog.dart';
 import '../add_course/add_course_screen.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'tabs/course_notes_tab.dart';
@@ -28,6 +26,7 @@ import 'widgets/course_bottom_toolbar.dart';
 import 'widgets/add_text_note_sheet.dart';
 import 'widgets/add_link_sheet.dart';
 import 'widgets/course_options_sheet.dart';
+import 'widgets/course_add_deadline_sheet.dart';
 import '../../core/utils/error_handler.dart';
 import '../../core/utils/consent_utils.dart';
 import 'handwriting_canvas_screen.dart';
@@ -307,29 +306,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
   }
 
   void _showAddDeadlineDialog(Course course) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => AddDeadlineDialog(
-        onSave: (title, selectedCourseId, date, type, addToCalendar) {
-          // AddDeadlineDialog actually asks for a course inside, but we can set its default if we want, or just let users use the dialog as normal.
-          // For now, it will default to the top course or you can modify AddDeadlineDialog to accept an initialCourseId.
-          context.read<DeadlineProvider>().createDeadline(
-            courseId: selectedCourseId,
-            title: title,
-            date: date,
-            type: type,
-            addToCalendar: addToCalendar,
-          );
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(AppLocalizations.of(context)!.deadlineAdded)),
-            );
-          }
-        },
-      ),
-    );
+    showCourseAddDeadlineDialog(context, courseId: course.id);
   }
 
   Future<void> _addFile(Course course) async {
