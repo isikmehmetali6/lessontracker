@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'helpers/course_actions.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/course.dart';
 import '../../models/note.dart';
@@ -43,8 +43,8 @@ class CourseDetailScreen extends StatefulWidget {
 
 class _CourseDetailScreenState extends State<CourseDetailScreen>
     with SingleTickerProviderStateMixin {
-  final ImagePicker _imagePicker = ImagePicker();
   late TabController _tabController;
+  late final CourseActions _actions;
 
   List<Grade> _grades = [];
   bool _isLoadingGrades = false;
@@ -56,6 +56,34 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _actions = CourseActions(
+      context: context,
+      isMounted: () => mounted,
+      showSnack: _showSnackBar,
+      onSingleImagePicked: (file, course) =>
+          _showImageNoteDialog(file, course),
+      onMultipleImagesPicked: (files, course) async {
+        int saved = 0;
+        for (final file in files) {
+          if (!mounted) break;
+          final note = await context.read<NoteProvider>().addImageNote(
+                courseId: course.id,
+                imageFile: file,
+                customTitle: 'Photo ${saved + 1}',
+                courseName: course.name,
+                userName: 'User',
+              );
+          if (note != null) saved++;
+        }
+        if (mounted) {
+          HapticFeedback.mediumImpact();
+          _showSnackBar(AppLocalizations.of(context)!.photoSaved(saved));
+        }
+      },
+      handleError: (e, {customMessage}) {
+        ErrorHandler.handleError(context, e, customMessage: customMessage);
+      },
+    );
     Future.microtask(() => _loadData());
   }
 
@@ -137,10 +165,22 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
           HapticFeedback.mediumImpact();
           _showSnackBar('Marked important moment! 🚩');
         },
-        onCaptureImageCamera: () => _captureImage(ImageSource.camera, course),
-        onCaptureImageGallery: () => _captureImage(ImageSource.gallery, course),
-        onShowTextNoteDialog: () => _showTextNoteDialog(course),
-        onCaptureOcr: () => _captureOcr(course),
+        onShowTextNoteDialog: () {
+          showAddTextNoteSheet(
+            context: context,
+            course: course,
+            onSaved: () {
+              if (mounted) {
+                _showSnackBar(AppLocalizations.of(context)!.noteSaved);
+              }
+            },
+          );
+        },
+        onCaptureImageCamera: () =>
+            _actions.captureImage(ImageSource.camera, course),
+        onCaptureImageGallery: () =>
+            _actions.captureImage(ImageSource.gallery, course),
+        onCaptureOcr: () => _actions.captureOcr(course),
         onOpenDrawingCanvas: () => _openDrawingCanvas(course),
       ),
     );
@@ -364,115 +404,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
     await context.read<CourseProvider>().openFile(file);
   }
 
-  Future<void> _captureImage(ImageSource source, Course course) async {
-    try {
-      if (source == ImageSource.gallery) {
-        final List<XFile> images = await _imagePicker.pickMultiImage(
-          maxWidth: 1920,
-          maxHeight: 1920,
-          imageQuality: 85,
-        );
-
-        if (images.isEmpty || !mounted) return;
-
-        if (images.length == 1) {
-          _showImageNoteDialog(File(images.first.path), course);
-        } else {
-          int saved = 0;
-          for (final image in images) {
-            if (!mounted) break;
-            final note = await context.read<NoteProvider>().addImageNote(
-              courseId: course.id,
-              imageFile: File(image.path),
-              customTitle: 'Photo ${saved + 1}',
-              courseName: course.name,
-              userName: 'User',
-            );
-            if (note != null) saved++;
-          }
-          if (mounted) {
-            HapticFeedback.mediumImpact();
-            _showSnackBar(AppLocalizations.of(context)!.photoSaved(saved));
-          }
-        }
-      } else {
-        final consent = await ConsentUtils.showContentCaptureConsentDialog(
-          context,
-        );
-        if (consent != true || !mounted) return;
-
-        final XFile? image = await _imagePicker.pickImage(
-          source: source,
-          maxWidth: 1920,
-          maxHeight: 1920,
-          imageQuality: 85,
-        );
-
-        if (image != null && mounted) {
-          _showImageNoteDialog(File(image.path), course);
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ErrorHandler.handleError(
-          context,
-          e,
-          customMessage: 'Failed to capture image',
-        );
-      }
-    }
-  }
-
-  /// OCR: Kameradan fotoğraf çek → OCR ile metin tanı → otomatik kaydet
-  Future<void> _captureOcr(Course course) async {
-    debugPrint('🔍 DEBUG: _captureOcr called');
-    final consent = await ConsentUtils.showContentCaptureConsentDialog(context);
-    debugPrint('🔍 DEBUG: consent = $consent');
-    if (consent != true || !mounted) return;
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(
-      'ocr_consent_timestamp',
-      DateTime.now().millisecondsSinceEpoch,
-    );
-
-    try {
-      final XFile? image = await _imagePicker.pickImage(
-        source: ImageSource.camera,
-        maxWidth: 1920,
-        maxHeight: 1920,
-        imageQuality: 85,
-      );
-
-      if (image == null || !mounted) return;
-
-      _showSnackBar(AppLocalizations.of(context)!.processingOcr);
-
-      final note = await context.read<NoteProvider>().addOcrNote(
-        courseId: course.id,
-        imageFile: File(image.path),
-        courseName: course.name,
-        userName: 'User',
-      );
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-      if (note != null) {
-        HapticFeedback.mediumImpact();
-        _showSnackBar(AppLocalizations.of(context)!.ocrNoteSaved);
-      } else {
-        ErrorHandler.handleError(
-          context,
-          context.read<NoteProvider>().error ?? 'OCR failed',
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ErrorHandler.handleError(context, e, customMessage: 'OCR failed: $e');
-      }
-    }
-  }
 
   void _showImageNoteDialog(File imageFile, Course course) {
     showModalBottomSheet(
@@ -504,18 +435,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
           }
         },
       ),
-    );
-  }
-
-  void _showTextNoteDialog(Course course) {
-    showAddTextNoteSheet(
-      context: context,
-      course: course,
-      onSaved: () {
-        if (mounted) {
-          _showSnackBar(AppLocalizations.of(context)!.noteSaved);
-        }
-      },
     );
   }
 
