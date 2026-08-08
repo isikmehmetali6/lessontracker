@@ -6,15 +6,12 @@ import 'package:image_picker/image_picker.dart';
 import 'helpers/course_actions.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/course.dart';
-import '../../models/note.dart';
 import '../../providers/course_provider.dart';
 import '../../providers/note_provider.dart';
 import '../../models/course_file.dart';
 import '../../widgets/common/sliver_app_bar_delegate.dart';
-import '../note_detail/note_detail_screen.dart';
 import '../../models/grade.dart';
 import '../../widgets/course/add_grade_dialog.dart';
-import '../../widgets/course/add_media_note_dialog.dart';
 import '../add_course/add_course_screen.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'tabs/course_notes_tab.dart';
@@ -29,8 +26,6 @@ import 'widgets/course_options_sheet.dart';
 import 'widgets/course_add_deadline_sheet.dart';
 import 'widgets/course_image_note_sheet.dart';
 import '../../core/utils/error_handler.dart';
-import '../../core/utils/consent_utils.dart';
-import 'handwriting_canvas_screen.dart';
 
 /// Ders detay sayfası
 class CourseDetailScreen extends StatefulWidget {
@@ -84,6 +79,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
       handleError: (e, {customMessage}) {
         ErrorHandler.handleError(context, e, customMessage: customMessage);
       },
+      onNotesChanged: _loadNotes,
+      fallbackCourse: widget.course,
     );
     Future.microtask(() => _loadData());
   }
@@ -182,7 +179,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
         onCaptureImageGallery: () =>
             _actions.captureImage(ImageSource.gallery, course),
         onCaptureOcr: () => _actions.captureOcr(course),
-        onOpenDrawingCanvas: () => _openDrawingCanvas(course),
+        onOpenDrawingCanvas: () => _actions.openDrawingCanvas(course),
       ),
     );
   }
@@ -190,9 +187,9 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
   Widget _buildNotesTab(bool isDark, Course course) {
     return CourseNotesTab(
       course: course,
-      onShowNoteDetail: _showNoteDetail,
-      onPlayAudio: _playAudio,
-      onToggleBookmark: _toggleBookmark,
+      onShowNoteDetail: _actions.showNoteDetail,
+      onPlayAudio: _actions.playAudio,
+      onToggleBookmark: _actions.toggleBookmark,
     );
   }
 
@@ -417,56 +414,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
         }
       },
     );
-  }
-
-  void _showNoteDetail(Note note) {
-    if (note.type == NoteType.drawing || note.drawingData != null) {
-      final course = context.read<CourseProvider>().coursesById[note.courseId] ??
-          widget.course;
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => HandwritingCanvasScreen(
-            course: course,
-            existingNote: note,
-          ),
-        ),
-      ).then((_) => _loadNotes());
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => NoteDetailScreen(note: note)),
-      ).then((_) => _loadNotes());
-    }
-  }
-
-  void _openDrawingCanvas(Course course) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => HandwritingCanvasScreen(course: course),
-      ),
-    ).then((savedNote) {
-      if (!context.mounted) return;
-      if (savedNote != null) {
-        _loadNotes();
-        if (!mounted) return;
-        if (!context.mounted) return;
-        _showSnackBar(AppLocalizations.of(context)!.drawingSaved);
-      }
-    });
-  }
-
-  void _playAudio(Note note) {
-    if (note.filePath != null) {
-      context.read<NoteProvider>().playAudio(note.filePath!);
-      HapticFeedback.selectionClick();
-      _showSnackBar('Playing audio...');
-    }
-  }
-
-  void _toggleBookmark(Note note) {
-    context.read<NoteProvider>().toggleBookmark(note);
     HapticFeedback.lightImpact();
   }
 

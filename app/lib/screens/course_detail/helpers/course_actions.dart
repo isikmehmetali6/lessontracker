@@ -7,7 +7,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lesson_tracker/core/utils/consent_utils.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:lesson_tracker/models/course.dart';
+import 'package:lesson_tracker/models/note.dart';
+import 'package:lesson_tracker/providers/course_provider.dart';
 import 'package:lesson_tracker/providers/note_provider.dart';
+import 'package:lesson_tracker/screens/course_detail/handwriting_canvas_screen.dart';
+import 'package:lesson_tracker/screens/note_detail/note_detail_screen.dart';
 
 /// Capture/OCR actions extracted from CourseDetailScreen per plan
 /// 3.1.2 ('actions helper: capture/OCR/image note'). The host is
@@ -21,6 +25,8 @@ class CourseActions {
     required this.onSingleImagePicked,
     required this.onMultipleImagesPicked,
     required this.handleError,
+    required this.onNotesChanged,
+    this.fallbackCourse,
   });
 
   /// Build context for provider/ErrorHandler/showDialog operations.
@@ -43,6 +49,13 @@ class CourseActions {
 
   /// Native error surface (toast + log).
   final void Function(Object error, {String? customMessage}) handleError;
+
+  /// Called after a note navigation returns so the host can refresh.
+  final void Function() onNotesChanged;
+
+  /// Fallback course (e.g. when navigating from a note whose course
+  /// isn't currently in the provider cache).
+  final Course? fallbackCourse;
 
   static final ImagePicker _imagePicker = ImagePicker();
 
@@ -127,5 +140,51 @@ class CourseActions {
         handleError(e, customMessage: 'OCR failed: $e');
       }
     }
+  }
+
+  Future<void> showNoteDetail(Note note) async {
+    if (note.type == NoteType.drawing || note.drawingData != null) {
+      final course = context.read<CourseProvider>().coursesById[note.courseId] ??
+          fallbackCourse!;
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => HandwritingCanvasScreen(
+            course: course,
+            existingNote: note,
+          ),
+        ),
+      );
+    } else {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => NoteDetailScreen(note: note)),
+      );
+    }
+    onNotesChanged();
+  }
+
+  Future<void> openDrawingCanvas(Course course) async {
+    final savedNote = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => HandwritingCanvasScreen(course: course),
+      ),
+    );
+    if (!isMounted()) return;
+    if (savedNote != null) {
+      onNotesChanged();
+    }
+  }
+
+  void playAudio(Note note) {
+    if (note.filePath != null) {
+      context.read<NoteProvider>().playAudio(note.filePath!);
+      showSnack('Playing audio...');
+    }
+  }
+
+  void toggleBookmark(Note note) {
+    context.read<NoteProvider>().toggleBookmark(note);
   }
 }
