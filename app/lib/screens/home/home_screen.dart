@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/course.dart';
@@ -25,10 +24,9 @@ import '../../core/services/secure_storage_service.dart';
 import 'widgets/home_content.dart';
 import 'widgets/home_bottom_nav.dart';
 import 'widgets/restore_cloud_dialog.dart';
+import 'helpers/quick_capture_ocr.dart';
 import '../../widgets/course/course_selection_sheet.dart';
-import '../../core/utils/error_handler.dart';
 import '../moodle/moodle_hub_screen.dart';
-import '../../core/utils/consent_utils.dart';
 
 /// Ana ekran
 class HomeScreen extends StatefulWidget {
@@ -260,97 +258,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  final ImagePicker _imagePicker = ImagePicker();
-
   /// OCR Quick Capture: Camera → OCR → Course Selection → Save
   Future<void> _quickCaptureOcr(BuildContext context) async {
-    try {
-      final consent = await ConsentUtils.showContentCaptureConsentDialog(
-        context,
-      );
-      if (consent != true || !mounted) return;
-
-      final XFile? image = await _imagePicker.pickImage(
-        source: ImageSource.camera,
-        maxWidth: 1920,
-        maxHeight: 1920,
-        imageQuality: 85,
-      );
-
-      if (image == null || !mounted) return;
-
-      if (!context.mounted) return;
-      final courseId = await _showCourseSelectionDialog(context);
-      if (courseId == null || !mounted) return;
-      if (!context.mounted) return;
-      if (!mounted) return;
-
-      // Show processing indicator
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(AppLocalizations.of(context)!.processingOcr),
-            ],
-          ),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          duration: const Duration(seconds: 10),
-        ),
-      );
-
-      final courseProvider = context.read<CourseProvider>();
-      final course = await courseProvider.getCourseById(courseId);
-      final userName = 'User';
-
-      if (!mounted) return;
-      if (!context.mounted) return;
-      final note = await context.read<NoteProvider>().addOcrNote(
-        courseId: courseId,
-        imageFile: File(image.path),
-        courseName: course?.name,
-        userName: userName,
-      );
-
-      if (!mounted) return;
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-      if (note != null) {
-        HapticFeedback.mediumImpact();
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.ocrNoteSaved),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        );
-      } else {
-        ErrorHandler.handleError(
-          context,
-          context.read<NoteProvider>().error ?? 'OCR failed',
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        if (!context.mounted) return;
-        ErrorHandler.handleError(context, e, customMessage: 'Error: $e');
-      }
-    }
+    await runQuickCaptureOcr(
+      context: context,
+      pickCourse: (ctx) => _showCourseSelectionDialog(ctx),
+    );
   }
 
   /// Course selection dialog — returns courseId or null if cancelled
