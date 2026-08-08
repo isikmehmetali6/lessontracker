@@ -262,14 +262,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _quickCaptureOcr(BuildContext context) async {
     await runQuickCaptureOcr(
       context: context,
-      pickCourse: (ctx) => _showCourseSelectionDialog(ctx),
+      pickCourse: showCourseSelectionSheet,
     );
   }
 
-  /// Course selection dialog — returns courseId or null if cancelled
-  Future<String?> _showCourseSelectionDialog(BuildContext context) async {
-    return showCourseSelectionSheet(context);
-  }
-}
-
 /// Ana sayfa içeriği
+}
