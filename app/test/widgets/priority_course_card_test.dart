@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lesson_tracker/models/course.dart';
-import 'package:lesson_tracker/widgets/home/home_widgets.dart';
+import 'package:lesson_tracker/widgets/home/priority_course_card.dart';
 
 void main() {
   group('PriorityCourseCard Widget Tests', () {
