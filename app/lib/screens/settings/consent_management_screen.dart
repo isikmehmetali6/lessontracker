@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/services/kvkk_consent_service.dart';
+import '../../services/kvkk_consent_service.dart';
 
 /// KVKK Rıza Yönetimi Ekranı
 /// Kullanıcı açık rıza tercihlerini buradan değiştirebilir (geri çekme hakkı).

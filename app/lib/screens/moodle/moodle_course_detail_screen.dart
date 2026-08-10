@@ -3,7 +3,7 @@ import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../core/services/moodle_file_download_service.dart';
+import '../../services/moodle_file_download_service.dart';
 import '../../models/moodle/moodle_course.dart';
 import '../../models/moodle/moodle_course_content.dart';
 import '../../providers/course_provider.dart';

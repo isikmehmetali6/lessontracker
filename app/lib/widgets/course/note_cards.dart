@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/services/file_service.dart';
+import '../../services/file_service.dart';
 import '../../models/note.dart';
 import '../common/common_widgets.dart';
 import 'package:intl/intl.dart';

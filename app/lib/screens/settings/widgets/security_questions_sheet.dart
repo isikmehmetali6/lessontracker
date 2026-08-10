@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lesson_tracker/core/services/security_questions_service.dart';
+import 'package:lesson_tracker/services/security_questions_service.dart';
 import 'package:lesson_tracker/core/theme/app_colors.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 

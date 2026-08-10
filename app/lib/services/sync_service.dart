@@ -14,7 +14,7 @@ import '../../repositories/deadline_repository.dart';
 import '../../repositories/grade_repository.dart';
 import '../../repositories/file_repository.dart';
 import '../../repositories/absence_repository.dart';
-import '../utils/absence_change_bus.dart';
+import '../../core/utils/absence_change_bus.dart';
 import '../../models/course.dart';
 import '../../models/note.dart';
 import '../../models/deadline.dart';

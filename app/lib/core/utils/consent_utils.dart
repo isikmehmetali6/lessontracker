@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/services/kvkk_consent_service.dart';
+import '../../services/kvkk_consent_service.dart';
 
 class ConsentUtils {
   /// Shows a KVKK explicitly consent dialog before capturing content (audio/video)

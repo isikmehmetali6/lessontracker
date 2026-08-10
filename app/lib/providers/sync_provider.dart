@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../core/services/sync_service.dart';
+import '../services/sync_service.dart';
 import 'course_provider.dart';
 import 'note_provider.dart';
 import 'deadline_provider.dart';

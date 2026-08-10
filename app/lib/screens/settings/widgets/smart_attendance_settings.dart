@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/services/location_service.dart';
-import '../../../core/services/attendance_automation_service.dart';
+import '../../../services/location_service.dart';
+import '../../../services/attendance_automation_service.dart';
 import 'settings_shared.dart';
 
 class SmartAttendanceSettings extends StatefulWidget {

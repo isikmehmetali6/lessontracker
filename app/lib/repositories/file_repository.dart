@@ -2,10 +2,10 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import '../core/database/database_helper.dart';
-import '../core/services/auto_sync_service.dart';
-import '../core/services/e2e_file_service.dart';
-import '../core/services/e2e_key_service.dart';
-import '../core/services/e2e_upload_service.dart';
+import '../services/auto_sync_service.dart';
+import '../services/e2e_file_service.dart';
+import '../services/e2e_key_service.dart';
+import '../services/e2e_upload_service.dart';
 import '../models/course_file.dart';
 
 class FileRepository {

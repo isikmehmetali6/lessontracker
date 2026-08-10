@@ -1,6 +1,6 @@
 import '../models/planner_event.dart';
 import '../core/database/database_helper.dart';
-import '../core/services/auto_sync_service.dart';
+import '../services/auto_sync_service.dart';
 
 class PlannerEventRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper();

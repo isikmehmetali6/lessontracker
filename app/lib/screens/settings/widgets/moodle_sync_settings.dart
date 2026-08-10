@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
-import '../../../core/services/moodle_background_service.dart';
+import '../../../services/moodle_background_service.dart';
 import '../../../core/theme/app_colors.dart';
 import 'settings_shared.dart';
 

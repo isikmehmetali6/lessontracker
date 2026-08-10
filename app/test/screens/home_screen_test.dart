@@ -16,7 +16,7 @@ import 'package:lesson_tracker/widgets/home/schedule_card.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:lesson_tracker/core/services/notification_service.dart';
+import 'package:lesson_tracker/services/notification_service.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../test_helpers.dart';
 

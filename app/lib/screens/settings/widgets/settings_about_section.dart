@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/auth_provider.dart';
-import '../../../core/services/sync_service.dart';
+import '../../../services/sync_service.dart';
 import '../privacy_policy_screen.dart';
 import '../terms_of_service_screen.dart';
 import '../cookie_policy_screen.dart';

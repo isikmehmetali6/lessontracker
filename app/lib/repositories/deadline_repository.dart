@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import '../core/database/database_helper.dart';
-import '../core/services/auto_sync_service.dart';
+import '../services/auto_sync_service.dart';
 import '../models/deadline.dart';
 
 class DeadlineRepository {
