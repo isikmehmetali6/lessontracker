@@ -10,6 +10,7 @@ import '../../providers/course_provider.dart';
 import '../../providers/moodle_provider.dart';
 import 'widgets/moodle_module_options_sheet.dart';
 import 'widgets/moodle_open_action_sheet.dart';
+import 'widgets/moodle_course_picker.dart';
 import '../../providers/note_provider.dart';
 import '../../services/moodle/moodle_api_service.dart';
 import '../../services/moodle/moodle_token_storage.dart';
@@ -651,64 +652,14 @@ class _ModuleTileState extends State<_ModuleTile> {
   }
 
   Future<void> _addDownloadedFileAsNote(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
     if (_localPath == null) return;
-
-    // Kullanıcıdan bir ders seçmesini iste. Moodle kursu ile local ders eşleşmiyor
-    // olabilir; bu nedenle tüm aktif dersler listelenir.
-    final courseProvider = context.read<CourseProvider>();
-    final courses = courseProvider.courses;
 
     if (!context.mounted) return;
 
-    if (courses.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.noCoursesAvailable)),
-      );
-      return;
-    }
-
-    final selected = await showModalBottomSheet<String>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                l10n.selectCourseTitle,
-                style: Theme.of(ctx).textTheme.titleMedium,
-              ),
-            ),
-            Flexible(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: courses.length,
-                itemBuilder: (ctx, i) {
-                  final c = courses[i];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Color(c.color.toARGB32()),
-                      child: Text(
-                        c.name.isNotEmpty ? c.name[0].toUpperCase() : '?',
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    title: Text(c.name),
-                    onTap: () => Navigator.pop(ctx, c.id),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
+    final selected = await showMoodleCoursePicker(
+      context,
+      context.read<CourseProvider>().courses,
     );
-
     if (selected == null || !context.mounted) return;
 
     final noteProvider = context.read<NoteProvider>();
