@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'helpers/course_actions.dart';
+import 'helpers/grade_actions.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/course.dart';
 import '../../providers/course_provider.dart';
@@ -425,21 +426,12 @@ void _showAddGradeDialog(Course course) {
   }
 
   Future<void> _deleteGrade(String gradeId) async {
-    final success = await context.read<CourseProvider>().deleteGrade(gradeId);
-    if (!mounted) return;
-
-    if (success) {
-      _loadGrades();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.gradeDeleted),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      );
-    }
+    await deleteGradeAction(
+      context: context,
+      gradeId: gradeId,
+      isMounted: () => mounted,
+      onSuccess: _loadGrades,
+    );
   }
 
   void _showSnackBar(String message) {
