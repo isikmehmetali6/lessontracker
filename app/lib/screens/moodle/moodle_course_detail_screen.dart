@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../services/moodle_file_download_service.dart';
 import '../../models/moodle/moodle_course.dart';
 import '../../models/moodle/moodle_course_content.dart';
@@ -11,6 +10,7 @@ import '../../providers/moodle_provider.dart';
 import 'widgets/moodle_module_options_sheet.dart';
 import 'widgets/moodle_open_action_sheet.dart';
 import 'widgets/moodle_course_picker.dart';
+import 'widgets/open_external_url.dart';
 import '../../providers/note_provider.dart';
 import '../../services/moodle/moodle_api_service.dart';
 import '../../services/moodle/moodle_token_storage.dart';
@@ -639,10 +639,7 @@ class _ModuleTileState extends State<_ModuleTile> {
     if (widget.module.isUrl && widget.module.contents.isNotEmpty) {
       final urlStr = widget.module.contents.first.fileUrl;
       if (urlStr != null) {
-        final uri = Uri.parse(urlStr);
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
-        }
+        await openExternalUrl(urlStr);
       }
     }
   }
