@@ -5,16 +5,14 @@ import 'package:provider/provider.dart';
 import '../../services/moodle_file_download_service.dart';
 import '../../models/moodle/moodle_course.dart';
 import '../../models/moodle/moodle_course_content.dart';
-import '../../providers/course_provider.dart';
 import '../../providers/moodle_provider.dart';
 import 'widgets/moodle_module_options_sheet.dart';
 import 'widgets/moodle_open_action_sheet.dart';
-import 'widgets/moodle_course_picker.dart';
 import 'widgets/moodle_module_tile_view.dart';
 import 'widgets/moodle_export_to_course.dart';
 import 'widgets/moodle_course_selection_sheet.dart';
+import 'widgets/add_moodle_file_as_note.dart';
 import 'widgets/open_external_url.dart';
-import '../../providers/note_provider.dart';
 import '../../services/moodle/moodle_api_service.dart';
 import '../../services/moodle/moodle_token_storage.dart';
 import '../../core/utils/moodle_utils.dart';
@@ -417,38 +415,12 @@ class _ModuleTileState extends State<_ModuleTile> {
 
   Future<void> _addDownloadedFileAsNote(BuildContext context) async {
     if (_localPath == null) return;
-
-    if (!context.mounted) return;
-
-    final selected = await showMoodleCoursePicker(
-      context,
-      context.read<CourseProvider>().courses,
-    );
-    if (selected == null || !context.mounted) return;
-
-    final noteProvider = context.read<NoteProvider>();
-    final fileName = widget.module.name;
-    final result = await noteProvider.addPdfNote(
-      courseId: selected,
-      title: fileName,
+    await addMoodleFileAsNoteAction(
+      context: context,
       localPath: _localPath!,
+      fileName: widget.module.name,
+      isMounted: () => mounted,
+      onNoteSaved: () async {},
     );
-
-    if (!context.mounted) return;
-    final locale = Localizations.localeOf(context).languageCode;
-    final successMsg =
-        locale == 'tr' ? 'Nota eklendi' : 'Added as note';
-    final errorFallback =
-        locale == 'tr' ? 'Bir hata oluştu' : 'An error occurred';
-
-    if (result != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(successMsg)),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(noteProvider.error ?? errorFallback)),
-      );
-    }
   }
 }
