@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../repositories/note_repository.dart';
-import '../core/services/ocr_service.dart';
-import '../core/services/file_service.dart';
-import '../core/services/audio_service.dart';
+import '../services/ocr_service.dart';
+import '../services/file_service.dart';
+import '../services/audio_service.dart';
 import '../models/note.dart';
 import 'package:uuid/uuid.dart';
 

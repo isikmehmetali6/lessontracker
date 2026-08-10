@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../models/deadline.dart';
 import '../repositories/deadline_repository.dart';
-import '../core/services/calendar_service.dart';
+import '../services/calendar_service.dart';
 
 class DeadlineProvider with ChangeNotifier {
   final DeadlineRepository _deadlineRepo = DeadlineRepository();

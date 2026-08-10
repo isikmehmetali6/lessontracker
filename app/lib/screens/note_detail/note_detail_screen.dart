@@ -8,7 +8,7 @@ import '../../models/note.dart';
 import '../../models/course.dart';
 import '../../providers/note_provider.dart';
 import '../../providers/course_provider.dart';
-import '../../core/services/file_service.dart';
+import '../../services/file_service.dart';
 import 'widgets/note_audio_player.dart';
 import 'widgets/note_drawing_display.dart';
 import 'widgets/note_pdf_display.dart';

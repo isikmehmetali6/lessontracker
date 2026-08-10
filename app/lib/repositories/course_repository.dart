@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import '../core/database/database_helper.dart';
-import '../core/services/auto_sync_service.dart';
-import '../core/services/sync_service.dart';
+import '../services/auto_sync_service.dart';
+import '../services/sync_service.dart';
 import '../models/course.dart';
 
 class CourseRepository {

@@ -12,7 +12,7 @@ import '../../services/moodle/moodle_api_service.dart';
 import '../../services/moodle/moodle_sync_service.dart';
 import '../../services/moodle/moodle_token_storage.dart';
 import 'moodle_notification_service.dart';
-import '../utils/moodle_utils.dart';
+import '../../core/utils/moodle_utils.dart';
 
 /// Moodle arka plan senkronizasyon servisi.
 ///

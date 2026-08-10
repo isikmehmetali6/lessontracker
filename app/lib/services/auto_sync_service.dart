@@ -4,7 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:async';
 import 'sync_service.dart';
-import '../database/database_helper.dart';
+import '../../core/database/database_helper.dart';
 
 class AutoSyncService {
   static final AutoSyncService _instance = AutoSyncService._internal();

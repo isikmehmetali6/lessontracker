@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/services/e2e_key_service.dart';
+import '../../../services/e2e_key_service.dart';
 import '../../../providers/auth_provider.dart';
 
 class SettingsProfileSection extends StatelessWidget {

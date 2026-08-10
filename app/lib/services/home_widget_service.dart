@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:home_widget/home_widget.dart';
-import '../models/course.dart';
-import '../models/deadline.dart';
+import '../../models/course.dart';
+import '../../models/deadline.dart';
 
 import 'package:flutter/foundation.dart';
 

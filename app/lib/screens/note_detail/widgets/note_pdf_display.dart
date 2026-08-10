@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:pdfx/pdfx.dart';
-import 'package:lesson_tracker/core/services/file_service.dart';
+import 'package:lesson_tracker/services/file_service.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 
 class NotePdfDisplay extends StatefulWidget {

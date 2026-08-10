@@ -5,9 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/database/database_helper.dart';
-import '../core/services/secure_storage_service.dart';
-import '../core/services/e2e_key_service.dart';
-import '../core/services/e2e_migration_service.dart';
+import '../services/secure_storage_service.dart';
+import '../services/e2e_key_service.dart';
+import '../services/e2e_migration_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   FirebaseAuth? _auth;

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/services/e2e_key_service.dart';
-import '../../../core/services/biometric_service.dart';
-import '../../../core/services/e2e_migration_service.dart';
+import '../../../services/e2e_key_service.dart';
+import '../../../services/biometric_service.dart';
+import '../../../services/e2e_migration_service.dart';
 import 'settings_shared.dart';
 import 'security_questions_sheet.dart';
 

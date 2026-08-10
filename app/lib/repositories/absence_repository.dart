@@ -1,6 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import '../core/database/database_helper.dart';
-import '../core/services/auto_sync_service.dart';
+import '../services/auto_sync_service.dart';
 
 class AbsenceRepository {
   static final AbsenceRepository _instance = AbsenceRepository._internal();
