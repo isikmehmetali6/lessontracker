@@ -10,6 +10,7 @@ import '../../providers/moodle_provider.dart';
 import 'widgets/moodle_module_options_sheet.dart';
 import 'widgets/moodle_open_action_sheet.dart';
 import 'widgets/moodle_course_picker.dart';
+import 'widgets/moodle_module_tile_view.dart';
 import 'widgets/open_external_url.dart';
 import '../../providers/note_provider.dart';
 import '../../services/moodle/moodle_api_service.dart';
@@ -442,171 +443,18 @@ class _ModuleTileState extends State<_ModuleTile> {
     final isDark = theme.brightness == Brightness.dark;
     final file = widget.module.primaryFile;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: () => _handleTap(context),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.surfaceDark : Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.1)
-                    : Colors.grey.shade200,
-              ),
-              boxShadow: [
-                if (!isDark)
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.03),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-              ],
-            ),
-            child: Row(
-              children: [
-                // Dosya tipi ikonu
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: _iconColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(_icon, color: _iconColor, size: 20),
-                ),
-                const SizedBox(width: 12),
-                // İsim + boyut
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        MoodleUtils.parseMultilang(
-                          widget.module.name,
-                          langCode,
-                        ),
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: isDark
-                                ? AppColors.textPrimaryDark
-                                : AppColors.textPrimaryLight),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (file != null) ...[
-                        const SizedBox(height: 2),
-                        Row(
-                          children: [
-                            Text(
-                              '${file.extension.toUpperCase()} · ${file.readableSize}',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                  color: isDark
-                                      ? AppColors.textSecondaryDark
-                                      : AppColors.textSecondaryLight),
-                            ),
-                            if (_isDownloaded) ...[
-                              const SizedBox(width: 6),
-                              Icon(Icons.check_circle_rounded,
-                                  size: 14, color: AppColors.green),
-                            ],
-                          ],
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                // İndirme / Açma İkonları
-                if (_isDownloading)
-                  SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      value: _progress,
-                      strokeWidth: 2,
-                      color: AppColors.primary,
-                    ),
-                  )
-                else if (file != null)
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          _isDownloaded
-                              ? Icons.folder_open_rounded
-                              : Icons.download_rounded,
-                          size: 20,
-                          color: _isDownloaded
-                              ? AppColors.primary
-                              : (isDark
-                                  ? AppColors.textSecondaryDark
-                                  : AppColors.textSecondaryLight),
-                        ),
-                        onPressed: () => _handleTap(context),
-                      ),
-                      if (_isDownloaded)
-                        IconButton(
-                          icon: Icon(
-                            Icons.more_vert_rounded,
-                            size: 20,
-                            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                          ),
-                          onPressed: () => _showOptionsBottomSheet(context),
-                        ),
-                    ],
-                  )
-                else
-                  Icon(Icons.open_in_new_rounded,
-                      size: 16,
-                      color: isDark
-                          ? AppColors.textSecondaryDark
-                          : AppColors.textSecondaryLight),
-              ],
-            ),
-          ),
-        ),
-      ),
+    return MoodleModuleTileView(
+      module: widget.module,
+      file: file,
+      isDark: isDark,
+      theme: theme,
+      langCode: langCode,
+      isDownloaded: _isDownloaded,
+      isDownloading: _isDownloading,
+      progress: _progress,
+      onTileTap: () => _handleTap(context),
+      onMoreActionsPressed: () => _showOptionsBottomSheet(context),
     );
-  }
-
-  IconData get _icon {
-    final file = widget.module.primaryFile;
-    if (file != null) {
-      if (file.isPdf) return Icons.picture_as_pdf_rounded;
-      if (file.isSlide) return Icons.slideshow_rounded;
-      if (file.isDocument) return Icons.description_rounded;
-      if (file.isSpreadsheet) return Icons.table_chart_rounded;
-      if (file.isImage) return Icons.image_rounded;
-      if (file.isVideo) return Icons.videocam_rounded;
-      if (file.isAudio) return Icons.audiotrack_rounded;
-    }
-    if (widget.module.isUrl) return Icons.link_rounded;
-    if (widget.module.isQuiz) return Icons.quiz_rounded;
-    if (widget.module.isAssignment) return Icons.assignment_rounded;
-    if (widget.module.isForum) return Icons.forum_rounded;
-    if (widget.module.isPage) return Icons.article_rounded;
-    return Icons.insert_drive_file_rounded;
-  }
-
-  Color get _iconColor {
-    final file = widget.module.primaryFile;
-    if (file != null) {
-      if (file.isPdf) return AppColors.red;
-      if (file.isSlide) return AppColors.orange;
-      if (file.isDocument) return AppColors.blue;
-      if (file.isSpreadsheet) return AppColors.green;
-      if (file.isImage) return AppColors.purple;
-      if (file.isVideo) return AppColors.emerald;
-      if (file.isAudio) return AppColors.pink;
-    }
-    if (widget.module.isUrl) return AppColors.sky;
-    if (widget.module.isQuiz) return AppColors.purple;
-    return Colors.blueGrey;
   }
 
   Future<void> _handleTap(BuildContext context) async {
