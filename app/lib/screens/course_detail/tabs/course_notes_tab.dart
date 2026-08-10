@@ -7,6 +7,7 @@ import '../../../../models/note.dart';
 import '../../../../providers/note_provider.dart';
 import '../../../../widgets/course/note_cards.dart';
 import '../widgets/confirm_action_dialog.dart';
+import 'widgets/notes_search_field.dart';
 
 class CourseNotesTab extends StatefulWidget {
   final Course course;
@@ -131,32 +132,16 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
     return Column(
       children: [
         // Search bar
-        Padding(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
-          child: TextField(
-            controller: _searchController,
-            onChanged: (v) => setState(() => _searchQuery = v),
-            decoration: InputDecoration(
-              hintText: l10n.searchHint,
-              prefixIcon: const Icon(Icons.search, size: 20),
-              suffixIcon: _searchQuery.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear, size: 18),
-                      onPressed: () {
-                        _searchController.clear();
-                        setState(() => _searchQuery = '');
-                      },
-                    )
-                  : null,
-              filled: true,
-              fillColor: isDark ? AppColors.surfaceDark : Colors.grey.shade50,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding: const EdgeInsets.symmetric(vertical: 12),
-            ),
-          ),
+        NotesSearchField(
+          controller: _searchController,
+          query: _searchQuery,
+          isDark: isDark,
+          hintText: l10n.searchHint,
+          onChanged: (v) => setState(() => _searchQuery = v),
+          onClear: () {
+            _searchController.clear();
+            setState(() => _searchQuery = '');
+          },
         ),
 
         // Filter chips
