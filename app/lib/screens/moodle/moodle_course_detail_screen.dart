@@ -11,6 +11,7 @@ import 'widgets/moodle_module_options_sheet.dart';
 import 'widgets/moodle_open_action_sheet.dart';
 import 'widgets/moodle_course_picker.dart';
 import 'widgets/moodle_module_tile_view.dart';
+import 'widgets/moodle_export_to_course.dart';
 import 'widgets/open_external_url.dart';
 import '../../providers/note_provider.dart';
 import '../../services/moodle/moodle_api_service.dart';
@@ -417,23 +418,14 @@ class _ModuleTileState extends State<_ModuleTile> {
 
   Future<void> _handleExportToCourse(BuildContext context, String courseId, String cName) async {
     if (_localPath == null || widget.module.primaryFile == null) return;
-
-    final success = await _downloadService.exportToAppCourse(
-      moodleFilePath: _localPath!,
+    await exportMoodleFileToCourse(
+      context: context,
+      downloadService: _downloadService,
+      localPath: _localPath!,
       courseId: courseId,
       fileName: widget.module.primaryFile!.fileName,
+      courseName: cName,
     );
-
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(success ? AppLocalizations.of(context)!.moodleSavedToCourse(cName) : AppLocalizations.of(context)!.moodleSaveError),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          backgroundColor: success ? AppColors.green : AppColors.red,
-        ),
-      );
-    }
   }
 
   @override
