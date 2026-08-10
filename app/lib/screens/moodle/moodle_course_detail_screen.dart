@@ -12,11 +12,11 @@ import 'widgets/moodle_open_action_sheet.dart';
 import 'widgets/moodle_course_picker.dart';
 import 'widgets/moodle_module_tile_view.dart';
 import 'widgets/moodle_export_to_course.dart';
+import 'widgets/moodle_course_selection_sheet.dart';
 import 'widgets/open_external_url.dart';
 import '../../providers/note_provider.dart';
 import '../../services/moodle/moodle_api_service.dart';
 import '../../services/moodle/moodle_token_storage.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/utils/moodle_utils.dart';
 import '../../providers/language_provider.dart';
 
@@ -335,83 +335,10 @@ class _ModuleTileState extends State<_ModuleTile> {
   }
 
   void _showCourseSelectionDialog(BuildContext parentContext) {
-    final courses = parentContext.read<CourseProvider>().uniqueCourses;
-
-    showModalBottomSheet(
-      context: parentContext,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(parentContext).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.6,
-          maxChildSize: 0.9,
-          minChildSize: 0.4,
-          expand: false,
-          builder: (context, scrollController) {
-            return Column(
-              children: [
-                const SizedBox(height: 8),
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.menu_book_rounded, color: AppColors.primary),
-                      const SizedBox(width: 8),
-                      Text(
-                        AppLocalizations.of(context)!.moodleSelectCourse,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Expanded(
-                  child: courses.isEmpty
-                      ? Center(
-                          child:                           Text(
-                            AppLocalizations.of(context)!.moodleNoLocalCourses,
-                            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                          ),
-                        )
-                      : ListView.builder(
-                          controller: scrollController,
-                          itemCount: courses.length,
-                          itemBuilder: (context, index) {
-                            final course = courses[index];
-                            return ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: course.color.withValues(alpha: 0.2),
-                                child: Text(
-                                  course.name.substring(0, 1).toUpperCase(),
-                                  style: TextStyle(color: course.color, fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              title: Text(course.name, style: const TextStyle(fontWeight: FontWeight.w500)),
-                              subtitle: course.subtitle != null ? Text(course.subtitle!) : null,
-                              onTap: () {
-                                Navigator.pop(context);
-                                _handleExportToCourse(parentContext, course.id, course.name);
-                              },
-                            );
-                          },
-                        ),
-                ),
-              ],
-            );
-          },
-        );
+    showMoodleCourseSelectionSheet(
+      parentContext,
+      onCourseSelected: (courseId, courseName) {
+        _handleExportToCourse(parentContext, courseId, courseName);
       },
     );
   }
