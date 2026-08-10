@@ -8,7 +8,9 @@ import '../../models/moodle/moodle_course.dart';
 import '../../models/moodle/moodle_course_content.dart';
 import '../../providers/course_provider.dart';
 import '../../providers/moodle_provider.dart';
-import 'widgets/moodle_module_options_sheet.dart';import '../../providers/note_provider.dart';
+import 'widgets/moodle_module_options_sheet.dart';
+import 'widgets/moodle_open_action_sheet.dart';
+import '../../providers/note_provider.dart';
 import '../../services/moodle/moodle_api_service.dart';
 import '../../services/moodle/moodle_token_storage.dart';
 import '../../core/theme/app_colors.dart';
@@ -620,9 +622,9 @@ class _ModuleTileState extends State<_ModuleTile> {
         final action = await _showOpenActionSheet(context);
         if (!mounted) return;
         if (!context.mounted) return;
-        if (action == _OpenAction.external) {
+        if (action == MoodleOpenAction.external) {
           await OpenFilex.open(_localPath!);
-        } else if (action == _OpenAction.addAsNote) {
+        } else if (action == MoodleOpenAction.addAsNote) {
           await _addDownloadedFileAsNote(context);
         }
       } else {
@@ -644,39 +646,8 @@ class _ModuleTileState extends State<_ModuleTile> {
     }
   }
 
-  Future<_OpenAction?> _showOpenActionSheet(BuildContext context) async {
-    final locale = Localizations.localeOf(context).languageCode;
-    final openLabel = locale == 'tr' ? 'Dışarıda aç' : 'Open externally';
-    final addAsNoteLabel =
-        locale == 'tr' ? 'Nota ekle' : 'Add as note';
-    final addAsNoteHint =
-        locale == 'tr' ? 'Derslerim notlarına kaydet' : 'Save to course notes';
-
-    return showModalBottomSheet<_OpenAction>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.open_in_new),
-              title: Text(openLabel),
-              onTap: () => Navigator.pop(ctx, _OpenAction.external),
-            ),
-            ListTile(
-              leading: const Icon(Icons.note_add_outlined),
-              title: Text(addAsNoteLabel),
-              subtitle: Text(addAsNoteHint),
-              onTap: () => Navigator.pop(ctx, _OpenAction.addAsNote),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
+  Future<MoodleOpenAction?> _showOpenActionSheet(BuildContext context) {
+    return showMoodleOpenActionSheet(context);
   }
 
   Future<void> _addDownloadedFileAsNote(BuildContext context) async {
@@ -766,5 +737,3 @@ class _ModuleTileState extends State<_ModuleTile> {
     }
   }
 }
-
-enum _OpenAction { external, addAsNote }
