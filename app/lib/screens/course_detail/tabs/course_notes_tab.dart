@@ -8,6 +8,7 @@ import '../../../../providers/note_provider.dart';
 import '../../../../widgets/course/note_cards.dart';
 import '../widgets/confirm_action_dialog.dart';
 import 'widgets/notes_search_field.dart';
+import 'widgets/note_filter_chips.dart';
 
 class CourseNotesTab extends StatefulWidget {
   final Course course;
@@ -145,42 +146,16 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
         ),
 
         // Filter chips
-        SizedBox(
-          height: 44,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            children: [
-              _buildFilterChip(null, l10n.viewAll, Icons.list, isDark),
-              const SizedBox(width: 8),
-              _buildFilterChip(
-                NoteType.text,
-                l10n.keyboard,
-                Icons.text_snippet_outlined,
-                isDark,
-              ),
-              const SizedBox(width: 8),
-              _buildFilterChip(
-                NoteType.image,
-                l10n.camera,
-                Icons.image_outlined,
-                isDark,
-              ),
-              const SizedBox(width: 8),
-              _buildFilterChip(
-                NoteType.ocr,
-                l10n.ocrLabel,
-                Icons.document_scanner_outlined,
-                isDark,
-              ),
-              const SizedBox(width: 8),
-              _buildFilterChip(
-                NoteType.drawing,
-                l10n.drawingLabel,
-                Icons.draw_outlined,
-                isDark,
-              ),
-              const SizedBox(width: 8),
+        NoteFilterChips(
+          selectedType: _selectedFilter,
+          isDark: isDark,
+          onSelect: (t) => setState(() => _selectedFilter = t),
+          viewAllLabel: l10n.viewAll,
+          textLabel: l10n.keyboard,
+          imageLabel: l10n.camera,
+          ocrLabel: l10n.ocrLabel,
+          drawingLabel: l10n.drawingLabel,
+        ),
               // Bookmark sort toggle
               GestureDetector(
                 onTap: () =>
@@ -334,56 +309,4 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
     );
   }
 
-  Widget _buildFilterChip(
-    NoteType? type,
-    String label,
-    IconData icon,
-    bool isDark,
-  ) {
-    final isSelected = _selectedFilter == type;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedFilter = type),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.15)
-              : (isDark ? AppColors.surfaceDark : Colors.grey.shade100),
-          borderRadius: BorderRadius.circular(10),
-          border: isSelected
-              ? Border.all(color: AppColors.primary, width: 1.5)
-              : Border.all(color: Colors.transparent, width: 1.5),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 16,
-              color: isSelected
-                  ? AppColors.primary
-                  : (isDark
-                        ? AppColors.textSecondaryDark
-                        : AppColors.textSecondaryLight),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected
-                    ? AppColors.primary
-                    : (isDark
-                          ? AppColors.textSecondaryDark
-                          : AppColors.textSecondaryLight),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
