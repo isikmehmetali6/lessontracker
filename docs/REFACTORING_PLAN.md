@@ -694,7 +694,7 @@ Mevcut `course_provider.dart` (~982) kümeleri:
 | **Risk** | Yüksek import churn — **ayrı PR**; Faz 2a DI ile karıştırma |
 | **Doğrulama** | `test ! -d app/lib/core/services`; `flutter analyze` |
 
-- [ ] **2.5** `core/services` → `services` birleştir (ayrı PR)
+- [x] **2.5** `core/services` → `services` birleştir — *PR-2.5*
 
 **Widgets yerleşim kuralı (Faz 3 ile zorunlu):**
 
