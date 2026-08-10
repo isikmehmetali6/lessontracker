@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../models/course.dart';
 import '../../../../models/grade.dart';
 import '../../../../providers/course_provider.dart';
+import 'widgets/grade_card.dart';
 
 class CourseGradesTab extends StatelessWidget {
   final Course course;
@@ -186,94 +187,15 @@ class CourseGradesTab extends StatelessWidget {
           )
         else
           ...grades.map((grade) {
-            final pct = grade.maxScore > 0 ? (grade.score / grade.maxScore * 100) : 0.0;
-            return Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
-                ),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      // Score circle
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _getScoreColor(pct).withValues(alpha: 0.12),
-                        ),
-                        child: Center(
-                          child: Text(
-                            pct.toStringAsFixed(0),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: _getScoreColor(pct),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              grade.name,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-                              ),
-                            ),
-                            Text(
-                              '${grade.score.toStringAsFixed(1)} / ${grade.maxScore.toStringAsFixed(0)}  •  ${l10n.weight}: ${grade.weight.toStringAsFixed(0)}%',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (onEditGrade != null) ...[
-                        IconButton(
-                          icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
-                          onPressed: () => onEditGrade!(grade),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                        ),
-                        const SizedBox(width: 4),
-                      ],
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.red),
-                        onPressed: () => onDeleteGrade(grade.id),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  // Individual score bar
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: (pct / 100).clamp(0.0, 1.0),
-                      minHeight: 5,
-                      backgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
-                      color: _getScoreColor(pct),
-                    ),
-                  ),
-                ],
-              ),
+            return GradeCard(
+              grade: grade,
+              isDark: isDark,
+              percentageOf: (score, max) => max > 0 ? (score / max * 100) : 0.0,
+              colorFor: _getScoreColor,
+              onEdit: onEditGrade == null ? null : () => onEditGrade!(grade),
+              onDelete: () => onDeleteGrade(grade.id),
             );
-          }),
+          }).toList(),
 
         const SizedBox(height: 12),
         SizedBox(
