@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../models/course.dart';
 import '../../../../models/course_file.dart';
 import 'widgets/file_list.dart';
+import 'widgets/empty_files_state.dart';
 
 class CourseFilesTab extends StatelessWidget {
   final Course course;
@@ -34,41 +35,10 @@ class CourseFilesTab extends StatelessWidget {
     }
     
     if (files.isEmpty) {
-      return Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.folder_open,
-                size: 64,
-                color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                AppLocalizations.of(context)!.noFilesYet,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed: onAddFile,
-                icon: const Icon(Icons.upload_file),
-                label: Text(AppLocalizations.of(context)!.uploadFile),
-              ),
-              const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed: onAddLink,
-                icon: const Icon(Icons.link),
-                label: Text(AppLocalizations.of(context)!.addLink),
-              ),
-            ],
-          ),
-        ),
+      return EmptyFilesState(
+        isDark: isDark,
+        onAddFile: onAddFile,
+        onAddLink: onAddLink,
       );
     }
 
