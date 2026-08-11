@@ -47,6 +47,14 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     super.dispose();
   }
 
+  /// PDF canvas modunda oluşturulmuş bir çizim notuysa, altına arka plan
+  /// olarak render edilecek PDF yolu; aksi halde null.
+  String? get _drawingPdfPath {
+    final path = widget.note.filePath;
+    if (widget.note.type != NoteType.drawing || path == null) return null;
+    return path.toLowerCase().endsWith('.pdf') ? path : null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -127,20 +135,25 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                     const SizedBox(height: 32),
                   ],
 
-                  // Drawing display
+                  // Drawing display (PDF annotasyonlarında sayfa arka
+                  // planı olarak ilgili PDF'i çizimlerin altına render eder)
                   if (widget.note.type == NoteType.drawing &&
                       widget.note.drawingData != null &&
                       widget.note.drawingData!.isNotEmpty) ...[
                     NoteDrawingDisplay(
                       drawingData: widget.note.drawingData!,
                       isDark: isDark,
+                      pdfPath: _drawingPdfPath,
                     ),
                     const SizedBox(height: 32),
                   ],
 
-                  // PDF display
+                  // PDF display — yalnızca yukarıdaki çizim zaten aynı
+                  // PDF'i arka plan olarak göstermiyorsa (çift gösterimi
+                  // önlemek için)
                   if (widget.note.filePath != null &&
-                      widget.note.filePath!.toLowerCase().endsWith('.pdf')) ...[
+                      widget.note.filePath!.toLowerCase().endsWith('.pdf') &&
+                      _drawingPdfPath == null) ...[
                     NotePdfDisplay(
                       pdfPath: widget.note.filePath!,
                       isDark: isDark,

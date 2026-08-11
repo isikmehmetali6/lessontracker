@@ -801,7 +801,7 @@ Tabs zaten ayrılmış (`course_*_tab`, app bar, header, toolbar). Kalan:
 - [x] `Listener` + stylus pressure + palm rejection — *01.08.2026*
 - [x] Çok sayfalı PDF stroke saklama — *01.08.2026*
 - [x] **3.2.1** Pressure persist (`v:2`) + codec tek yerde — *`core/utils/drawing_data_codec.dart`; `{"v":2,...}` formatı + v1 geri uyumlu okuma; hem `handwriting_canvas_screen.dart` hem `note_drawing_display.dart` bu codec'i kullanıyor — 11.08.2026*
-- [ ] **3.2.2** Display path PDF arka planı (veya ürün “stroke-only” kararı kaydı)
+- [x] **3.2.2** Display path PDF arka planı — *ürün kararı: PDF arka planı uygulandı (stroke-only değil). `note_drawing_display.dart` artık `pdfPath` alıyor, `pdfx` ile her sayfayı `page.render()` üzerinden görsele çevirip `DrawingCanvas`'ın (şeffaf arka plan) altına koyuyor; sayfa görselleri `Future` cache'te tutuluyor. `note_detail_screen.dart` PDF-destekli çizim notlarında ayrı `NotePdfDisplay`'i artık göstermiyor (çift gösterim önlendi) — 11.08.2026*
 
 #### 3.3 Erişilebilirlik
 
