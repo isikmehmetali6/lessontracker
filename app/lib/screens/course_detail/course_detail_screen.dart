@@ -83,7 +83,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
       handleError: (e, {customMessage}) {
         ErrorHandler.handleError(context, e, customMessage: customMessage);
       },
-      onNotesChanged: _loadNotes,
+      onNotesChanged: _loadData,
       fallbackCourse: widget.course,
     );
     Future.microtask(() => _loadData());
@@ -96,43 +96,26 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
   }
 
   Future<void> _loadData() async {
-    await Future.wait([
-      context.read<NoteProvider>().loadCourseNotes(widget.course.id),
-      _loadGrades(),
-      _loadFiles(),
+    if (!mounted) return;
+    setState(() {
+      _isLoadingGrades = true;
+      _isLoadingFiles = true;
+    });
+    final noteProvider = context.read<NoteProvider>();
+    final courseProvider = context.read<CourseProvider>();
+    final courseId = widget.course.id;
+    final results = await Future.wait([
+      noteProvider.loadCourseNotes(courseId),
+      courseProvider.loadCourseGrades(courseId),
+      courseProvider.loadCourseFiles(courseId),
     ]);
-  }
-
-  Future<void> _loadNotes() async {
-    await context.read<NoteProvider>().loadCourseNotes(widget.course.id);
-  }
-
-  Future<void> _loadGrades() async {
     if (!mounted) return;
-    setState(() => _isLoadingGrades = true);
-    final grades = await context.read<CourseProvider>().loadCourseGrades(
-      widget.course.id,
-    );
-    if (mounted) {
-      setState(() {
-        _grades = grades;
-        _isLoadingGrades = false;
-      });
-    }
-  }
-
-  Future<void> _loadFiles() async {
-    if (!mounted) return;
-    setState(() => _isLoadingFiles = true);
-    final files = await context.read<CourseProvider>().loadCourseFiles(
-      widget.course.id,
-    );
-    if (mounted) {
-      setState(() {
-        _files = files;
-        _isLoadingFiles = false;
-      });
-    }
+    setState(() {
+      _grades = results[1] as List<Grade>;
+      _isLoadingGrades = false;
+      _files = results[2] as List<CourseFile>;
+      _isLoadingFiles = false;
+    });
   }
 
   @override
@@ -219,7 +202,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
                 weight: weight,
               );
               await context.read<CourseProvider>().updateGrade(updatedGrade);
-              _loadGrades();
+              _loadData();
             },
           ),
         );
@@ -355,7 +338,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
     final success = await context.read<CourseProvider>().addFile(course.id);
     if (!mounted) return;
     if (success) {
-      _loadFiles();
+      _loadData();
       _showSnackBar(AppLocalizations.of(context)!.fileAdded);
     }
   }
@@ -366,7 +349,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
       course: course,
       onSaved: () {
         if (mounted) {
-          _loadFiles();
+          _loadData();
           _showSnackBar(AppLocalizations.of(context)!.linkAdded);
         }
       },
@@ -378,7 +361,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
     if (confirm) {
       if (!mounted) return;
       await context.read<CourseProvider>().deleteFile(file);
-      _loadFiles();
+      _loadData();
     }
   }
 
@@ -413,7 +396,7 @@ void _showAddGradeDialog(Course course) {
     showCourseAddGradeSheet(
       context: context,
       course: course,
-      onGradesChanged: _loadGrades,
+      onGradesChanged: _loadData,
     );
   }
 
@@ -422,7 +405,7 @@ void _showAddGradeDialog(Course course) {
       context: context,
       gradeId: gradeId,
       isMounted: () => mounted,
-      onSuccess: _loadGrades,
+      onSuccess: _loadData,
     );
   }
 
