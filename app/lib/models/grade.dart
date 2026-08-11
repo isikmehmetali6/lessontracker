@@ -1,21 +1,20 @@
-class Grade {
-  final String id;
-  final String courseId;
-  final String name; // e.g. "Midterm", "Final"
-  final double score; // e.g. 85.0
-  final double maxScore; // e.g. 100.0
-  final double weight; // e.g. 30.0 (percent)
-  final DateTime createdAt;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  Grade({
-    required this.id,
-    required this.courseId,
-    required this.name,
-    required this.score,
-    this.maxScore = 100.0,
-    required this.weight,
-    required this.createdAt,
-  });
+part 'grade.freezed.dart';
+
+@freezed
+abstract class Grade with _$Grade {
+  const Grade._();
+
+  const factory Grade({
+    required String id,
+    required String courseId,
+    required String name, // e.g. "Midterm", "Final"
+    required double score, // e.g. 85.0
+    @Default(100.0) double maxScore, // e.g. 100.0
+    required double weight, // e.g. 30.0 (percent)
+    required DateTime createdAt,
+  }) = _Grade;
 
   Map<String, dynamic> toMap() {
     return {
@@ -40,31 +39,4 @@ class Grade {
       createdAt: DateTime.parse(map['createdAt'] as String),
     );
   }
-
-  Grade copyWith({
-    String? id,
-    String? courseId,
-    String? name,
-    double? score,
-    double? maxScore,
-    double? weight,
-    DateTime? createdAt,
-  }) {
-    return Grade(
-      id: id ?? this.id,
-      courseId: courseId ?? this.courseId,
-      name: name ?? this.name,
-      score: score ?? this.score,
-      maxScore: maxScore ?? this.maxScore,
-      weight: weight ?? this.weight,
-      createdAt: createdAt ?? this.createdAt,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) || other is Grade && runtimeType == other.runtimeType && id == other.id;
-
-  @override
-  int get hashCode => id.hashCode;
 }

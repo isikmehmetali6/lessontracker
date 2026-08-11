@@ -1,3 +1,6 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'deadline.freezed.dart';
 
 enum DeadlineType {
   exam,
@@ -6,22 +9,18 @@ enum DeadlineType {
   other,
 }
 
-class Deadline {
-  final String id;
-  final String courseId;
-  final String title;
-  final DateTime date;
-  final DeadlineType type;
-  final bool reminder;
+@freezed
+abstract class Deadline with _$Deadline {
+  const Deadline._();
 
-  Deadline({
-    required this.id,
-    required this.courseId,
-    required this.title,
-    required this.date,
-    required this.type,
-    this.reminder = true,
-  });
+  const factory Deadline({
+    required String id,
+    required String courseId,
+    required String title,
+    required DateTime date,
+    required DeadlineType type,
+    @Default(true) bool reminder,
+  }) = _Deadline;
 
   Map<String, dynamic> toMap() {
     return {
@@ -49,31 +48,6 @@ class Deadline {
       date: DateTime.parse(map['date'] as String),
       type: deadlineType,
       reminder: map['reminder'] == 1,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) || other is Deadline && runtimeType == other.runtimeType && id == other.id;
-
-  @override
-  int get hashCode => id.hashCode;
-
-  Deadline copyWith({
-    String? id,
-    String? courseId,
-    String? title,
-    DateTime? date,
-    DeadlineType? type,
-    bool? reminder,
-  }) {
-    return Deadline(
-      id: id ?? this.id,
-      courseId: courseId ?? this.courseId,
-      title: title ?? this.title,
-      date: date ?? this.date,
-      type: type ?? this.type,
-      reminder: reminder ?? this.reminder,
     );
   }
 }

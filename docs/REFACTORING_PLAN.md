@@ -827,7 +827,7 @@ Tabs zaten ayrılmış (`course_*_tab`, app bar, header, toolbar). Kalan:
 | **4a.3** | Repository lifecycle standardı | Singleton vs plain tutarlılığı — düşük öncelik |
 | **4a.4** | Web stratejisi dokümanı | `UnsupportedError` kalsın mı, web target düşürülsün mü |
 
-- [ ] **4a.1** Freezed: en az grade + deadline
+- [x] **4a.1** Freezed: en az grade + deadline — *`Grade` ve `Deadline` `@freezed` sınıflarına çevrildi (`course.dart`/`note.dart` ile aynı desen: `const X._()` + `factory` + elle yazılmış `toMap`/`fromMap` korundu); `build_runner` ile `grade.freezed.dart`/`deadline.freezed.dart` üretildi. Not: `Grade`'in eski `==`/`hashCode`'u yalnızca `id` bazlıydı, Freezed varsayılanı tüm alanları karşılaştırıyor — kod tabanında hiçbir yerde nesne eşitliğine (`==`/`contains`/`Set`) bağlı kullanım yoktu (yalnızca `.id ==` karşılaştırmaları), bu yüzden davranış değişikliği yok. analyze 0, testler regresyonsuz — 11.08.2026*
 - [ ] **4a.2** Cache politikası + ölçüm notu
 - [ ] **4a.3** Repo lifecycle standardı (opsiyonel)
 - [ ] **4a.4** Web destek kararı dokümante
