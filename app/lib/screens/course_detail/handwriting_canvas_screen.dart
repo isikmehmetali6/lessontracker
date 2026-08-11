@@ -14,6 +14,8 @@ import '../../models/course.dart';
 import '../../models/note.dart';
 import '../../providers/note_provider.dart';
 import '../../widgets/course/drawing_canvas.dart';
+import 'widgets/canvas_mode_selector.dart';
+import 'widgets/canvas_mode_views.dart';
 
 enum CanvasMode { blank, photo, pdf }
 
@@ -381,39 +383,18 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
   }
 
   Widget _buildModeSelector(bool isDark, AppLocalizations l10n) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _ModeChip(
-            icon: Icons.article_outlined,
-            label: l10n.blankLabel,
-            isSelected: _mode == CanvasMode.blank,
-            onTap: () => setState(() {
-              _mode = CanvasMode.blank;
-              _currentPageStrokes = [];
-            }),
-            isDark: isDark,
-          ),
-          const SizedBox(width: 12),
-          _ModeChip(
-            icon: Icons.image_outlined,
-            label: l10n.photoLabel,
-            isSelected: _mode == CanvasMode.photo,
-            onTap: _pickPhoto,
-            isDark: isDark,
-          ),
-          const SizedBox(width: 12),
-          _ModeChip(
-            icon: Icons.picture_as_pdf_outlined,
-            label: l10n.pdfLabel,
-            isSelected: _mode == CanvasMode.pdf,
-            onTap: _pickPdf,
-            isDark: isDark,
-          ),
-        ],
-      ),
+    return CanvasModeSelector(
+      mode: _mode,
+      isDark: isDark,
+      blankLabel: l10n.blankLabel,
+      photoLabel: l10n.photoLabel,
+      pdfLabel: l10n.pdfLabel,
+      onBlankTap: () => setState(() {
+        _mode = CanvasMode.blank;
+        _currentPageStrokes = [];
+      }),
+      onPhotoTap: _pickPhoto,
+      onPdfTap: _pickPdf,
     );
   }
 
@@ -433,209 +414,57 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
   }
 
   Widget _buildBlankCanvas(bool isDark) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: DrawingCanvas(
-          strokes: _currentPageStrokes,
-          currentColor: _currentColor,
-          currentSize: _currentSize,
-          backgroundColor: AppColors.surfaceLight,
-          onStrokesChanged: (newStrokes) =>
-              setState(() {
-                _currentPageStrokes = newStrokes;
-                _strokesByPage[1] = newStrokes;
-              }),
-        ),
-      ),
+    return BlankCanvasView(
+      strokes: _currentPageStrokes,
+      currentColor: _currentColor,
+      currentSize: _currentSize,
+      onStrokesChanged: (newStrokes) => setState(() {
+        _currentPageStrokes = newStrokes;
+        _strokesByPage[1] = newStrokes;
+      }),
     );
   }
 
   Widget _buildPhotoCanvas(bool isDark, AppLocalizations l10n) {
-    if (_photoBytes == null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.add_photo_alternate_outlined,
-              size: 64,
-              color: isDark ? Colors.grey[600] : Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.tapPhotoHint,
-              style: TextStyle(
-                color: isDark ? Colors.grey[400] : Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Container(
-      margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Photo
-            Image.memory(_photoBytes!, fit: BoxFit.contain),
-            // Drawing overlay
-            DrawingCanvas(
-              strokes: _currentPageStrokes,
-              currentColor: _currentColor,
-              currentSize: _currentSize,
-              backgroundColor: Colors.transparent,
-              onStrokesChanged: (newStrokes) =>
-                  setState(() {
-                    _currentPageStrokes = newStrokes;
-                    _strokesByPage[1] = newStrokes;
-                  }),
-            ),
-          ],
-        ),
-      ),
+    return PhotoCanvasView(
+      photoBytes: _photoBytes,
+      isDark: isDark,
+      tapPhotoHint: l10n.tapPhotoHint,
+      strokes: _currentPageStrokes,
+      currentColor: _currentColor,
+      currentSize: _currentSize,
+      onStrokesChanged: (newStrokes) => setState(() {
+        _currentPageStrokes = newStrokes;
+        _strokesByPage[1] = newStrokes;
+      }),
     );
   }
 
   Widget _buildPdfCanvas(bool isDark, AppLocalizations l10n) {
-    if (_pdfController == null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.picture_as_pdf_outlined,
-              size: 64,
-              color: isDark ? Colors.grey[600] : Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.tapPdfHint,
-              style: TextStyle(
-                color: isDark ? Colors.grey[400] : Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // PDF Viewer
-        PdfViewPinch(
-          controller: _pdfController!,
-          onDocumentLoaded: (document) {
-            setState(() {
-              _totalPdfPages = document.pagesCount;
-              _currentPdfPage = 1;
-              _currentPageStrokes = _strokesByPage[1] ?? [];
-            });
-          },
-          onPageChanged: (page) {
-            setState(() {
-              _currentPdfPage = page;
-              _currentPageStrokes = _strokesByPage[page] ?? [];
-            });
-          },
-        ),
-        // Drawing overlay (transparency adjusted for annotation)
-        DrawingCanvas(
-          strokes: _currentPageStrokes,
-          currentColor: _currentColor.withValues(alpha: 0.7),
-          currentSize: _currentSize,
-          backgroundColor: Colors.transparent,
-          onStrokesChanged: (newStrokes) {
-            setState(() {
-              _currentPageStrokes = newStrokes;
-              _strokesByPage[_currentPdfPage] = newStrokes;
-            });
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class _ModeChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-  final bool isDark;
-
-  const _ModeChip({
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary
-              : (isDark ? AppColors.surfaceDarkElevated : Colors.grey[200]),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: isSelected
-                  ? Colors.white
-                  : (isDark ? Colors.white70 : Colors.black54),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected
-                    ? Colors.white
-                    : (isDark ? Colors.white70 : Colors.black54),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return PdfCanvasView(
+      pdfController: _pdfController,
+      isDark: isDark,
+      tapPdfHint: l10n.tapPdfHint,
+      strokes: _currentPageStrokes,
+      currentColor: _currentColor,
+      currentSize: _currentSize,
+      onStrokesChanged: (newStrokes) => setState(() {
+        _currentPageStrokes = newStrokes;
+        _strokesByPage[_currentPdfPage] = newStrokes;
+      }),
+      onDocumentLoaded: (document) {
+        setState(() {
+          _totalPdfPages = document.pagesCount;
+          _currentPdfPage = 1;
+          _currentPageStrokes = _strokesByPage[1] ?? [];
+        });
+      },
+      onPageChanged: (page) {
+        setState(() {
+          _currentPdfPage = page;
+          _currentPageStrokes = _strokesByPage[page] ?? [];
+        });
+      },
     );
   }
 }

@@ -777,7 +777,7 @@ Tabs zaten ayrılmış (`course_*_tab`, app bar, header, toolbar). Kalan:
 | `handwriting_canvas_screen.dart` (~640) | mode layers + codec kullanımı |
 | `absence_calendar_tab.dart` (~654) | reason sheets + summary; repo kaldır (2.3.2 ile) |
 
-- [x] **3.1.6** handwriting + absence calendar extract — *kısmi: `absence_calendar_tab.dart` 654 → 310, reason sheet'ler ayrılmış, doğrudan `AbsenceRepository` kullanımı yok (2.3.2 ile tutarlı); `handwriting_canvas_screen.dart` hâlâ ~641 satır, mode-layer bölünmesi yapılmamış (yalnızca `DrawingDataCodec` kullanıyor) — 11.08.2026*
+- [x] **3.1.6** handwriting + absence calendar extract — *`absence_calendar_tab.dart` 654 → 310, reason sheet'ler ayrılmış, doğrudan `AbsenceRepository` kullanımı yok (2.3.2 ile tutarlı); `handwriting_canvas_screen.dart` 641 → 470, mode seçici (`canvas_mode_selector.dart`) ve mode katmanları (`canvas_mode_views.dart`: `BlankCanvasView`/`PhotoCanvasView`/`PdfCanvasView`) ayrıldı — 11.08.2026*
 
 ##### Paylaşılan çıkarımlar
 
