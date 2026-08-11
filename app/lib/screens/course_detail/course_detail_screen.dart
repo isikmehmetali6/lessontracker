@@ -5,13 +5,14 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'helpers/course_actions.dart';
 import 'helpers/grade_actions.dart';
+import 'helpers/course_delete_actions.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/course.dart';
+import '../../models/grade.dart';
+import '../../models/course_file.dart';
 import '../../providers/course_provider.dart';
 import '../../providers/note_provider.dart';
-import '../../models/course_file.dart';
 import '../../widgets/common/sliver_app_bar_delegate.dart';
-import '../../models/grade.dart';
 import '../../widgets/course/add_grade_dialog.dart';
 import '../add_course/add_course_screen.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
@@ -401,20 +402,11 @@ class _CourseDetailScreenState extends State<CourseDetailScreen>
   }
 
   void _deleteCourse(Course course) async {
-    final confirmed = await showConfirmActionDialog(
-      context,
-      title: AppLocalizations.of(context)!.deleteCourse,
-      message: AppLocalizations.of(context)!.deleteCourseConfirmation,
+    await deleteCourseAction(
+      context: context,
+      course: course,
+      isMounted: () => mounted,
     );
-
-    if (confirmed) {
-      if (!context.mounted) return;
-      // ignore: use_build_context_synchronously
-      await context.read<CourseProvider>().deleteCourse(course.id);
-      if (!context.mounted) return;
-      // ignore: use_build_context_synchronously
-      Navigator.pop(context);
-    }
   }
 
 void _showAddGradeDialog(Course course) {
