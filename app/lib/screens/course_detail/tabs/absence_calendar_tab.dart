@@ -9,8 +9,9 @@ import '../../../providers/course_provider.dart';
 import 'absence_reason.dart' show absenceReasonColors;
 import 'widgets/absence_day_details.dart';
 import 'widgets/absence_legend.dart';
-import 'widgets/absence_confirm_delete.dart';
+import 'widgets/absence_loader.dart';
 import 'widgets/absence_reason_sheets.dart';
+import 'widgets/absence_confirm_delete.dart';
 
 class AbsenceCalendarTab extends StatefulWidget {
   final String courseId;
@@ -43,22 +44,16 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
   }
 
   Future<void> _loadAbsences() async {
-    final absences = await context
-        .read<CourseProvider>()
-        .loadAbsencesForCourse(widget.courseId);
-    final events = <DateTime, List<Map<String, dynamic>>>{};
-    for (final a in absences) {
-      final dateStr = a['date'];
-      final date = dateStr is DateTime ? dateStr : DateTime.parse(dateStr as String);
-      final normalizedDate = DateTime(date.year, date.month, date.day);
-      events.putIfAbsent(normalizedDate, () => []).add(a);
-    }
-    if (mounted) {
-      setState(() {
-        _absenceEvents = events;
-        _isLoading = false;
-      });
-    }
+    final events = await loadAbsencesForTab(
+      context: context,
+      courseId: widget.courseId,
+      isMounted: () => mounted,
+    );
+    if (!mounted) return;
+    setState(() {
+      _absenceEvents = events;
+      _isLoading = false;
+    });
   }
 
   List<Map<String, dynamic>> _getEventsForDay(DateTime day) {
