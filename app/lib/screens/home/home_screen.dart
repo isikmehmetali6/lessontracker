@@ -266,5 +266,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-/// Ana sayfa içeriği
 }
