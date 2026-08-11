@@ -11,6 +11,7 @@ import 'widgets/absence_day_details.dart';
 import 'widgets/absence_legend.dart';
 import 'widgets/absence_loader.dart';
 import 'widgets/absence_reason_sheets.dart';
+import 'widgets/absence_reason_label.dart';
 import 'widgets/absence_confirm_delete.dart';
 
 class AbsenceCalendarTab extends StatefulWidget {
@@ -62,14 +63,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
   }
 
   String _reasonLabel(String reason) {
-    final l10n = AppLocalizations.of(context)!;
-    switch (reason) {
-      case 'unexcused': return l10n.absenceUnexcused;
-      case 'medical': return l10n.absenceMedical;
-      case 'excused': return l10n.absenceExcused;
-      case 'personal': return l10n.absencePersonal;
-      default: return reason;
-    }
+    return absenceReasonLabel(context, reason);
   }
 
   @override
