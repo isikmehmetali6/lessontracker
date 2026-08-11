@@ -2,6 +2,9 @@ import '../models/planner_event.dart';
 import '../core/database/database_helper.dart';
 import '../services/auto_sync_service.dart';
 
+/// Stateless — no in-memory web fallback cache to preserve (web reads/writes
+/// simply no-op below), so plain (non-singleton) construction is intentional
+/// (bkz. 4a.3, docs/REFACTORING_PLAN.md).
 class PlannerEventRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper();
 

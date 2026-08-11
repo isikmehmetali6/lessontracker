@@ -8,6 +8,8 @@ import '../services/e2e_key_service.dart';
 import '../services/e2e_upload_service.dart';
 import '../models/note.dart';
 
+/// Singleton — preserves `_notesInMemory`, this repo's in-memory web
+/// fallback cache, across call sites (bkz. 4a.3, docs/REFACTORING_PLAN.md).
 class NoteRepository {
   static final NoteRepository _instance = NoteRepository._internal();
   factory NoteRepository() => _instance;

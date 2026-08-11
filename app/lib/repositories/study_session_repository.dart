@@ -3,6 +3,8 @@ import '../core/database/database_helper.dart';
 import '../services/auto_sync_service.dart';
 import '../models/study_session.dart';
 
+/// Singleton — preserves `_sessionsInMemory`, this repo's in-memory web
+/// fallback cache, across call sites (bkz. 4a.3, docs/REFACTORING_PLAN.md).
 class StudySessionRepository {
   static final StudySessionRepository _instance = StudySessionRepository._internal();
   factory StudySessionRepository() => _instance;

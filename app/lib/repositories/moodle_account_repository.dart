@@ -1,7 +1,10 @@
 import '../../models/moodle/moodle_account.dart';
 import '../../core/database/database_helper.dart';
 
-/// moodle_accounts tablosu üzerinde CRUD işlemleri
+/// moodle_accounts tablosu üzerinde CRUD işlemleri.
+///
+/// Stateless — no in-memory web fallback cache to preserve, so plain
+/// (non-singleton) construction is intentional (bkz. 4a.3, docs/REFACTORING_PLAN.md).
 class MoodleAccountRepository {
   final DatabaseHelper _db = DatabaseHelper();
 

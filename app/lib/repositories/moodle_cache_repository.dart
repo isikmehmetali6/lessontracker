@@ -5,6 +5,9 @@ import '../../core/constants/app_constants.dart';
 
 /// Moodle API yanıtlarını moodle_cache tablosunda saklar.
 /// Ağ bağlantısı olmadığında son sync'teki veriler gösterilir.
+///
+/// Stateless — no in-memory web fallback cache to preserve, so plain
+/// (non-singleton) construction is intentional (bkz. 4a.3, docs/REFACTORING_PLAN.md).
 class MoodleCacheRepository {
   final DatabaseHelper _db = DatabaseHelper();
 

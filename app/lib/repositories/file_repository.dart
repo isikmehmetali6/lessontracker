@@ -8,6 +8,8 @@ import '../services/e2e_key_service.dart';
 import '../services/e2e_upload_service.dart';
 import '../models/course_file.dart';
 
+/// Singleton — preserves `_filesInMemory`, this repo's in-memory web
+/// fallback cache, across call sites (bkz. 4a.3, docs/REFACTORING_PLAN.md).
 class FileRepository {
   static final FileRepository _instance = FileRepository._internal();
   factory FileRepository() => _instance;

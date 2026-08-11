@@ -4,6 +4,8 @@ import '../core/database/database_helper.dart';
 import '../services/auto_sync_service.dart';
 import '../models/deadline.dart';
 
+/// Singleton — preserves `_deadlinesInMemory`, this repo's in-memory web
+/// fallback cache, across call sites (bkz. 4a.3, docs/REFACTORING_PLAN.md).
 class DeadlineRepository {
   static final DeadlineRepository _instance = DeadlineRepository._internal();
   factory DeadlineRepository() => _instance;

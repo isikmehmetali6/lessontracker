@@ -3,6 +3,8 @@ import '../core/database/database_helper.dart';
 import '../services/auto_sync_service.dart';
 import '../models/grade.dart';
 
+/// Singleton — preserves `_gradesInMemory`, this repo's in-memory web
+/// fallback cache, across call sites (bkz. 4a.3, docs/REFACTORING_PLAN.md).
 class GradeRepository {
   static final GradeRepository _instance = GradeRepository._internal();
   factory GradeRepository() => _instance;

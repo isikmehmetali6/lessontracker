@@ -2,6 +2,8 @@ import 'package:sqflite/sqflite.dart';
 import '../core/database/database_helper.dart';
 import '../services/auto_sync_service.dart';
 
+/// Singleton — preserves `_absencesInMemory`, this repo's in-memory web
+/// fallback cache, across call sites (bkz. 4a.3, docs/REFACTORING_PLAN.md).
 class AbsenceRepository {
   static final AbsenceRepository _instance = AbsenceRepository._internal();
   factory AbsenceRepository() => _instance;

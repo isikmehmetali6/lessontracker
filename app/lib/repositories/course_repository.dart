@@ -5,6 +5,8 @@ import '../services/auto_sync_service.dart';
 import '../services/sync_service.dart';
 import '../models/course.dart';
 
+/// Singleton — preserves `_coursesInMemory`, this repo's in-memory web
+/// fallback cache, across call sites (bkz. 4a.3, docs/REFACTORING_PLAN.md).
 class CourseRepository {
   static final CourseRepository _instance = CourseRepository._internal();
   factory CourseRepository() => _instance;
