@@ -145,7 +145,7 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
           },
         ),
 
-        // Filter chips
+        // Filter chips (+ bookmark sort toggle as trailing item)
         NoteFilterChips(
           selectedType: _selectedFilter,
           isDark: isDark,
@@ -155,58 +155,53 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
           imageLabel: l10n.camera,
           ocrLabel: l10n.ocrLabel,
           drawingLabel: l10n.drawingLabel,
-        ),
-              // Bookmark sort toggle
-              GestureDetector(
-                onTap: () =>
-                    setState(() => _bookmarkedFirst = !_bookmarkedFirst),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _bookmarkedFirst
-                        ? AppColors.amber.withValues(alpha: 0.15)
-                        : (isDark
-                              ? AppColors.surfaceDark
-                              : Colors.grey.shade100),
-                    borderRadius: BorderRadius.circular(10),
-                    border: _bookmarkedFirst
-                        ? Border.all(color: AppColors.amber, width: 1.5)
-                        : null,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        _bookmarkedFirst
-                            ? Icons.bookmark
-                            : Icons.bookmark_border,
-                        size: 16,
-                        color: _bookmarkedFirst
-                            ? AppColors.amber
-                            : (isDark
-                                  ? AppColors.textSecondaryDark
-                                  : AppColors.textSecondaryLight),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '★',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: _bookmarkedFirst
-                              ? AppColors.amber
-                              : (isDark
-                                    ? AppColors.textSecondaryDark
-                                    : AppColors.textSecondaryLight),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+          trailing: GestureDetector(
+            onTap: () => setState(() => _bookmarkedFirst = !_bookmarkedFirst),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
               ),
-            ],
+              decoration: BoxDecoration(
+                color: _bookmarkedFirst
+                    ? AppColors.amber.withValues(alpha: 0.15)
+                    : (isDark
+                          ? AppColors.surfaceDark
+                          : Colors.grey.shade100),
+                borderRadius: BorderRadius.circular(10),
+                border: _bookmarkedFirst
+                    ? Border.all(color: AppColors.amber, width: 1.5)
+                    : null,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    _bookmarkedFirst
+                        ? Icons.bookmark
+                        : Icons.bookmark_border,
+                    size: 16,
+                    color: _bookmarkedFirst
+                        ? AppColors.amber
+                        : (isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '★',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: _bookmarkedFirst
+                          ? AppColors.amber
+                          : (isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondaryLight),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
 
@@ -308,5 +303,4 @@ class _CourseNotesTabState extends State<CourseNotesTab> {
       ],
     );
   }
-
 }
