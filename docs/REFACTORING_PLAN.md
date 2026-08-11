@@ -830,7 +830,7 @@ Tabs zaten ayrılmış (`course_*_tab`, app bar, header, toolbar). Kalan:
 - [x] **4a.1** Freezed: en az grade + deadline — *`Grade` ve `Deadline` `@freezed` sınıflarına çevrildi (`course.dart`/`note.dart` ile aynı desen: `const X._()` + `factory` + elle yazılmış `toMap`/`fromMap` korundu); `build_runner` ile `grade.freezed.dart`/`deadline.freezed.dart` üretildi. Not: `Grade`'in eski `==`/`hashCode`'u yalnızca `id` bazlıydı, Freezed varsayılanı tüm alanları karşılaştırıyor — kod tabanında hiçbir yerde nesne eşitliğine (`==`/`contains`/`Set`) bağlı kullanım yoktu (yalnızca `.id ==` karşılaştırmaları), bu yüzden davranış değişikliği yok. analyze 0, testler regresyonsuz — 11.08.2026*
 - [ ] **4a.2** Cache politikası + ölçüm notu
 - [ ] **4a.3** Repo lifecycle standardı (opsiyonel)
-- [ ] **4a.4** Web destek kararı dokümante
+- [x] **4a.4** Web destek kararı dokümante — *Ürün kararı (kullanıcı onayı, 11.08.2026): web platformu desteklenmeyecek. `database_helper.dart`'taki `if (isWeb) throw UnsupportedError('SQLite is not supported on web')` davranışı bilinçli olarak korunuyor; web target'ı tam desteğe çıkarma çalışması planlanmıyor. `web/` klasörü repo'da kalabilir (araç/CI varsayılanı) ama aktif geliştirme kapsamı dışında.*
 
 **4a gate:** freezed grade+deadline; cache notları uygulanmış veya ölçülmüş.
 
