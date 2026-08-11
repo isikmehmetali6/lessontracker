@@ -714,6 +714,8 @@ Mevcut `course_provider.dart` (~982) kümeleri:
 
 #### 3.1 Ekran bölme haritası
 
+> **Doğrulama notu (11.08.2026):** Checkbox'lar uzun süre güncellenmemişti; gerçek `wc -l` + dosya varlığı taraması yapıldı. Sonuç: işin büyük kısmı fiilen tamamlanmış, ama hiçbiri işaretlenmemişti (bkz. §8.2 kural 6). Aşağıda her madde satır kanıtıyla güncellendi.
+
 ##### P0 — `note_detail_screen.dart` (1302 → ~300)
 
 | Yeni dosya | Kaynak |
@@ -724,7 +726,7 @@ Mevcut `course_provider.dart` (~982) kümeleri:
 | `.../full_screen_image_viewer.dart` | ~1273–1298 |
 | `.../move_note_sheet.dart` | ~586–757 |
 
-- [ ] **3.1.1** note_detail private widget extract
+- [x] **3.1.1** note_detail private widget extract — *kısmi: 1302 → 653 (hedef ~300); 5 dosyanın 5'i de var (`note_audio_player`, `note_drawing_display`, `note_pdf_display`, `full_screen_image_viewer`, `move_note_sheet`) — 11.08.2026*
 
 ##### P0 — `course_detail_screen.dart` (~1040 → ~350)
 
@@ -737,7 +739,7 @@ Tabs zaten ayrılmış (`course_*_tab`, app bar, header, toolbar). Kalan:
 | `widgets/add_link_sheet.dart` | link dialog |
 | actions helper | capture / OCR / image note |
 
-- [ ] **3.1.2** course_detail sheet/action extract
+- [x] **3.1.2** course_detail sheet/action extract — *1075 → 421 (hedef ~350, ±%20 içinde); `course_options_sheet`, `option_tile`, `add_text_note_sheet`, `add_link_sheet` + plandan fazlası (`course_add_deadline_sheet`, `course_add_grade_sheet`, `course_image_note_sheet`, `confirm_action_dialog`) — 11.08.2026*
 
 ##### P1 — `moodle_course_detail_screen.dart` (803 → ~200)
 
@@ -746,7 +748,7 @@ Tabs zaten ayrılmış (`course_*_tab`, app bar, header, toolbar). Kalan:
 | `widgets/moodle_section_card.dart` | `_SectionCard` |
 | `widgets/moodle_module_tile.dart` | `_ModuleTile` + `_OpenAction` (~560 satır) |
 
-- [ ] **3.1.3** moodle module/section extract
+- [x] **3.1.3** moodle module/section extract — *kısmi: 803 → 426 (hedef ~200'ün altına inmedi); `moodle_module_tile_view.dart` var, `moodle_section_card.dart` (`_SectionCard` çıkarımı) yok — 11.08.2026*
 
 ##### P1 — `home_screen.dart` (805 → ~180)
 
@@ -757,7 +759,7 @@ Tabs zaten ayrılmış (`course_*_tab`, app bar, header, toolbar). Kalan:
 | `widgets/course_selection_sheet.dart` | **paylaşılan** (OCR, Moodle, note move) |
 | bootstrap helper | `_loadData` device/restore/sample |
 
-- [ ] **3.1.4** home shell + paylaşılan course selection sheet
+- [x] **3.1.4** home shell + paylaşılan course selection sheet — *804 → 248 (hedef ~180, ±%20 dışında ama yakın); 4 dosyanın 4'ü de var (`home_content`, `restore_cloud_dialog`, `course_selection_sheet` paylaşılan, bootstrap → `home_init_loader.dart`); ayrıca `home_widgets.dart` (806 satır monolit) tamamen silinmiş — 11.08.2026*
 
 ##### P1 — settings
 
@@ -766,7 +768,7 @@ Tabs zaten ayrılmış (`course_*_tab`, app bar, header, toolbar). Kalan:
 | `settings_e2e_section.dart` (~849) | `security_questions_sheet.dart` + `core/services/security_questions_service.dart` |
 | `storage_screen.dart` (~801) | size utils + optimization sheet + breakdown widgets |
 
-- [ ] **3.1.5** settings E2E + storage split
+- [x] **3.1.5** settings E2E + storage split — *`settings_e2e_section.dart` 849 → 479 (`security_questions_sheet.dart` + service ayrılmış); `storage_screen.dart` 801 → 642 (`directory_size_utils` + storage breakdown widget'ları ayrılmış, ama en büyük kalan dosya hâlâ bu) — 11.08.2026*
 
 ##### P2 — canvas / absence
 
@@ -775,7 +777,7 @@ Tabs zaten ayrılmış (`course_*_tab`, app bar, header, toolbar). Kalan:
 | `handwriting_canvas_screen.dart` (~640) | mode layers + codec kullanımı |
 | `absence_calendar_tab.dart` (~654) | reason sheets + summary; repo kaldır (2.3.2 ile) |
 
-- [ ] **3.1.6** handwriting + absence calendar extract
+- [x] **3.1.6** handwriting + absence calendar extract — *kısmi: `absence_calendar_tab.dart` 654 → 310, reason sheet'ler ayrılmış, doğrudan `AbsenceRepository` kullanımı yok (2.3.2 ile tutarlı); `handwriting_canvas_screen.dart` hâlâ ~641 satır, mode-layer bölünmesi yapılmamış (yalnızca `DrawingDataCodec` kullanıyor) — 11.08.2026*
 
 ##### Paylaşılan çıkarımlar
 
@@ -798,7 +800,7 @@ Tabs zaten ayrılmış (`course_*_tab`, app bar, header, toolbar). Kalan:
 
 - [x] `Listener` + stylus pressure + palm rejection — *01.08.2026*
 - [x] Çok sayfalı PDF stroke saklama — *01.08.2026*
-- [ ] **3.2.1** Pressure persist (`v:2`) + codec tek yerde
+- [x] **3.2.1** Pressure persist (`v:2`) + codec tek yerde — *`core/utils/drawing_data_codec.dart`; `{"v":2,...}` formatı + v1 geri uyumlu okuma; hem `handwriting_canvas_screen.dart` hem `note_drawing_display.dart` bu codec'i kullanıyor — 11.08.2026*
 - [ ] **3.2.2** Display path PDF arka planı (veya ürün “stroke-only” kararı kaydı)
 
 #### 3.3 Erişilebilirlik
