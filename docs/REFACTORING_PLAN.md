@@ -748,7 +748,7 @@ Tabs zaten ayrılmış (`course_*_tab`, app bar, header, toolbar). Kalan:
 | `widgets/moodle_section_card.dart` | `_SectionCard` |
 | `widgets/moodle_module_tile.dart` | `_ModuleTile` + `_OpenAction` (~560 satır) |
 
-- [x] **3.1.3** moodle module/section extract — *kısmi: 803 → 426 (hedef ~200'ün altına inmedi); `moodle_module_tile_view.dart` var, `moodle_section_card.dart` (`_SectionCard` çıkarımı) yok — 11.08.2026*
+- [x] **3.1.3** moodle module/section extract — *803 → 191 (hedef ~200'ün altında); `moodle_section_card.dart` (`MoodleSectionCard`) ve `moodle_module_tile.dart` (`MoodleModuleTile`, eski `_ModuleTile`/`_ModuleTileState`) çıkarıldı — 11.08.2026*
 
 ##### P1 — `home_screen.dart` (805 → ~180)
 
