@@ -478,7 +478,7 @@ Her iş kalemi şu şablonu kullanır: **Amaç · Dosyalar · Adımlar · Kabul 
 | **Risk** | Keystore kaybı = mağaza güncelleme imkânsız |
 | **Doğrulama** | `flutter build apk --release` (keystore ile) |
 
-- [ ] **0.6** Release signing template + docs (keystore kullanıcıda)
+- [x] **0.6** Release signing template + docs (keystore kullanıcıda) — *Gradle tarafı hazır: `build.gradle.kts` `android/key.properties` varsa okuyup `signingConfigs.release` oluşturuyor, yoksa debug key'e düşüyor (davranış değişmedi). `android/key.properties.example` + `docs/RELEASE_SIGNING.md` (keytool komutu, yedekleme uyarısı, doğrulama, ileride CI secrets notu) eklendi. `.gitignore` zaten `key.properties`/`*.jks`'i hariç tutuyordu (Flutter'ın varsayılan şablonu). **Kapanmayan kısım:** gerçek keystore kullanıcı tarafından oluşturulmalı — plan'ın kendi kabul kriterine göre bu "prosedür + template" ile kapanmış sayılıyor. Bu ortamda Android SDK/gradlew olmadığı için gerçek bir Gradle derlemesiyle doğrulanamadı; kod standart, yaygın kullanılan Flutter deseni — kullanıcı `flutter build apk --release`/`--debug` ile lokal doğrulamalı — 11.08.2026*
 
 #### 0.7 Asset & klasör yapısı tekilleştirme
 

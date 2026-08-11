@@ -1,0 +1,4 @@
+storePassword=CHANGE_ME
+keyPassword=CHANGE_ME
+keyAlias=lessontracker
+storeFile=/absolute/path/to/lessontracker-release.jks
