@@ -23,6 +23,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/secure_storage_service.dart';
 import 'widgets/home_content.dart';
 import 'widgets/home_bottom_nav.dart';
+import 'widgets/offline_banner.dart';
 import 'widgets/restore_cloud_dialog.dart';
 import 'helpers/quick_capture_ocr.dart';
 import '../../widgets/course/course_selection_sheet.dart';
@@ -203,29 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             if (_isOffline)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 8,
-                  horizontal: 16,
-                ),
-                color: Colors.orange.shade800,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.wifi_off, color: Colors.white, size: 16),
-                    const SizedBox(width: 8),
-                    Text(
-                      AppLocalizations.of(context)!.youAreOffline,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              const OfflineBanner(),
             Expanded(
               child: IndexedStack(
                 index: _currentIndex,
