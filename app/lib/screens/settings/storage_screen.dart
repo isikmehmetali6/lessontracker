@@ -14,6 +14,7 @@ import 'widgets/storage_breakdown_widgets.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import '../../core/utils/error_handler.dart';
+import '../../core/utils/moodle_image_cache_manager.dart';
 
 class StorageScreen extends StatefulWidget {
   const StorageScreen({super.key});
@@ -162,8 +163,10 @@ class _StorageScreenState extends State<StorageScreen> {
       PaintingBinding.instance.imageCache.clear();
       PaintingBinding.instance.imageCache.clearLiveImages();
 
-      // Cached network image disk cache temizliği
+      // Cached network image disk cache temizliği (Moodle görselleri +
+      // olası varsayılan cache_manager kullanıcıları)
       try {
+        await MoodleImageCacheManager().emptyCache();
         await DefaultCacheManager().emptyCache();
       } catch (e, stackTrace) {
         debugPrint('Error clearing image cache: $e\nStack: $stackTrace');

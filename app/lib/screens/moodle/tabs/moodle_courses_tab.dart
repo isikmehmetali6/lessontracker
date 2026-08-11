@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../providers/moodle_provider.dart';
 import '../../../../models/moodle/moodle_course.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/moodle_image_cache_manager.dart';
 import '../../../../core/utils/moodle_utils.dart';
 import '../../../../providers/language_provider.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
@@ -92,7 +93,10 @@ class _AccountHeader extends StatelessWidget {
         if (account.avatarUrl != null)
           CircleAvatar(
             radius: 14,
-            backgroundImage: CachedNetworkImageProvider(account.avatarUrl!),
+            backgroundImage: CachedNetworkImageProvider(
+              account.avatarUrl!,
+              cacheManager: MoodleImageCacheManager(),
+            ),
           )
         else
           CircleAvatar(
@@ -175,6 +179,7 @@ class _CourseCard extends StatelessWidget {
               width: double.infinity,
               child: CachedNetworkImage(
                 imageUrl: course.courseImageUrl!,
+                cacheManager: MoodleImageCacheManager(),
                 fit: BoxFit.cover,
                 errorWidget: (_, __, ___) =>
                     Container(color: isDark ? Colors.grey.shade900 : Colors.grey.shade100),
