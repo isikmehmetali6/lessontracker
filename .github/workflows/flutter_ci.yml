@@ -40,7 +40,7 @@ jobs:
       - name: Verify env asset optional load
         working-directory: app
         run: |
-          ! grep -q "^- \.env$" pubspec.yaml \
+          ! grep -qE "^\s*- \.env\s*$" pubspec.yaml \
             && grep -q "isOptional: true" lib/main.dart
 
       - name: Analyze
