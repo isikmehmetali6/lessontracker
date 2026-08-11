@@ -633,6 +633,18 @@ abstract class AppLocalizations {
   /// **'Left'**
   String get remainingLabel;
 
+  /// No description provided for @addAbsenceAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add absence'**
+  String get addAbsenceAction;
+
+  /// No description provided for @removeAbsenceAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove last absence'**
+  String get removeAbsenceAction;
+
   /// No description provided for @viewHistory.
   ///
   /// In en, this message translates to:

@@ -280,6 +280,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get remainingLabel => 'Übrig';
 
   @override
+  String get addAbsenceAction => 'Abwesenheit hinzufügen';
+
+  @override
+  String get removeAbsenceAction => 'Letzte Abwesenheit entfernen';
+
+  @override
   String get viewHistory => 'Verlauf anzeigen';
 
   @override

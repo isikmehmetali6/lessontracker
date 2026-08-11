@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../add_course/add_course_screen.dart';
 
@@ -9,12 +10,12 @@ class HomeFAB extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.only(top: 32),
       child: Semantics(
-        label: 'Yeni ders ekle',
+        label: l10n.addNewCourse,
         button: true,
-        hint: 'Yeni bir ders oluşturmak için dokunun',
         child: FloatingActionButton(
           onPressed: () {
             HapticFeedback.mediumImpact();

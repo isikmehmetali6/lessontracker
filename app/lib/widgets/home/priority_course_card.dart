@@ -32,7 +32,17 @@ class PriorityCourseCard extends StatelessWidget {
       secondaryTextColor = Colors.white70;
     }
 
-    return GestureDetector(
+    final semanticLabel = course.hasUpcomingExam
+        ? '${course.name}, exam upcoming, ${course.progress.round()}% complete'
+        : course.isBehind
+            ? '${course.name}, behind schedule, ${course.progress.round()}% complete'
+            : '${course.name}, ${course.progress.round()}% complete';
+
+    return Semantics(
+      button: onTap != null,
+      label: semanticLabel,
+      excludeSemantics: true,
+      child: GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
@@ -167,6 +177,7 @@ class PriorityCourseCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

@@ -88,6 +88,8 @@
     "absenceRightsLeft": "{count} hak kaldı",
     "absenceLabel": "Devamsızlık",
     "remainingLabel": "Kaldı",
+    "addAbsenceAction": "Devamsızlık ekle",
+    "removeAbsenceAction": "Son devamsızlığı kaldır",
     "viewHistory": "Geçmişi Görüntüle",
     "gpa": "GNO",
     "academicStanding": "Akademik Durum",

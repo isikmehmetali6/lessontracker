@@ -88,6 +88,8 @@
     "absenceRightsLeft": "{count} Rechte übrig",
     "absenceLabel": "Abwesenheit",
     "remainingLabel": "Übrig",
+    "addAbsenceAction": "Abwesenheit hinzufügen",
+    "removeAbsenceAction": "Letzte Abwesenheit entfernen",
     "viewHistory": "Verlauf anzeigen",
     "gpa": "Notendurchschnitt",
     "academicStanding": "Akademischer Stand",

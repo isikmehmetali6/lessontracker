@@ -812,7 +812,7 @@ Tabs zaten ayrılmış (`course_*_tab`, app bar, header, toolbar). Kalan:
 | **Kabul** | TalkBack/VoiceOver: ders listesi → detay → not ekle |
 
 - [x] TextScaler kısıtı kaldırılmış — *01.08.2026*
-- [ ] **3.3** Semantics etiketleri ana akışta
+- [x] **3.3** Semantics etiketleri ana akışta — *kısmi: ders listesi (`ScheduleCard`/`PriorityCourseCard` → tek `Semantics` düğümü, ad+saat+konum), devamsızlık ± (`AbsenceTrackerCard` → `Semantics`+`Tooltip`, yeni l10n anahtarları `addAbsenceAction`/`removeAbsenceAction`, 4 dilde), not ekle CTA satırı (`CourseBottomToolbar` → her ikon `Semantics`+`Tooltip`), ana FAB (`HomeFAB` → hardcoded TR yerine `l10n.addNewCourse`) kapsandı. Sekmeler (`Tab(text:...)`) zaten Flutter'ın kendi semantics'ini kullanıyor. Gerçek cihazda TalkBack/VoiceOver ile doğrulanmadı — 11.08.2026*
 
 ---
 

@@ -58,7 +58,17 @@ class ScheduleCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isEnded = _isClassEnded;
 
-    return Opacity(
+    final timeRange =
+        '${_formatTime(course.startTime)} - ${_formatTime(course.endTime)}';
+    final semanticLabel = course.location != null
+        ? '${course.name}, $timeRange, ${course.location}'
+        : '${course.name}, $timeRange';
+
+    return Semantics(
+      button: onTap != null,
+      label: semanticLabel,
+      excludeSemantics: true,
+      child: Opacity(
       opacity: isEnded ? 0.65 : 1,
       child: GlassCard(
         onTap: onTap,
@@ -233,6 +243,7 @@ class ScheduleCard extends StatelessWidget {
               ),
           ],
         ),
+      ),
       ),
     );
   }

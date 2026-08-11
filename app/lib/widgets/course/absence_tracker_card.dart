@@ -89,6 +89,7 @@ class AbsenceTrackerCard extends StatelessWidget {
                 icon: Icons.remove,
                 color: isDark ? Colors.grey[700]! : Colors.grey[200]!,
                 iconColor: isDark ? Colors.white : Colors.black,
+                semanticLabel: l10n.removeAbsenceAction,
                 onPressed: () {
                   if (course.currentAbsences > 0) {
                     HapticFeedback.lightImpact();
@@ -164,6 +165,7 @@ class AbsenceTrackerCard extends StatelessWidget {
                 icon: Icons.add,
                 color: AppColors.primary,
                 iconColor: Colors.white,
+                semanticLabel: l10n.addAbsenceAction,
                 onPressed: () {
                    HapticFeedback.mediumImpact();
                    onAbsenceChanged(course.currentAbsences + 1);
@@ -337,24 +339,32 @@ class AbsenceTrackerCard extends StatelessWidget {
     required IconData icon,
     required Color color,
     required Color iconColor,
+    required String semanticLabel,
     required VoidCallback onPressed,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(50),
-        child: Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            icon,
-            color: iconColor,
-            size: 28,
+    return Tooltip(
+      message: semanticLabel,
+      child: Semantics(
+        button: true,
+        label: semanticLabel,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onPressed,
+            borderRadius: BorderRadius.circular(50),
+            child: Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: iconColor,
+                size: 28,
+              ),
+            ),
           ),
         ),
       ),

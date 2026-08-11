@@ -280,6 +280,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get remainingLabel => 'Kaldı';
 
   @override
+  String get addAbsenceAction => 'Devamsızlık ekle';
+
+  @override
+  String get removeAbsenceAction => 'Son devamsızlığı kaldır';
+
+  @override
   String get viewHistory => 'Geçmişi Görüntüle';
 
   @override

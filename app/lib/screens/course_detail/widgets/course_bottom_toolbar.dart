@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class CourseBottomToolbar extends StatelessWidget {
@@ -24,6 +25,7 @@ class CourseBottomToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
@@ -59,6 +61,7 @@ class CourseBottomToolbar extends StatelessWidget {
                   icon: Icons.photo_camera,
                   onTap: onCaptureImageCamera,
                   isDark: isDark,
+                  label: l10n.camera,
                 ),
 
                 VerticalDivider(
@@ -73,6 +76,7 @@ class CourseBottomToolbar extends StatelessWidget {
                   icon: Icons.keyboard,
                   onTap: onShowTextNoteDialog,
                   isDark: isDark,
+                  label: l10n.keyboard,
                 ),
 
                 // OCR Scanner
@@ -80,6 +84,7 @@ class CourseBottomToolbar extends StatelessWidget {
                   icon: Icons.document_scanner,
                   onTap: onCaptureOcr,
                   isDark: isDark,
+                  label: l10n.ocrLabel,
                 ),
 
                 // Galeri
@@ -87,6 +92,7 @@ class CourseBottomToolbar extends StatelessWidget {
                   icon: Icons.photo_library,
                   onTap: onCaptureImageGallery,
                   isDark: isDark,
+                  label: l10n.gallery,
                 ),
 
                 // Drawing Canvas (iPad Pencil)
@@ -95,6 +101,7 @@ class CourseBottomToolbar extends StatelessWidget {
                   onTap: onOpenDrawingCanvas,
                   isDark: isDark,
                   isHighlight: true,
+                  label: l10n.drawingLabel,
                 ),
               ],
             ),
@@ -110,31 +117,40 @@ class _ToolbarButton extends StatelessWidget {
   final VoidCallback onTap;
   final bool isDark;
   final bool isHighlight;
+  final String label;
 
   const _ToolbarButton({
     required this.icon,
     required this.onTap,
     required this.isDark,
+    required this.label,
     this.isHighlight = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            onTap();
-          },
-          child: Center(
-            child: Icon(
-              icon,
-              color: isHighlight
-                  ? AppColors.primary
-                  : (isDark ? Colors.white70 : Colors.grey.shade600),
-              size: 24,
+      child: Tooltip(
+        message: label,
+        child: Semantics(
+          button: true,
+          label: label,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                onTap();
+              },
+              child: Center(
+                child: Icon(
+                  icon,
+                  color: isHighlight
+                      ? AppColors.primary
+                      : (isDark ? Colors.white70 : Colors.grey.shade600),
+                  size: 24,
+                ),
+              ),
             ),
           ),
         ),

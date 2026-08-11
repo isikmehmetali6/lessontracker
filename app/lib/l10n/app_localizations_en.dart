@@ -280,6 +280,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get remainingLabel => 'Left';
 
   @override
+  String get addAbsenceAction => 'Add absence';
+
+  @override
+  String get removeAbsenceAction => 'Remove last absence';
+
+  @override
   String get viewHistory => 'View History';
 
   @override
