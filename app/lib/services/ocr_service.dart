@@ -1,23 +1,68 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
-/// OCR Servisi - Apple Silicon simulator build'leri için stub.
-/// Fiziksel cihazda veya Intel Mac'te google_mlkit_text_recognition kullanılır.
+/// OCR Servisi - Google ML Kit ile metin tanıma
 class OcrService {
   static final OcrService _instance = OcrService._internal();
   factory OcrService() => _instance;
   OcrService._internal();
 
-  /// Resimden metin çıkar (stub)
+  TextRecognizer? _textRecognizer;
+
+  /// Text recognizer'ı başlat
+  TextRecognizer get textRecognizer {
+    _textRecognizer ??= TextRecognizer(script: TextRecognitionScript.latin);
+    return _textRecognizer!;
+  }
+
+  /// Resimden metin çıkar
   Future<OcrResult> recognizeText(String imagePath) async {
-    debugPrint('[OcrService] ⚠️ OCR devre dışı (simulator build)');
-    return OcrResult(
-      fullText: '',
-      blocks: [],
-      success: false,
-      error: 'OCR özelliği Apple Silicon simulator buildinde devre dışıdır. Fiziksel cihazda deneyin.',
-    );
+    try {
+      if (!await File(imagePath).exists()) {
+        debugPrint('[OcrService] ⚠️ Image file not found at path: $imagePath');
+        return OcrResult(
+          fullText: '',
+          blocks: [],
+          success: false,
+          error: 'Image file not found at path: $imagePath',
+        );
+      }
+
+      final inputImage = InputImage.fromFilePath(imagePath);
+      final recognizedText = await textRecognizer.processImage(inputImage);
+
+      final blocks = <OcrBlock>[];
+      for (final block in recognizedText.blocks) {
+        final lines = <OcrLine>[];
+        for (final line in block.lines) {
+          lines.add(OcrLine(
+            text: line.text,
+            confidence: line.confidence ?? 0.0,
+            boundingBox: line.boundingBox,
+          ));
+        }
+        blocks.add(OcrBlock(
+          text: block.text,
+          lines: lines,
+          boundingBox: block.boundingBox,
+        ));
+      }
+
+      return OcrResult(
+        fullText: recognizedText.text,
+        blocks: blocks,
+        success: true,
+      );
+    } catch (e) {
+      return OcrResult(
+        fullText: '',
+        blocks: [],
+        success: false,
+        error: e.toString(),
+      );
+    }
   }
 
   /// Resim dosyasından metin çıkar
@@ -26,7 +71,10 @@ class OcrService {
   }
 
   /// Servisi kapat
-  Future<void> close() async {}
+  Future<void> close() async {
+    await _textRecognizer?.close();
+    _textRecognizer = null;
+  }
 }
 
 /// OCR sonucu
@@ -44,6 +92,7 @@ class OcrResult {
   });
 
   bool get isEmpty => fullText.trim().isEmpty;
+
   bool get hasText => fullText.trim().isNotEmpty;
 
   int get wordCount {
