@@ -82,13 +82,20 @@ class DatabaseHelper {
     }
 
     String? encryptionKey = await _secureStorage.read(key: _keyDbEncryptionKey);
-    if (encryptionKey == null) {
+    // Anahtar Keychain'de yoksa yeni üretilir. Bu durumda, eğer diskte
+    // zaten bir .db dosyası varsa, o dosya EVELCE farklı (artık kayıp)
+    // bir anahtarla şifrelenmiş demektir — yeni üretilen anahtarla asla
+    // decrypt edilemez (bkz. sqlcipher HMAC/"file is not a database").
+    // Keychain'siz o veriyi kurtarmanın yolu yok, o yüzden bu durumu
+    // bilerek ayırt edip aşağıda tek seferlik kurtarma uyguluyoruz.
+    final isFreshKey = encryptionKey == null;
+    if (isFreshKey) {
       final key = encrypt.Key.fromSecureRandom(32);
       await _secureStorage.write(key: _keyDbEncryptionKey, value: key.base64);
       encryptionKey = key.base64;
     }
 
-    return await sqlcipher.openDatabase(
+    Future<Database> openWithKey() => sqlcipher.openDatabase(
       path,
       version: 17,
       password: encryptionKey,
@@ -98,6 +105,17 @@ class DatabaseHelper {
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
+
+    try {
+      return await openWithKey();
+    } on sqlcipher.DatabaseException {
+      if (!isFreshKey || !await File(path).exists()) rethrow;
+      // Anahtar zaten yeniyse ve dosya bu yeni anahtarla açılamadıysa,
+      // içindeki veri artık hiçbir şekilde kurtarılamaz — dosyayı silip
+      // temiz bir veritabanıyla devam ediyoruz (sonsuz crash döngüsü yerine).
+      await File(path).delete();
+      return await openWithKey();
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
