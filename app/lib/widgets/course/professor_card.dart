@@ -149,10 +149,14 @@ class ProfessorCard extends StatelessWidget {
     );
 
     if (onTap != null) {
-      return InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: row,
+      return Semantics(
+        button: true,
+        label: 'Copy $label',
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: row,
+        ),
       );
     }
     return row;

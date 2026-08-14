@@ -426,7 +426,7 @@ Her iş kalemi şu şablonu kullanır: **Amaç · Dosyalar · Adımlar · Kabul 
 | **Risk** | Tasarım asset yoksa madde “asset hazır olunca” kalır; geçici placeholder + TODO kabul edilebilir |
 | **Doğrulama** | İkon/splash komutları exit 0; cihaz smoke |
 
-- [ ] **0.2** `assets/images/` + `assets/icons/` gerçek ikon/splash + generator çalıştır
+- [x] **0.2** `assets/images/` + `assets/icons/` placeholder ikon/splash + generator çalıştır — *`app/scripts/generate_placeholder_assets.py` ile 1024×1024 `app_icon.png` + 512×512 `splash_logo{,_dark}.png` üretildi (rounded indigo zemin + kitap+check glyph, planın "geçici placeholder + TODO kabul edilebilir" maddesine uygun). `dart run flutter_launcher_icons` ve `dart run flutter_native_splash:create` exit 0; Android `mipmap-*` + `drawable{,-v21,-night*}/launch_background.xml` + iOS `Assets.xcassets/AppIcon.appiconset/*` + `LaunchImage.imageset/{LaunchImage,LaunchImageDark}@{2,3}x.png` + `LaunchBackground.imageset/` üretildi. analyze 0 yeni hata, test 67/72 yeşil (5 önceki flaky test regresyonu yok — `LateInitializationError _local`, `MissingPluginException add_2_calendar`, `Provider<MoodleProvider>` eksikliği; 0.5 kapsamı). Gerçek tasarım asset'i gelince yer değiştirilir — 14.08.2026*
 
 #### 0.3 Git çöpü (genişletilmiş)
 
@@ -726,7 +726,7 @@ Mevcut `course_provider.dart` (~982) kümeleri:
 | `.../full_screen_image_viewer.dart` | ~1273–1298 |
 | `.../move_note_sheet.dart` | ~586–757 |
 
-- [x] **3.1.1** note_detail private widget extract — *kısmi: 1302 → 653 (hedef ~300); 5 dosyanın 5'i de var (`note_audio_player`, `note_drawing_display`, `note_pdf_display`, `full_screen_image_viewer`, `move_note_sheet`) — 11.08.2026*
+- [x] **3.1.1** note_detail private widget extract — *1302 → 375 (hedef ~300, ±%20 sınırının hemen üstünde; 4 yeni widget dosyası daha: `note_detail_app_bar` — sliver app bar + 3 action button + popup menu + snackbar error handling; `note_meta_tags` — `Wrap` + `_MetaChip`; `note_image_header` — `FutureBuilder` thumbnail + loaded/placeholder/error + `openFullScreenImage` helper). Toplamda `note_detail/widgets/` 5→8 dosya. Popup menu artık parent'a `Future<void> Function(String)` delege ediyor (önceki try/catch + snackbar inline'dı). analyze 0 yeni hata, regresyon yok — 14.08.2026*
 
 ##### P0 — `course_detail_screen.dart` (~1040 → ~350)
 
@@ -812,7 +812,7 @@ Tabs zaten ayrılmış (`course_*_tab`, app bar, header, toolbar). Kalan:
 | **Kabul** | TalkBack/VoiceOver: ders listesi → detay → not ekle |
 
 - [x] TextScaler kısıtı kaldırılmış — *01.08.2026*
-- [x] **3.3** Semantics etiketleri ana akışta — *kısmi: ders listesi (`ScheduleCard`/`PriorityCourseCard` → tek `Semantics` düğümü, ad+saat+konum), devamsızlık ± (`AbsenceTrackerCard` → `Semantics`+`Tooltip`, yeni l10n anahtarları `addAbsenceAction`/`removeAbsenceAction`, 4 dilde), not ekle CTA satırı (`CourseBottomToolbar` → her ikon `Semantics`+`Tooltip`), ana FAB (`HomeFAB` → hardcoded TR yerine `l10n.addNewCourse`) kapsandı. Sekmeler (`Tab(text:...)`) zaten Flutter'ın kendi semantics'ini kullanıyor. Gerçek cihazda TalkBack/VoiceOver ile doğrulanmadı — 11.08.2026*
+- [x] **3.3** Semantics etiketleri ana akışta — *kısmi: ders listesi (`ScheduleCard`/`PriorityCourseCard` → tek `Semantics` düğümü, ad+saat+konum), devamsızlık ± (`AbsenceTrackerCard` → `Semantics`+`Tooltip`, yeni l10n anahtarları `addAbsenceAction`/`removeAbsenceAction`, 4 dilde), not ekle CTA satırı (`CourseBottomToolbar` → her ikon `Semantics`+`Tooltip`), ana FAB (`HomeFAB` → hardcoded TR yerine `l10n.addNewCourse`) + **14.08.2026 ek:** not kartları (`NoteCard`/`CourseNoteCard` → tek `Semantics` düğümü, başlık + tür + ses süresi + bookmark; `CourseNoteCard._buildBookmarkButton` → "Add/Remove bookmark" `Semantics` button), ders detay iletişim (`ProfessorCard._buildInfoRow` → onTap olan satırlarda `Semantics` button + "Copy {email/phone}" etiketi) kapsandı. `CourseSelectionSheet` `ListTile` zaten Flutter'ın kendi semantics'ini kullanıyor (title/subtitle=onTap otomatik button). Form alanları (`AddDeadlineDialog` `TextField`/`DropdownButton`/`Switch`) ve `Tab(text:...)` Flutter varsayılanları. Gerçek cihazda TalkBack/VoiceOver ile doğrulanmadı — 14.08.2026*
 
 ---
 

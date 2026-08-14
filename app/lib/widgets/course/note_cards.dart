@@ -25,72 +25,84 @@ class NoteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return GlassCard(
-      onTap: onTap,
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        children: [
-          // Sol - Önizleme
-          _buildPreview(isDark),
-          const SizedBox(width: 16),
-          // Sağ - Bilgiler
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        note.title,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+    return Semantics(
+      button: onTap != null,
+      label: _semanticsLabel(),
+      excludeSemantics: true,
+      child: GlassCard(
+        onTap: onTap,
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            // Sol - Önizleme
+            _buildPreview(isDark),
+            const SizedBox(width: 16),
+            // Sağ - Bilgiler
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          note.title,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
+                      Text(
+                        _formatDate(note.createdAt ?? DateTime.now()),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  // İçerik önizleme veya ses durumu
+                  if (note.isAudio)
+                    _buildAudioInfo(isDark)
+                  else if (note.content != null && note.content!.isNotEmpty)
                     Text(
-                      _formatDate(note.createdAt ?? DateTime.now()),
+                      note.content!,
                       style: TextStyle(
                         fontSize: 12,
                         color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                // İçerik önizleme veya ses durumu
-                if (note.isAudio)
-                  _buildAudioInfo(isDark)
-                else if (note.content != null && note.content!.isNotEmpty)
-                  Text(
-                    note.content!,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                  const SizedBox(height: 8),
+                  // Etiket
+                  if (courseName != null)
+                    TagChip(
+                      label: courseName!.toUpperCase(),
+                      color: courseColor ?? AppColors.primary,
+                      isSmall: true,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                const SizedBox(height: 8),
-                // Etiket
-                if (courseName != null)
-                  TagChip(
-                    label: courseName!.toUpperCase(),
-                    color: courseColor ?? AppColors.primary,
-                    isSmall: true,
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  String _semanticsLabel() {
+    final parts = <String>[note.title];
+    if (courseName != null) parts.add(courseName!);
+    if (note.isAudio) parts.add(note.formattedDuration);
+    return parts.join(', ');
   }
 
   Widget _buildPreview(bool isDark) {
@@ -249,13 +261,33 @@ class CourseNoteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    if (note.isAudio) {
-      return _buildAudioCard(context, isDark);
-    } else if (note.isOcr || note.isImage) {
-      return _buildImageCard(context, isDark);
-    } else {
-      return _buildTextCard(context, isDark);
-    }
+    final card = note.isAudio
+        ? _buildAudioCard(context, isDark)
+        : note.isOcr || note.isImage
+            ? _buildImageCard(context, isDark)
+            : _buildTextCard(context, isDark);
+
+    return Semantics(
+      button: onTap != null,
+      label: _semanticsLabel(),
+      excludeSemantics: true,
+      child: card,
+    );
+  }
+
+  String _semanticsLabel() {
+    final parts = <String>[note.title];
+    final type = note.isAudio
+        ? 'Audio note'
+        : note.isOcr
+            ? 'OCR note'
+            : note.isImage
+                ? 'Image note'
+                : 'Text note';
+    parts.add(type);
+    if (note.isAudio) parts.add(note.formattedDuration);
+    if (note.isBookmarked) parts.add('Bookmarked');
+    return parts.join(', ');
   }
 
   // ───────────────────── COMMON HELPERS ─────────────────────
@@ -287,23 +319,27 @@ class CourseNoteCard extends StatelessWidget {
   }
 
   Widget _buildBookmarkButton(bool isDark) {
-    return GestureDetector(
-      onTap: onBookmarkTap,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: note.isBookmarked
-              ? AppColors.amber.withValues(alpha: 0.15)
-              : (isDark ? Colors.white.withValues(alpha: 0.06) : Colors.grey.shade100),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(
-          note.isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-          size: 18,
-          color: note.isBookmarked
-              ? AppColors.amber
-              : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+    return Semantics(
+      button: true,
+      label: note.isBookmarked ? 'Remove bookmark' : 'Add bookmark',
+      child: GestureDetector(
+        onTap: onBookmarkTap,
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: note.isBookmarked
+                ? AppColors.amber.withValues(alpha: 0.15)
+                : (isDark ? Colors.white.withValues(alpha: 0.06) : Colors.grey.shade100),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+            note.isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+            size: 18,
+            color: note.isBookmarked
+                ? AppColors.amber
+                : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+          ),
         ),
       ),
     );
