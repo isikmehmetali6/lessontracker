@@ -284,6 +284,7 @@ class _AbsenceCalendarTabState extends State<AbsenceCalendarTab> {
       reasonLabel: _reasonLabel,
       onEditReason: (id, reason) => showAbsenceEditSheet(
         context: context,
+        courseId: widget.courseId,
         absenceId: id,
         currentReason: reason,
         isDark: widget.isDark,

@@ -203,8 +203,17 @@ class AuthProvider extends ChangeNotifier {
         await _ensureE2EKey(password);
       }
 
-      // Check email verification
+      // Check email verification. Supabase "Confirm email" açıkken sunucu
+      // zaten `email_not_confirmed` döner; bu dal savunma amaçlıdır: false
+      // dönerken oturumu açık bırakmayız, yoksa AuthWrapper kullanıcıyı
+      // HomeScreen'e alır (B19).
       if (_user != null && !_user!.emailVerified) {
+        try {
+          await _auth!.signOut(scope: SignOutScope.local);
+        } catch (e) {
+          debugPrint('Error clearing unverified session: $e');
+        }
+        _user = null;
         _error =
             'Please verify your email before logging in. Check your inbox for the verification link.';
         _isLoading = false;

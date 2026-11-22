@@ -209,8 +209,15 @@ class CourseProvider extends ChangeNotifier {
     }
   }
 
+  /// Hatırlatma gece yarısını geçince bildirim bir önceki güne planlanır
+  /// (bkz. [_scheduleForCourse]). Hatırlatma süresi planlamadan sonra
+  /// değişmiş olabileceğinden hem dersin gününü hem önceki günü iptal ederiz
+  /// (B18). İptal tüm ders için yapıldığından fazladan id iptali zararsızdır.
   Future<void> _cancelForCourse(Course course) async {
-    for (var day in course.scheduleDays) {
+    final days = <int>{
+      for (final day in course.scheduleDays) ...[day, (day + 6) % 7],
+    };
+    for (final day in days) {
       await _notificationService.cancelClassNotification(course.id, day);
     }
   }
@@ -620,9 +627,14 @@ class CourseProvider extends ChangeNotifier {
 
   /// Devamsızlık sebebini güncelle (takvim sekmesi için)
   /// AttendanceProvider'a delege eder.
-  Future<void> updateAbsenceReasonById(String absenceId, String reason) async {
+  /// [courseId] AbsenceChangeBus'ın doğru dersi yenilemesi için gerekir (B14).
+  Future<void> updateAbsenceReasonById(
+    String courseId,
+    String absenceId,
+    String reason,
+  ) async {
     await AttendanceProvider(absenceRepo: _absenceRepo)
-        .updateAbsenceReasonById('', absenceId, reason);
+        .updateAbsenceReasonById(courseId, absenceId, reason);
     notifyListeners();
   }
 
@@ -699,20 +711,10 @@ class CourseProvider extends ChangeNotifier {
     _warning = null;
     try {
       final currentTotal = await getTotalWeight(courseId);
-      final newTotal = currentTotal + weight;
-      final grade = Grade(
-        id: _uuid.v4(),
-        courseId: courseId,
-        name: name,
-        score: score,
-        maxScore: maxScore,
-        weight: weight,
-        createdAt: DateTime.now(),
-      );
-      await GradeProvider(
-        gradeRepo: _gradeRepo,
-        uuid: _uuid,
-      ).addGrade(
+      final gradeProvider = GradeProvider(gradeRepo: _gradeRepo, uuid: _uuid);
+      // DB'ye yazılan nesnenin kendisi döndürülür (B13: önceden farklı id'li
+      // ikinci bir Grade oluşturuluyordu).
+      final grade = await gradeProvider.addGrade(
         courseId: courseId,
         name: name,
         score: score,
@@ -720,12 +722,8 @@ class CourseProvider extends ChangeNotifier {
         weight: weight,
         currentTotalWeight: currentTotal,
       );
-      // _warning'i GradeProvider'dan okumak yerine yerel hesap korunur.
-      if (newTotal > 100) {
-        _warning =
-            'Total weight is ${newTotal.toStringAsFixed(0)}% (exceeds 100%). '
-            'This may affect weighted average calculation.';
-      }
+      _error = gradeProvider.error;
+      _warning = gradeProvider.warning;
       notifyListeners();
       return grade;
     } catch (e) {

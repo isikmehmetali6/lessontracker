@@ -132,6 +132,7 @@ Future<void> showAbsenceAddSheet({
 /// Modal sheet for editing the reason of an existing absence.
 Future<void> showAbsenceEditSheet({
   required BuildContext context,
+  required String courseId,
   required String absenceId,
   required String currentReason,
   required bool isDark,
@@ -148,7 +149,7 @@ Future<void> showAbsenceEditSheet({
     labelBuilder: labelBuilder,
     onSubmit: (reason) async {
       final provider = context.read<CourseProvider>();
-      await provider.updateAbsenceReasonById(absenceId, reason);
+      await provider.updateAbsenceReasonById(courseId, absenceId, reason);
       HapticFeedback.mediumImpact();
       onSaved();
     },

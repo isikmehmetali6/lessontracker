@@ -19,6 +19,11 @@ class NotificationService {
   bool _isInitialized = false;
   final Map<String, DateTime> _mutedCourses = {};
 
+  /// Ders hatırlatıcısının bildirim id'si — planlama ve iptal aynı formülü
+  /// kullanmalı (B18). [dayOfWeek] bildirimin **tetiklendiği** gündür.
+  static int classNotificationId(String courseId, int dayOfWeek) =>
+      (courseId + dayOfWeek.toString()).hashCode.abs() % 900000;
+
   Future<void> init() async {
     if (kIsWeb) return;
     if (_isInitialized) return;
@@ -114,7 +119,7 @@ class NotificationService {
     int reminderMinutes = 60,
   }) async {
     final int notificationId =
-        (courseId + dayOfWeek.toString()).hashCode.abs() % 900000;
+        classNotificationId(courseId, dayOfWeek);
 
     final String timeText = reminderMinutes >= 60
         ? '${reminderMinutes ~/ 60} hour${reminderMinutes ~/ 60 > 1 ? 's' : ''}'
@@ -147,7 +152,7 @@ class NotificationService {
 
   Future<void> cancelClassNotification(String courseId, int dayOfWeek) async {
     final int notificationId =
-        (courseId + dayOfWeek.toString()).hashCode.abs() % 900000;
+        classNotificationId(courseId, dayOfWeek);
     await flutterLocalNotificationsPlugin.cancel(notificationId);
   }
 
