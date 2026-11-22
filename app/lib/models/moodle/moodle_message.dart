@@ -95,6 +95,34 @@ class MoodleMessage {
     );
   }
 
+  /// Yerel önbellek (moodle_cache) için.
+  Map<String, dynamic> toCacheJson() => {
+        'id': id,
+        'accountId': accountId,
+        'senderId': senderId,
+        'senderName': senderName,
+        'senderAvatar': senderAvatar,
+        'message': message,
+        'subject': subject,
+        'timestamp': timestamp.toIso8601String(),
+        'isRead': isRead,
+        'courseId': courseId,
+      };
+
+  factory MoodleMessage.fromCacheJson(Map<String, dynamic> json) =>
+      MoodleMessage(
+        id: json['id'] as int,
+        accountId: json['accountId'] as String,
+        senderId: json['senderId'] as int? ?? 0,
+        senderName: json['senderName'] as String? ?? '',
+        senderAvatar: json['senderAvatar'] as String?,
+        message: json['message'] as String? ?? '',
+        subject: json['subject'] as String?,
+        timestamp: DateTime.parse(json['timestamp'] as String),
+        isRead: json['isRead'] as bool? ?? false,
+        courseId: json['courseId'] as int?,
+      );
+
   @override
   String toString() =>
       'MoodleMessage(id: $id, from: $senderName, preview: ${preview.substring(0, preview.length.clamp(0, 30))})';

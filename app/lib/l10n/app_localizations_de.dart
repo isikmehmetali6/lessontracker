@@ -2000,83 +2000,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get moodleAccountNotFound => 'Konto nicht gefunden';
 
   @override
-  String get veliConsentTitle => 'Eltern';
-
-  @override
-  String get veliConsentDesc => 'Benutzer unter 18 Jahren benötigen die elterliche Einwilligung zur Nutzung der App.';
-
-  @override
-  String get veliEmailLabel => 'E-Mail der Eltern';
-
-  @override
-  String get veliEmailHint => 'E-Mail-Adresse der Eltern eingeben';
-
-  @override
-  String get veliConfirmCheck => 'Ich bestätige, dass ich Elternteil bin und meinem Kind die Nutzung dieser App erlaube.';
-
-  @override
-  String get veliKvkkCheck => 'Ich gebe die elterliche Einwilligung gemäß KVKK Gesetz Nr. 6698.';
-
-  @override
-  String veliCodeSent(Object email) {
-    return 'Bestätigungscode an $email gesendet.';
-  }
-
-  @override
-  String get veliEnterCode => 'Gib den 6-stelligen Bestätigungscode ein';
-
-  @override
-  String get veliVerifyAndApprove => 'Bestätigen & Genehmigen';
-
-  @override
-  String get veliResendCode => 'Code erneut senden';
-
-  @override
-  String get veliChangeEmail => 'E-Mail ändern';
-
-  @override
-  String get veliSendCode => 'Bestätigungscode senden';
-
-  @override
-  String get veliCancel => 'Abbrechen';
-
-  @override
-  String get veliRequired => 'Elterliche Einwilligung ist erforderlich';
-
-  @override
-  String get veliValidEmail => 'Gib eine gültige E-Mail-Adresse ein';
-
-  @override
-  String get veliCheckConsent => 'Bitte aktiviere das Kästchen für die elterliche Einwilligung';
-
-  @override
-  String get veliCodeRequired => 'Gib den Bestätigungscode ein';
-
-  @override
-  String get veliSessionNotFound => 'Bestätigungssitzung nicht gefunden. Bitte versuche es erneut.';
-
-  @override
-  String get veliCodeExpired => 'Bestätigungscode abgelaufen. Bitte fordere einen neuen an.';
-
-  @override
-  String get veliWrongCode => 'Falscher Bestätigungscode.';
-
-  @override
-  String get veliInfoText => 'Die E-Mail der Eltern wird nur zum Senden der Einwilligungsbenachrichtigung verwendet.';
-
-  @override
-  String get veliRequestConsent => 'Einwilligung anfordern';
-
-  @override
-  String get veliEmailVerification => 'E-Mail-Bestätigung';
-
-  @override
-  String get veliStepVerification => 'Bestätigung';
-
-  @override
-  String get veliStepConsent => 'Einwilligung';
-
-  @override
   String get kvkkFlowReset => 'KVKK-Einwilligung zurückgesetzt – App neu starten';
 
   @override
@@ -2318,4 +2241,35 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get acikRizaLimitedMode => 'Im eingeschränkten Modus fortfahren';
+
+  @override
+  String get restorePasswordTitle => 'Kontopasswort eingeben';
+
+  @override
+  String get restorePasswordDescription => 'Deine Cloud-Daten sind Ende-zu-Ende-verschlüsselt. Gib dein Kontopasswort ein, um sie auf diesem Gerät zu entsperren.';
+
+  @override
+  String get restorePasswordWrong => 'Falsches Passwort. Deine Cloud-Daten konnten nicht entsperrt werden.';
+
+  @override
+  String restoreSkippedRecords(Object count) {
+    return '$count Einträge konnten auf diesem Gerät nicht entschlüsselt werden und wurden übersprungen.';
+  }
+
+  @override
+  String get restoreFailed => 'Wiederherstellung fehlgeschlagen. Bitte versuche es erneut.';
+
+  @override
+  String get backupKeyMissing => 'Dein Verschlüsselungsschlüssel ist auf diesem Gerät nicht verfügbar. Melde dich ab und wieder an, um das Cloud-Backup zu entsperren.';
+
+  @override
+  String get cleanupCloudOrphans => 'Ungenutzte Cloud-Dateien bereinigen';
+
+  @override
+  String cleanupCloudOrphansDone(Object count) {
+    return '$count ungenutzte Cloud-Dateien entfernt.';
+  }
+
+  @override
+  String get moodleInsecureUrlWarning => 'Diese Verbindung ist nicht verschlüsselt (http). Dein Moodle-Token könnte im Netzwerk offengelegt werden.';
 }

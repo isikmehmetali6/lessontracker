@@ -48,7 +48,6 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
   // PDF mode
   PdfControllerPinch? _pdfController;
   int _currentPdfPage = 1;
-  int _totalPdfPages = 0;
   String? _pdfPath;
 
   bool _isLoading = false;
@@ -71,7 +70,6 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
           _strokesByPage
             ..clear()
             ..addAll(decoded);
-          _totalPdfPages = _strokesByPage.keys.length;
           _currentPageStrokes = _strokesByPage[1] ?? [];
         }
       } catch (e, stackTrace) {
@@ -454,7 +452,6 @@ class _HandwritingCanvasScreenState extends State<HandwritingCanvasScreen> {
       }),
       onDocumentLoaded: (document) {
         setState(() {
-          _totalPdfPages = document.pagesCount;
           _currentPdfPage = 1;
           _currentPageStrokes = _strokesByPage[1] ?? [];
         });

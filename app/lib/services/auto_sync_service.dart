@@ -1,11 +1,20 @@
-import 'package:flutter/foundation.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:sqflite/sqflite.dart';
 import 'dart:async';
-import 'sync_service.dart';
-import '../../core/backend/supabase_backend.dart';
-import '../../core/database/database_helper.dart';
+import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
+import 'package:sqflite/sqflite.dart';
+
+import '../core/backend/supabase_backend.dart';
+import '../core/database/database_helper.dart';
+import 'sync_service.dart';
+
+/// Veri değişikliklerinden sonra otomatik yedek + çevrimdışı silme kuyruğu.
+///
+/// Silmeler `pending_changes` tablosuna (operation = 'delete', payload =
+/// bulut dosya yolları) yazılır; bağlantı varken önce bu kuyruk buluta
+/// uygulanır, ardından tam backup alınır. Bir kuyruk satırı yalnızca bulut
+/// silmesi başarılı olduğunda kaldırılır (bkz. docs/FIX_PLAN_2026-11-23.md K3).
 class AutoSyncService {
   static final AutoSyncService _instance = AutoSyncService._internal();
   factory AutoSyncService() => _instance;
@@ -14,22 +23,20 @@ class AutoSyncService {
   Timer? _debounceTimer;
   bool _isSyncing = false;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
-  int _pendingChangesCount = 0;
 
   void init() {
     _connectivitySubscription?.cancel();
     _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
       results,
-    ) {
+    ) async {
       final hasConnection = results.any((r) => r != ConnectivityResult.none);
-      if (hasConnection) {
-        final pendingCount = _getPendingChangesCountSync();
-        if (pendingCount > 0) {
-          debugPrint(
-            'AutoSync: Internet restored, processing $pendingCount pending changes...',
-          );
-          _performBackup();
-        }
+      if (!hasConnection) return;
+      final pendingCount = await _getPendingChangesCount();
+      if (pendingCount > 0) {
+        debugPrint(
+          'AutoSync: Internet restored, processing $pendingCount pending changes...',
+        );
+        _performBackup();
       }
     });
   }
@@ -41,10 +48,8 @@ class AutoSyncService {
 
   Future<void> _performBackup() async {
     if (_isSyncing) return;
-
     try {
       _isSyncing = true;
-
       if (SupabaseBackend.currentUser == null) return;
 
       final connectivityResult = await Connectivity().checkConnectivity();
@@ -58,17 +63,13 @@ class AutoSyncService {
         return;
       }
 
-      final pendingCount = await _getPendingChangesCount();
-      if (pendingCount > 0) {
-        debugPrint(
-          'AutoSync: Processing $pendingCount pending changes before backup...',
-        );
-        await _processPendingChanges();
-      }
+      final syncService = SyncService();
+      await processPendingDeletes(syncService);
+
+      if (!await syncService.isCloudBackupEnabled()) return;
 
       debugPrint('AutoSync: Triggering backup after data change...');
-      await SyncService().backupData();
-      await _clearPendingChanges();
+      await syncService.backupData();
       debugPrint('AutoSync: Backup complete.');
     } catch (e) {
       debugPrint('AutoSync: Error during backup: $e');
@@ -77,11 +78,15 @@ class AutoSyncService {
     }
   }
 
+  /// Silmeyi kuyruğa ekler. [payload] buluttaki ilgili dosya yollarını
+  /// (`cloudPath`, `thumbnailCloudPath`) taşır; yerel satır silindikten
+  /// sonra bu bilgiye başka yerden ulaşılamaz.
   Future<void> recordPendingChange(
     String tableName,
     String recordId,
-    String operation,
-  ) async {
+    String operation, {
+    Map<String, dynamic>? payload,
+  }) async {
     try {
       final db = await DatabaseHelper().database;
       await db.insert('pending_changes', {
@@ -90,7 +95,8 @@ class AutoSyncService {
         'operation': operation,
         'timestamp': DateTime.now().toIso8601String(),
         'synced': 0,
-      }, conflictAlgorithm: ConflictAlgorithm.replace);
+        'payload': payload == null ? null : jsonEncode(payload),
+      });
     } catch (e) {
       debugPrint('AutoSync: Error recording pending change: $e');
     }
@@ -102,45 +108,58 @@ class AutoSyncService {
       final result = await db.rawQuery(
         'SELECT COUNT(*) FROM pending_changes WHERE synced = 0',
       );
-      final count = Sqflite.firstIntValue(result) ?? 0;
-      _pendingChangesCount = count;
-      return count;
+      return Sqflite.firstIntValue(result) ?? 0;
     } catch (e) {
       return 0;
     }
   }
 
-  int _getPendingChangesCountSync() {
-    return _pendingChangesCount;
-  }
+  /// Kuyruktaki silmeleri buluta uygular. Başarılı satırlar kuyruktan
+  /// kaldırılır; başarısız olanlar bir sonraki denemeye kalır.
+  @visibleForTesting
+  Future<int> processPendingDeletes(SyncService syncService) async {
+    final db = await DatabaseHelper().database;
+    final rows = await db.query(
+      'pending_changes',
+      where: 'synced = ? AND operation = ?',
+      whereArgs: [0, 'delete'],
+      orderBy: 'id ASC',
+    );
 
-  /// Marks queued pending_changes rows as synced. Per-row replay isn't
-  /// implemented — _performBackup follows up with a full SyncService.backupData,
-  /// which is what actually pushes the data.
-  Future<void> _processPendingChanges() async {
-    try {
-      final db = await DatabaseHelper().database;
-      final updated = await db.update(
-        'pending_changes',
-        {'synced': 1},
-        where: 'synced = ?',
-        whereArgs: [0],
-      );
-      if (updated > 0) {
-        debugPrint('AutoSync: Marked $updated pending changes as synced.');
+    var applied = 0;
+    for (final row in rows) {
+      final rowId = row['id'] as int;
+      final rawPayload = row['payload'] as String?;
+      Map<String, dynamic>? payload;
+      if (rawPayload != null) {
+        try {
+          payload = jsonDecode(rawPayload) as Map<String, dynamic>;
+        } catch (_) {
+          payload = null;
+        }
       }
-    } catch (e) {
-      debugPrint('AutoSync: Error processing pending changes: $e');
+      try {
+        await syncService.applyCloudDelete(
+          row['tableName'] as String,
+          row['recordId'] as String,
+          payload,
+        );
+        await db.delete(
+          'pending_changes',
+          where: 'id = ?',
+          whereArgs: [rowId],
+        );
+        applied++;
+      } catch (e) {
+        debugPrint(
+          'AutoSync: Pending delete ${row['tableName']}/${row['recordId']} failed: $e',
+        );
+      }
     }
-  }
-
-  Future<void> _clearPendingChanges() async {
-    try {
-      final db = await DatabaseHelper().database;
-      await db.delete('pending_changes', where: 'synced = ?', whereArgs: [1]);
-    } catch (e) {
-      debugPrint('AutoSync: Error clearing pending changes: $e');
+    if (applied > 0) {
+      debugPrint('AutoSync: Applied $applied pending cloud deletes.');
     }
+    return applied;
   }
 
   void dispose() {

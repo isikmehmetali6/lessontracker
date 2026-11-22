@@ -1,12 +1,15 @@
 import 'dart:convert';
 import 'package:encrypt/encrypt.dart' as encrypt;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-/// AES-CBC encryption helpers for cloud backup payloads.
+/// **Legacy** yedek şifrelemesi — yalnızca eski kayıtları çözmek için.
 ///
-/// Extracted from SyncService as part of plan 2.2 (SyncService split
-/// facade). The key and IV live in secure storage so the same value
-/// round-trips across backup/restore.
+/// Eski sürümler kayıtları cihaza özel `backup_encryption_key` ve tüm
+/// kayıtlarda aynı IV ile AES-CBC şifreliyordu; bu anahtar buluta hiç
+/// yazılmadığından yalnızca yedeği alan cihazda açılabilir. Yeni kayıtlar
+/// [RecordCrypto] (v2) ile yazılır; restore sonrası backup tüm kayıtları v2'ye
+/// taşır. Göç tamamlanınca bu sınıf kaldırılabilir.
 class SyncEncryption {
   SyncEncryption({FlutterSecureStorage? secureStorage})
       : _secureStorage = secureStorage ?? const FlutterSecureStorage();
@@ -16,58 +19,43 @@ class SyncEncryption {
 
   final FlutterSecureStorage _secureStorage;
 
-  Future<encrypt.Key> getEncryptionKey() async {
-    final keyBase64 = await _secureStorage.read(key: keyName);
-    if (keyBase64 == null) {
-      throw Exception(
-        'Encryption key not found. Please enable cloud backup first.',
-      );
-    }
-    return encrypt.Key.fromBase64(keyBase64);
-  }
-
-  Future<encrypt.IV> getOrCreateIV() async {
-    String? ivBase64 = await _secureStorage.read(key: ivName);
-    if (ivBase64 == null) {
-      final iv = encrypt.IV.fromSecureRandom(16);
-      await _secureStorage.write(key: ivName, value: iv.base64);
-      return iv;
-    }
-    return encrypt.IV.fromBase64(ivBase64);
-  }
-
-  Future<void> ensureEncryptionKeyExists() async {
-    String? key = await _secureStorage.read(key: keyName);
-    if (key == null) {
-      final generatedKey = encrypt.Key.fromSecureRandom(32);
-      await _secureStorage.write(
-        key: keyName,
-        value: generatedKey.base64,
-      );
-    }
-  }
-
-  Future<String> encryptData(Map<String, dynamic> data) async {
-    final key = await getEncryptionKey();
-    final iv = await getOrCreateIV();
-    final encrypter = encrypt.Encrypter(
-      encrypt.AES(key, mode: encrypt.AESMode.cbc),
-    );
-    final encrypted = encrypter.encrypt(jsonEncode(data), iv: iv);
-    return encrypted.base64;
-  }
-
   Future<Map<String, dynamic>> decryptData(String encryptedBase64) async {
-    final key = await getEncryptionKey();
+    final keyBase64 = await _secureStorage.read(key: keyName);
     final ivBase64 = await _secureStorage.read(key: ivName);
-    if (ivBase64 == null) {
-      throw Exception('Backup IV not found. Cannot decrypt data.');
+    if (keyBase64 == null || ivBase64 == null) {
+      throw const LegacyBackupKeyMissing();
     }
-    final iv = encrypt.IV.fromBase64(ivBase64);
     final encrypter = encrypt.Encrypter(
-      encrypt.AES(key, mode: encrypt.AESMode.cbc),
+      encrypt.AES(encrypt.Key.fromBase64(keyBase64), mode: encrypt.AESMode.cbc),
     );
-    final decrypted = encrypter.decrypt64(encryptedBase64, iv: iv);
+    final decrypted = encrypter.decrypt64(
+      encryptedBase64,
+      iv: encrypt.IV.fromBase64(ivBase64),
+    );
     return jsonDecode(decrypted) as Map<String, dynamic>;
   }
+
+  /// Yalnızca testlerde legacy kayıt üretmek için.
+  @visibleForTesting
+  Future<String> encryptLegacyForTesting(Map<String, dynamic> data) async {
+    final keyBase64 = await _secureStorage.read(key: keyName);
+    final ivBase64 = await _secureStorage.read(key: ivName);
+    final encrypter = encrypt.Encrypter(
+      encrypt.AES(
+        encrypt.Key.fromBase64(keyBase64!),
+        mode: encrypt.AESMode.cbc,
+      ),
+    );
+    return encrypter
+        .encrypt(jsonEncode(data), iv: encrypt.IV.fromBase64(ivBase64!))
+        .base64;
+  }
+}
+
+/// Legacy kayıt bu cihazda çözülemez (yedek başka cihazda alınmış).
+class LegacyBackupKeyMissing implements Exception {
+  const LegacyBackupKeyMissing();
+  @override
+  String toString() =>
+      'LegacyBackupKeyMissing: record was encrypted on another device';
 }

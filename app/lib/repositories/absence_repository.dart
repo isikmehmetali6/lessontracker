@@ -87,13 +87,18 @@ class AbsenceRepository {
         await txn.delete('absences', where: 'id = ?', whereArgs: [id]);
       }
     });
+    // Bulut devamsızlık kaydı backup'ta yerel durumdan yeniden yazılır.
+    AutoSyncService().triggerBackup();
   }
 
   Future<List<Map<String, dynamic>>> getAbsencesWithReasonByCourse(
     String courseId,
   ) async {
     if (_dbHelper.isWeb) {
-      return _absencesInMemory.where((a) => a['courseId'] == courseId).toList()
+      return _absencesInMemory
+          .where((a) => a['courseId'] == courseId)
+          .map((a) => {...a, 'date': (a['date'] as DateTime).toIso8601String()})
+          .toList()
         ..sort((a, b) => (b['date'] as String).compareTo(a['date'] as String));
     }
     final db = await _dbHelper.database;

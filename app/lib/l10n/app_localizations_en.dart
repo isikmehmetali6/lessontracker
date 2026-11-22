@@ -2000,83 +2000,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moodleAccountNotFound => 'Account not found';
 
   @override
-  String get veliConsentTitle => 'Parental Consent';
-
-  @override
-  String get veliConsentDesc => 'Users under 18 need parental consent to use the app.';
-
-  @override
-  String get veliEmailLabel => 'Parent Email Address';
-
-  @override
-  String get veliEmailHint => 'Enter parent\'s email address';
-
-  @override
-  String get veliConfirmCheck => 'I confirm that I am a parent and I allow my child to use this app.';
-
-  @override
-  String get veliKvkkCheck => 'I provide parental consent under KVKK Law No. 6698.';
-
-  @override
-  String veliCodeSent(Object email) {
-    return 'Verification code sent to $email.';
-  }
-
-  @override
-  String get veliEnterCode => 'Enter the 6-digit verification code';
-
-  @override
-  String get veliVerifyAndApprove => 'Verify & Approve';
-
-  @override
-  String get veliResendCode => 'Resend Code';
-
-  @override
-  String get veliChangeEmail => 'Change Email';
-
-  @override
-  String get veliSendCode => 'Send Verification Code';
-
-  @override
-  String get veliCancel => 'Cancel';
-
-  @override
-  String get veliRequired => 'Parental consent is required';
-
-  @override
-  String get veliValidEmail => 'Enter a valid email address';
-
-  @override
-  String get veliCheckConsent => 'Please check the parental consent box';
-
-  @override
-  String get veliCodeRequired => 'Enter the verification code';
-
-  @override
-  String get veliSessionNotFound => 'Verification session not found. Please try again.';
-
-  @override
-  String get veliCodeExpired => 'Verification code expired. Please request a new one.';
-
-  @override
-  String get veliWrongCode => 'Wrong verification code.';
-
-  @override
-  String get veliInfoText => 'The parent email will only be used to send the consent notification.';
-
-  @override
-  String get veliRequestConsent => 'Request Consent';
-
-  @override
-  String get veliEmailVerification => 'Email Verification';
-
-  @override
-  String get veliStepVerification => 'Verification';
-
-  @override
-  String get veliStepConsent => 'Consent';
-
-  @override
   String get kvkkFlowReset => 'KVKK consent reset — restart the app';
 
   @override
@@ -2318,4 +2241,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get acikRizaLimitedMode => 'Continue in Limited Mode';
+
+  @override
+  String get restorePasswordTitle => 'Enter your account password';
+
+  @override
+  String get restorePasswordDescription => 'Your cloud data is end-to-end encrypted. Enter your account password to unlock it on this device.';
+
+  @override
+  String get restorePasswordWrong => 'Incorrect password. Your cloud data could not be unlocked.';
+
+  @override
+  String restoreSkippedRecords(Object count) {
+    return '$count records could not be decrypted on this device and were skipped.';
+  }
+
+  @override
+  String get restoreFailed => 'Restore failed. Please try again.';
+
+  @override
+  String get backupKeyMissing => 'Your encryption key is not available on this device. Sign out and sign in again to unlock cloud backup.';
+
+  @override
+  String get cleanupCloudOrphans => 'Clean up unused cloud files';
+
+  @override
+  String cleanupCloudOrphansDone(Object count) {
+    return '$count unused cloud files removed.';
+  }
+
+  @override
+  String get moodleInsecureUrlWarning => 'This connection is not encrypted (http). Your Moodle token may be exposed on the network.';
 }

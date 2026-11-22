@@ -7,6 +7,8 @@ import '../../core/constants/app_constants.dart';
 class MoodleTokenStorage {
   static const _prefix = 'moodle_token_';
   static const _expiryPrefix = 'moodle_token_expiry_';
+  // Yalnızca temizlik için: eski sürümler bu anahtarlarla kullanıcı adı ve
+  // şifre yazmış olabilir. Yeni kod bu anahtarlara asla yazmaz.
   static const _usernamePrefix = 'moodle_username_';
   static const _passwordPrefix = 'moodle_password_';
 
@@ -48,25 +50,8 @@ class MoodleTokenStorage {
     return DateTime.parse(expiryStr);
   }
 
-  /// Kullanıcı credentials kaydet (token yenileme için)
-  Future<void> saveCredentials(
-    String accountId,
-    String username,
-    String password,
-  ) async {
-    await _storage.write(key: '$_usernamePrefix$accountId', value: username);
-    await _storage.write(key: '$_passwordPrefix$accountId', value: password);
-  }
-
-  /// Kullanıcı credentials al
-  Future<Map<String, String>?> getCredentials(String accountId) async {
-    final username = await _storage.read(key: '$_usernamePrefix$accountId');
-    final password = await _storage.read(key: '$_passwordPrefix$accountId');
-    if (username == null || password == null) return null;
-    return {'username': username, 'password': password};
-  }
-
-  /// Belirli bir hesabın token'ını sil
+  /// Belirli bir hesabın token'ını sil (eski sürümlerin yazmış olabileceği
+  /// kullanıcı adı/şifre anahtarları da temizlenir)
   Future<void> deleteToken(String accountId) async {
     await _storage.delete(key: '$_prefix$accountId');
     await _storage.delete(key: '$_expiryPrefix$accountId');

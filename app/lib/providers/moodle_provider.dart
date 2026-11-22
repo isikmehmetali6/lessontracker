@@ -61,7 +61,11 @@ class MoodleProvider extends ChangeNotifier {
 
   bool _isInitialized = false;
   bool _isLoading = false;
-  bool _isSyncing = false;
+  /// `_syncAll` için ayrı bayrak; hesap bazlı eşzamanlılık
+  /// [_syncingAccounts] ile korunur (B1: tek bayrak tüm senkronu
+  /// engelliyordu).
+  bool _isSyncingAll = false;
+  final Set<String> _syncingAccounts = {};
 
   // ==================== GETTERS ====================
 
@@ -76,6 +80,7 @@ class MoodleProvider extends ChangeNotifier {
   String? syncErrorFor(String accountId) => _syncErrors[accountId];
 
   bool get isAnySyncing =>
+      _syncingAccounts.isNotEmpty ||
       _syncStatuses.values.any((s) => s == MoodleSyncStatus.syncing);
 
   // ---- Aggregated getters (tüm hesaplar birleşik) ----
@@ -287,19 +292,28 @@ class MoodleProvider extends ChangeNotifier {
   }
 
   Future<void> _syncAll({bool silent = false}) async {
-    if (_isSyncing) return;
-    _isSyncing = true;
+    if (_isSyncingAll) return;
+    _isSyncingAll = true;
     try {
-      for (final account in _accounts) {
+      // Kopya üzerinde dolaş: sync sırasında hesap silinebilir.
+      for (final account in List.of(_accounts)) {
         await _syncAccount(account.id, silent: silent);
       }
     } finally {
-      _isSyncing = false;
+      _isSyncingAll = false;
     }
   }
 
   Future<void> _syncAccount(String accountId, {bool silent = false}) async {
-    if (_isSyncing) return;
+    if (!_syncingAccounts.add(accountId)) return; // zaten senkronlanıyor
+    try {
+      await _doSyncAccount(accountId, silent: silent);
+    } finally {
+      _syncingAccounts.remove(accountId);
+    }
+  }
+
+  Future<void> _doSyncAccount(String accountId, {bool silent = false}) async {
     final account = _accounts.where((a) => a.id == accountId).firstOrNull;
     if (account == null) return;
 
@@ -308,6 +322,9 @@ class MoodleProvider extends ChangeNotifier {
     if (!silent) notifyListeners();
 
     final result = await _syncService.syncAccount(account);
+
+    // Sync sürerken hesap kaldırıldıysa sonucu yazma
+    if (!_accounts.any((a) => a.id == accountId)) return;
 
     // Hesap listesindeki lastSynced güncelle
     final idx = _accounts.indexWhere((a) => a.id == accountId);
@@ -321,6 +338,7 @@ class MoodleProvider extends ChangeNotifier {
     _grades[accountId] = result.grades;
     _announcements[accountId] = result.announcements;
     _events[accountId] = result.events;
+    _messages[accountId] = result.messages;
 
     if (result.isSuccess) {
       _syncStatuses[accountId] = MoodleSyncStatus.success;

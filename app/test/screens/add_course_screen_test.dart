@@ -5,6 +5,7 @@ import 'package:lesson_tracker/models/course.dart';
 import 'package:lesson_tracker/providers/course_provider.dart';
 import 'package:lesson_tracker/providers/theme_provider.dart';
 import 'package:lesson_tracker/providers/auth_provider.dart';
+import 'package:lesson_tracker/providers/moodle_provider.dart';
 import 'package:lesson_tracker/screens/add_course/add_course_screen.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
@@ -12,6 +13,7 @@ import 'package:provider/provider.dart';
 // Mock Provider
 class MockCourseProvider extends Mock implements CourseProvider {}
 class MockAuthProvider extends Mock implements AuthProvider {}
+class MockMoodleProvider extends Mock implements MoodleProvider {}
 
 void main() {
   late MockCourseProvider mockCourseProvider;
@@ -40,6 +42,8 @@ void main() {
     final authProvider = MockAuthProvider();
     when(() => authProvider.isGuest).thenReturn(true);
     when(() => authProvider.user).thenReturn(null);
+    final moodleProvider = MockMoodleProvider();
+    when(() => moodleProvider.hasAccounts).thenReturn(false);
 
     return MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -49,6 +53,7 @@ void main() {
           ChangeNotifierProvider<CourseProvider>.value(value: mockCourseProvider),
           ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
           ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
+          ChangeNotifierProvider<MoodleProvider>.value(value: moodleProvider),
         ],
         child: child,
       ),

@@ -62,6 +62,11 @@ class PlannerEventRepository {
       where: 'id = ?',
       whereArgs: [id],
     );
+    await AutoSyncService().recordPendingChange(
+      'planner_events',
+      id,
+      'delete',
+    );
     AutoSyncService().triggerBackup();
   }
 

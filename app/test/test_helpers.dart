@@ -79,3 +79,34 @@ void setupSqlCipherMock() {
     }
   });
 }
+
+/// Bellek içi secure storage. Dönen map testte doğrudan okunup yazılabilir.
+Map<String, String> setupInMemorySecureStorage() {
+  final store = <String, String>{};
+  const channel = MethodChannel('plugins.it_nomads.com/flutter_secure_storage');
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(channel, (MethodCall call) async {
+    final args = (call.arguments as Map?)?.cast<String, dynamic>() ?? {};
+    final key = args['key'] as String?;
+    switch (call.method) {
+      case 'read':
+        return store[key];
+      case 'write':
+        store[key!] = args['value'] as String;
+        return null;
+      case 'delete':
+        store.remove(key);
+        return null;
+      case 'deleteAll':
+        store.clear();
+        return null;
+      case 'containsKey':
+        return store.containsKey(key);
+      case 'readAll':
+        return Map<String, String>.from(store);
+      default:
+        return null;
+    }
+  });
+  return store;
+}

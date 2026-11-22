@@ -71,6 +71,7 @@ class DeadlineRepository {
     }
     final db = await _dbHelper.database;
     await db.delete('deadlines', where: 'id = ?', whereArgs: [id]);
+    await AutoSyncService().recordPendingChange('deadlines', id, 'delete');
     AutoSyncService().triggerBackup();
   }
 

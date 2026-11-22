@@ -2000,83 +2000,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get moodleAccountNotFound => 'Hesap bulunamadı';
 
   @override
-  String get veliConsentTitle => 'Veli Rızası';
-
-  @override
-  String get veliConsentDesc => '18 yaş altı kullanıcıların uygulamayı kullanması için veli rızası gereklidir.';
-
-  @override
-  String get veliEmailLabel => 'Veli E-posta Adresi';
-
-  @override
-  String get veliEmailHint => 'Velinin e-posta adresini girin';
-
-  @override
-  String get veliConfirmCheck => 'Veli olduğumu ve çocuğumun bu uygulamayı kullanmasına izin verdiğimi onaylıyorum.';
-
-  @override
-  String get veliKvkkCheck => '6698 sayılı KVKK kapsamında veli rızası veriyorum.';
-
-  @override
-  String veliCodeSent(Object email) {
-    return '$email adresine doğrulama kodu gönderildi.';
-  }
-
-  @override
-  String get veliEnterCode => '6 haneli doğrulama kodunu girin';
-
-  @override
-  String get veliVerifyAndApprove => 'Doğrula ve Onayla';
-
-  @override
-  String get veliResendCode => 'Kodu Yeniden Gönder';
-
-  @override
-  String get veliChangeEmail => 'E-posta Değiştir';
-
-  @override
-  String get veliSendCode => 'Doğrulama Kodu Gönder';
-
-  @override
-  String get veliCancel => 'İptal';
-
-  @override
-  String get veliRequired => 'Veli rızası zorunludur';
-
-  @override
-  String get veliValidEmail => 'Geçerli bir e-posta adresi girin';
-
-  @override
-  String get veliCheckConsent => 'Lütfen veli rızası kutusunu işaretleyin';
-
-  @override
-  String get veliCodeRequired => 'Doğrulama kodunu girin';
-
-  @override
-  String get veliSessionNotFound => 'Doğrulama oturumu bulunamadı. Lütfen tekrar deneyin.';
-
-  @override
-  String get veliCodeExpired => 'Doğrulama kodunun süresi doldu. Lütfen yeni bir kod isteyin.';
-
-  @override
-  String get veliWrongCode => 'Yanlış doğrulama kodu.';
-
-  @override
-  String get veliInfoText => 'Veli e-posta adresi yalnızca rıza bildirimi göndermek için kullanılacaktır.';
-
-  @override
-  String get veliRequestConsent => 'Rıza İste';
-
-  @override
-  String get veliEmailVerification => 'E-posta Doğrulama';
-
-  @override
-  String get veliStepVerification => 'Doğrulama';
-
-  @override
-  String get veliStepConsent => 'Rıza';
-
-  @override
   String get kvkkFlowReset => 'KVKK rızası sıfırlandı — uygulamayı yeniden başlatın';
 
   @override
@@ -2318,4 +2241,35 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get acikRizaLimitedMode => 'Sınırlı Modda Devam Et';
+
+  @override
+  String get restorePasswordTitle => 'Hesap parolanızı girin';
+
+  @override
+  String get restorePasswordDescription => 'Bulut verileriniz uçtan uca şifreli. Bu cihazda açmak için hesap parolanızı girin.';
+
+  @override
+  String get restorePasswordWrong => 'Parola yanlış. Bulut verileriniz açılamadı.';
+
+  @override
+  String restoreSkippedRecords(Object count) {
+    return '$count kayıt bu cihazda çözülemediği için atlandı.';
+  }
+
+  @override
+  String get restoreFailed => 'Geri yükleme başarısız oldu. Lütfen tekrar deneyin.';
+
+  @override
+  String get backupKeyMissing => 'Şifreleme anahtarınız bu cihazda yok. Bulut yedeğini açmak için çıkış yapıp tekrar giriş yapın.';
+
+  @override
+  String get cleanupCloudOrphans => 'Kullanılmayan bulut dosyalarını temizle';
+
+  @override
+  String cleanupCloudOrphansDone(Object count) {
+    return '$count kullanılmayan bulut dosyası silindi.';
+  }
+
+  @override
+  String get moodleInsecureUrlWarning => 'Bu bağlantı şifresiz (http). Moodle token\'ınız ağda açıkta kalabilir.';
 }

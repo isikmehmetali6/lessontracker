@@ -47,6 +47,14 @@ class NoteRepository {
     return maps.map((map) => Note.fromMap(map)).toList();
   }
 
+  /// Yedekleme için tüm notlar (sayfalama yok — bkz. FIX_PLAN B3).
+  Future<List<Note>> getAllNotesForSync() async {
+    if (_dbHelper.isWeb) return List<Note>.from(_notesInMemory);
+    final db = await _dbHelper.database;
+    final maps = await db.query('notes', orderBy: 'createdAt DESC');
+    return maps.map((map) => Note.fromMap(map)).toList();
+  }
+
   /// Derse göre notları getir
   Future<List<Note>> getNotesByCourse(String courseId) async {
     if (_dbHelper.isWeb) {
@@ -164,24 +172,28 @@ class NoteRepository {
       }
     }
 
-    await insertNote(note);
-
-    if (cloudPath != null) {
-      await _updateNoteCloudPath(note.id, cloudPath, thumbnailCloudPath);
-    }
+    await insertNote(
+      note.copyWith(
+        cloudPath: cloudPath,
+        thumbnailCloudPath: thumbnailCloudPath,
+      ),
+    );
   }
 
-  Future<void> _updateNoteCloudPath(
-    String noteId,
-    String cloudPath,
+  /// Bulut yollarını yazar. **Backup tetiklemez** — backup içinden
+  /// çağrıldığında sonsuz döngü olmasın diye.
+  Future<void> updateCloudPaths(
+    String noteId, {
+    String? cloudPath,
     String? thumbnailCloudPath,
-  ) async {
+  }) async {
     if (_dbHelper.isWeb) return;
+    final updates = <String, dynamic>{
+      if (cloudPath != null) 'cloudPath': cloudPath,
+      if (thumbnailCloudPath != null) 'thumbnailCloudPath': thumbnailCloudPath,
+    };
+    if (updates.isEmpty) return;
     final db = await _dbHelper.database;
-    final updates = <String, dynamic>{'cloudPath': cloudPath};
-    if (thumbnailCloudPath != null) {
-      updates['thumbnailCloudPath'] = thumbnailCloudPath;
-    }
     await db.update('notes', updates, where: 'id = ?', whereArgs: [noteId]);
   }
 
@@ -196,55 +208,8 @@ class NoteRepository {
     }
   }
 
-  /// Not sil (cloud dosyasını da siler)
-  Future<void> deleteNoteWithFiles(String id) async {
-    final cloudPath = await _getNoteCloudPath(id);
-    if (cloudPath != null) {
-      try {
-        final e2eService = E2EFileService();
-        await e2eService.deleteFile(cloudPath);
-        final thumbnailCloudPath = await _getNoteThumbnailCloudPath(id);
-        if (thumbnailCloudPath != null) {
-          await e2eService.deleteFile(thumbnailCloudPath);
-        }
-      } catch (e) {
-        debugPrint('Error deleting cloud files: $e');
-      }
-    }
-    await deleteNote(id);
-  }
-
-  Future<String?> _getNoteCloudPath(String noteId) async {
-    if (_dbHelper.isWeb) return null;
-    final db = await _dbHelper.database;
-    final result = await db.query(
-      'notes',
-      columns: ['cloudPath'],
-      where: 'id = ?',
-      whereArgs: [noteId],
-      limit: 1,
-    );
-    if (result.isNotEmpty && result.first['cloudPath'] != null) {
-      return result.first['cloudPath'] as String;
-    }
-    return null;
-  }
-
-  Future<String?> _getNoteThumbnailCloudPath(String noteId) async {
-    if (_dbHelper.isWeb) return null;
-    final db = await _dbHelper.database;
-    final result = await db.query(
-      'notes',
-      columns: ['thumbnailCloudPath'],
-      where: 'id = ?',
-      whereArgs: [noteId],
-      limit: 1,
-    );
-    if (result.isNotEmpty && result.first['thumbnailCloudPath'] != null) {
-      return result.first['thumbnailCloudPath'] as String;
-    }
-    return null;
-  }
+  /// Not sil (cloud dosyaları silme kuyruğu üzerinden temizlenir).
+  Future<void> deleteNoteWithFiles(String id) => deleteNote(id);
 
   /// Not güncelle
   Future<void> updateNote(Note note) async {
@@ -270,14 +235,32 @@ class NoteRepository {
     AutoSyncService().triggerBackup();
   }
 
-  /// Not sil
+  /// Not sil — buluttaki kayıt ve şifreli dosyalar silme kuyruğuyla temizlenir.
   Future<void> deleteNote(String id) async {
     if (_dbHelper.isWeb) {
       _notesInMemory.removeWhere((n) => n.id == id);
       return;
     }
     final db = await _dbHelper.database;
+    final rows = await db.query(
+      'notes',
+      columns: ['courseId', 'cloudPath', 'thumbnailCloudPath'],
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
     await db.delete('notes', where: 'id = ?', whereArgs: [id]);
+    if (rows.isNotEmpty) {
+      await AutoSyncService().recordPendingChange(
+        'notes',
+        id,
+        'delete',
+        payload: {
+          'cloudPath': rows.first['cloudPath'],
+          'thumbnailCloudPath': rows.first['thumbnailCloudPath'],
+        },
+      );
+    }
     AutoSyncService().triggerBackup();
   }
 

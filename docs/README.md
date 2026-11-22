@@ -9,6 +9,7 @@ Bu klasör, LessonTracker Flutter uygulamasının tüm dokümantasyonunu içerir
 | Dosya | Açıklama |
 |---|---|
 | [`REFACTORING_PLAN.md`](REFACTORING_PLAN.md) | **Aktif yol haritası (Ağustos 2026).** Mevcut durum (§01–§03), detaylı fazlar (§04), PR dilimi (§06), **nasıl uygulanır (§08)**. İşe buradan başla. |
+| [`FIX_PLAN_2026-11-23.md`](FIX_PLAN_2026-11-23.md) | **23.11.2026 denetim düzeltmeleri** — senkron/şifreleme bütünlüğü, Moodle senkronu, akıllı yoklama vb. 21 bulgu ve uygulanma durumu. |
 | [`SRS.md`](SRS.md) | Yazılım gereksinimleri özeti. |
 | [`SUPABASE_SETUP.md`](SUPABASE_SETUP.md) | Supabase backend kurulumu (şema, RLS, Storage, Edge Function, `.env`). |
 | [`AUDIT_REPORT_2026-07-17.md`](AUDIT_REPORT_2026-07-17.md) | Temmuz 2026 denetim raporu (tarihsel referans). |
