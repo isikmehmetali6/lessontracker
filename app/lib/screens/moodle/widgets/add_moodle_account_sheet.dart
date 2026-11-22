@@ -274,12 +274,22 @@ class _AddMoodleAccountSheetState extends State<AddMoodleAccountSheet>
               TextFormField(
                 controller: _urlController,
                 keyboardType: TextInputType.url,
+                onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
                   labelText: l10n.moodleUrl,
                   hintText: l10n.moodleUrlHint,
                   prefixIcon: const Icon(Icons.link_rounded),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14)),
+                  // Token sorgu parametresiyle gider; http'de açıkta kalır.
+                  helperText: _urlController.text
+                          .trim()
+                          .toLowerCase()
+                          .startsWith('http://')
+                      ? l10n.moodleInsecureUrlWarning
+                      : null,
+                  helperMaxLines: 3,
+                  helperStyle: TextStyle(color: theme.colorScheme.error),
                 ),
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) return l10n.moodleUrlRequired;

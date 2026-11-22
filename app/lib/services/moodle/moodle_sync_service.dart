@@ -6,6 +6,7 @@ import '../../models/moodle/moodle_assignment.dart';
 import '../../models/moodle/moodle_calendar_event.dart';
 import '../../models/moodle/moodle_course.dart';
 import '../../models/moodle/moodle_grade.dart';
+import '../../models/moodle/moodle_message.dart';
 import '../../repositories/moodle_account_repository.dart';
 import '../../repositories/moodle_cache_repository.dart';
 import 'moodle_api_service.dart';
@@ -19,6 +20,7 @@ class MoodleSyncResult {
   final List<MoodleGrade> grades;
   final List<MoodleAnnouncement> announcements;
   final List<MoodleCalendarEvent> events;
+  final List<MoodleMessage> messages;
   final String? error;
 
   const MoodleSyncResult({
@@ -28,6 +30,7 @@ class MoodleSyncResult {
     this.grades = const [],
     this.announcements = const [],
     this.events = const [],
+    this.messages = const [],
     this.error,
   });
 
@@ -106,12 +109,14 @@ class MoodleSyncService {
           token: token,
           courses: courses,
         ),
+        _api.getMessages(account: account, token: token, userId: userId),
       ]);
 
       final assignments = results[0] as List<MoodleAssignment>;
       final grades = results[1] as List<MoodleGrade>;
       final announcements = results[2] as List<MoodleAnnouncement>;
       final events = results[3] as List<MoodleCalendarEvent>;
+      final messages = results[4] as List<MoodleMessage>;
 
       // 4. Cache'e yaz
       await Future.wait([
@@ -184,6 +189,11 @@ class MoodleSyncService {
                   })
               .toList(),
         ),
+        _cacheRepo.write(
+          accountId: account.id,
+          dataType: 'messages',
+          payload: messages.map((m) => m.toCacheJson()).toList(),
+        ),
       ]);
 
       // 5. lastSynced güncelle
@@ -197,6 +207,7 @@ class MoodleSyncService {
         grades: grades,
         announcements: announcements,
         events: events,
+        messages: messages,
       );
     } catch (e) {
       debugPrint('[MoodleSyncService] Sync failed for ${account.siteTitle}: $e');
@@ -241,9 +252,30 @@ class MoodleSyncService {
               ))
           .toList();
 
+      var messages = const <MoodleMessage>[];
+      try {
+        final cachedMessages = await _cacheRepo.read(
+          accountId: account.id,
+          dataType: 'messages',
+          ignoreExpiry: true,
+        );
+        if (cachedMessages is List) {
+          messages = cachedMessages
+              .map(
+                (m) => MoodleMessage.fromCacheJson(
+                  Map<String, dynamic>.from(m as Map),
+                ),
+              )
+              .toList();
+        }
+      } catch (e) {
+        debugPrint('[MoodleSyncService] Message cache load failed: $e');
+      }
+
       return MoodleSyncResult(
         account: account,
         courses: courses,
+        messages: messages,
         error: error, // Hata mesajını taşı ama cache verisi göster
       );
     } catch (cacheError) {
