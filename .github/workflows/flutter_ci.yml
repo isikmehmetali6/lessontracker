@@ -24,7 +24,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.5'
+          # pubspec.lock: flutter >=3.44.0, dart >=3.12.0
+          flutter-version: '3.44.x'
           channel: stable
           cache: true
 
