@@ -2241,4 +2241,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get acikRizaLimitedMode => 'Continue in Limited Mode';
+
+  @override
+  String get restorePasswordTitle => 'Enter your account password';
+
+  @override
+  String get restorePasswordDescription => 'Your cloud data is end-to-end encrypted. Enter your account password to unlock it on this device.';
+
+  @override
+  String get restorePasswordWrong => 'Incorrect password. Your cloud data could not be unlocked.';
+
+  @override
+  String restoreSkippedRecords(Object count) {
+    return '$count records could not be decrypted on this device and were skipped.';
+  }
+
+  @override
+  String get restoreFailed => 'Restore failed. Please try again.';
+
+  @override
+  String get backupKeyMissing => 'Your encryption key is not available on this device. Sign out and sign in again to unlock cloud backup.';
+
+  @override
+  String get cleanupCloudOrphans => 'Clean up unused cloud files';
+
+  @override
+  String cleanupCloudOrphansDone(Object count) {
+    return '$count unused cloud files removed.';
+  }
+
+  @override
+  String get moodleInsecureUrlWarning => 'This connection is not encrypted (http). Your Moodle token may be exposed on the network.';
 }

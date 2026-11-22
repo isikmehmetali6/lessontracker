@@ -2241,4 +2241,35 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get acikRizaLimitedMode => 'Sınırlı Modda Devam Et';
+
+  @override
+  String get restorePasswordTitle => 'Hesap parolanızı girin';
+
+  @override
+  String get restorePasswordDescription => 'Bulut verileriniz uçtan uca şifreli. Bu cihazda açmak için hesap parolanızı girin.';
+
+  @override
+  String get restorePasswordWrong => 'Parola yanlış. Bulut verileriniz açılamadı.';
+
+  @override
+  String restoreSkippedRecords(Object count) {
+    return '$count kayıt bu cihazda çözülemediği için atlandı.';
+  }
+
+  @override
+  String get restoreFailed => 'Geri yükleme başarısız oldu. Lütfen tekrar deneyin.';
+
+  @override
+  String get backupKeyMissing => 'Şifreleme anahtarınız bu cihazda yok. Bulut yedeğini açmak için çıkış yapıp tekrar giriş yapın.';
+
+  @override
+  String get cleanupCloudOrphans => 'Kullanılmayan bulut dosyalarını temizle';
+
+  @override
+  String cleanupCloudOrphansDone(Object count) {
+    return '$count kullanılmayan bulut dosyası silindi.';
+  }
+
+  @override
+  String get moodleInsecureUrlWarning => 'Bu bağlantı şifresiz (http). Moodle token\'ınız ağda açıkta kalabilir.';
 }

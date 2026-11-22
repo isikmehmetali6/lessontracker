@@ -72,7 +72,7 @@ class DatabaseHelper {
     if (override != null) {
       return await override(
         path,
-        17,
+        18,
         onConfigure: (db) async {
           await db.execute('PRAGMA foreign_keys = ON');
         },
@@ -97,7 +97,7 @@ class DatabaseHelper {
 
     Future<Database> openWithKey() => sqlcipher.openDatabase(
       path,
-      version: 17,
+      version: 18,
       password: encryptionKey,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
@@ -211,6 +211,7 @@ class DatabaseHelper {
         type TEXT NOT NULL,
         createdAt TEXT NOT NULL,
         url TEXT,
+        cloudPath TEXT,
         FOREIGN KEY (courseId) REFERENCES courses (id) ON DELETE CASCADE
       )
     ''');
@@ -256,7 +257,8 @@ class DatabaseHelper {
         recordId TEXT NOT NULL,
         operation TEXT NOT NULL,
         timestamp TEXT NOT NULL,
-        synced INTEGER DEFAULT 0
+        synced INTEGER DEFAULT 0,
+        payload TEXT
       )
     ''');
     await db.execute(
@@ -621,6 +623,21 @@ class DatabaseHelper {
         );
       }
       debugPrint('[DB Migration v17] Cloud path columns processed.');
+    }
+    if (oldVersion < 18) {
+      // Silme kuyruğu için bulut yolları (bkz. docs/FIX_PLAN_2026-11-23.md K3)
+      try {
+        await db.execute('ALTER TABLE pending_changes ADD COLUMN payload TEXT');
+      } catch (e) {
+        debugPrint('[DB Migration v18] pending_changes.payload may exist: $e');
+      }
+      // v17'den önce sıfırdan kurulan DB'lerde _onCreate course_files.cloudPath
+      // kolonunu oluşturmuyordu (B21).
+      try {
+        await db.execute('ALTER TABLE course_files ADD COLUMN cloudPath TEXT');
+      } catch (e) {
+        debugPrint('[DB Migration v18] course_files.cloudPath may exist: $e');
+      }
     }
   }
 

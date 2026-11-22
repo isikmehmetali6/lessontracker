@@ -70,25 +70,19 @@ class FileRepository {
       }
     }
 
-    final fileWithCloudPath = CourseFile(
-      id: file.id,
-      courseId: file.courseId,
-      path: file.path,
-      name: file.name,
-      type: file.type,
-      createdAt: file.createdAt,
-      url: file.url,
-      cloudPath: cloudPath,
-    );
-
-    await insertFile(fileWithCloudPath);
-
-    if (cloudPath != null) {
-      await _updateFileCloudPath(file.id, cloudPath);
-    }
+    await insertFile(file.copyWith(cloudPath: cloudPath));
   }
 
-  Future<void> _updateFileCloudPath(String fileId, String cloudPath) async {
+  /// Yedekleme için tüm dosyalar.
+  Future<List<CourseFile>> getAllFilesForSync() async {
+    if (_dbHelper.isWeb) return List<CourseFile>.from(_filesInMemory);
+    final db = await _dbHelper.database;
+    final maps = await db.query('course_files', orderBy: 'createdAt DESC');
+    return maps.map((map) => CourseFile.fromMap(map)).toList();
+  }
+
+  /// Bulut yolunu yazar. **Backup tetiklemez** (backup içinden çağrılır).
+  Future<void> updateCloudPath(String fileId, String cloudPath) async {
     if (_dbHelper.isWeb) return;
     final db = await _dbHelper.database;
     await db.update(
@@ -110,44 +104,32 @@ class FileRepository {
     }
   }
 
-  /// Dosya sil (cloud dosyasını da siler)
-  Future<void> deleteFileWithCloud(String id) async {
-    final cloudPath = await _getFileCloudPath(id);
-    if (cloudPath != null) {
-      try {
-        final e2eService = E2EFileService();
-        await e2eService.deleteFile(cloudPath);
-      } catch (e) {
-        debugPrint('Error deleting cloud file: $e');
-      }
-    }
-    await deleteFile(id);
-  }
+  /// Dosya sil (cloud dosyası silme kuyruğu üzerinden temizlenir).
+  Future<void> deleteFileWithCloud(String id) => deleteFile(id);
 
-  Future<String?> _getFileCloudPath(String fileId) async {
-    if (_dbHelper.isWeb) return null;
-    final db = await _dbHelper.database;
-    final result = await db.query(
-      'course_files',
-      columns: ['cloudPath'],
-      where: 'id = ?',
-      whereArgs: [fileId],
-      limit: 1,
-    );
-    if (result.isNotEmpty && result.first['cloudPath'] != null) {
-      return result.first['cloudPath'] as String;
-    }
-    return null;
-  }
-
-  /// Dosya sil
+  /// Dosya sil — buluttaki kayıt ve şifreli dosya silme kuyruğuyla temizlenir.
   Future<void> deleteFile(String id) async {
     if (_dbHelper.isWeb) {
       _filesInMemory.removeWhere((f) => f.id == id);
       return;
     }
     final db = await _dbHelper.database;
+    final rows = await db.query(
+      'course_files',
+      columns: ['cloudPath'],
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
     await db.delete('course_files', where: 'id = ?', whereArgs: [id]);
+    if (rows.isNotEmpty) {
+      await AutoSyncService().recordPendingChange(
+        'course_files',
+        id,
+        'delete',
+        payload: {'cloudPath': rows.first['cloudPath']},
+      );
+    }
     AutoSyncService().triggerBackup();
   }
 

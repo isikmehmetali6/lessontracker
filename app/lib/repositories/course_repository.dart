@@ -38,6 +38,14 @@ class CourseRepository {
     return maps.map((map) => Course.fromMap(map)).toList();
   }
 
+  /// Yedekleme için tüm dersler (arşivli dahil, sayfalama yok — FIX_PLAN B3).
+  Future<List<Course>> getAllCoursesForSync() async {
+    if (_dbHelper.isWeb) return List<Course>.from(_coursesInMemory);
+    final db = await _dbHelper.database;
+    final maps = await db.query('courses', orderBy: 'createdAt DESC');
+    return maps.map((map) => Course.fromMap(map)).toList();
+  }
+
   /// Aktif dersleri getir
   Future<List<Course>> getActiveCourses() async {
     if (_dbHelper.isWeb) {

@@ -65,6 +65,7 @@ class GradeRepository {
       where: 'id = ?',
       whereArgs: [id],
     );
+    await AutoSyncService().recordPendingChange('grades', id, 'delete');
     AutoSyncService().triggerBackup();
   }
 

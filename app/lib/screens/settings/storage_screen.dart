@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/directory_size_utils.dart';
+import '../../core/backend/supabase_backend.dart';
 import '../../core/database/database_helper.dart';
+import '../../services/sync_service.dart';
 import '../../repositories/course_repository.dart';
 import '../../repositories/note_repository.dart';
 import '../../repositories/grade_repository.dart';
@@ -202,6 +204,27 @@ class _StorageScreenState extends State<StorageScreen> {
     }
   }
 
+  Future<void> _cleanupCloudOrphans() async {
+    final loc = AppLocalizations.of(context)!;
+    setState(() => _isLoading = true);
+    try {
+      final removed = await SyncService().cleanupOrphanUploads();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(loc.cleanupCloudOrphansDone(removed)),
+            backgroundColor: AppColors.blue,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Cloud orphan cleanup error: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   void _showOptimizationMenu() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final loc = AppLocalizations.of(context)!;
@@ -382,6 +405,48 @@ class _StorageScreenState extends State<StorageScreen> {
                 ),
               ),
             ),
+
+            if (SupabaseBackend.currentUser != null) ...[
+              const SizedBox(height: 16),
+
+              // Seçenek 3 — buluttaki yetim şifreli dosyalar (FIX_PLAN B5)
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _cleanupCloudOrphans();
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.blue.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppColors.blue.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.cloud_off_rounded,
+                        color: AppColors.blue,
+                        size: 28,
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text(
+                          loc.cleanupCloudOrphans,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
 
             const SizedBox(height: 32),
           ],

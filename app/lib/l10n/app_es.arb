@@ -802,5 +802,14 @@
     "acikRizaFeatureOcr": "Reconocimiento de texto OCR",
     "acikRizaSettingsNote": "Puedes cambiar estas preferencias más tarde en Ajustes.",
     "acikRizaCancel": "Cancelar",
-    "acikRizaLimitedMode": "Continuar en Modo Limitado"
+    "acikRizaLimitedMode": "Continuar en Modo Limitado",
+    "restorePasswordTitle": "Introduce la contraseña de tu cuenta",
+    "restorePasswordDescription": "Tus datos en la nube están cifrados de extremo a extremo. Introduce la contraseña de tu cuenta para desbloquearlos en este dispositivo.",
+    "restorePasswordWrong": "Contraseña incorrecta. No se pudieron desbloquear tus datos en la nube.",
+    "restoreSkippedRecords": "{count} registros no se pudieron descifrar en este dispositivo y se omitieron.",
+    "restoreFailed": "La restauración falló. Inténtalo de nuevo.",
+    "backupKeyMissing": "Tu clave de cifrado no está disponible en este dispositivo. Cierra sesión y vuelve a iniciarla para desbloquear la copia en la nube.",
+    "cleanupCloudOrphans": "Limpiar archivos de la nube no utilizados",
+    "cleanupCloudOrphansDone": "{count} archivos de la nube no utilizados eliminados.",
+    "moodleInsecureUrlWarning": "Esta conexión no está cifrada (http). Tu token de Moodle podría quedar expuesto en la red."
 }

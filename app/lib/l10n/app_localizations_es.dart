@@ -2241,4 +2241,35 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get acikRizaLimitedMode => 'Continuar en Modo Limitado';
+
+  @override
+  String get restorePasswordTitle => 'Introduce la contraseña de tu cuenta';
+
+  @override
+  String get restorePasswordDescription => 'Tus datos en la nube están cifrados de extremo a extremo. Introduce la contraseña de tu cuenta para desbloquearlos en este dispositivo.';
+
+  @override
+  String get restorePasswordWrong => 'Contraseña incorrecta. No se pudieron desbloquear tus datos en la nube.';
+
+  @override
+  String restoreSkippedRecords(Object count) {
+    return '$count registros no se pudieron descifrar en este dispositivo y se omitieron.';
+  }
+
+  @override
+  String get restoreFailed => 'La restauración falló. Inténtalo de nuevo.';
+
+  @override
+  String get backupKeyMissing => 'Tu clave de cifrado no está disponible en este dispositivo. Cierra sesión y vuelve a iniciarla para desbloquear la copia en la nube.';
+
+  @override
+  String get cleanupCloudOrphans => 'Limpiar archivos de la nube no utilizados';
+
+  @override
+  String cleanupCloudOrphansDone(Object count) {
+    return '$count archivos de la nube no utilizados eliminados.';
+  }
+
+  @override
+  String get moodleInsecureUrlWarning => 'Esta conexión no está cifrada (http). Tu token de Moodle podría quedar expuesto en la red.';
 }

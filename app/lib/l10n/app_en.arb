@@ -802,5 +802,14 @@
     "acikRizaFeatureOcr": "OCR text recognition",
     "acikRizaSettingsNote": "You can change these preferences later in Settings.",
     "acikRizaCancel": "Cancel",
-    "acikRizaLimitedMode": "Continue in Limited Mode"
+    "acikRizaLimitedMode": "Continue in Limited Mode",
+    "restorePasswordTitle": "Enter your account password",
+    "restorePasswordDescription": "Your cloud data is end-to-end encrypted. Enter your account password to unlock it on this device.",
+    "restorePasswordWrong": "Incorrect password. Your cloud data could not be unlocked.",
+    "restoreSkippedRecords": "{count} records could not be decrypted on this device and were skipped.",
+    "restoreFailed": "Restore failed. Please try again.",
+    "backupKeyMissing": "Your encryption key is not available on this device. Sign out and sign in again to unlock cloud backup.",
+    "cleanupCloudOrphans": "Clean up unused cloud files",
+    "cleanupCloudOrphansDone": "{count} unused cloud files removed.",
+    "moodleInsecureUrlWarning": "This connection is not encrypted (http). Your Moodle token may be exposed on the network."
 }

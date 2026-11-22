@@ -794,5 +794,14 @@
     "acikRizaFeatureOcr": "OCR-Texterkennung",
     "acikRizaSettingsNote": "Du kannst diese Einstellungen später in den Einstellungen ändern.",
     "acikRizaCancel": "Abbrechen",
-    "acikRizaLimitedMode": "Im eingeschränkten Modus fortfahren"
+    "acikRizaLimitedMode": "Im eingeschränkten Modus fortfahren",
+    "restorePasswordTitle": "Kontopasswort eingeben",
+    "restorePasswordDescription": "Deine Cloud-Daten sind Ende-zu-Ende-verschlüsselt. Gib dein Kontopasswort ein, um sie auf diesem Gerät zu entsperren.",
+    "restorePasswordWrong": "Falsches Passwort. Deine Cloud-Daten konnten nicht entsperrt werden.",
+    "restoreSkippedRecords": "{count} Einträge konnten auf diesem Gerät nicht entschlüsselt werden und wurden übersprungen.",
+    "restoreFailed": "Wiederherstellung fehlgeschlagen. Bitte versuche es erneut.",
+    "backupKeyMissing": "Dein Verschlüsselungsschlüssel ist auf diesem Gerät nicht verfügbar. Melde dich ab und wieder an, um das Cloud-Backup zu entsperren.",
+    "cleanupCloudOrphans": "Ungenutzte Cloud-Dateien bereinigen",
+    "cleanupCloudOrphansDone": "{count} ungenutzte Cloud-Dateien entfernt.",
+    "moodleInsecureUrlWarning": "Diese Verbindung ist nicht verschlüsselt (http). Dein Moodle-Token könnte im Netzwerk offengelegt werden."
 }

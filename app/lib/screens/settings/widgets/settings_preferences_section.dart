@@ -7,6 +7,8 @@ import '../../../providers/theme_provider.dart';
 import '../../../providers/course_provider.dart';
 import '../../../providers/language_provider.dart';
 import '../../../services/app_lock_service.dart';
+import '../../../services/auto_sync_service.dart';
+import '../../../services/e2e_key_service.dart';
 import '../../../services/sync_service.dart';
 import '../notification_settings_screen.dart';
 import 'settings_shared.dart';
@@ -148,6 +150,21 @@ class _SettingsPreferencesSectionState
                   onChanged: (value) async {
                     final syncService = SyncService();
                     await syncService.setCloudBackupEnabled(value);
+                    if (value) {
+                      // Kayıtlar E2E anahtarıyla şifrelenir; anahtar yoksa
+                      // backup yapılamaz (bkz. FIX_PLAN K1).
+                      final hasKey = await E2EKeyService().hasLocalKey();
+                      if (!hasKey && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(l10n.backupKeyMissing),
+                            backgroundColor: AppColors.orange,
+                          ),
+                        );
+                      } else {
+                        AutoSyncService().triggerBackup();
+                      }
+                    }
                     if (mounted) setState(() {});
                     HapticFeedback.mediumImpact();
                   },

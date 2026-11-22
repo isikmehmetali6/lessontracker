@@ -4430,6 +4430,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Continue in Limited Mode'**
   String get acikRizaLimitedMode;
+
+  /// No description provided for @restorePasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your account password'**
+  String get restorePasswordTitle;
+
+  /// No description provided for @restorePasswordDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cloud data is end-to-end encrypted. Enter your account password to unlock it on this device.'**
+  String get restorePasswordDescription;
+
+  /// No description provided for @restorePasswordWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect password. Your cloud data could not be unlocked.'**
+  String get restorePasswordWrong;
+
+  /// No description provided for @restoreSkippedRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} records could not be decrypted on this device and were skipped.'**
+  String restoreSkippedRecords(Object count);
+
+  /// No description provided for @restoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore failed. Please try again.'**
+  String get restoreFailed;
+
+  /// No description provided for @backupKeyMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Your encryption key is not available on this device. Sign out and sign in again to unlock cloud backup.'**
+  String get backupKeyMissing;
+
+  /// No description provided for @cleanupCloudOrphans.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean up unused cloud files'**
+  String get cleanupCloudOrphans;
+
+  /// No description provided for @cleanupCloudOrphansDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} unused cloud files removed.'**
+  String cleanupCloudOrphansDone(Object count);
+
+  /// No description provided for @moodleInsecureUrlWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This connection is not encrypted (http). Your Moodle token may be exposed on the network.'**
+  String get moodleInsecureUrlWarning;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:lesson_tracker/services/e2e_key_service.dart';
 import 'package:lesson_tracker/services/notification_service.dart';
 import 'package:lesson_tracker/services/secure_storage_service.dart';
 import 'package:lesson_tracker/services/sync_service.dart';
@@ -13,6 +13,7 @@ import 'package:lesson_tracker/providers/deadline_provider.dart';
 import 'package:lesson_tracker/providers/note_provider.dart';
 import 'package:lesson_tracker/providers/sync_provider.dart';
 import 'package:lesson_tracker/screens/home/widgets/restore_cloud_dialog.dart';
+import 'package:lesson_tracker/screens/home/widgets/restore_password_dialog.dart';
 
 /// Runs the home screen's initial data pipeline. Extracted from
 /// `_HomeScreenState._loadData` per plan 3.1.4 (home shell).
@@ -35,58 +36,18 @@ Future<void> runHomeInit({
   if (!isMounted()) return;
   final courseProvider = context.read<CourseProvider>();
   final noteProvider = context.read<NoteProvider>();
-  final deadlineProvider = context.read<DeadlineProvider>();
   final authProvider = context.read<AuthProvider>();
-  final syncProvider = context.read<SyncProvider>();
+  final isSignedInUser = authProvider.user != null && !authProvider.isGuest;
 
   // Yeni cihaz kontrolü — sadece giriş yapan (misafir olmayan) kullanıcılar için
-  if (authProvider.user != null && !authProvider.isGuest) {
+  if (isSignedInUser) {
     final uid = authProvider.user!.uid;
     final knownKey = 'known_user_$uid';
     final isKnownDevice = await SecureStorageService.getBool(knownKey);
 
     if (!isKnownDevice) {
-      try {
-        final syncService = SyncService();
-        final hasBackup = await syncService.hasCloudBackup();
-        if (hasBackup && isMounted()) {
-          final courseCount = await syncService.getCloudCourseCount();
-          if (!isMounted()) return;
-
-          final shouldRestore = await showRestoreCloudDialog(
-            context: context,
-            courseCount: courseCount,
-            onStartFresh: () async {
-              try {
-                await SyncService().clearCloudData();
-                if (!isMounted() || !context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      AppLocalizations.of(context)!.cloudDataCleared,
-                    ),
-                    backgroundColor: AppColors.green,
-                    duration: const Duration(seconds: 3),
-                  ),
-                );
-              } catch (e) {
-                debugPrint('Bulut silme hatası: $e');
-              }
-            },
-          );
-          if (shouldRestore == true && isMounted()) {
-            syncProvider.registerProviders(
-              courseProvider,
-              noteProvider,
-              deadlineProvider,
-            );
-            await syncProvider.restore();
-            if (!isMounted()) return;
-          }
-        }
-      } catch (e) {
-        debugPrint('Cloud backup check error: $e');
-      }
+      if (!context.mounted || !isMounted()) return;
+      await offerCloudRestore(context: context, isMounted: isMounted);
       await SecureStorageService.setBool(knownKey, true);
     }
   }
@@ -98,53 +59,10 @@ Future<void> runHomeInit({
   if (!isMounted()) return;
 
   // Eğer yerel DB boşsa ve kullanıcı giriş yapmışsa, bulutta veri olabilir
-  if (courseProvider.courses.isEmpty &&
-      authProvider.user != null &&
-      !authProvider.isGuest) {
-    try {
-      final syncService = SyncService();
-      final hasBackup = await syncService.hasCloudBackup();
-      if (hasBackup && isMounted()) {
-        final courseCount = await syncService.getCloudCourseCount();
-        if (!isMounted()) return;
-        final shouldRestore = await showRestoreCloudDialog(
-          context: context,
-          courseCount: courseCount,
-          onStartFresh: () async {
-            try {
-              await SyncService().clearCloudData();
-              if (!isMounted() || !context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    AppLocalizations.of(context)!.cloudDataCleared,
-                  ),
-                  backgroundColor: AppColors.green,
-                  duration: const Duration(seconds: 3),
-                ),
-              );
-            } catch (e) {
-              debugPrint('Bulut silme hatası: $e');
-            }
-          },
-        );
-        if (shouldRestore == true && isMounted()) {
-          syncProvider.registerProviders(
-            courseProvider,
-            noteProvider,
-            deadlineProvider,
-          );
-          await syncProvider.restore();
-          if (!isMounted()) return;
-          await courseProvider.loadCourses();
-          if (!isMounted()) return;
-          await noteProvider.loadNotes();
-          if (!isMounted()) return;
-        }
-      }
-    } catch (e) {
-      debugPrint('Empty DB cloud check error: $e');
-    }
+  if (courseProvider.courses.isEmpty && isSignedInUser) {
+    if (!context.mounted) return;
+    await offerCloudRestore(context: context, isMounted: isMounted);
+    if (!isMounted()) return;
   }
 
   // Sadece ilk kurulumda örnek veri ekle
@@ -165,4 +83,90 @@ Future<void> runHomeInit({
   if (isMounted()) {
     await NotificationService().requestPermissions();
   }
+}
+
+/// Bulutta yedek varsa kullanıcıya "yükle / sıfırdan başla" sorar; gerekirse
+/// E2E anahtarını açmak için hesap parolasını ister ve restore eder.
+/// Restore yapıldıysa `true` döner.
+Future<bool> offerCloudRestore({
+  required BuildContext context,
+  required bool Function() isMounted,
+}) async {
+  final syncProvider = context.read<SyncProvider>();
+  syncProvider.registerProviders(
+    context.read<CourseProvider>(),
+    context.read<NoteProvider>(),
+    context.read<DeadlineProvider>(),
+  );
+
+  try {
+    final syncService = SyncService();
+    if (!await syncService.hasCloudBackup()) return false;
+    final courseCount = await syncService.getCloudCourseCount();
+    if (!isMounted() || !context.mounted) return false;
+
+    final shouldRestore = await showRestoreCloudDialog(
+      context: context,
+      courseCount: courseCount,
+      onStartFresh: () async {
+        try {
+          await SyncService().clearCloudData();
+          if (!isMounted() || !context.mounted) return;
+          _showSnack(
+            context,
+            AppLocalizations.of(context)!.cloudDataCleared,
+            AppColors.green,
+          );
+        } catch (e) {
+          debugPrint('Bulut silme hatası: $e');
+        }
+      },
+    );
+    if (shouldRestore != true || !isMounted()) return false;
+
+    var outcome = await syncProvider.restore();
+    var wrongPassword = false;
+    while (outcome == RestoreOutcome.needsPassword) {
+      if (!isMounted() || !context.mounted) return false;
+      final password = await showRestorePasswordDialog(
+        context: context,
+        showWrongPassword: wrongPassword,
+      );
+      if (password == null) return false;
+      final unlocked = await E2EKeyService().loadKeyFromCloud(password);
+      if (!unlocked) {
+        wrongPassword = true;
+        continue;
+      }
+      outcome = await syncProvider.restore();
+    }
+
+    if (!isMounted() || !context.mounted) return false;
+    final l10n = AppLocalizations.of(context)!;
+    if (outcome == RestoreOutcome.failed) {
+      _showSnack(context, l10n.restoreFailed, AppColors.red);
+      return false;
+    }
+    if (syncProvider.skippedRecords > 0) {
+      _showSnack(
+        context,
+        l10n.restoreSkippedRecords(syncProvider.skippedRecords),
+        AppColors.orange,
+      );
+    }
+    return true;
+  } catch (e) {
+    debugPrint('Cloud restore offer error: $e');
+    return false;
+  }
+}
+
+void _showSnack(BuildContext context, String message, Color color) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      backgroundColor: color,
+      duration: const Duration(seconds: 4),
+    ),
+  );
 }

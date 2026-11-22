@@ -2241,4 +2241,35 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get acikRizaLimitedMode => 'Im eingeschränkten Modus fortfahren';
+
+  @override
+  String get restorePasswordTitle => 'Kontopasswort eingeben';
+
+  @override
+  String get restorePasswordDescription => 'Deine Cloud-Daten sind Ende-zu-Ende-verschlüsselt. Gib dein Kontopasswort ein, um sie auf diesem Gerät zu entsperren.';
+
+  @override
+  String get restorePasswordWrong => 'Falsches Passwort. Deine Cloud-Daten konnten nicht entsperrt werden.';
+
+  @override
+  String restoreSkippedRecords(Object count) {
+    return '$count Einträge konnten auf diesem Gerät nicht entschlüsselt werden und wurden übersprungen.';
+  }
+
+  @override
+  String get restoreFailed => 'Wiederherstellung fehlgeschlagen. Bitte versuche es erneut.';
+
+  @override
+  String get backupKeyMissing => 'Dein Verschlüsselungsschlüssel ist auf diesem Gerät nicht verfügbar. Melde dich ab und wieder an, um das Cloud-Backup zu entsperren.';
+
+  @override
+  String get cleanupCloudOrphans => 'Ungenutzte Cloud-Dateien bereinigen';
+
+  @override
+  String cleanupCloudOrphansDone(Object count) {
+    return '$count ungenutzte Cloud-Dateien entfernt.';
+  }
+
+  @override
+  String get moodleInsecureUrlWarning => 'Diese Verbindung ist nicht verschlüsselt (http). Dein Moodle-Token könnte im Netzwerk offengelegt werden.';
 }
