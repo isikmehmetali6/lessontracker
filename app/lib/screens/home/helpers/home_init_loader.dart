@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lesson_tracker/services/e2e_key_service.dart';
 import 'package:lesson_tracker/services/notification_service.dart';
 import 'package:lesson_tracker/services/secure_storage_service.dart';
+import 'package:lesson_tracker/services/security_questions_service.dart';
 import 'package:lesson_tracker/services/sync_service.dart';
 import 'package:lesson_tracker/core/theme/app_colors.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
@@ -38,6 +39,11 @@ Future<void> runHomeInit({
   final noteProvider = context.read<NoteProvider>();
   final authProvider = context.read<AuthProvider>();
   final isSignedInUser = authProvider.user != null && !authProvider.isGuest;
+
+  if (isSignedInUser) {
+    // Güvenlik sorusu cevaplarını v2 hash'e taşı (bir kez, sessiz)
+    SecurityQuestionsService.migrateIfNeeded();
+  }
 
   // Yeni cihaz kontrolü — sadece giriş yapan (misafir olmayan) kullanıcılar için
   if (isSignedInUser) {
