@@ -786,7 +786,7 @@
     "deleteAccountAttendance": "Anwesenheits- und Notenaufzeichnungen",
     "deleteAccountSessions": "Lernsitzungen",
     "deleteAccountMoodle": "Moodle-Kontoverbindungen",
-    "deleteAccountFirebase": "Firebase-Konto",
+    "deleteAccountCloud": "Cloud-Konto",
     "deleteAccountRetention": "Deine Daten werden innerhalb von 30 Tagen endgültig gelöscht.",
     "deleteAccountConfirm": "Ich bestätige, dass ich mein Konto löschen möchte.",
     "deleteAccountCancel": "Abbrechen",

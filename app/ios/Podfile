@@ -27,6 +27,16 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 
 flutter_ios_podfile_setup
 
+# iOS 26 simülatörleri yalnızca arm64 çalıştırır, Google ML Kit'in hazır
+# framework'lerinde ise arm64-simülatör dilimi yok. Simülatör derlemesinde
+# ML Kit bağlanmaz, plugin kaynakları derlenmez ve yerlerine
+# Runner/MLKitSimulatorStubs.m içindeki yedek plugin'ler kullanılır (OCR
+# simülatörde `UNAVAILABLE` döner). Gerçek cihaz derlemesi etkilenmez.
+MLKIT_BINARY_FRAMEWORKS = %w[
+  MLImage MLKitCommon MLKitTextRecognition MLKitTextRecognitionCommon MLKitVision
+].freeze
+MLKIT_PLUGIN_TARGETS = %w[google_mlkit_commons google_mlkit_text_recognition].freeze
+
 target 'Runner' do
   use_frameworks! :linkage => :static
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
@@ -42,10 +52,41 @@ post_install do |installer|
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'
       config.build_settings['ENABLE_USER_SCRIPT_SANDBOXING'] = 'NO'
+      if MLKIT_PLUGIN_TARGETS.include?(target.name)
+        config.build_settings['EXCLUDED_SOURCE_FILE_NAMES[sdk=iphonesimulator*]'] = '*.m'
+      end
     end
   end
   
   installer.pods_project.build_configurations.each do |config|
     config.build_settings['CODE_SIGN_IDENTITY'] = ''
+  end
+end
+
+# Pods-Runner xcconfig'leri post_install'dan sonra yazıldığı için burada
+# düzenlenir: ML Kit podspec'lerinin eklediği simülatör arm64 dışlaması
+# kaldırılır ve simülatör için ML Kit framework'leri bağlanmaz.
+post_integrate do |installer|
+  support_dir = File.join(installer.sandbox.root, 'Target Support Files', 'Pods-Runner')
+  Dir.glob(File.join(support_dir, 'Pods-Runner.*.xcconfig')).each do |path|
+    lines = File.readlines(path)
+    lines.reject! do |line|
+      line.start_with?(
+        'EXCLUDED_ARCHS[sdk=iphonesimulator*]',
+        'OTHER_LDFLAGS[sdk=iphonesimulator*]',
+        'CLANG_MODULES_AUTOLINK[sdk=iphonesimulator*]'
+      )
+    end
+    ldflags = lines.find { |line| line.start_with?('OTHER_LDFLAGS = ') }
+    if ldflags
+      sim_ldflags = ldflags.sub('OTHER_LDFLAGS = ', 'OTHER_LDFLAGS[sdk=iphonesimulator*] = ')
+      MLKIT_BINARY_FRAMEWORKS.each { |f| sim_ldflags = sim_ldflags.gsub(" -framework \"#{f}\"", '') }
+      lines << sim_ldflags
+    end
+    # GeneratedPluginRegistrant plugin başlıkları üzerinden MLKitVision'ı
+    # modül olarak içe aktarır; clang bu durumda framework'ü otomatik bağlar.
+    # Simülatörde kapatılır — pod framework'leri OTHER_LDFLAGS'ta zaten açık.
+    lines << "CLANG_MODULES_AUTOLINK[sdk=iphonesimulator*] = NO\n"
+    File.write(path, lines.join)
   end
 end

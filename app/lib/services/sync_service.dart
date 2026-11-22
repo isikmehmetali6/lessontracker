@@ -1,12 +1,10 @@
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path/path.dart' as p;
+import '../../core/backend/supabase_backend.dart';
 import '../../core/database/database_helper.dart';
 import '../../repositories/course_repository.dart';
 import '../../repositories/note_repository.dart';
@@ -22,6 +20,7 @@ import '../../models/grade.dart';
 import '../../models/course_file.dart';
 import '../../repositories/planner_event_repository.dart';
 import '../../models/planner_event.dart';
+import 'cloud_records_service.dart';
 import 'file_service.dart';
 import 'e2e_file_service.dart';
 import 'e2e_key_service.dart';
@@ -31,7 +30,7 @@ import 'package:path_provider/path_provider.dart';
 import 'sync_encryption.dart';
 import 'sync_batch_utils.dart';
 
-/// Birden çok batch'e bölme limiti (Firestore max 500)
+/// Tek bir upsert isteğinde gönderilen en fazla kayıt sayısı
 const int _kBatchChunkSize = kSyncBatchChunkSize;
 
 Future<T> _withRetry<T>(
@@ -48,8 +47,7 @@ class SyncService {
   final FileRepository _fileRepo = FileRepository();
   final AbsenceRepository _absenceRepo = AbsenceRepository();
   final PlannerEventRepository _plannerEventRepo = PlannerEventRepository();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final CloudRecordsService _cloud = CloudRecordsService();
   final FileService _fileService = FileService();
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   final SyncEncryption _encryption;
@@ -81,17 +79,10 @@ class SyncService {
 
   /// Kullanıcının bulutta yedek verisi var mı kontrol et
   Future<bool> hasCloudBackup() async {
-    final user = _auth.currentUser;
-    if (user == null) return false;
+    if (SupabaseBackend.currentUser == null) return false;
 
     try {
-      final snapshot = await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('courses')
-          .limit(1)
-          .get();
-      return snapshot.docs.isNotEmpty;
+      return await _cloud.count('courses') > 0;
     } catch (e) {
       debugPrint('Error checking cloud backup: $e');
       return false;
@@ -100,16 +91,10 @@ class SyncService {
 
   /// Bulut yedek bilgisini getir (ders sayısı)
   Future<int> getCloudCourseCount() async {
-    final user = _auth.currentUser;
-    if (user == null) return 0;
+    if (SupabaseBackend.currentUser == null) return 0;
 
     try {
-      final snapshot = await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('courses')
-          .get();
-      return snapshot.docs.length;
+      return await _cloud.count('courses');
     } catch (e) {
       return 0;
     }
@@ -117,17 +102,15 @@ class SyncService {
 
   /// Kullanıcının tüm bulut yedeklerini sil ("Sıfırdan Başla" seçeneği için)
   Future<void> clearCloudData() async {
-    final user = _auth.currentUser;
+    final user = SupabaseBackend.currentUser;
     if (user == null) return;
 
     if (!await _checkConnectivity()) {
       return; // İnternet yoksa sessizce başarısız olsun (veya hata fırlatabiliriz)
     }
 
-    final uid = user.uid;
-
     try {
-      final collections = [
+      const collections = [
         'courses',
         'notes',
         'deadlines',
@@ -138,25 +121,9 @@ class SyncService {
       ];
 
       for (final collection in collections) {
-        final snapshot = await _firestore
-            .collection('users')
-            .doc(uid)
-            .collection(collection)
-            .get();
-
-        for (int i = 0; i < snapshot.docs.length; i += _kBatchChunkSize) {
-          final chunk = snapshot.docs.sublist(
-            i,
-            (i + _kBatchChunkSize).clamp(0, snapshot.docs.length),
-          );
-          final batch = _firestore.batch();
-          for (final doc in chunk) {
-            batch.delete(doc.reference);
-          }
-          await batch.commit();
-        }
+        await _cloud.deleteCollection(collection);
       }
-      debugPrint("Cloud data cleared successfully for user $uid.");
+      debugPrint("Cloud data cleared successfully for user ${user.id}.");
     } catch (e) {
       debugPrint("Error clearing cloud data: $e");
     }
@@ -164,8 +131,7 @@ class SyncService {
 
   /// Belirli bir dersi buluttan sil
   Future<void> deleteCourseCloud(String courseId) async {
-    final user = _auth.currentUser;
-    if (user == null) {
+    if (SupabaseBackend.currentUser == null) {
       throw Exception('Kullanıcı giriş yapmamış');
     }
 
@@ -173,51 +139,16 @@ class SyncService {
       throw Exception('İnternet bağlantısı yok');
     }
 
-    final uid = user.uid;
     try {
-      final batch = _firestore.batch();
-      final userRef = _firestore.collection('users').doc(uid);
+      await _cloud.delete('courses', courseId);
+      // Devamsızlık kaydı ders id'si ile tutulur
+      await _cloud.delete('absences', courseId);
 
-      // Course doc
-      batch.delete(userRef.collection('courses').doc(courseId));
-
-      // Absences doc (stored with courseId as docId)
-      batch.delete(userRef.collection('absences').doc(courseId));
-
-      // Queries for sub-collections
-      final notesSnap = await userRef
-          .collection('notes')
-          .where('courseId', isEqualTo: courseId)
-          .get();
-      for (var doc in notesSnap.docs) {
-        batch.delete(doc.reference);
+      // İlişkili kayıtlar düz metin `course_id` sütunuyla bulunur
+      // (içerik şifreli olduğundan veri içinden sorgulanamaz).
+      for (final collection in const ['notes', 'deadlines', 'grades', 'files']) {
+        await _cloud.deleteByCourse(collection, courseId);
       }
-
-      final deadlinesSnap = await userRef
-          .collection('deadlines')
-          .where('courseId', isEqualTo: courseId)
-          .get();
-      for (var doc in deadlinesSnap.docs) {
-        batch.delete(doc.reference);
-      }
-
-      final gradesSnap = await userRef
-          .collection('grades')
-          .where('courseId', isEqualTo: courseId)
-          .get();
-      for (var doc in gradesSnap.docs) {
-        batch.delete(doc.reference);
-      }
-
-      final filesSnap = await userRef
-          .collection('files')
-          .where('courseId', isEqualTo: courseId)
-          .get();
-      for (var doc in filesSnap.docs) {
-        batch.delete(doc.reference);
-      }
-
-      await batch.commit();
 
       debugPrint(
         "Course $courseId and all related cloud data deleted successfully.",
@@ -233,8 +164,9 @@ class SyncService {
   }
 
   Future<void> _runBackup() async {
-    final user = _auth.currentUser;
-    if (user == null) throw Exception('User not logged in');
+    if (SupabaseBackend.currentUser == null) {
+      throw Exception('User not logged in');
+    }
 
     if (!await isCloudBackupEnabled()) {
       throw Exception(
@@ -247,8 +179,6 @@ class SyncService {
         'No internet connection. Please check your network and try again.',
       );
     }
-
-    final uid = user.uid;
 
     try {
       _reportProgress('Fetching local data...', 0.1);
@@ -283,7 +213,7 @@ class SyncService {
       // 2. Backup Courses — B1 fix: batch chunking with encryption
       await _commitInChunksEncrypted(
         items: courses,
-        collectionPath: 'users/$uid/courses',
+        collection: 'courses',
         toMap: (course) => course.toMap(),
         getId: (course) => course.id,
         onItem: (_) => processedItems++,
@@ -292,16 +222,17 @@ class SyncService {
       // 3. Backup Deadlines
       await _commitInChunksEncrypted(
         items: deadlines,
-        collectionPath: 'users/$uid/deadlines',
+        collection: 'deadlines',
         toMap: (deadline) => deadline.toMap(),
         getId: (deadline) => deadline.id,
+        getCourseId: (deadline) => deadline.courseId,
         onItem: (_) => processedItems++,
       );
 
       // 3.5. Backup Planner Events
       await _commitInChunksEncrypted(
         items: plannerEvents,
-        collectionPath: 'users/$uid/planner_events',
+        collection: 'planner_events',
         toMap: (event) => event.toMap(),
         getId: (event) => event.id,
         onItem: (_) => processedItems++,
@@ -310,9 +241,10 @@ class SyncService {
       // 4. Backup Grades
       await _commitInChunksEncrypted(
         items: allGrades,
-        collectionPath: 'users/$uid/grades',
+        collection: 'grades',
         toMap: (grade) => grade.toMap(),
         getId: (grade) => grade.id,
+        getCourseId: (grade) => grade.courseId,
         onItem: (_) => processedItems++,
       );
 
@@ -326,7 +258,7 @@ class SyncService {
         Map<String, dynamic> noteMap = note.toMap();
 
         // Handle File Upload if exists — resolve relative paths first
-        // E2E Storage - files are encrypted and uploaded to Firebase Storage
+        // E2E Storage - files are encrypted and uploaded to Supabase Storage
         if (await E2EKeyService().isE2EEnabled()) {
           try {
             final uploadService = E2EUploadService();
@@ -369,12 +301,15 @@ class SyncService {
         }
 
         final encryptedData = await _encryptData(noteMap);
-        await _firestore
-            .collection('users')
-            .doc(uid)
-            .collection('notes')
-            .doc(note.id)
-            .set({'encryptedData': encryptedData});
+        await _withRetry(
+          () => _cloud.upsert(
+            'notes',
+            note.id,
+            {'encryptedData': encryptedData},
+            courseId: note.courseId,
+          ),
+          3,
+        );
         processedItems++;
       }
 
@@ -387,7 +322,7 @@ class SyncService {
 
         Map<String, dynamic> fileMap = file.toMap();
 
-        // E2E Storage - files are encrypted and uploaded to Firebase Storage
+        // E2E Storage - files are encrypted and uploaded to Supabase Storage
         if (await E2EKeyService().isE2EEnabled()) {
           try {
             final uploadService = E2EUploadService();
@@ -410,12 +345,15 @@ class SyncService {
         }
 
         final encryptedData = await _encryptData(fileMap);
-        await _firestore
-            .collection('users')
-            .doc(uid)
-            .collection('files')
-            .doc(file.id)
-            .set({'encryptedData': encryptedData});
+        await _withRetry(
+          () => _cloud.upsert(
+            'files',
+            file.id,
+            {'encryptedData': encryptedData},
+            courseId: file.courseId,
+          ),
+          3,
+        );
         processedItems++;
       }
 
@@ -424,15 +362,10 @@ class SyncService {
       for (var course in courses) {
         final absenceDates = await _absenceRepo.getAbsencesByCourse(course.id);
         if (absenceDates.isNotEmpty) {
-          await _firestore
-              .collection('users')
-              .doc(uid)
-              .collection('absences')
-              .doc(course.id)
-              .set({
-                'courseId': course.id,
-                'dates': absenceDates.map((d) => d.toIso8601String()).toList(),
-              });
+          await _cloud.upsert('absences', course.id, {
+            'courseId': course.id,
+            'dates': absenceDates.map((d) => d.toIso8601String()).toList(),
+          }, courseId: course.id);
         }
       }
 
@@ -455,8 +388,9 @@ class SyncService {
   }
 
   Future<void> _runRestore() async {
-    final user = _auth.currentUser;
-    if (user == null) throw Exception('User not logged in');
+    if (SupabaseBackend.currentUser == null) {
+      throw Exception('User not logged in');
+    }
 
     if (!await isCloudBackupEnabled()) {
       throw Exception(
@@ -471,8 +405,6 @@ class SyncService {
       );
     }
 
-    final uid = user.uid;
-
     try {
       _reportProgress('Fetching cloud data...', 0.1);
 
@@ -482,14 +414,10 @@ class SyncService {
       // We'll assume strict ID matching and use update or insert.
 
       // 1. Restore Courses
-      final courseSnaps = await _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('courses')
-          .get();
-      for (var doc in courseSnaps.docs) {
+      final courseSnaps = await _cloud.getAll('courses');
+      for (var doc in courseSnaps) {
         final decryptedData = await _withRetry(
-          () => _decryptData(doc.data()['encryptedData'] as String),
+          () => _decryptData(doc.data['encryptedData'] as String),
           3,
         );
         final course = Course.fromMap(decryptedData);
@@ -502,15 +430,11 @@ class SyncService {
       }
 
       // 2. Restore Deadlines (insertDeadline uses ConflictAlgorithm.replace)
-      final deadlineSnaps = await _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('deadlines')
-          .get();
-      for (var doc in deadlineSnaps.docs) {
+      final deadlineSnaps = await _cloud.getAll('deadlines');
+      for (var doc in deadlineSnaps) {
         try {
           final decryptedData = await _withRetry(
-            () => _decryptData(doc.data()['encryptedData'] as String),
+            () => _decryptData(doc.data['encryptedData'] as String),
             3,
           );
           final deadline = Deadline.fromMap(decryptedData);
@@ -521,15 +445,11 @@ class SyncService {
       }
 
       // 2.5. Restore Planner Events
-      final plannerSnaps = await _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('planner_events')
-          .get();
-      for (var doc in plannerSnaps.docs) {
+      final plannerSnaps = await _cloud.getAll('planner_events');
+      for (var doc in plannerSnaps) {
         try {
           final decryptedData = await _withRetry(
-            () => _decryptData(doc.data()['encryptedData'] as String),
+            () => _decryptData(doc.data['encryptedData'] as String),
             3,
           );
           final event = PlannerEvent.fromMap(decryptedData);
@@ -545,15 +465,11 @@ class SyncService {
       }
 
       // 3. Restore Grades (insertGrade uses ConflictAlgorithm.replace)
-      final gradeSnaps = await _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('grades')
-          .get();
-      for (var doc in gradeSnaps.docs) {
+      final gradeSnaps = await _cloud.getAll('grades');
+      for (var doc in gradeSnaps) {
         try {
           final decryptedData = await _withRetry(
-            () => _decryptData(doc.data()['encryptedData'] as String),
+            () => _decryptData(doc.data['encryptedData'] as String),
             3,
           );
           final grade = Grade.fromMap(decryptedData);
@@ -564,19 +480,15 @@ class SyncService {
       }
 
       // 4. Restore Notes (Download Files)
-      final noteSnaps = await _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('notes')
-          .get();
-      int totalNotes = noteSnaps.docs.length;
+      final noteSnaps = await _cloud.getAll('notes');
+      int totalNotes = noteSnaps.length;
       int processedNotes = 0;
       final isE2EEnabled = await E2EKeyService().isE2EEnabled();
 
-      for (var doc in noteSnaps.docs) {
+      for (var doc in noteSnaps) {
         try {
           final decryptedData = await _withRetry(
-            () => _decryptData(doc.data()['encryptedData'] as String),
+            () => _decryptData(doc.data['encryptedData'] as String),
             3,
           );
           final data = Map<String, dynamic>.from(decryptedData);
@@ -657,15 +569,11 @@ class SyncService {
       }
 
       // 5. Restore Course Files
-      final fileSnaps = await _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('files')
-          .get();
-      for (var doc in fileSnaps.docs) {
+      final fileSnaps = await _cloud.getAll('files');
+      for (var doc in fileSnaps) {
         try {
           final decryptedData = await _withRetry(
-            () => _decryptData(doc.data()['encryptedData'] as String),
+            () => _decryptData(doc.data['encryptedData'] as String),
             3,
           );
           final data = Map<String, dynamic>.from(decryptedData);
@@ -703,15 +611,11 @@ class SyncService {
 
       // 6. Restore Absences
       _reportProgress('Restoring absences...', 0.9);
-      final absenceSnaps = await _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('absences')
-          .get();
+      final absenceSnaps = await _cloud.getAll('absences');
       const uuid = Uuid();
-      for (var doc in absenceSnaps.docs) {
+      for (var doc in absenceSnaps) {
         try {
-          final data = doc.data();
+          final data = doc.data;
           final courseId = data['courseId'] as String;
           final dates = (data['dates'] as List<dynamic>?) ?? [];
           for (var dateStr in dates) {
@@ -760,37 +664,12 @@ class SyncService {
     }
   }
 
-  /// @nodoc
-  // B1 fix: Firestore batch'lerini 400'lük parçalara bölerek commit et
-  // NOT: Bu method şu anda kullanılmıyor ama gelecekte batch operations için gerekebilir
-  // ignore: unused_element
-  Future<void> _commitInChunks<T>({
-    required List<T> items,
-    required String collectionPath,
-    required Map<String, dynamic> Function(T item) toMap,
-    required String Function(T item) getId,
-    Function(T item)? onItem,
-  }) async {
-    for (int i = 0; i < items.length; i += _kBatchChunkSize) {
-      final chunk = items.sublist(
-        i,
-        (i + _kBatchChunkSize).clamp(0, items.length),
-      );
-      final batch = _firestore.batch();
-      for (var item in chunk) {
-        final docRef = _firestore.collection(collectionPath).doc(getId(item));
-        batch.set(docRef, toMap(item));
-        onItem?.call(item);
-      }
-      await _withRetry(() async => batch.commit(), 3);
-    }
-  }
-
   Future<void> _commitInChunksEncrypted<T>({
     required List<T> items,
-    required String collectionPath,
+    required String collection,
     required Map<String, dynamic> Function(T item) toMap,
     required String Function(T item) getId,
+    String? Function(T item)? getCourseId,
     Function(T item)? onItem,
   }) async {
     for (int i = 0; i < items.length; i += _kBatchChunkSize) {
@@ -798,22 +677,29 @@ class SyncService {
         i,
         (i + _kBatchChunkSize).clamp(0, items.length),
       );
-      final batch = _firestore.batch();
+      final records = <CloudRecord>[];
       for (var item in chunk) {
-        final docRef = _firestore.collection(collectionPath).doc(getId(item));
         final encryptedData = await _encryptData(toMap(item));
-        batch.set(docRef, {'encryptedData': encryptedData});
+        records.add(
+          CloudRecord(
+            id: getId(item),
+            courseId: getCourseId?.call(item),
+            data: {'encryptedData': encryptedData},
+          ),
+        );
         onItem?.call(item);
       }
-      await _withRetry(() async => batch.commit(), 3);
+      await _withRetry(() => _cloud.upsertMany(collection, records), 3);
     }
   }
 
   /// B3 fix: İnternet bağlantısı kontrolü
   Future<bool> _checkConnectivity() async {
     try {
+      final host = SupabaseBackend.host;
+      if (host == null) return false;
       final result = await InternetAddress.lookup(
-        'firestore.googleapis.com',
+        host,
       ).timeout(const Duration(seconds: 5));
       return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
     } on SocketException catch (e) {
@@ -834,58 +720,28 @@ class SyncService {
   }
 
   Future<void> _runDeleteAllUserData() async {
-    final user = _auth.currentUser;
-    if (user == null) {
+    if (SupabaseBackend.currentUser == null) {
       throw Exception('Kullanıcı giriş yapmamış');
     }
 
     try {
       onProgress?.call('Veriler siliniyor...', 0.1);
 
-      // 1. Firestore'daki tüm kullanıcı verilerini sil
-      final userDocRef = _firestore.collection('users').doc(user.uid);
-
-      // Alt koleksiyonları temizle
-      final collections = [
-        'courses',
-        'notes',
-        'deadlines',
-        'grades',
-        'files',
-        'absences',
-        'planner_events',
-        'study_sessions',
-      ];
-      for (final collection in collections) {
-        try {
-          final snapshot = await userDocRef.collection(collection).get();
-          if (snapshot.docs.isNotEmpty) {
-            final batch = _firestore.batch();
-            for (final doc in snapshot.docs) {
-              batch.delete(doc.reference);
-            }
-            await batch.commit();
-          }
-        } catch (e) {
-          debugPrint('Error deleting $collection: $e');
-        }
-      }
-
-      // Ana kullanıcı dokümanını sil
-      await userDocRef.delete();
-      onProgress?.call('Bulut verileri silindi', 0.3);
-
-      // 2. Firebase Storage'daki dosyaları sil
+      // 1. Storage'daki şifreli dosyaları sil (auth kaydı silinmeden önce —
+      //    sonrasında RLS erişimi kalmaz)
       try {
-        final storageRef = FirebaseStorage.instance.ref('users/${user.uid}');
-        await storageRef.delete();
+        await E2EFileService().deleteAllUserFiles();
       } catch (e) {
         debugPrint('Error deleting storage files: $e');
       }
-      onProgress?.call('Depolama alanı temizlendi', 0.5);
+      onProgress?.call('Depolama alanı temizlendi', 0.3);
 
-      // 3. Firebase Auth hesabını sil
-      await user.delete();
+      // 2. Veritabanındaki tüm kullanıcı kayıtlarını sil
+      await _cloud.deleteAll();
+      onProgress?.call('Bulut verileri silindi', 0.5);
+
+      // 3. Auth hesabını sil (profiles satırı cascade ile gider)
+      await SupabaseBackend.deleteCurrentUser();
       onProgress?.call('Hesap silindi', 0.7);
 
       // 4. Local SQLite database'i temizle

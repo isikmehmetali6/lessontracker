@@ -57,7 +57,6 @@ void main() {
     setupTestInfrastructure();
     setupSecureStorageMock();
     setupSqlCipherMock();
-    setupFirebaseMocks();
     SharedPreferences.setMockInitialValues({});
   });
 

@@ -79,30 +79,3 @@ void setupSqlCipherMock() {
     }
   });
 }
-
-void setupFirebaseMocks() {
-  const methodChannel = MethodChannel('firebase_core');
-  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-      .setMockMethodCallHandler(methodChannel, (MethodCall methodCall) async {
-    if (methodCall.method == 'Firebase#initializeApp') {
-      return <String, dynamic>{
-        'name': '[DEFAULT]',
-        'options': <String, dynamic>{},
-        'isSecretDecryptionEnabled': false,
-      };
-    }
-    return null;
-  });
-
-  const authChannel = MethodChannel('firebase_auth');
-  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-      .setMockMethodCallHandler(authChannel, (MethodCall methodCall) async {
-    return null;
-  });
-
-  const firestoreChannel = MethodChannel('cloud_firestore');
-  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-      .setMockMethodCallHandler(firestoreChannel, (MethodCall methodCall) async {
-    return null;
-  });
-}

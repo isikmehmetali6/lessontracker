@@ -4389,11 +4389,11 @@ abstract class AppLocalizations {
   /// **'Moodle account connections'**
   String get deleteAccountMoodle;
 
-  /// No description provided for @deleteAccountFirebase.
+  /// No description provided for @deleteAccountCloud.
   ///
   /// In en, this message translates to:
-  /// **'Firebase account'**
-  String get deleteAccountFirebase;
+  /// **'Cloud account'**
+  String get deleteAccountCloud;
 
   /// No description provided for @deleteAccountRetention.
   ///

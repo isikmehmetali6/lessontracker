@@ -37,7 +37,7 @@ LessonTracker; öğrencilerin ders programlarını düzenlemelerini, devamsızl�
 ## 2. Genel Açıklama ve Mimari Diyagramlar (Overall Description)
 
 ### 2.1 Ürün Perspektifi ve Sistem Mimarisi
-LessonTracker, istemci tarafında Flutter (Dart) framework'ü ile geliştirilmiş, yerel SQLCipher (şifreli SQLite) veritabanı ile çevrimdışı öncelikli (offline-first) çalışan, arka planda Firebase (Auth, Firestore, Storage, Cloud Functions) ve Moodle REST API servisleri ile senkronize olan hibrit bir sistemdir.
+LessonTracker, istemci tarafında Flutter (Dart) framework'ü ile geliştirilmiş, yerel SQLCipher (şifreli SQLite) veritabanı ile çevrimdışı öncelikli (offline-first) çalışan, arka planda Supabase (Auth, Postgres, Storage, Edge Functions) ve Moodle REST API servisleri ile senkronize olan hibrit bir sistemdir.
 
 #### 🏛️ Şekil 2.1: Genel Sistem Mimari Diyagramı
 ```mermaid
@@ -69,15 +69,15 @@ graph TD
     end
 
     subgraph "Harici ve Bulut Servisleri (External Cloud Services)"
-        FIRE_AUTH["Firebase Auth (Identity)"]
-        FIRESTORE["Cloud Firestore (Cloud Sync)"]
-        FIRE_STORE["Firebase Storage (Media/Voice/Pdfs)"]
+        SB_AUTH["Supabase Auth (Identity)"]
+        SB_DB["Supabase Postgres (Cloud Sync)"]
+        SB_STORAGE["Supabase Storage (Media/Voice/Pdfs)"]
         MOODLE_API["Moodle REST API (Courses, Content, Grades)"]
         ML_KIT["Google ML Kit (OCR Engine)"]
         
-        SERVICES --> FIRE_AUTH
-        SERVICES --> FIRESTORE
-        SERVICES --> FIRE_STORE
+        SERVICES --> SB_AUTH
+        SERVICES --> SB_DB
+        SERVICES --> SB_STORAGE
         SERVICES --> MOODLE_API
         SERVICES --> ML_KIT
     end
@@ -213,7 +213,7 @@ flowchart TD
     SaveStrokes --> SaveNote
     
     SaveNote --> SaveLocal["SQLCipher Şifreli Depolamaya Kaydet"]
-    SaveLocal --> CloudSync["Firebase Storage / Firestore'a Senkronize Et"]
+    SaveLocal --> CloudSync["Supabase Storage / Postgres'e Senkronize Et"]
 ```
 
 ---
@@ -324,7 +324,7 @@ erDiagram
 
 ### 6.2 Yazılım Arayüzleri
 - **Moodle Web Services REST API:** `core_course_get_contents`, `gradereport_user_get_grade_items` vb.
-- **Firebase SDK:** `firebase_auth`, `cloud_firestore`, `firebase_storage`, `cloud_functions`.
+- **Supabase SDK:** `supabase_flutter` (Auth, PostgREST, Storage, Edge Functions). Şema: `supabase/migrations/`.
 - **Google ML Kit:** Metin tanıma (OCR) servisi.
 
 ---

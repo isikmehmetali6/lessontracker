@@ -109,7 +109,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
                   _buildBullet(isDark, l10n.deleteAccountAttendance),
                   _buildBullet(isDark, l10n.deleteAccountSessions),
                   _buildBullet(isDark, l10n.deleteAccountMoodle),
-                  _buildBullet(isDark, l10n.deleteAccountFirebase),
+                  _buildBullet(isDark, l10n.deleteAccountCloud),
                 ],
               ),
             ),

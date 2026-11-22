@@ -2224,7 +2224,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteAccountMoodle => 'Moodle account connections';
 
   @override
-  String get deleteAccountFirebase => 'Firebase account';
+  String get deleteAccountCloud => 'Cloud account';
 
   @override
   String get deleteAccountRetention => 'Your data will be permanently deleted within 30 days.';

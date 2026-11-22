@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'dart:convert';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../core/backend/supabase_backend.dart';
 
 class VeliConsentScreen extends StatefulWidget {
   final VoidCallback onConsentGiven;
@@ -545,16 +545,16 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
 
   Future<void> _sendVerificationEmail(String email, String code) async {
     try {
-      final functions = FirebaseFunctions.instance;
-      final callable = functions.httpsCallable('sendVeliVerificationEmail');
+      final client = SupabaseBackend.client;
+      if (client == null) throw Exception('Supabase is not configured');
 
-      final result = await callable.call({
-        'email': email,
-        'code': code,
-        'veliName': 'Veli',
-      });
+      final result = await client.functions.invoke(
+        'send-veli-verification-email',
+        body: {'email': email, 'code': code, 'veliName': 'Veli'},
+      );
 
-      if (result.data['success'] == true) {
+      final data = result.data;
+      if (data is Map && data['success'] == true) {
         final prefs = await SharedPreferences.getInstance();
         final pendingApproval = jsonEncode({
           'veli_email': email,
@@ -567,7 +567,7 @@ class _VeliConsentScreenState extends State<VeliConsentScreen> {
         await prefs.setString('pending_veli_approval', pendingApproval);
       }
     } catch (e) {
-      debugPrint('Cloud function error: $e');
+      debugPrint('Edge function error: $e');
       final prefs = await SharedPreferences.getInstance();
       final pendingApproval = jsonEncode({
         'veli_email': email,

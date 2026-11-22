@@ -53,11 +53,10 @@ dependencies:
   geolocator: ^13.0.1
   permission_handler: ^11.3.1
   home_widget: ^0.9.0
-  firebase_core: ^4.4.0
-  firebase_auth: ^6.1.4
-  cloud_firestore: ^6.1.2
-  firebase_storage: ^13.0.6
-  cloud_functions: ^6.0.7
+
+  # Backend (Auth, Postgres, Storage, Edge Functions)
+  supabase_flutter: ^2.10.0
+
   http: ^1.6.0
   shared_preferences: ^2.5.4
   local_auth: ^2.3.0
@@ -81,7 +80,6 @@ dependencies:
   
   # Drawing / Handwriting
   perfect_freehand: ^2.3.0
-  firebase_crashlytics: ^5.2.6
 
 
 
