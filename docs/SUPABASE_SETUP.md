@@ -8,11 +8,23 @@ LessonTracker bulut tarafında Supabase kullanır (Eylül 2026'da Firebase'in ye
 | Firestore `users/{uid}` | `public.profiles` tablosu |
 | Firestore `users/{uid}/{koleksiyon}/{id}` | `public.user_records` tablosu (`collection`, `id`, `data jsonb`) |
 | Firebase Storage `users/{uid}/...` | Storage bucket'ı `user-files`, yol `{uid}/{photos\|audio\|documents}/...` |
-| Cloud Function `sendVeliVerificationEmail` | Edge Function `send-veli-verification-email` |
+| Cloud Function `sendVeliVerificationEmail` | Kaldırıldı (23.11.2026, FIX_PLAN B8) |
 | Firestore Security Rules | Row Level Security (RLS) politikaları |
 | Crashlytics | Kaldırıldı (yerine bir şey konmadı) |
 
-Bulut verisi eskisi gibi istemcide şifrelenir (`{"encryptedData": ...}`). Sunucu yalnızca şifreli içeriği ve ilişki kurmak için `course_id` sütununu görür.
+Bulut verisi istemcide şifrelenir. Sunucu yalnızca şifreli içeriği ve ilişki kurmak için `course_id` sütununu görür.
+
+**Şifreleme biçimleri** (bkz. [`FIX_PLAN_2026-11-23.md`](FIX_PLAN_2026-11-23.md) K1–K2):
+
+| Kayıt | Biçim | Anahtar |
+|---|---|---|
+| `user_records.data` (v2, güncel) | `{"v": 2, "encryptedData": base64(nonce ‖ ct ‖ tag)}` — AES-256-GCM | Kullanıcının E2E anahtarı |
+| `user_records.data` (legacy) | `{"encryptedData": ...}` — AES-CBC, sabit IV | Cihaza özel `backup_encryption_key` (yalnızca yedeği alan cihazda açılır; restore sonrası backup v2'ye taşır) |
+| `system/e2e_key` | `{encryptedKey, salt, kdfVersion: 2, keyVersion}` — PBKDF2-HMAC-SHA256 (UTF-8 parola, 100k) + AES-GCM | Hesap parolası |
+| Storage `*.enc` (v2) | `LTG2 ‖ nonce ‖ ct ‖ tag` | E2E anahtarı |
+| Storage `*.enc` (legacy) | `iv ‖ ct` (CBC) | E2E anahtarı |
+
+Silmeler `pending_changes` kuyruğuyla (`operation = 'delete'`) buluta uygulanır; restore bu yüzden silinmiş kayıtları geri getirmez.
 
 > **Bu repo için proje:** `slpsyormnfbgooaevzhb` (eu-central-1). Şema 28.09.2026'da uygulandı. IPv4 ağlardan veritabanına `aws-0-eu-central-1.pooler.supabase.com:5432` (kullanıcı `postgres.slpsyormnfbgooaevzhb`) üzerinden bağlanılır.
 
@@ -55,12 +67,13 @@ Bu migration şunları oluşturur:
 - Hesap silmek için `delete_current_user()` RPC fonksiyonu (KVKK md. 7)
 - Gizli `user-files` bucket'ı ve klasör bazlı Storage politikaları
 
-## 3. Edge Function (veli onay e-postası)
+## 3. Edge Function
+
+Şu an Edge Function yok. Eski `send-veli-verification-email` fonksiyonu 23.11.2026'da kaldırıldı: veli onay ekranları uygulamada hiçbir yerden açılmıyordu ve fonksiyon, kimlik doğrulaması olmadan herhangi bir adrese e-posta attırılabiliyordu (bkz. [`FIX_PLAN_2026-11-23.md`](FIX_PLAN_2026-11-23.md) B8). Daha önce deploy edildiyse projeden de silin:
 
 ```bash
-supabase secrets set EMAIL_USER=<gmail> EMAIL_PASS=<uygulama-şifresi> \
-  EMAIL_FROM="LessonTracker <noreply@lessontracker.com>"
-supabase functions deploy send-veli-verification-email
+supabase functions delete send-veli-verification-email
+supabase secrets unset EMAIL_USER EMAIL_PASS EMAIL_FROM
 ```
 
 ## 4. Auth ayarları (Dashboard → Authentication)
