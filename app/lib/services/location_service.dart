@@ -120,13 +120,17 @@ class LocationService {
     await prefs.remove(_prefRadiusKey);
   }
 
-  /// Üniversitede mi? kontrol et
-  Future<bool> isAtUniversity() async {
+  /// Üniversitede mi? kontrol et.
+  ///
+  /// `null` = bilinmiyor (üniversite konumu ayarlı değil ya da cihaz konumu
+  /// alınamadı — izin yok, GPS kapalı, zaman aşımı). Çağıranlar `null`'u
+  /// "kampüste değil" olarak yorumlamamalı (FIX_PLAN B9).
+  Future<bool?> isAtUniversity() async {
     final uniLoc = await getUniversityLocation();
-    if (uniLoc == null) return false;
+    if (uniLoc == null) return null;
 
     final currentPosition = await getCurrentLocation();
-    if (currentPosition == null) return false;
+    if (currentPosition == null) return null;
 
     final distance = Geolocator.distanceBetween(
       currentPosition.latitude,
