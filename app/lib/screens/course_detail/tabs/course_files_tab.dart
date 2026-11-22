@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../models/course.dart';
 import '../../../../models/course_file.dart';
 import 'widgets/file_list.dart';

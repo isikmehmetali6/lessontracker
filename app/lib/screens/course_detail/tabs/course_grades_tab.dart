@@ -195,7 +195,7 @@ class CourseGradesTab extends StatelessWidget {
               onEdit: onEditGrade == null ? null : () => onEditGrade!(grade),
               onDelete: () => onDeleteGrade(grade.id),
             );
-          }).toList(),
+          }),
 
         const SizedBox(height: 12),
         SizedBox(

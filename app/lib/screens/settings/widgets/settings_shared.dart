@@ -25,6 +25,15 @@ class SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Section cards paint a background on a DecoratedBox; without its own
+    // Material the ListTile's ink splash is drawn underneath and is invisible.
+    return Material(
+      type: MaterialType.transparency,
+      child: _buildTile(),
+    );
+  }
+
+  Widget _buildTile() {
     return ListTile(
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
