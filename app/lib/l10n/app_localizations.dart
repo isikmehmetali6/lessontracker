@@ -4484,6 +4484,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This connection is not encrypted (http). Your Moodle token may be exposed on the network.'**
   String get moodleInsecureUrlWarning;
+
+  /// No description provided for @sendResetLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Send reset link'**
+  String get sendResetLink;
+
+  /// No description provided for @resetLinkSentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your email'**
+  String get resetLinkSentTitle;
+
+  /// No description provided for @resetLinkSentDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a password reset link to {email}. Open it on this device to set a new password. Check your spam folder too.'**
+  String resetLinkSentDesc(Object email);
+
+  /// No description provided for @setNewPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a new password'**
+  String get setNewPasswordTitle;
+
+  /// No description provided for @setNewPasswordDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a new password for your account.'**
+  String get setNewPasswordDesc;
+
+  /// No description provided for @passwordChangedE2EWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed. Your encrypted cloud backup is still locked with your old password; if you remember it, enter it when restoring.'**
+  String get passwordChangedE2EWarning;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

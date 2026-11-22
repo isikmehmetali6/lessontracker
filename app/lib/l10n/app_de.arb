@@ -803,5 +803,11 @@
     "backupKeyMissing": "Dein Verschlüsselungsschlüssel ist auf diesem Gerät nicht verfügbar. Melde dich ab und wieder an, um das Cloud-Backup zu entsperren.",
     "cleanupCloudOrphans": "Ungenutzte Cloud-Dateien bereinigen",
     "cleanupCloudOrphansDone": "{count} ungenutzte Cloud-Dateien entfernt.",
-    "moodleInsecureUrlWarning": "Diese Verbindung ist nicht verschlüsselt (http). Dein Moodle-Token könnte im Netzwerk offengelegt werden."
+    "moodleInsecureUrlWarning": "Diese Verbindung ist nicht verschlüsselt (http). Dein Moodle-Token könnte im Netzwerk offengelegt werden.",
+    "sendResetLink": "Link zum Zurücksetzen senden",
+    "resetLinkSentTitle": "Prüfe deine E-Mails",
+    "resetLinkSentDesc": "Wir haben einen Link zum Zurücksetzen an {email} gesendet. Öffne ihn auf diesem Gerät, um ein neues Passwort festzulegen. Prüfe auch den Spam-Ordner.",
+    "setNewPasswordTitle": "Neues Passwort festlegen",
+    "setNewPasswordDesc": "Wähle ein neues Passwort für dein Konto.",
+    "passwordChangedE2EWarning": "Passwort geändert. Dein verschlüsseltes Cloud-Backup ist weiterhin mit deinem alten Passwort gesperrt; falls du es noch weißt, gib es bei der Wiederherstellung ein."
 }

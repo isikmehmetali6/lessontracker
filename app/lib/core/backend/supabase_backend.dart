@@ -14,6 +14,13 @@ class SupabaseBackend {
   /// Şifreli dosyaların tutulduğu Storage bucket'ı.
   static const String filesBucket = 'user-files';
 
+  /// Auth e-postalarındaki linklerin (kayıt onayı, şifre sıfırlama, e-posta
+  /// değişikliği) dönüş adresi. iOS `CFBundleURLTypes` ve Android
+  /// intent-filter ile uygulamayı açar; supabase_flutter linki yakalayıp
+  /// oturuma çevirir. Supabase panelinde Auth → URL Configuration altındaki
+  /// "Redirect URLs" listesinde de bulunmalıdır.
+  static const String authRedirectUrl = 'lessontracker://auth-callback';
+
   static bool _ready = false;
   static String? _host;
 

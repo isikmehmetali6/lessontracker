@@ -27,6 +27,7 @@ import 'package:workmanager/workmanager.dart';
 
 import 'screens/home/home_screen.dart';
 import 'screens/auth/login_screen.dart';
+import 'screens/auth/reset_password_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'screens/onboarding/kvkk_flow.dart';
 
@@ -249,11 +250,19 @@ class _AuthWrapperState extends State<AuthWrapper> {
     // Auth check
     return Consumer<AuthProvider>(
       builder: (context, auth, _) {
+        // Şifre sıfırlama linkiyle gelindi: üstte açık kalan ekranları
+        // (ör. PasswordRecoveryScreen) kapatıp yeni şifre ekranını göster.
+        if (auth.isPasswordRecovery) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            }
+          });
+          return const ResetPasswordScreen();
+        }
         if (auth.isAuthenticated) {
-          // TODO: Enable email verification check after SMTP settings are configured
-          // if (!auth.isEmailVerified) {
-          //   return EmailVerificationScreen();
-          // }
+          // E-posta onayı sunucuda zorunlu ("Confirm email" açık): onaysız
+          // hesap oturum açamaz, ayrıca kontrol gerekmez.
           if (_showKvkk) {
             return KvkkOnboardingFlow(
               onComplete: () => setState(() => _showKvkk = false),

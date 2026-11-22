@@ -790,5 +790,11 @@
     "backupKeyMissing": "Şifreleme anahtarınız bu cihazda yok. Bulut yedeğini açmak için çıkış yapıp tekrar giriş yapın.",
     "cleanupCloudOrphans": "Kullanılmayan bulut dosyalarını temizle",
     "cleanupCloudOrphansDone": "{count} kullanılmayan bulut dosyası silindi.",
-    "moodleInsecureUrlWarning": "Bu bağlantı şifresiz (http). Moodle token'ınız ağda açıkta kalabilir."
+    "moodleInsecureUrlWarning": "Bu bağlantı şifresiz (http). Moodle token'ınız ağda açıkta kalabilir.",
+    "sendResetLink": "Sıfırlama linki gönder",
+    "resetLinkSentTitle": "E-postanı kontrol et",
+    "resetLinkSentDesc": "{email} adresine şifre sıfırlama linki gönderdik. Yeni şifre belirlemek için linki bu cihazda aç. Spam klasörünü de kontrol et.",
+    "setNewPasswordTitle": "Yeni şifre belirle",
+    "setNewPasswordDesc": "Hesabın için yeni bir şifre seç.",
+    "passwordChangedE2EWarning": "Şifre değiştirildi. Şifreli bulut yedeğin hâlâ eski şifrenle kilitli; hatırlıyorsan geri yüklerken eski şifreni gir."
 }

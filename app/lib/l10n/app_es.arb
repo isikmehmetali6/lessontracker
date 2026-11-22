@@ -811,5 +811,11 @@
     "backupKeyMissing": "Tu clave de cifrado no está disponible en este dispositivo. Cierra sesión y vuelve a iniciarla para desbloquear la copia en la nube.",
     "cleanupCloudOrphans": "Limpiar archivos de la nube no utilizados",
     "cleanupCloudOrphansDone": "{count} archivos de la nube no utilizados eliminados.",
-    "moodleInsecureUrlWarning": "Esta conexión no está cifrada (http). Tu token de Moodle podría quedar expuesto en la red."
+    "moodleInsecureUrlWarning": "Esta conexión no está cifrada (http). Tu token de Moodle podría quedar expuesto en la red.",
+    "sendResetLink": "Enviar enlace de restablecimiento",
+    "resetLinkSentTitle": "Revisa tu correo",
+    "resetLinkSentDesc": "Enviamos un enlace de restablecimiento a {email}. Ábrelo en este dispositivo para establecer una nueva contraseña. Revisa también la carpeta de spam.",
+    "setNewPasswordTitle": "Establece una nueva contraseña",
+    "setNewPasswordDesc": "Elige una nueva contraseña para tu cuenta.",
+    "passwordChangedE2EWarning": "Contraseña cambiada. Tu copia cifrada en la nube sigue bloqueada con tu contraseña anterior; si la recuerdas, introdúcela al restaurar."
 }

@@ -2272,4 +2272,24 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get moodleInsecureUrlWarning => 'Esta conexión no está cifrada (http). Tu token de Moodle podría quedar expuesto en la red.';
+
+  @override
+  String get sendResetLink => 'Enviar enlace de restablecimiento';
+
+  @override
+  String get resetLinkSentTitle => 'Revisa tu correo';
+
+  @override
+  String resetLinkSentDesc(Object email) {
+    return 'Enviamos un enlace de restablecimiento a $email. Ábrelo en este dispositivo para establecer una nueva contraseña. Revisa también la carpeta de spam.';
+  }
+
+  @override
+  String get setNewPasswordTitle => 'Establece una nueva contraseña';
+
+  @override
+  String get setNewPasswordDesc => 'Elige una nueva contraseña para tu cuenta.';
+
+  @override
+  String get passwordChangedE2EWarning => 'Contraseña cambiada. Tu copia cifrada en la nube sigue bloqueada con tu contraseña anterior; si la recuerdas, introdúcela al restaurar.';
 }

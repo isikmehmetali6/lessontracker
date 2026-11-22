@@ -811,5 +811,11 @@
     "backupKeyMissing": "Your encryption key is not available on this device. Sign out and sign in again to unlock cloud backup.",
     "cleanupCloudOrphans": "Clean up unused cloud files",
     "cleanupCloudOrphansDone": "{count} unused cloud files removed.",
-    "moodleInsecureUrlWarning": "This connection is not encrypted (http). Your Moodle token may be exposed on the network."
+    "moodleInsecureUrlWarning": "This connection is not encrypted (http). Your Moodle token may be exposed on the network.",
+    "sendResetLink": "Send reset link",
+    "resetLinkSentTitle": "Check your email",
+    "resetLinkSentDesc": "We sent a password reset link to {email}. Open it on this device to set a new password. Check your spam folder too.",
+    "setNewPasswordTitle": "Set a new password",
+    "setNewPasswordDesc": "Choose a new password for your account.",
+    "passwordChangedE2EWarning": "Password changed. Your encrypted cloud backup is still locked with your old password; if you remember it, enter it when restoring."
 }

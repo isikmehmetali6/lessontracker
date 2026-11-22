@@ -2272,4 +2272,24 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get moodleInsecureUrlWarning => 'Bu bağlantı şifresiz (http). Moodle token\'ınız ağda açıkta kalabilir.';
+
+  @override
+  String get sendResetLink => 'Sıfırlama linki gönder';
+
+  @override
+  String get resetLinkSentTitle => 'E-postanı kontrol et';
+
+  @override
+  String resetLinkSentDesc(Object email) {
+    return '$email adresine şifre sıfırlama linki gönderdik. Yeni şifre belirlemek için linki bu cihazda aç. Spam klasörünü de kontrol et.';
+  }
+
+  @override
+  String get setNewPasswordTitle => 'Yeni şifre belirle';
+
+  @override
+  String get setNewPasswordDesc => 'Hesabın için yeni bir şifre seç.';
+
+  @override
+  String get passwordChangedE2EWarning => 'Şifre değiştirildi. Şifreli bulut yedeğin hâlâ eski şifrenle kilitli; hatırlıyorsan geri yüklerken eski şifreni gir.';
 }

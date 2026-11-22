@@ -2272,4 +2272,24 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get moodleInsecureUrlWarning => 'Diese Verbindung ist nicht verschlüsselt (http). Dein Moodle-Token könnte im Netzwerk offengelegt werden.';
+
+  @override
+  String get sendResetLink => 'Link zum Zurücksetzen senden';
+
+  @override
+  String get resetLinkSentTitle => 'Prüfe deine E-Mails';
+
+  @override
+  String resetLinkSentDesc(Object email) {
+    return 'Wir haben einen Link zum Zurücksetzen an $email gesendet. Öffne ihn auf diesem Gerät, um ein neues Passwort festzulegen. Prüfe auch den Spam-Ordner.';
+  }
+
+  @override
+  String get setNewPasswordTitle => 'Neues Passwort festlegen';
+
+  @override
+  String get setNewPasswordDesc => 'Wähle ein neues Passwort für dein Konto.';
+
+  @override
+  String get passwordChangedE2EWarning => 'Passwort geändert. Dein verschlüsseltes Cloud-Backup ist weiterhin mit deinem alten Passwort gesperrt; falls du es noch weißt, gib es bei der Wiederherstellung ein.';
 }

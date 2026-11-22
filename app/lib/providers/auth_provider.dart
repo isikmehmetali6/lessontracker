@@ -24,6 +24,12 @@ class AuthProvider extends ChangeNotifier {
   bool get isGuest => _isGuest;
   bool get isEmailVerified => _user?.emailVerified ?? false;
 
+  bool _isPasswordRecovery = false;
+
+  /// Kullanıcı şifre sıfırlama linkiyle uygulamaya döndü; yeni şifre
+  /// belirlenene kadar AuthWrapper ResetPasswordScreen gösterir.
+  bool get isPasswordRecovery => _isPasswordRecovery;
+
   AuthProvider() {
     _initializeAuth();
   }
@@ -41,6 +47,11 @@ class AuthProvider extends ChangeNotifier {
 
     _authSubscription = _auth!.onAuthStateChange.listen((data) {
       _setUser(data.session?.user);
+      if (data.event == AuthChangeEvent.passwordRecovery) {
+        _isPasswordRecovery = true;
+      } else if (data.event == AuthChangeEvent.signedOut) {
+        _isPasswordRecovery = false;
+      }
       notifyListeners();
     });
   }
@@ -114,7 +125,10 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _auth!.resetPasswordForEmail(email.trim());
+      await _auth!.resetPasswordForEmail(
+        email.trim(),
+        redirectTo: SupabaseBackend.authRedirectUrl,
+      );
       _isLoading = false;
       notifyListeners();
       return true;
@@ -147,7 +161,11 @@ class AuthProvider extends ChangeNotifier {
       if (_auth == null || email == null) {
         throw Exception('Authentication service unavailable.');
       }
-      await _auth!.resend(type: OtpType.signup, email: email);
+      await _auth!.resend(
+        type: OtpType.signup,
+        email: email,
+        emailRedirectTo: SupabaseBackend.authRedirectUrl,
+      );
       _isLoading = false;
       notifyListeners();
       return true;
@@ -284,6 +302,7 @@ class AuthProvider extends ChangeNotifier {
         email: email,
         password: password,
         data: {'name': name},
+        emailRedirectTo: SupabaseBackend.authRedirectUrl,
       );
 
       // E-posta onayı kapalıysa oturum hemen açılır; açıksa anahtar ilk
@@ -411,6 +430,7 @@ class AuthProvider extends ChangeNotifier {
       // sonra değişir.
       final response = await _auth!.updateUser(
         UserAttributes(email: newEmail),
+        emailRedirectTo: SupabaseBackend.authRedirectUrl,
       );
       _setUser(response.user);
 
@@ -461,6 +481,53 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  /// Şifre sıfırlama linkiyle açılan oturumda yeni şifreyi kaydeder.
+  ///
+  /// Bu cihazda E2E anahtarı varsa buluttaki sarılmış anahtar yeni şifreyle
+  /// yeniden sarılır; böylece başka cihazlarda yeni şifreyle açılabilir.
+  /// Anahtar yoksa eski şifreyle şifrelenmiş bulut verisi açılamaz — bu
+  /// durumda dönüş değerinin `e2eKeyPreserved` alanı `false` olur.
+  Future<({bool success, bool e2eKeyPreserved})> completePasswordRecovery(
+    String newPassword,
+  ) async {
+    if (_auth == null || _auth!.currentUser == null) {
+      return (success: false, e2eKeyPreserved: false);
+    }
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _auth!.updateUser(UserAttributes(password: newPassword));
+
+      var keyPreserved = false;
+      try {
+        keyPreserved = await E2EKeyService().rewrapWithNewPassword(newPassword);
+      } catch (e) {
+        debugPrint('E2E re-wrap after recovery failed: $e');
+      }
+
+      _isPasswordRecovery = false;
+      _isLoading = false;
+      notifyListeners();
+      return (success: true, e2eKeyPreserved: keyPreserved);
+    } on AuthException catch (e) {
+      _error = _mapAuthError(e);
+    } catch (e) {
+      _error = e.toString();
+    }
+    _isLoading = false;
+    notifyListeners();
+    return (success: false, e2eKeyPreserved: false);
+  }
+
+  /// Kullanıcı yeni şifre belirlemekten vazgeçti: kurtarma oturumu
+  /// kapatılır, giriş ekranına dönülür.
+  Future<void> cancelPasswordRecovery() async {
+    _isPasswordRecovery = false;
+    await signOut();
   }
 
   /// Email format doğrula
