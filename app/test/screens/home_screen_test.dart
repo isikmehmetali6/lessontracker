@@ -149,11 +149,20 @@ void main() {
     );
   }
 
+  // pumpAndSettle cannot be used: the offstage Settings tab (IndexedStack)
+  // shows a spinner while it awaits local_auth, which never answers under
+  // the widget-test fake clock. Pump enough frames for the home tab instead.
+  Future<void> pumpHome(WidgetTester tester) async {
+    await tester.pumpWidget(buildTestWidget());
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+  }
+
   group('HomeScreen Integration Tests', () {
     testWidgets('Renders empty states correctly',
         (WidgetTester tester) async {
-      await tester.pumpWidget(buildTestWidget());
-      await tester.pumpAndSettle();
+      await pumpHome(tester);
 
       expect(find.text('Guest'), findsOneWidget);
 
@@ -173,8 +182,7 @@ void main() {
 
       when(() => mockCourseProvider.todayCourses).thenReturn([mockCourse]);
 
-      await tester.pumpWidget(buildTestWidget());
-      await tester.pumpAndSettle();
+      await pumpHome(tester);
 
       expect(find.byType(ScheduleCard), findsOneWidget);
       expect(find.text('Math 101'), findsOneWidget);
@@ -191,8 +199,7 @@ void main() {
         tester.view.resetDevicePixelRatio();
       });
 
-      await tester.pumpWidget(buildTestWidget());
-      await tester.pumpAndSettle();
+      await pumpHome(tester);
 
       expect(find.byType(HomeStatsSummary), findsWidgets);
     });
