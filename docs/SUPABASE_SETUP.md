@@ -26,7 +26,7 @@ Bulut verisi istemcide şifrelenir. Sunucu yalnızca şifreli içeriği ve iliş
 
 Silmeler `pending_changes` kuyruğuyla (`operation = 'delete'`) buluta uygulanır; restore bu yüzden silinmiş kayıtları geri getirmez.
 
-> **Bu repo için proje:** `slpsyormnfbgooaevzhb` (eu-central-1). Şema 28.09.2026'da uygulandı. IPv4 ağlardan veritabanına `aws-0-eu-central-1.pooler.supabase.com:5432` (kullanıcı `postgres.slpsyormnfbgooaevzhb`) üzerinden bağlanılır.
+> **Bu repo için proje:** `slpsyormnfbgooaevzhb` (eu-central-1). Şema 28.09.2026'da uygulandı. SQL Editor ile uygulandığı için migration geçmişine yazılmamıştı; 23.11.2026’da `supabase migration repair --status applied 20260928000000 --remote` ile işaretlendi (GitHub entegrasyonu aynı migration’ı tekrar çalıştırmasın diye). Yeni şema değişiklikleri `supabase/migrations/` altına eklenmeli, SQL Editor’de elle uygulanmamalı. IPv4 ağlardan veritabanına `aws-0-eu-central-1.pooler.supabase.com:5432` (kullanıcı `postgres.slpsyormnfbgooaevzhb`) üzerinden bağlanılır.
 
 ## 1. Proje oluşturma
 
