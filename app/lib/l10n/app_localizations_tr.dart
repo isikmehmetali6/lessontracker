@@ -2224,7 +2224,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get deleteAccountMoodle => 'Moodle hesap bağlantıları';
 
   @override
-  String get deleteAccountFirebase => 'Firebase hesabı';
+  String get deleteAccountCloud => 'Bulut hesabı';
 
   @override
   String get deleteAccountRetention => 'Verileriniz 30 gün içinde kalıcı olarak silinecektir.';

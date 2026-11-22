@@ -3,7 +3,6 @@ import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../services/e2e_key_service.dart';
 import '../../../services/biometric_service.dart';
-import '../../../services/e2e_migration_service.dart';
 import 'settings_shared.dart';
 import 'security_questions_sheet.dart';
 
@@ -20,9 +19,6 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
   bool _biometricAvailable = false;
   String _biometricType = 'Biometric';
   bool _isLoading = true;
-  bool _isMigrating = false;
-  double _migrationProgress = 0.0;
-  String _migrationMessage = '';
 
   @override
   void initState() {
@@ -70,52 +66,6 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
       setState(() => _isBiometricEnabled = false);
       if (mounted) {
         _showSnackBar(l10n.biometricDisabled(_biometricType), Colors.orange);
-      }
-    }
-  }
-
-  Future<void> _startMigration() async {
-    final l10n = AppLocalizations.of(context)!;
-    final migrationService = E2EMigrationService();
-
-    final needsMigration = await migrationService.isMigrationNeeded();
-    if (!needsMigration) {
-      _showSnackBar(l10n.alreadyEncrypted, Colors.green);
-      return;
-    }
-
-    setState(() {
-      _isMigrating = true;
-      _migrationProgress = 0.0;
-      _migrationMessage = l10n.startingMigration;
-    });
-
-    migrationService.onProgress = (message, progress) {
-      if (mounted) {
-        setState(() {
-          _migrationMessage = message;
-          _migrationProgress = progress;
-        });
-      }
-    };
-
-    try {
-      await migrationService.migrateLegacyFiles();
-      if (mounted) {
-        setState(() {
-          _isMigrating = false;
-          _migrationMessage = l10n.migrationComplete;
-          _migrationProgress = 1.0;
-        });
-        _showSnackBar(l10n.allEncrypted, Colors.green);
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isMigrating = false;
-          _migrationMessage = l10n.migrationFailed;
-        });
-        _showSnackBar(l10n.migrationFailedDetail('$e'), Colors.red);
       }
     }
   }
@@ -189,8 +139,6 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
               _buildBiometricTile(isDark),
               SettingsDivider(isDark: isDark),
               _buildSecurityQuestionsTile(isDark),
-              SettingsDivider(isDark: isDark),
-              _buildMigrationTile(isDark),
             ],
           ],
         ],
@@ -271,100 +219,6 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
         color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
       ),
       onTap: () => _showSecurityQuestionsDialog(isDark),
-    );
-  }
-
-  Widget _buildMigrationTile(bool isDark) {
-    final l10n = AppLocalizations.of(context)!;
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: AppColors.blue.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.cloud_upload_outlined,
-                  color: AppColors.blue,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.encryptExistingFiles,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: isDark
-                            ? AppColors.textPrimaryDark
-                            : AppColors.textPrimaryLight,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _migrationMessage.isNotEmpty
-                          ? _migrationMessage
-                          : l10n.backupFilesToCloud,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isDark
-                            ? Colors.grey.shade400
-                            : Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (_isMigrating)
-                SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    value: _migrationProgress > 0 ? _migrationProgress : null,
-                    strokeWidth: 2,
-                    color: AppColors.blue,
-                  ),
-                )
-              else
-                TextButton(
-                  onPressed: _startMigration,
-                  child: Text(l10n.start),
-                ),
-            ],
-          ),
-          if (_isMigrating && _migrationProgress > 0) ...[
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: _migrationProgress,
-                backgroundColor: AppColors.blue.withValues(alpha: 0.2),
-                color: AppColors.blue,
-                minHeight: 6,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${(_migrationProgress * 100).toStringAsFixed(0)}%',
-              style: TextStyle(
-                fontSize: 12,
-                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-              ),
-            ),
-          ],
-        ],
-      ),
     );
   }
 

@@ -773,7 +773,7 @@
     "deleteAccountAttendance": "Devamsızlık ve not kayıtları",
     "deleteAccountSessions": "Çalışma oturumları",
     "deleteAccountMoodle": "Moodle hesap bağlantıları",
-    "deleteAccountFirebase": "Firebase hesabı",
+    "deleteAccountCloud": "Bulut hesabı",
     "deleteAccountRetention": "Verileriniz 30 gün içinde kalıcı olarak silinecektir.",
     "deleteAccountConfirm": "Hesabımı silmek istediğimi onaylıyorum.",
     "deleteAccountCancel": "İptal",

@@ -794,7 +794,7 @@
     "deleteAccountAttendance": "Attendance and grade records",
     "deleteAccountSessions": "Study sessions",
     "deleteAccountMoodle": "Moodle account connections",
-    "deleteAccountFirebase": "Firebase account",
+    "deleteAccountCloud": "Cloud account",
     "deleteAccountRetention": "Your data will be permanently deleted within 30 days.",
     "deleteAccountConfirm": "I confirm that I want to delete my account.",
     "deleteAccountCancel": "Cancel",

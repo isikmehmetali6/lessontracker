@@ -1,15 +1,12 @@
-import 'dart:ui' show PlatformDispatcher;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
+import 'core/backend/supabase_backend.dart';
 import 'core/theme/app_theme.dart';
 import 'providers/theme_provider.dart';
 import 'providers/course_provider.dart';
@@ -32,7 +29,6 @@ import 'screens/home/home_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'screens/onboarding/kvkk_flow.dart';
-import 'firebase_options.dart';
 
 @pragma('vm:entry-point')
 void callbackDispatcher() {
@@ -83,31 +79,12 @@ Future<void> main() async {
     Workmanager().initialize(callbackDispatcher);
   }
 
-  // Initialize Firebase — must succeed before sync/auth services
-  bool firebaseReady = false;
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    firebaseReady = true;
-  } catch (e) {
-    debugPrint('Firebase Init Warning: $e');
-  }
+  // Initialize Supabase — must succeed before sync/auth services
+  final backendReady = await SupabaseBackend.initialize();
 
-  // Firebase initialized — start connectivity listener for auto-sync retry
-  if (firebaseReady) {
+  // Backend ready — start connectivity listener for auto-sync retry
+  if (backendReady) {
     AutoSyncService().init();
-
-    // Crashlytics: Flutter framework hatalarını ve async error'ları yakala.
-    // Sadece release modda aktif (debug'da noisy olur).
-    if (!kDebugMode) {
-      FlutterError.onError =
-          FirebaseCrashlytics.instance.recordFlutterFatalError;
-      PlatformDispatcher.instance.onError = (error, stack) {
-        FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-        return true;
-      };
-    }
   }
 
   if (!kIsWeb) {

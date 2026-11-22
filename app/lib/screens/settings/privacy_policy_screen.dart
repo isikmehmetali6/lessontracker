@@ -80,7 +80,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
               content: '''Verileriniz aşağıdaki şekillerde saklanır:
 
 • Yerel Depolama (SQLite): Cihazınızda yerel olarak saklanan veriler
-• Firebase Firestore: Bulut yedeklemesi için şifrelenmiş olarak saklanan veriler
+• Supabase: Bulut yedeklemesi için şifrelenmiş olarak saklanan veriler
 • Google ML Kit: OCR işlemleri için geçici olarak işlenen görüntüler
 
 Verileriniz şifrelenmiş olarak saklanır ve yalnızca sizin erişiminizle kullanılabilir.''',
@@ -105,7 +105,7 @@ Verileriniz şifrelenmiş olarak saklanır ve yalnızca sizin erişiminizle kull
               content:
                   '''Uygulamamızda aşağıdaki üçüncü taraf servisleri kullanılmaktadır:
 
-• Firebase: Kimlik doğrulama ve bulut veri depolama
+• Supabase: Kimlik doğrulama ve bulut veri depolama
 • Google ML Kit: OCR (Optik Karakter Tanıma) işlemleri
 • Google Sign-In: Kullanıcı girişi
 
@@ -135,7 +135,7 @@ Bu haklarınızı kullanmak için uygulama içi "Hesabımı Sil" seçeneğini ku
                   '''Verilerinizi korumak için aşağıdaki önlemleri alıyoruz:
 
 • AES-256 şifreleme ile veri güvenliği
-• Firebase Security Rules ile erişim kontrolü
+• Supabase Row Level Security (RLS) ile erişim kontrolü
 • Güvenli ağ iletişimi (HTTPS/TLS)
 • Kullanıcı PIN koruması (opsiyonel)''',
             ),

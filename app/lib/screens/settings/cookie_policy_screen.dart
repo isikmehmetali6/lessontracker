@@ -78,7 +78,7 @@ class CookiePolicyScreen extends StatelessWidget {
               content: '''Zorunlu Çerezler:
 Bu çerezler uygulamanın düzgün çalışması için gereklidir ve kapatılamazlar.
 
-• firebase-auth-session: Firebase ile oturum yönetimi için
+• supabase-auth-session: Supabase ile oturum yönetimi için
 • encrypted-key: Şifreleme anahtarı güvenli saklama için
 • kvkk_consent_timestamp: KVKK onay durumu için
 
@@ -99,10 +99,9 @@ Bu çerezler tercihlerinizi saklamak için kullanılır ve kapatılabilirler.
               content:
                   '''Uygulamamızda aşağıdaki üçüncü taraf servisleri kullanılmaktadır ve bu servisler kendi çerezlerini kullanabilir:
 
-Firebase (Google LLC):
+Supabase (Supabase Inc.):
 • Kimlik doğrulama
 • Bulut veri depolama
-• Cloud Messaging
 
 Google ML Kit:
 • OCR (Optik Karakter Tanıma) işlemleri

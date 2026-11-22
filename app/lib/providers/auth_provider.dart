@@ -1,25 +1,23 @@
 import 'dart:async';
-import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../core/backend/supabase_backend.dart';
 import '../core/database/database_helper.dart';
+import '../models/app_user.dart';
 import '../services/secure_storage_service.dart';
 import '../services/e2e_key_service.dart';
-import '../services/e2e_migration_service.dart';
 
 class AuthProvider extends ChangeNotifier {
-  FirebaseAuth? _auth;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  StreamSubscription<User?>? _authSubscription;
+  GoTrueClient? _auth;
+  StreamSubscription<AuthState>? _authSubscription;
 
-  User? _user;
+  AppUser? _user;
   bool _isGuest = false;
   bool _isLoading = false;
   String? _error;
 
-  User? get user => _user;
+  AppUser? get user => _user;
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isAuthenticated => _user != null || _isGuest;
@@ -33,19 +31,38 @@ class AuthProvider extends ChangeNotifier {
   static const String _keyIsGuest = 'auth_is_guest';
 
   void _initializeAuth() {
-    try {
-      _auth = FirebaseAuth.instance;
+    final client = SupabaseBackend.client;
+    if (client == null) {
+      debugPrint('AuthProvider Warning: Supabase Auth not available');
+      return;
+    }
+    _auth = client.auth;
+    _setUser(_auth!.currentUser);
 
-      _authSubscription = _auth?.authStateChanges().listen((User? user) {
-        _user = user;
-        if (_user != null) _isGuest = false;
-        notifyListeners();
-      });
+    _authSubscription = _auth!.onAuthStateChange.listen((data) {
+      _setUser(data.session?.user);
+      notifyListeners();
+    });
+  }
+
+  void _setUser(User? user) {
+    _user = user == null ? null : AppUser.fromSupabase(user);
+    if (_user != null) _isGuest = false;
+  }
+
+  /// Supabase oturumu varsa profil tablosunu günceller (hata yutulur).
+  Future<void> _updateProfile(Map<String, dynamic> values) async {
+    final uid = _auth?.currentUser?.id;
+    final client = SupabaseBackend.client;
+    if (uid == null || client == null) return;
+    try {
+      await client.from('profiles').update(values).eq('id', uid);
     } catch (e) {
-      debugPrint('AuthProvider Warning: Firebase Auth not available: $e');
-      _auth = null;
+      debugPrint('Error updating profile row: $e');
     }
   }
+
+  String _nowIso() => DateTime.now().toUtc().toIso8601String();
 
   bool _guestRestored = false;
 
@@ -97,12 +114,12 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _auth!.sendPasswordResetEmail(email: email.trim());
+      await _auth!.resetPasswordForEmail(email.trim());
       _isLoading = false;
       notifyListeners();
       return true;
-    } on FirebaseAuthException catch (e) {
-      _error = _mapFirebaseError(e.code);
+    } on AuthException catch (e) {
+      _error = _mapAuthError(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -126,12 +143,16 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _user!.sendEmailVerification();
+      final email = _user!.email;
+      if (_auth == null || email == null) {
+        throw Exception('Authentication service unavailable.');
+      }
+      await _auth!.resend(type: OtpType.signup, email: email);
       _isLoading = false;
       notifyListeners();
       return true;
-    } on FirebaseAuthException catch (e) {
-      _error = _mapFirebaseError(e.code);
+    } on AuthException catch (e) {
+      _error = _mapAuthError(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -147,8 +168,8 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> refreshUser() async {
     if (_user == null) return false;
     try {
-      await _user!.reload();
-      _user = _auth?.currentUser;
+      final response = await _auth?.getUser();
+      _setUser(response?.user ?? _auth?.currentUser);
       notifyListeners();
       return _user?.emailVerified ?? false;
     } catch (e) {
@@ -168,49 +189,21 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _auth!.signInWithEmailAndPassword(email: email, password: password);
+      final response = await _auth!.signInWithPassword(
+        email: email,
+        password: password,
+      );
+      _setUser(response.user);
 
-      // Update last login
-      if (_auth!.currentUser != null) {
-        try {
-          await _firestore
-              .collection('users')
-              .doc(_auth!.currentUser!.uid)
-              .update({'lastLogin': FieldValue.serverTimestamp()});
-        } catch (e) {
-          debugPrint('Error updating lastLogin: $e');
-        }
+      if (_user != null) {
+        // Update last login
+        await _updateProfile({'last_login': _nowIso()});
 
         // Load E2E key from cloud if not available locally
-        try {
-          final keyService = E2EKeyService();
-          final hasLocalKey = await keyService.hasLocalKey();
-          if (!hasLocalKey) {
-            debugPrint('No local E2E key found, loading from cloud...');
-            final keyLoaded = await keyService.loadKeyFromCloud(password);
-            if (keyLoaded) {
-              debugPrint('E2E key loaded from cloud successfully');
-              try {
-                await E2EMigrationService().migrateLegacyFiles();
-              } catch (e) {
-                debugPrint('E2E migration error: $e');
-              }
-            } else {
-              debugPrint(
-                'Failed to load E2E key from cloud - may be first login',
-              );
-            }
-          } else {
-            debugPrint('Local E2E key found');
-          }
-        } catch (e) {
-          debugPrint('E2E key loading error: $e');
-        }
+        await _ensureE2EKey(password);
       }
 
       // Check email verification
-      await _user!.reload();
-      _user = _auth?.currentUser;
       if (_user != null && !_user!.emailVerified) {
         _error =
             'Please verify your email before logging in. Check your inbox for the verification link.';
@@ -222,27 +215,9 @@ class AuthProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return true;
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'keychain-error' && !kIsWeb && Platform.isMacOS) {
-        debugPrint(
-          'Caught Keychain Error on MacOS. Checking if user is actually logged in...',
-        );
-        // Sometimes the auth succeeds in memory but fails to write to keychain.
-        if (_auth?.currentUser != null) {
-          debugPrint(
-            'User IS logged in specifically. Ignoring keychain error.',
-          );
-          _isLoading = false;
-          _user = _auth?.currentUser;
-          notifyListeners();
-          return true;
-        }
-        _error =
-            'MacOS Debug Keychain Error. Application is unsigned. Please use Guest Login or ignore this if you are developing.';
-      } else {
-        _error = _mapFirebaseError(e.code);
-      }
-      debugPrint('SignIn FirebaseAuth Error: ${e.code} - ${e.message}');
+    } on AuthException catch (e) {
+      debugPrint('SignIn Auth Error: ${e.code} - ${e.message}');
+      _error = _mapAuthError(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -252,6 +227,33 @@ class AuthProvider extends ChangeNotifier {
       _error = e.toString();
       notifyListeners();
       return false;
+    }
+  }
+
+  /// Yerelde E2E anahtarı yoksa buluttan çözer; bulutta da yoksa (e-posta
+  /// onayı açıkken kayıt sırasında oturum oluşmadığı için ilk girişte) yeni
+  /// anahtar üretir.
+  Future<void> _ensureE2EKey(String password) async {
+    try {
+      final keyService = E2EKeyService();
+      if (await keyService.hasLocalKey()) {
+        debugPrint('Local E2E key found');
+        return;
+      }
+      if (await keyService.hasCloudKey()) {
+        debugPrint('No local E2E key found, loading from cloud...');
+        final keyLoaded = await keyService.loadKeyFromCloud(password);
+        debugPrint(
+          keyLoaded
+              ? 'E2E key loaded from cloud successfully'
+              : 'Failed to decrypt E2E key from cloud',
+        );
+      } else {
+        await keyService.initializeUserKey(password);
+        debugPrint('E2E key initialized on first login');
+      }
+    } catch (e) {
+      debugPrint('E2E key loading error: $e');
     }
   }
 
@@ -266,64 +268,33 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final credential = await _auth!.createUserWithEmailAndPassword(
+      // `name` metadata'sı `handle_new_user` trigger'ı ile profiles
+      // tablosuna da yazılır. E-posta onayı açıksa Supabase doğrulama
+      // e-postasını kendisi gönderir.
+      final response = await _auth!.signUp(
         email: email,
         password: password,
+        data: {'name': name},
       );
 
-      if (credential.user != null) {
-        // Send email verification
+      // E-posta onayı kapalıysa oturum hemen açılır; açıksa anahtar ilk
+      // girişte _ensureE2EKey ile üretilir.
+      if (response.session != null) {
         try {
-          await credential.user!.sendEmailVerification();
+          await E2EKeyService().initializeUserKey(password);
+          debugPrint('E2E key initialized for new user');
         } catch (e) {
-          debugPrint('Error sending verification email: $e');
-        }
-
-        // Update Display Name
-        try {
-          await credential.user!.updateDisplayName(name);
-
-          // Create User Document
-          await _firestore.collection('users').doc(credential.user!.uid).set({
-            'name': name,
-            'email': email,
-            'createdAt': FieldValue.serverTimestamp(),
-            'lastLogin': FieldValue.serverTimestamp(),
-            'emailVerified': false,
-          });
-
-          // Initialize E2E encryption key
-          try {
-            await E2EKeyService().initializeUserKey(password);
-            debugPrint('E2E key initialized for new user');
-          } catch (e) {
-            debugPrint('E2E key initialization error: $e');
-          }
-        } catch (e) {
-          debugPrint('Firestore/Profile Update Error: $e');
-          // Proceed even if profile save fails, as Auth is successful
+          debugPrint('E2E key initialization error: $e');
         }
       }
 
       _isLoading = false;
       notifyListeners();
       return true;
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'keychain-error' && !kIsWeb && Platform.isMacOS) {
-        debugPrint(
-          'Caught Keychain Error during SignUp on MacOS. Checking if user is actually logged in...',
-        );
-        if (_auth?.currentUser != null) {
-          debugPrint('User IS logged in (SignUp). Ignoring keychain error.');
-          _isLoading = false;
-          _user = _auth?.currentUser;
-          notifyListeners();
-          return true;
-        }
-      }
-      debugPrint('FirebaseAuth Error: ${e.code} - ${e.message}');
+    } on AuthException catch (e) {
+      debugPrint('SignUp Auth Error: ${e.code} - ${e.message}');
       _isLoading = false;
-      _error = _mapFirebaseError(e.code);
+      _error = _mapAuthError(e);
       notifyListeners();
       return false;
     } catch (e) {
@@ -376,8 +347,12 @@ class AuthProvider extends ChangeNotifier {
       debugPrint('Error clearing guest flag: $e');
     }
 
-    // 4. Firebase çıkışı
-    await _auth?.signOut();
+    // 4. Supabase çıkışı
+    try {
+      await _auth?.signOut();
+    } catch (e) {
+      debugPrint('Error signing out: $e');
+    }
 
     // 5. E2E key cache temizle — RAM'deki şifre anahtarını sıfırla
     E2EKeyService().clearCache();
@@ -395,18 +370,14 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Update Firebase Auth Profile
-      await _user!.updateDisplayName(name);
+      // Update auth metadata (displayName kaynağı)
+      final response = await _auth!.updateUser(
+        UserAttributes(data: {'name': name}),
+      );
+      _setUser(response.user);
 
-      // Update Firestore Document
-      await _firestore.collection('users').doc(_user!.uid).update({
-        'name': name,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      // Reload user to get fresh data
-      await _user!.reload();
-      _user = _auth?.currentUser;
+      // Update profile row
+      await _updateProfile({'name': name, 'updated_at': _nowIso()});
 
       _isLoading = false;
       notifyListeners();
@@ -427,11 +398,12 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _user!.verifyBeforeUpdateEmail(newEmail);
-      // Firestore email will be updated when user confirms via authStateChanges
-
-      await _user!.reload();
-      _user = _auth?.currentUser;
+      // Supabase yeni adrese onay bağlantısı gönderir; e-posta onaydan
+      // sonra değişir.
+      final response = await _auth!.updateUser(
+        UserAttributes(email: newEmail),
+      );
+      _setUser(response.user);
 
       _isLoading = false;
       notifyListeners();
@@ -455,22 +427,21 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Re-authenticate first
-      final credential = EmailAuthProvider.credential(
+      // Re-authenticate first (mevcut şifre doğrulaması)
+      await _auth!.signInWithPassword(
         email: _user!.email!,
         password: currentPassword,
       );
-      await _user!.reauthenticateWithCredential(credential);
 
       // Update password
-      await _user!.updatePassword(newPassword);
+      await _auth!.updateUser(UserAttributes(password: newPassword));
 
       _isLoading = false;
       notifyListeners();
       return true;
-    } on FirebaseAuthException catch (e) {
+    } on AuthException catch (e) {
       debugPrint('Error updating password: ${e.code}');
-      _error = _mapFirebaseError(e.code);
+      _error = _mapAuthError(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -495,15 +466,27 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Hesabı sil (KVKK Madde 7 - Silme Hakkı)
-  /// Not: Firebase verisi için SyncService.deleteAllUserData() ayrıca çağrılmalı
+  /// Not: Bulut verisi için SyncService.deleteAllUserData() ayrıca çağrılmalı
   Future<void> deleteAccount() async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      // 1. Firebase Auth hesabını sil
-      await _auth?.currentUser?.delete();
+      // 1. Auth hesabını sil (SyncService.deleteAllUserData zaten sildiyse
+      //    tekrar denemek zararsızdır) ve yerel oturumu kapat
+      if (_auth?.currentUser != null) {
+        try {
+          await SupabaseBackend.deleteCurrentUser();
+        } catch (e) {
+          debugPrint('Error deleting auth user: $e');
+        }
+        try {
+          await _auth!.signOut(scope: SignOutScope.local);
+        } catch (e) {
+          debugPrint('Error clearing local session: $e');
+        }
+      }
 
       // 2. Local database'i temizle
       await DatabaseHelper().clearAllData();
@@ -532,24 +515,30 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  String _mapFirebaseError(String code) {
-    switch (code) {
-      case 'user-not-found':
+  String _mapAuthError(AuthException e) {
+    if (e is AuthRetryableFetchException) {
+      return 'Network error. Please check your internet connection.';
+    }
+    switch (e.code) {
+      case 'invalid_credentials':
+        return 'Incorrect email or password.';
+      case 'user_not_found':
         return 'No user found with this email.';
-      case 'wrong-password':
-        return 'Incorrect password.';
-      case 'email-already-in-use':
+      case 'email_not_confirmed':
+        return 'Please verify your email before logging in. Check your inbox for the verification link.';
+      case 'user_already_exists':
+      case 'email_exists':
         return 'Email is already registered.';
-      case 'invalid-email':
+      case 'email_address_invalid':
+      case 'validation_failed':
         return 'Invalid email address.';
-      case 'weak-password':
+      case 'weak_password':
         return 'Password is too weak. Use at least 6 characters.';
-      case 'too-many-requests':
+      case 'over_request_rate_limit':
+      case 'over_email_send_rate_limit':
         return 'Too many attempts. Please try again later.';
-      case 'network-request-failed':
-        return 'Network error. Please check your internet connection.';
       default:
-        return 'Authentication failed. Please try again. (Error: $code)';
+        return 'Authentication failed. Please try again. (Error: ${e.code ?? e.message})';
     }
   }
 }

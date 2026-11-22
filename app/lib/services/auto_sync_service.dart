@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:async';
 import 'sync_service.dart';
+import '../../core/backend/supabase_backend.dart';
 import '../../core/database/database_helper.dart';
 
 class AutoSyncService {
@@ -45,7 +45,7 @@ class AutoSyncService {
     try {
       _isSyncing = true;
 
-      if (FirebaseAuth.instance.currentUser == null) return;
+      if (SupabaseBackend.currentUser == null) return;
 
       final connectivityResult = await Connectivity().checkConnectivity();
       final hasConnection = connectivityResult.any(

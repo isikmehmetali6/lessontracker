@@ -1,9 +1,9 @@
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart' as path;
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
+import '../core/backend/supabase_backend.dart';
+import 'cloud_records_service.dart';
 import 'e2e_crypto_service.dart';
 import 'e2e_key_service.dart';
 import 'package:flutter/foundation.dart';
@@ -11,14 +11,25 @@ import 'package:flutter/foundation.dart';
 class E2EFileService {
   final E2ECryptoService _cryptoService = E2ECryptoService();
   final E2EKeyService _keyService = E2EKeyService();
-  final FirebaseStorage _storage = FirebaseStorage.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final CloudRecordsService _cloud = CloudRecordsService();
   final Uuid _uuid = const Uuid();
+
+  /// Yüklenen şifreli dosyaların meta kayıtları (sync yedeklerindeki
+  /// `files` koleksiyonuyla karışmasın diye ayrı tutulur).
+  static const String _uploadsCollection = 'uploads';
+
+  /// Storage klasör adları — `deleteAllUserFiles` bunları dolaşır.
+  static const List<String> fileTypes = ['photos', 'audio', 'documents'];
 
   static final E2EFileService _instance = E2EFileService._internal();
   factory E2EFileService() => _instance;
   E2EFileService._internal();
+
+  StorageFileApi get _bucket {
+    final client = SupabaseBackend.client;
+    if (client == null) throw Exception('Supabase is not configured');
+    return client.storage.from(SupabaseBackend.filesBucket);
+  }
 
   Future<String> uploadPhoto(File localFile) async {
     return uploadFile(localFile, 'photos');
@@ -33,7 +44,7 @@ class E2EFileService {
   }
 
   Future<String> uploadFile(File localFile, String type) async {
-    final user = _auth.currentUser;
+    final user = SupabaseBackend.currentUser;
     if (user == null) {
       throw Exception('No authenticated user');
     }
@@ -53,29 +64,26 @@ class E2EFileService {
 
     final fileId = _uuid.v4();
     final extension = path.extension(localFile.path);
-    final cloudPath = 'users/${user.uid}/$type/$fileId$extension.enc';
+    // İlk klasör kullanıcı id'si olmalı — Storage RLS politikası buna bakar.
+    final cloudPath = '${user.id}/$type/$fileId$extension.enc';
 
-    final ref = _storage.ref().child(cloudPath);
-    final metadata = SettableMetadata(
-      contentType: 'application/octet-stream',
-      customMetadata: {'encrypted': 'true', 'type': type},
+    await _bucket.uploadBinary(
+      cloudPath,
+      encryptedData,
+      fileOptions: const FileOptions(
+        contentType: 'application/octet-stream',
+        upsert: true,
+      ),
     );
 
-    await ref.putData(encryptedData, metadata);
-
-    await _firestore
-        .collection('users')
-        .doc(user.uid)
-        .collection('files')
-        .doc(fileId)
-        .set({
-          'cloudPath': cloudPath,
-          'type': type,
-          'originalName': path.basename(localFile.path),
-          'size': fileBytes.length,
-          'encryptedSize': encryptedData.length,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
+    await _cloud.upsert(_uploadsCollection, fileId, {
+      'cloudPath': cloudPath,
+      'type': type,
+      'originalName': path.basename(localFile.path),
+      'size': fileBytes.length,
+      'encryptedSize': encryptedData.length,
+      'createdAt': DateTime.now().toUtc().toIso8601String(),
+    });
 
     return cloudPath;
   }
@@ -98,11 +106,7 @@ class E2EFileService {
       throw Exception('E2E key not found');
     }
 
-    final ref = _storage.ref().child(cloudPath);
-    final bytes = await ref.getData();
-    if (bytes == null) {
-      throw Exception('File not found at $cloudPath');
-    }
+    final bytes = await _bucket.download(cloudPath);
     if (bytes.length > 50 * 1024 * 1024) {
       debugPrint(
         'E2EFileService: Warning - Large file (${bytes.length}) may cause memory issues. Consider chunked download.',
@@ -112,62 +116,48 @@ class E2EFileService {
   }
 
   Future<void> deleteFile(String cloudPath) async {
-    final user = _auth.currentUser;
-    if (user == null) {
+    if (SupabaseBackend.currentUser == null) {
       throw Exception('No authenticated user');
     }
 
     try {
-      final ref = _storage.ref().child(cloudPath);
-      await ref.delete();
+      await _bucket.remove([cloudPath]);
 
-      final fileId = path.basename(cloudPath).replaceAll('.enc', '');
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('files')
-          .doc(fileId)
-          .delete();
+      // `{uid}/{type}/{fileId}{ext}.enc` → fileId
+      final fileId = path.basenameWithoutExtension(
+        path.withoutExtension(cloudPath),
+      );
+      await _cloud.delete(_uploadsCollection, fileId);
     } catch (e) {
       debugPrint('E2EFileService: Error deleting file - $e');
     }
   }
 
-  Future<String?> getDownloadUrl(String cloudPath) async {
-    try {
-      final ref = _storage.ref().child(cloudPath);
-      return await ref.getDownloadURL();
-    } catch (e) {
-      debugPrint('E2EFileService: Error getting download URL - $e');
-      return null;
-    }
-  }
+  /// Kullanıcının Storage'daki tüm dosyalarını siler (hesap silme).
+  Future<void> deleteAllUserFiles() async {
+    final user = SupabaseBackend.currentUser;
+    if (user == null) return;
 
-  Future<int> getFileSize(String cloudPath) async {
-    try {
-      final ref = _storage.ref().child(cloudPath);
-      final metadata = await ref.getMetadata();
-      return metadata.size ?? 0;
-    } catch (e) {
-      debugPrint('E2EFileService: Error getting file size - $e');
-      return 0;
+    for (final type in fileTypes) {
+      final folder = '${user.id}/$type';
+      while (true) {
+        final objects = await _bucket.list(
+          path: folder,
+          searchOptions: const SearchOptions(limit: 1000),
+        );
+        if (objects.isEmpty) break;
+        await _bucket.remove(objects.map((o) => '$folder/${o.name}').toList());
+        if (objects.length < 1000) break;
+      }
     }
   }
 
   Future<List<String>> listUserFiles() async {
-    final user = _auth.currentUser;
-    if (user == null) return [];
+    if (SupabaseBackend.currentUser == null) return [];
 
     try {
-      final snapshot = await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('files')
-          .get();
-
-      return snapshot.docs
-          .map((doc) => doc.data()['cloudPath'] as String)
-          .toList();
+      final records = await _cloud.getAll(_uploadsCollection);
+      return records.map((r) => r.data['cloudPath'] as String).toList();
     } catch (e) {
       debugPrint('E2EFileService: Error listing files - $e');
       return [];

@@ -1,157 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../../core/backend/supabase_backend.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
-
-class SecurityQuestionService {
-  static const String _collectionPath = 'users';
-
-  static const List<String> availableQuestions = [
-    'What is your pet\'s name?',
-    'What was your first teacher\'s name?',
-    'What city were you born in?',
-    'What is your favorite movie?',
-    'What was your first phone number?',
-    'What is your mother\'s maiden name?',
-    'What was the name of your first school?',
-    'What is your favorite book?',
-  ];
-
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  static final SecurityQuestionService _instance =
-      SecurityQuestionService._internal();
-  factory SecurityQuestionService() => _instance;
-  SecurityQuestionService._internal();
-
-  Future<bool> hasSecurityQuestions() async {
-    final user = _auth.currentUser;
-    if (user == null) return false;
-
-    try {
-      final doc = await _firestore
-          .collection(_collectionPath)
-          .doc(user.uid)
-          .collection('system')
-          .doc('security_questions')
-          .get();
-      return doc.exists && doc.data() != null;
-    } catch (e) {
-      debugPrint('SecurityQuestionService: Error checking questions - $e');
-      return false;
-    }
-  }
-
-  Future<void> setupSecurityQuestions(
-    List<int> questionIndices,
-    List<String> answers,
-  ) async {
-    final user = _auth.currentUser;
-    if (user == null) throw Exception('No authenticated user');
-
-    if (questionIndices.length != 3 || answers.length != 3) {
-      throw Exception('Must provide exactly 3 questions and answers');
-    }
-
-    final hashedAnswers = answers.map((a) => _hashAnswer(a)).toList();
-
-    await _firestore
-        .collection(_collectionPath)
-        .doc(user.uid)
-        .collection('system')
-        .doc('security_questions')
-        .set({
-          'questions': questionIndices,
-          'answers': hashedAnswers,
-          'createdAt': FieldValue.serverTimestamp(),
-          'attempts': 0,
-        });
-  }
-
-  Future<bool> verifySecurityQuestions(List<String> answers) async {
-    final user = _auth.currentUser;
-    if (user == null) return false;
-
-    try {
-      final doc = await _firestore
-          .collection(_collectionPath)
-          .doc(user.uid)
-          .collection('system')
-          .doc('security_questions')
-          .get();
-
-      if (!doc.exists || doc.data() == null) return false;
-
-      final data = doc.data()!;
-      final storedAnswers = List<String>.from(data['answers'] ?? []);
-      final hashedInput = answers.map((a) => _hashAnswer(a)).toList();
-
-      bool allCorrect = true;
-      for (int i = 0; i < storedAnswers.length && i < hashedInput.length; i++) {
-        if (storedAnswers[i] != hashedInput[i]) {
-          allCorrect = false;
-          break;
-        }
-      }
-
-      if (!allCorrect) {
-        await _firestore
-            .collection(_collectionPath)
-            .doc(user.uid)
-            .collection('system')
-            .doc('security_questions')
-            .update({'attempts': FieldValue.increment(1)});
-      }
-
-      return allCorrect;
-    } catch (e) {
-      debugPrint('SecurityQuestionService: Error verifying - $e');
-      return false;
-    }
-  }
-
-  Future<void> deleteSecurityQuestions() async {
-    final user = _auth.currentUser;
-    if (user == null) return;
-
-    try {
-      await _firestore
-          .collection(_collectionPath)
-          .doc(user.uid)
-          .collection('system')
-          .doc('security_questions')
-          .delete();
-    } catch (e) {
-      debugPrint('SecurityQuestionService: Error deleting - $e');
-    }
-  }
-
-  Future<int> getAttempts() async {
-    final user = _auth.currentUser;
-    if (user == null) return 0;
-
-    try {
-      final doc = await _firestore
-          .collection(_collectionPath)
-          .doc(user.uid)
-          .collection('system')
-          .doc('security_questions')
-          .get();
-      return doc.data()?['attempts'] ?? 0;
-    } catch (e) {
-      return 0;
-    }
-  }
-
-  String _hashAnswer(String answer) {
-    final normalized = answer.trim().toLowerCase();
-    final bytes = utf8.encode(normalized);
-    return base64Encode(bytes);
-  }
-}
 
 class PasswordRecoveryScreen extends StatefulWidget {
   const PasswordRecoveryScreen({super.key});
@@ -607,7 +457,7 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
     });
 
     try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      await _sendPasswordResetEmail(email);
       setState(() {
         _step = 2;
       });
@@ -668,7 +518,7 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
 
     try {
       final email = _emailController.text.trim();
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      await _sendPasswordResetEmail(email);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -689,5 +539,11 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
     } finally {
       setState(() => _isLoading = false);
     }
+  }
+
+  Future<void> _sendPasswordResetEmail(String email) async {
+    final client = SupabaseBackend.client;
+    if (client == null) throw Exception('Supabase is not configured');
+    await client.auth.resetPasswordForEmail(email);
   }
 }

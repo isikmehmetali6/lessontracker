@@ -794,7 +794,7 @@
     "deleteAccountAttendance": "Registros de asistencia y calificaciones",
     "deleteAccountSessions": "Sesiones de estudio",
     "deleteAccountMoodle": "Conexiones de cuentas de Moodle",
-    "deleteAccountFirebase": "Cuenta de Firebase",
+    "deleteAccountCloud": "Cuenta en la nube",
     "deleteAccountRetention": "Tus datos se eliminarán permanentemente en un plazo de 30 días.",
     "deleteAccountConfirm": "Confirmo que quiero eliminar mi cuenta.",
     "deleteAccountCancel": "Cancelar",

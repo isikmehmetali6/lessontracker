@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../core/backend/supabase_backend.dart';
+import 'cloud_records_service.dart';
 import 'e2e_crypto_service.dart';
 
 class E2EKeyService {
@@ -13,8 +13,10 @@ class E2EKeyService {
 
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   final E2ECryptoService _cryptoService = E2ECryptoService();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final CloudRecordsService _cloud = CloudRecordsService();
+
+  static const String _systemCollection = 'system';
+  static const String _keyDocId = 'e2e_key';
 
   static final E2EKeyService _instance = E2EKeyService._internal();
   factory E2EKeyService() => _instance;
@@ -43,8 +45,14 @@ class E2EKeyService {
     );
   }
 
+  /// Bulutta bu kullanıcı için sarmalanmış bir anahtar var mı?
+  Future<bool> hasCloudKey() async {
+    if (SupabaseBackend.currentUser == null) return false;
+    return await _cloud.get(_systemCollection, _keyDocId) != null;
+  }
+
   Future<void> initializeUserKey(String password) async {
-    final user = _auth.currentUser;
+    final user = SupabaseBackend.currentUser;
     if (user == null) {
       throw Exception('No authenticated user');
     }
@@ -60,42 +68,31 @@ class E2EKeyService {
     );
     await _secureStorage.write(key: _keyE2EUserSalt, value: base64Encode(salt));
 
-    await _firestore
-        .collection('users')
-        .doc(user.uid)
-        .collection('system')
-        .doc('e2e_key')
-        .set({
-          'encryptedKey': base64Encode(encryptedKey),
-          'salt': base64Encode(salt),
-          'createdAt': FieldValue.serverTimestamp(),
-          'keyVersion': 1,
-        });
+    await _cloud.upsert(_systemCollection, _keyDocId, {
+      'encryptedKey': base64Encode(encryptedKey),
+      'salt': base64Encode(salt),
+      'createdAt': DateTime.now().toUtc().toIso8601String(),
+      'keyVersion': 1,
+    });
 
     await setE2EEnabled(true);
     _cachedKey = userKey;
   }
 
   Future<bool> loadKeyFromCloud(String password) async {
-    final user = _auth.currentUser;
-    if (user == null) {
+    if (SupabaseBackend.currentUser == null) {
       throw Exception('No authenticated user');
     }
 
     try {
-      final doc = await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('system')
-          .doc('e2e_key')
-          .get();
+      final record = await _cloud.get(_systemCollection, _keyDocId);
 
-      if (!doc.exists || doc.data() == null) {
+      if (record == null) {
         debugPrint('E2EKeyService: No cloud key found for user');
         return false;
       }
 
-      final data = doc.data()!;
+      final data = record.data;
       final encryptedKeyBase64 = data['encryptedKey'] as String;
       final saltBase64 = data['salt'] as String;
 
@@ -151,8 +148,7 @@ class E2EKeyService {
   }
 
   Future<void> changePassword(String oldPassword, String newPassword) async {
-    final user = _auth.currentUser;
-    if (user == null) {
+    if (SupabaseBackend.currentUser == null) {
       throw Exception('No authenticated user');
     }
 
@@ -169,21 +165,16 @@ class E2EKeyService {
     final oldSalt = base64Decode(oldSaltBase64);
     final oldDerivedKey = _cryptoService.deriveKey(oldPassword, oldSalt);
 
-    final keyDoc = await _firestore
-        .collection('users')
-        .doc(user.uid)
-        .collection('system')
-        .doc('e2e_key')
-        .get();
+    final keyDoc = await _cloud.get(_systemCollection, _keyDocId);
 
-    if (keyDoc.data() == null) {
+    if (keyDoc == null) {
       throw Exception('No cloud key found');
     }
 
     Uint8List userKey;
     try {
       userKey = _cryptoService.decryptBytes(
-        base64Decode(keyDoc.data()!['encryptedKey']),
+        base64Decode(keyDoc.data['encryptedKey'] as String),
         oldDerivedKey,
       );
     } catch (e) {
@@ -194,17 +185,14 @@ class E2EKeyService {
     final newDerivedKey = _cryptoService.deriveKey(newPassword, newSalt);
     final newEncryptedKey = _cryptoService.encryptBytes(userKey, newDerivedKey);
 
-    await _firestore
-        .collection('users')
-        .doc(user.uid)
-        .collection('system')
-        .doc('e2e_key')
-        .update({
-          'encryptedKey': base64Encode(newEncryptedKey),
-          'salt': base64Encode(newSalt),
-          'lastKeyChange': FieldValue.serverTimestamp(),
-          'keyVersion': FieldValue.increment(1),
-        });
+    final keyVersion = (keyDoc.data['keyVersion'] as num?)?.toInt() ?? 1;
+    await _cloud.upsert(_systemCollection, _keyDocId, {
+      ...keyDoc.data,
+      'encryptedKey': base64Encode(newEncryptedKey),
+      'salt': base64Encode(newSalt),
+      'lastKeyChange': DateTime.now().toUtc().toIso8601String(),
+      'keyVersion': keyVersion + 1,
+    });
 
     await _secureStorage.write(
       key: _keyE2EUserSalt,
@@ -215,15 +203,9 @@ class E2EKeyService {
   }
 
   Future<void> deleteKey() async {
-    final user = _auth.currentUser;
-    if (user != null) {
+    if (SupabaseBackend.currentUser != null) {
       try {
-        await _firestore
-            .collection('users')
-            .doc(user.uid)
-            .collection('system')
-            .doc('e2e_key')
-            .delete();
+        await _cloud.delete(_systemCollection, _keyDocId);
       } catch (e) {
         debugPrint('E2EKeyService: Error deleting cloud key - $e');
       }

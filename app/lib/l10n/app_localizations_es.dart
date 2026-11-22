@@ -2224,7 +2224,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get deleteAccountMoodle => 'Conexiones de cuentas de Moodle';
 
   @override
-  String get deleteAccountFirebase => 'Cuenta de Firebase';
+  String get deleteAccountCloud => 'Cuenta en la nube';
 
   @override
   String get deleteAccountRetention => 'Tus datos se eliminarán permanentemente en un plazo de 30 días.';

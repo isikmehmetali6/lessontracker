@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
 /// OCR Servisi - Google ML Kit ile metin tanıma
@@ -54,6 +55,17 @@ class OcrService {
         fullText: recognizedText.text,
         blocks: blocks,
         success: true,
+      );
+    } on PlatformException catch (e) {
+      // iOS simülatöründe ML Kit yerine yedek plugin çalışır
+      // (ios/Runner/MLKitSimulatorStubs.m) ve UNAVAILABLE döner.
+      return OcrResult(
+        fullText: '',
+        blocks: [],
+        success: false,
+        error: e.code == 'UNAVAILABLE'
+            ? 'OCR is not available on the iOS simulator. Use a physical device.'
+            : e.toString(),
       );
     } catch (e) {
       return OcrResult(

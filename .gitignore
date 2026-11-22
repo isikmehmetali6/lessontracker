@@ -135,3 +135,6 @@ study_tracker_main_home_screen/
 # ────────────────────────────────────────────────────────────────
 **/app.*.symbols
 **/app.*.map.json
+# Supabase CLI
+supabase/.temp/
+supabase/.branches/

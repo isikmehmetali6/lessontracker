@@ -90,7 +90,7 @@ class AydinlatmaScreen extends StatelessWidget {
 • Çalışma süresi istatistikleri
 • Bulut yedekleme ve senkronizasyon (opsiyonel)
 • OCR ile metin tanıma
-• Push bildirimleri (Firebase Cloud Messaging)''',
+• Yerel bildirimler (hatırlatıcılar)''',
                     ),
                     const SizedBox(height: 20),
                     _buildSection(
@@ -101,7 +101,7 @@ class AydinlatmaScreen extends StatelessWidget {
                       content: '''
 Kişisel verileriniz aşağıdaki üçüncü taraflara aktarılabilir:
 
-• Firebase (Google LLC, ABD)
+• Supabase (Supabase Inc.)
   → Kimlik doğrulama ve bulut veri depolama
   → Yeterli güvence mekanizması mevcut
 
@@ -128,7 +128,7 @@ Kişisel verileriniz aşağıdaki üçüncü taraflara aktarılabilir:
                       iconColor: AppColors.red,
                       content: '''
 • AES-256 şifreleme ile veri koruma
-• Firebase Security Rules ile erişim kontrolü
+• Supabase Row Level Security (RLS) ile erişim kontrolü
 • Güvenli ağ iletişimi (HTTPS/TLS)
 • Şifreleme anahtarı cihazda güvenli depoda saklanır''',
                     ),
