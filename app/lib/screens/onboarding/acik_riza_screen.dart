@@ -463,7 +463,7 @@ class _AcikRizaScreenState extends State<AcikRizaScreen> {
                           Switch(
                             value: value,
                             onChanged: onChanged,
-                            activeThumbColor: iconColor,
+                            activeTrackColor: iconColor,
                           ),
                         ],
                       ),

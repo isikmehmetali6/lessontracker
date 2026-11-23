@@ -19,8 +19,8 @@
 | U8 | "Spring Semester" sabit | Dersin alt başlığı gösterilir; yoksa yalnız hoca |
 | U9 | Haftalık programda çakışan dersler üst üste | Çakışan bloklar yan yana sütunlara bölünür |
 | U10 | Haftalık programda kelime ortadan bölünüyor | Tek satır + üç nokta |
-| U11 | "Create Course" butonu düşük kontrast | Beyaz yazı |
-| U12 | Stil tutarsızlıkları (mor buton, switch, bağlantı arka planı) | `switchTheme` temaya; şifre ekranları ana renk; bağlantılar aynı stil |
+| U11 | "Create Course" butonu düşük kontrast | Kök neden ortak `PrimaryButton` (koyu yazı) → beyaz yazı; tüm birincil butonlar düzeldi |
+| U12 | Stil tutarsızlıkları (mor buton, switch, bağlantı arka planı) | `switchTheme` temaya (yerel thumb renkleri ray rengine taşındı); şifre ekranları ana renk. Kayıt ekranındaki bağlantı arka planı test sürücüsünün hover efektiymiş — hata değil |
 | U13 | Form hataları kutunun içine sıkışıyor | Dolgu/kenarlık `InputDecoration`'a taşınır, hata alanın altında |
 | U14 | Alt menü etiketi kesiliyor, Ayarlar ortada; devamsızlık kartı 3× tekrar; son onboarding sayfasında Skip; "+ tuşuna bas" | Kısa etiket, sıra Ana/Plan/Hafta/Moodle/Ayarlar; "kalan hak" satırı kaldırılır; son sayfada Skip gizli; boş durum metni düzeltilir |
 | U15 | Web'de veri kalıcı değil | Web'de kalıcı "Demo modu — veriler kaydedilmez" bandı (tam web desteği kapsam dışı) |

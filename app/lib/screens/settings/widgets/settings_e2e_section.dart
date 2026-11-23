@@ -201,7 +201,7 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
       trailing: Switch(
         value: _isBiometricEnabled,
         onChanged: _biometricAvailable ? _toggleBiometric : null,
-        activeThumbColor: AppColors.blue,
+        activeTrackColor: AppColors.blue,
       ),
     );
   }

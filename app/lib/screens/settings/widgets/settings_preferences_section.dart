@@ -49,7 +49,6 @@ class _SettingsPreferencesSectionState
               onChanged: (value) {
                 themeProvider.toggleTheme();
               },
-              activeThumbColor: AppColors.primary,
             ),
           ),
           SettingsDivider(isDark: isDark),
@@ -123,7 +122,6 @@ class _SettingsPreferencesSectionState
                           if (mounted) setState(() {});
                         }
                       },
-                      activeThumbColor: AppColors.primary,
                     ),
                   );
                 },
@@ -168,7 +166,6 @@ class _SettingsPreferencesSectionState
                     if (mounted) setState(() {});
                     HapticFeedback.mediumImpact();
                   },
-                  activeThumbColor: AppColors.primary,
                 ),
               );
             },
