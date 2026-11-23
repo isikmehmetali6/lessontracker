@@ -34,11 +34,16 @@ class PriorityCourseCard extends StatelessWidget {
       secondaryTextColor = Colors.white70;
     }
 
-    final semanticLabel = course.hasUpcomingExam
-        ? '${course.name}, exam upcoming, ${course.progress.round()}% complete'
-        : course.isBehind
-            ? '${course.name}, behind schedule, ${course.progress.round()}% complete'
-            : '${course.name}, ${course.progress.round()}% complete';
+    final semanticLabel = [
+      course.name,
+      if (course.hasUpcomingExam)
+        l10n.badgeExam
+      else if (course.isBehind)
+        l10n.badgeBehind
+      else if (course.isAbsenceAtRisk)
+        l10n.badgeAbsence,
+      l10n.percentComplete(course.progress.round()),
+    ].join(', ');
 
     return Semantics(
       button: onTap != null,

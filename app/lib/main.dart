@@ -217,15 +217,34 @@ class _AuthWrapperState extends State<AuthWrapper> {
         () async => context.read<MoodleProvider>().clearAll(),
       );
 
+      // Oturum içinde giriş yapıldığında (misafir veya hesap) da KVKK
+      // kontrolü çalışsın. Önceki "context.watch" hilesi didChangeDependencies
+      // içinde tetiklenmediği için kontrol yalnızca açılışta yapılıyordu.
+      _authProvider = authProvider;
+      authProvider.addListener(_onAuthChanged);
+
       if (authProvider.isAuthenticated) {
         _checkKvkkConsent();
       }
-    } else if (_initChecked && !_showOnboarding && !_isLocked) {
-      final auth = context.watch<AuthProvider>();
-      if (auth.isAuthenticated && !_showKvkk) {
-        _checkKvkkConsent();
-      }
     }
+  }
+
+  AuthProvider? _authProvider;
+
+  void _onAuthChanged() {
+    final auth = _authProvider;
+    if (auth == null || !mounted) return;
+    if (!auth.isAuthenticated) {
+      if (_showKvkk) setState(() => _showKvkk = false);
+      return;
+    }
+    if (_initChecked && !_showKvkk) _checkKvkkConsent();
+  }
+
+  @override
+  void dispose() {
+    _authProvider?.removeListener(_onAuthChanged);
+    super.dispose();
   }
 
   @override

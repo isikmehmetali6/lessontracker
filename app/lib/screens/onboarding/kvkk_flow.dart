@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -97,6 +98,8 @@ class _KvkkOnboardingFlowState extends State<KvkkOnboardingFlow> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Geliştirici aracı — yalnızca debug derlemede görünür.
+                  if (kDebugMode)
                   TextButton(
                     onPressed: _resetConsent,
                     style: TextButton.styleFrom(
