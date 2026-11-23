@@ -3,7 +3,7 @@
 - **Kaynak:** 23.11.2026 uçtan uca UI testi (Chrome, 390×844, açık/koyu tema, 33 ekran görüntüsü) + kod doğrulaması
 - **Dal:** `fix/ui-audit-2026-11` (`feat/auth-deep-links` üzerine)
 - **Kurallar:** [`REFACTORING_PLAN.md`](REFACTORING_PLAN.md) §2.0 (constructor injection, `provider`), metinler 4 dilde `l10n/*.arb` + `flutter gen-l10n`
-- **Durum:** 🚧 Kısmen uygulandı — commit 1–3 tamam (U2–U8, U13, U14 kısmen); kalan: U1, U9–U12, U15–U19
+- **Durum:** ✅ Uygulandı (U1–U19). `flutter analyze` temiz, `flutter test` 140/140. Tarayıcıda (tr-TR, 390×844) yeniden doğrulandı.
 
 ## Bulgular → Karar
 
@@ -42,3 +42,17 @@
 10. Testler + doküman
 
 Her commit: `flutter analyze` temiz, `flutter test` yeşil; sonda tarayıcıda ekran görüntüleriyle yeniden kontrol.
+
+## Yeniden testte bulunup düzeltilenler
+- **KVKK akışı oturum içi girişte hiç çalışmıyordu** (misafir ve normal kullanıcı): `AuthWrapper` yalnız açılışta kontrol ediyordu → artık `AuthProvider` dinleyicisiyle her giriş değişiminde.
+- KVKK ekranında geliştirici "🔄 Reset" butonu herkese görünüyordu → yalnız debug.
+- Haftalık başlıkta Türkçe "P" hem Pazartesi hem Perşembe (Almanca M/M, D/D) → iki harf.
+- Ders kartında "Absences: x / y" sabit İngilizce → l10n. Ders formunda başlangıç saati "Başlat" (fiil) → "Başlangıç".
+- Alt menüde Ayarlar en sona alındı (yalnız görsel sıra).
+- Kayıt ekranındaki "Log In" arka planı test sürücüsünün hover efektiymiş — hata değil.
+
+## Ürün/hukuk kararı bekleyenler (kodla çözülmedi)
+- KVKK aydınlatma metninde veri sorumlusu e-postası yer tutucu: `lessontracker@example.com`.
+- Metin "Google hesabı"nı işlenen veri olarak sayıyor; uygulamada Google ile giriş yok.
+- KVKK akışında "Atla" ile onay vermeden geçilebiliyor.
+- Web hedefi: yalnız uyarı bandı eklendi; kalıcı web depolama kapsam dışı.

@@ -168,7 +168,7 @@ class CourseScheduleForm extends StatelessWidget {
                   Row(
                     children: [
                       _TimePickerField(
-                        label: AppLocalizations.of(context)!.start,
+                        label: AppLocalizations.of(context)!.startTimeLabel,
                         time: item.startTime,
                         isDark: isDark,
                         onTap: () async {

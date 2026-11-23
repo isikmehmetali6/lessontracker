@@ -835,5 +835,6 @@
     "exitGuestMode": "Misafir modundan çık",
     "exitGuestModeWarning": "Bu işlem bu cihazdaki tüm dersleri ve notları siler. Saklamak istiyorsan bunun yerine giriş yap veya hesap oluştur.",
     "webDemoBanner": "Web demosu: sayfayı yenileyince veya kapatınca verilerin kaydedilmez. Saklamak için mobil uygulamayı kullan.",
-    "scheduleAbsences": "Devamsızlık: {count} / {limit}"
+    "scheduleAbsences": "Devamsızlık: {count} / {limit}",
+    "startTimeLabel": "Başlangıç"
 }

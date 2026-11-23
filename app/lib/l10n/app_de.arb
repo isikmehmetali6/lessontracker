@@ -848,5 +848,6 @@
     "exitGuestMode": "Gastmodus beenden",
     "exitGuestModeWarning": "Dabei werden alle Kurse und Notizen auf diesem Gerät gelöscht. Um sie zu behalten, melde dich stattdessen an oder erstelle ein Konto.",
     "webDemoBanner": "Web-Demo: Deine Daten werden beim Neuladen oder Schließen nicht gespeichert. Nutze die mobile App, um sie zu behalten.",
-    "scheduleAbsences": "Fehlzeiten: {count} / {limit}"
+    "scheduleAbsences": "Fehlzeiten: {count} / {limit}",
+    "startTimeLabel": "Beginn"
 }

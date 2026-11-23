@@ -4754,6 +4754,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Absences: {count} / {limit}'**
   String scheduleAbsences(Object count, Object limit);
+
+  /// No description provided for @startTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get startTimeLabel;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

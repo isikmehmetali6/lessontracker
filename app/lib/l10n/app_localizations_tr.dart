@@ -2413,4 +2413,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String scheduleAbsences(Object count, Object limit) {
     return 'Devamsızlık: $count / $limit';
   }
+
+  @override
+  String get startTimeLabel => 'Başlangıç';
 }
