@@ -1073,19 +1073,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get daySun => 'Paz';
 
   @override
-  String get dayM => 'P';
+  String get dayM => 'Pt';
 
   @override
-  String get dayT => 'S';
+  String get dayT => 'Sa';
 
   @override
-  String get dayW => 'Ç';
+  String get dayW => 'Ça';
 
   @override
-  String get dayTh => 'P';
+  String get dayTh => 'Pe';
 
   @override
-  String get dayF => 'C';
+  String get dayF => 'Cu';
 
   @override
   String get daySa => 'Ct';
@@ -2408,4 +2408,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get webDemoBanner => 'Web demosu: sayfayı yenileyince veya kapatınca verilerin kaydedilmez. Saklamak için mobil uygulamayı kullan.';
+
+  @override
+  String scheduleAbsences(Object count, Object limit) {
+    return 'Devamsızlık: $count / $limit';
+  }
 }

@@ -4748,6 +4748,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Web demo: your data is not saved when you reload or close the page. Use the mobile app to keep it.'**
   String get webDemoBanner;
+
+  /// No description provided for @scheduleAbsences.
+  ///
+  /// In en, this message translates to:
+  /// **'Absences: {count} / {limit}'**
+  String scheduleAbsences(Object count, Object limit);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

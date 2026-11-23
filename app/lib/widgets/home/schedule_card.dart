@@ -193,7 +193,7 @@ class ScheduleCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'Absences: ${course.currentAbsences} / ${course.absenceLimit}',
+                      AppLocalizations.of(context)!.scheduleAbsences(course.currentAbsences, course.absenceLimit),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,

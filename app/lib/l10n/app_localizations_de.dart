@@ -1073,19 +1073,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get daySun => 'So';
 
   @override
-  String get dayM => 'M';
+  String get dayM => 'Mo';
 
   @override
-  String get dayT => 'D';
+  String get dayT => 'Di';
 
   @override
-  String get dayW => 'M';
+  String get dayW => 'Mi';
 
   @override
   String get dayTh => 'Do';
 
   @override
-  String get dayF => 'F';
+  String get dayF => 'Fr';
 
   @override
   String get daySa => 'Sa';
@@ -2408,4 +2408,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get webDemoBanner => 'Web-Demo: Deine Daten werden beim Neuladen oder Schließen nicht gespeichert. Nutze die mobile App, um sie zu behalten.';
+
+  @override
+  String scheduleAbsences(Object count, Object limit) {
+    return 'Fehlzeiten: $count / $limit';
+  }
 }

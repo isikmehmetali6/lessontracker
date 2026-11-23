@@ -383,11 +383,11 @@
     "dayFri": "Cum",
     "daySat": "Cmt",
     "daySun": "Paz",
-    "dayM": "P",
-    "dayT": "S",
-    "dayW": "Ç",
-    "dayTh": "P",
-    "dayF": "C",
+    "dayM": "Pt",
+    "dayT": "Sa",
+    "dayW": "Ça",
+    "dayTh": "Pe",
+    "dayF": "Cu",
     "daySa": "Ct",
     "daySu": "Pz",
     "dailyPlan": "Günlük Plan",
@@ -834,5 +834,6 @@
     "guestUpgradeBody": "Bu cihazdaki derslerin ve notların korunur. Giriş yaptıktan sonra yedeklemek için Ayarlar'dan Bulut Yedeği'ni aç.",
     "exitGuestMode": "Misafir modundan çık",
     "exitGuestModeWarning": "Bu işlem bu cihazdaki tüm dersleri ve notları siler. Saklamak istiyorsan bunun yerine giriş yap veya hesap oluştur.",
-    "webDemoBanner": "Web demosu: sayfayı yenileyince veya kapatınca verilerin kaydedilmez. Saklamak için mobil uygulamayı kullan."
+    "webDemoBanner": "Web demosu: sayfayı yenileyince veya kapatınca verilerin kaydedilmez. Saklamak için mobil uygulamayı kullan.",
+    "scheduleAbsences": "Devamsızlık: {count} / {limit}"
 }

@@ -2408,4 +2408,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get webDemoBanner => 'Demo web: tus datos no se guardan al recargar o cerrar la página. Usa la app móvil para conservarlos.';
+
+  @override
+  String scheduleAbsences(Object count, Object limit) {
+    return 'Faltas: $count / $limit';
+  }
 }

@@ -397,11 +397,11 @@
     "dayFri": "Fr",
     "daySat": "Sa",
     "daySun": "So",
-    "dayM": "M",
-    "dayT": "D",
-    "dayW": "M",
+    "dayM": "Mo",
+    "dayT": "Di",
+    "dayW": "Mi",
     "dayTh": "Do",
-    "dayF": "F",
+    "dayF": "Fr",
     "daySa": "Sa",
     "daySu": "So",
     "dailyPlan": "Tagesplan",
@@ -847,5 +847,6 @@
     "guestUpgradeBody": "Deine Kurse und Notizen auf diesem Gerät bleiben erhalten. Aktiviere nach der Anmeldung das Cloud-Backup in den Einstellungen.",
     "exitGuestMode": "Gastmodus beenden",
     "exitGuestModeWarning": "Dabei werden alle Kurse und Notizen auf diesem Gerät gelöscht. Um sie zu behalten, melde dich stattdessen an oder erstelle ein Konto.",
-    "webDemoBanner": "Web-Demo: Deine Daten werden beim Neuladen oder Schließen nicht gespeichert. Nutze die mobile App, um sie zu behalten."
+    "webDemoBanner": "Web-Demo: Deine Daten werden beim Neuladen oder Schließen nicht gespeichert. Nutze die mobile App, um sie zu behalten.",
+    "scheduleAbsences": "Fehlzeiten: {count} / {limit}"
 }

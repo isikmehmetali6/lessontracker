@@ -855,5 +855,6 @@
     "guestUpgradeBody": "Your courses and notes on this device will be kept. After signing in, turn on Cloud Backup in Settings to back them up.",
     "exitGuestMode": "Exit guest mode",
     "exitGuestModeWarning": "This deletes all courses and notes stored on this device. To keep them, sign in or create an account instead.",
-    "webDemoBanner": "Web demo: your data is not saved when you reload or close the page. Use the mobile app to keep it."
+    "webDemoBanner": "Web demo: your data is not saved when you reload or close the page. Use the mobile app to keep it.",
+    "scheduleAbsences": "Absences: {count} / {limit}"
 }

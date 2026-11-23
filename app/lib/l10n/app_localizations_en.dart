@@ -2408,4 +2408,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get webDemoBanner => 'Web demo: your data is not saved when you reload or close the page. Use the mobile app to keep it.';
+
+  @override
+  String scheduleAbsences(Object count, Object limit) {
+    return 'Absences: $count / $limit';
+  }
 }

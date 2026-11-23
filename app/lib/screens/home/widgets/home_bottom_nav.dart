@@ -62,14 +62,6 @@ class HomeBottomNav extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: _HomeNavItem(
-                    icon: Icons.settings,
-                    label: AppLocalizations.of(context)?.settingsParams ?? 'Settings',
-                    isSelected: currentIndex == 3,
-                    onTap: () => onTabSelected(3),
-                  ),
-                ),
-                Expanded(
                   child: Consumer<MoodleProvider>(
                     builder: (context, moodle, _) => _HomeNavItemBadge(
                       icon: Icons.school_rounded,
@@ -78,6 +70,15 @@ class HomeBottomNav extends StatelessWidget {
                       badgeCount: moodle.unreadCount,
                       onTap: () => onTabSelected(4),
                     ),
+                  ),
+                ),
+                // Ayarlar en sonda (görsel sıra; IndexedStack indeksleri aynı)
+                Expanded(
+                  child: _HomeNavItem(
+                    icon: Icons.settings,
+                    label: AppLocalizations.of(context)?.settingsParams ?? 'Settings',
+                    isSelected: currentIndex == 3,
+                    onTap: () => onTabSelected(3),
                   ),
                 ),
               ],
