@@ -143,6 +143,7 @@ class NoteRepository {
       'INSERT OR REPLACE INTO notes (${columns.join(',')}, searchContent) VALUES (${placeholders.join(',')})',
       values,
     );
+    await AutoSyncService().markChanged('notes', note.id);
     AutoSyncService().triggerBackup();
   }
 
@@ -232,6 +233,7 @@ class NoteRepository {
       where: 'id = ?',
       whereArgs: [note.id],
     );
+    await AutoSyncService().markChanged('notes', note.id);
     AutoSyncService().triggerBackup();
   }
 

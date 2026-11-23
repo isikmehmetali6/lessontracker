@@ -85,6 +85,7 @@ class CourseRepository {
       ...course.toMap(),
       'updatedAt': DateTime.now().toIso8601String(),
     }, conflictAlgorithm: ConflictAlgorithm.replace);
+    await AutoSyncService().markChanged('courses', course.id);
     AutoSyncService().triggerBackup();
   }
 
@@ -104,6 +105,7 @@ class CourseRepository {
       where: 'id = ?',
       whereArgs: [course.id],
     );
+    await AutoSyncService().markChanged('courses', course.id);
     AutoSyncService().triggerBackup();
   }
 

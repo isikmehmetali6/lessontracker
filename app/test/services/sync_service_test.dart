@@ -193,11 +193,11 @@ void main() {
     expect(await AutoSyncService().processPendingDeletes(offline), 0);
 
     final db = await DatabaseHelper().database;
-    final rows = await db.query('pending_changes');
+    final rows = await db.query('pending_changes', where: "operation = 'delete'");
     expect(rows.length, 1);
 
     expect(await AutoSyncService().processPendingDeletes(makeService()), 1);
-    expect(await db.query('pending_changes'), isEmpty);
+    expect(await db.query('pending_changes', where: "operation = 'delete'"), isEmpty);
   });
 
   test('yedek ayarı kapalı yeni cihazda restore çalışır (B6)', () async {
@@ -282,5 +282,57 @@ void main() {
     await cloud.upsert('courses', 'legacy', {'encryptedData': 'AAAA'});
     final result = await makeService().restoreData();
     expect(result.skippedRecords, 1);
+  });
+  // ==================== Artımlı yedek (UI_FIX_PLAN U16) ====================
+
+  test('ilk artımlı yedek tam yedeğe düşer', () async {
+    await courseRepo.insertCourse(_course('c1'));
+    await noteRepo.insertNote(_note('n1', 'c1'));
+    await makeService().backupChanges();
+    expect(cloud.store['courses']!.keys, ['c1']);
+    expect(cloud.store['notes']!.keys, ['n1']);
+  });
+
+  test('sonraki yedek yalnızca değişen kaydı gönderir', () async {
+    await courseRepo.insertCourse(_course('c1'));
+    for (var i = 0; i < 5; i++) {
+      await noteRepo.insertNote(_note('n$i', 'c1'));
+    }
+    final service = makeService();
+    await service.backupData();
+    cloud.upsertLog.clear();
+
+    final note = await noteRepo.getNoteById('n2');
+    await noteRepo.updateNote(note!.copyWith(title: 'Güncel'));
+    await absenceRepo.insertAbsence('a1', 'c1', DateTime(2026, 3, 2));
+    await service.backupChanges();
+
+    expect(cloud.upsertLog, unorderedEquals(['notes/n2', 'absences/c1']));
+    final db = await DatabaseHelper().database;
+    expect(
+      await db.query('pending_changes', where: "operation = 'upsert'"),
+      isEmpty,
+    );
+
+    // Değişiklik yoksa hiçbir şey gönderilmez
+    cloud.upsertLog.clear();
+    await service.backupChanges();
+    expect(cloud.upsertLog, isEmpty);
+  });
+
+  test('restore kendi eklemelerini yükleme kuyruğunda bırakmaz', () async {
+    await courseRepo.insertCourse(_course('c1'));
+    await noteRepo.insertNote(_note('n1', 'c1'));
+    final service = makeService();
+    await service.backupData();
+
+    await DatabaseHelper().clearAllData();
+    await service.restoreData();
+
+    final db = await DatabaseHelper().database;
+    expect(
+      await db.query('pending_changes', where: "operation = 'upsert'"),
+      isEmpty,
+    );
   });
 }

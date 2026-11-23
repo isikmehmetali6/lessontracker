@@ -60,6 +60,7 @@ class DeadlineRepository {
       deadline.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    await AutoSyncService().markChanged('deadlines', deadline.id);
     AutoSyncService().triggerBackup();
   }
 
@@ -91,6 +92,7 @@ class DeadlineRepository {
       where: 'id = ?',
       whereArgs: [deadline.id],
     );
+    await AutoSyncService().markChanged('deadlines', deadline.id);
     AutoSyncService().triggerBackup();
   }
 
