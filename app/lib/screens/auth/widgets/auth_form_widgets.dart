@@ -71,6 +71,8 @@ class AuthErrorBox extends StatelessWidget {
   }
 }
 
+/// Etiket + doldurulmuş giriş alanı. Kenarlık ve dolgu InputDecoration'da
+/// olduğu için doğrulama hatası kutunun içine değil, alanın altına çizilir.
 class AuthTextField extends StatelessWidget {
   const AuthTextField({
     super.key,
@@ -78,7 +80,10 @@ class AuthTextField extends StatelessWidget {
     required this.label,
     required this.icon,
     required this.isDark,
+    this.hint,
     this.isPassword = false,
+    this.isPasswordVisible = false,
+    this.onPasswordToggle,
     this.keyboardType,
     this.validator,
     this.autofillHints,
@@ -86,15 +91,25 @@ class AuthTextField extends StatelessWidget {
 
   final TextEditingController controller;
   final String label;
+  final String? hint;
   final IconData icon;
   final bool isDark;
   final bool isPassword;
+  final bool isPasswordVisible;
+  final VoidCallback? onPasswordToggle;
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
   final Iterable<String>? autofillHints;
 
   @override
   Widget build(BuildContext context) {
+    final iconColor = isDark ? Colors.grey.shade600 : Colors.grey.shade400;
+    OutlineInputBorder border(Color color, [double width = 1]) =>
+        OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: color, width: width),
+        );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -103,39 +118,48 @@ class AuthTextField extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+            color: isDark
+                ? AppColors.textSecondaryDark
+                : AppColors.textSecondaryLight,
           ),
         ),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
-          obscureText: isPassword,
+          obscureText: isPassword && !isPasswordVisible,
           keyboardType: keyboardType,
           validator: validator,
           autofillHints: autofillHints,
           style: TextStyle(color: isDark ? Colors.white : Colors.black87),
           decoration: InputDecoration(
-            prefixIcon: Icon(
-              icon,
-              color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+            hintText: hint,
+            hintStyle: TextStyle(
+              color: isDark ? Colors.grey.shade700 : Colors.grey.shade400,
             ),
+            prefixIcon: Icon(icon, color: iconColor),
+            suffixIcon: isPassword && onPasswordToggle != null
+                ? IconButton(
+                    icon: Icon(
+                      isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: iconColor,
+                    ),
+                    onPressed: onPasswordToggle,
+                  )
+                : null,
             filled: true,
             fillColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide.none,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            enabledBorder: border(
+              isDark ? Colors.grey.shade800 : Colors.grey.shade200,
             ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: AppColors.indigoAccent,
-                width: 1.5,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: Colors.red, width: 1),
-            ),
+            focusedBorder: border(AppColors.primary, 1.5),
+            errorBorder: border(Colors.red),
+            focusedErrorBorder: border(Colors.red, 1.5),
+            errorStyle: const TextStyle(fontSize: 12),
+            errorMaxLines: 2,
           ),
         ),
       ],
@@ -162,7 +186,7 @@ class AuthPrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.indigoAccent,
+          backgroundColor: AppColors.primary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),

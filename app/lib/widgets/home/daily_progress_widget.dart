@@ -1,3 +1,4 @@
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:lesson_tracker/core/theme/app_colors.dart';
 import 'package:lesson_tracker/widgets/common/common_widgets.dart';
@@ -28,7 +29,7 @@ class DailyProgressWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Daily Progress',
+                  AppLocalizations.of(context)!.dailyProgress,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,

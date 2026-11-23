@@ -93,7 +93,7 @@ void main() {
 
       final emailField = find.widgetWithText(
         TextFormField,
-        'Enter your Email Address',
+        'Enter your email',
       );
       expect(emailField, findsOneWidget);
 

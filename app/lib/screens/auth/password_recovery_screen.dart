@@ -120,7 +120,7 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
                   const Icon(
                     Icons.mark_email_read_outlined,
                     size: 72,
-                    color: AppColors.indigoAccent,
+                    color: AppColors.primary,
                   ),
                   const SizedBox(height: 24),
                   AuthPrimaryButton(

@@ -68,7 +68,7 @@ class HelpSupportScreen extends StatelessWidget {
                   onTap: () {
                     Clipboard.setData(const ClipboardData(text: 'support@lessontracker.app'));
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Email copied: support@lessontracker.app')),
+                      SnackBar(content: Text('${AppLocalizations.of(context)!.emailCopied}: support@lessontracker.app')),
                     );
                   },
                 ),

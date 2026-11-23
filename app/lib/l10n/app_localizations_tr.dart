@@ -517,7 +517,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get noCourses => 'Henüz ders yok';
 
   @override
-  String get addYourFirstCourse => 'İlk dersini eklemek için + butonuna dokun!';
+  String get addYourFirstCourse => 'Takibe başlamak için ilk dersini ekle!';
 
   @override
   String get editProfile => 'Profili Düzenle';
@@ -2292,4 +2292,105 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get passwordChangedE2EWarning => 'Şifre değiştirildi. Şifreli bulut yedeğin hâlâ eski şifrenle kilitli; hatırlıyorsan geri yüklerken eski şifreni gir.';
+
+  @override
+  String get onbTitle1 => 'Derslerini Takip Et';
+
+  @override
+  String get onbDesc1 => 'Ders programını düzenle, devamsızlığını takip et ve hiçbir dersi kaçırma.';
+
+  @override
+  String get onbTitle2 => 'Akıllı Notlar';
+
+  @override
+  String get onbDesc2 => 'Metin notu al, belgeleri OCR ile tara, ses kaydet — hepsi tek yerde.';
+
+  @override
+  String get onbTitle3 => 'Çalışma Zamanlayıcısı';
+
+  @override
+  String get onbDesc3 => 'Odaklanmak için Pomodoro tekniğini kullan. Çalışma süreni ve ilerlemeni takip et.';
+
+  @override
+  String get onbTitle4 => 'İstatistikler ve Not Ortalaması';
+
+  @override
+  String get onbDesc4 => 'Notlarını, istatistiklerini ve ortalama hesaplayıcıyı tek yerde gör.';
+
+  @override
+  String get moodleFeatureAssignmentsDesc => 'Son teslim tarihlerini kaçırma';
+
+  @override
+  String get moodleFeatureGradesDesc => 'Tüm sınav sonuçlarını tek yerde gör';
+
+  @override
+  String get moodleFeatureAnnouncementsDesc => 'Hocalarının paylaşımlarını anında gör';
+
+  @override
+  String get moodleFeatureMultiAccountDesc => 'Birden fazla üniversite desteği';
+
+  @override
+  String get statCourses => 'Ders';
+
+  @override
+  String get statDueSoon => 'Yaklaşan';
+
+  @override
+  String get statAtRisk => 'Riskli';
+
+  @override
+  String get scanNotes => 'Not Tara';
+
+  @override
+  String get ocrImport => 'OCR ile aktar';
+
+  @override
+  String get kvkkConsentReset => 'KVKK onayı sıfırlandı — uygulamayı yeniden açın';
+
+  @override
+  String get end => 'Bitiş';
+
+  @override
+  String get securityEncryption => 'Güvenlik ve Şifreleme';
+
+  @override
+  String get dailyProgress => 'Günlük İlerleme';
+
+  @override
+  String get noAbsenceLimit => 'Devamsızlık sınırı yok';
+
+  @override
+  String get badgeExam => 'SINAV';
+
+  @override
+  String get badgeBehind => 'GERİDE';
+
+  @override
+  String get badgeAbsence => 'DEVAMSIZLIK';
+
+  @override
+  String percentComplete(Object percent) {
+    return '%$percent tamamlandı';
+  }
+
+  @override
+  String get viewDetails => 'Detayları Gör';
+
+  @override
+  String get password => 'Şifre';
+
+  @override
+  String get hintEnterEmail => 'E-posta adresini gir';
+
+  @override
+  String get hintEnterPassword => 'Şifreni gir';
+
+  @override
+  String get hintEnterName => 'Adını ve soyadını gir';
+
+  @override
+  String get hintConfirmPassword => 'Şifreni tekrar gir';
+
+  @override
+  String get navWeek => 'Hafta';
 }

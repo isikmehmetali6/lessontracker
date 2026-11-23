@@ -517,7 +517,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noCourses => 'Noch keine Kurse';
 
   @override
-  String get addYourFirstCourse => 'Tippe auf +, um deinen ersten Kurs hinzuzufügen!';
+  String get addYourFirstCourse => 'Füge deinen ersten Kurs hinzu, um loszulegen!';
 
   @override
   String get editProfile => 'Profil Bearbeiten';
@@ -2292,4 +2292,105 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get passwordChangedE2EWarning => 'Passwort geändert. Dein verschlüsseltes Cloud-Backup ist weiterhin mit deinem alten Passwort gesperrt; falls du es noch weißt, gib es bei der Wiederherstellung ein.';
+
+  @override
+  String get onbTitle1 => 'Behalte deine Kurse im Blick';
+
+  @override
+  String get onbDesc1 => 'Organisiere deinen Stundenplan, verfolge Fehlzeiten und verpasse keine Vorlesung mehr.';
+
+  @override
+  String get onbTitle2 => 'Smarte Notizen';
+
+  @override
+  String get onbDesc2 => 'Schreibe Notizen, scanne Dokumente per OCR, nimm Audio auf – alles an einem Ort.';
+
+  @override
+  String get onbTitle3 => 'Lerntimer';
+
+  @override
+  String get onbDesc3 => 'Bleib mit der Pomodoro-Technik fokussiert. Verfolge Lernzeit und Fortschritt.';
+
+  @override
+  String get onbTitle4 => 'Einblicke & Notenschnitt';
+
+  @override
+  String get onbDesc4 => 'Sieh deine Noten, Statistiken und den Notenrechner auf einen Blick.';
+
+  @override
+  String get moodleFeatureAssignmentsDesc => 'Verpasse keine Abgabe';
+
+  @override
+  String get moodleFeatureGradesDesc => 'Alle Noten an einem Ort';
+
+  @override
+  String get moodleFeatureAnnouncementsDesc => 'Beiträge deiner Dozenten sofort sehen';
+
+  @override
+  String get moodleFeatureMultiAccountDesc => 'Mehrere Universitäten verbinden';
+
+  @override
+  String get statCourses => 'Kurse';
+
+  @override
+  String get statDueSoon => 'Bald fällig';
+
+  @override
+  String get statAtRisk => 'Gefährdet';
+
+  @override
+  String get scanNotes => 'Notizen scannen';
+
+  @override
+  String get ocrImport => 'OCR-Import';
+
+  @override
+  String get kvkkConsentReset => 'KVKK-Einwilligung zurückgesetzt – bitte App neu öffnen';
+
+  @override
+  String get end => 'Ende';
+
+  @override
+  String get securityEncryption => 'Sicherheit & Verschlüsselung';
+
+  @override
+  String get dailyProgress => 'Tagesfortschritt';
+
+  @override
+  String get noAbsenceLimit => 'Kein Fehlzeitenlimit';
+
+  @override
+  String get badgeExam => 'PRÜFUNG';
+
+  @override
+  String get badgeBehind => 'IM RÜCKSTAND';
+
+  @override
+  String get badgeAbsence => 'FEHLZEIT';
+
+  @override
+  String percentComplete(Object percent) {
+    return '$percent % erledigt';
+  }
+
+  @override
+  String get viewDetails => 'Details ansehen';
+
+  @override
+  String get password => 'Passwort';
+
+  @override
+  String get hintEnterEmail => 'E-Mail-Adresse eingeben';
+
+  @override
+  String get hintEnterPassword => 'Passwort eingeben';
+
+  @override
+  String get hintEnterName => 'Vollständigen Namen eingeben';
+
+  @override
+  String get hintConfirmPassword => 'Passwort wiederholen';
+
+  @override
+  String get navWeek => 'Woche';
 }

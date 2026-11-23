@@ -1,3 +1,4 @@
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lesson_tracker/core/theme/app_colors.dart';
@@ -16,8 +17,8 @@ class QuickCaptureButtons extends StatelessWidget {
         Expanded(
           child: _QuickCaptureButton(
             icon: Icons.document_scanner,
-            title: 'Scan Notes',
-            subtitle: 'OCR Import',
+            title: AppLocalizations.of(context)!.scanNotes,
+            subtitle: AppLocalizations.of(context)!.ocrImport,
             color: AppColors.primary,
             isHighlighted: true,
             onTap: onScanTap,

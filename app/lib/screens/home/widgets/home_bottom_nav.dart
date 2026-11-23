@@ -56,7 +56,7 @@ class HomeBottomNav extends StatelessWidget {
                 Expanded(
                   child: _HomeNavItem(
                     icon: Icons.view_week,
-                    label: AppLocalizations.of(context)?.weeklySchedule ?? 'Schedule',
+                    label: AppLocalizations.of(context)?.navWeek ?? 'Week',
                     isSelected: currentIndex == 2,
                     onTap: () => onTabSelected(2),
                   ),

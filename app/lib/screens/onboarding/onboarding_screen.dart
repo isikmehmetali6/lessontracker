@@ -17,32 +17,34 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _currentPage = 0;
 
-  final _pages = const [
-    _OnboardingPage(
-      icon: Icons.school,
-      color: AppColors.primary,
-      title: 'Track Your Courses',
-      subtitle: 'Organize your schedule, track attendance, and never miss a class again.',
-    ),
-    _OnboardingPage(
-      icon: Icons.sticky_note_2,
-      color: AppColors.orange,
-      title: 'Smart Notes',
-      subtitle: 'Take text notes, scan documents with OCR, record audio — all in one place.',
-    ),
-    _OnboardingPage(
-      icon: Icons.timer,
-      color: AppColors.green,
-      title: 'Study Timer',
-      subtitle: 'Use Pomodoro technique to stay focused. Track your study time and progress.',
-    ),
-    _OnboardingPage(
-      icon: Icons.insights,
-      color: AppColors.purple,
-      title: 'Insights & GPA',
-      subtitle: 'See your grades, statistics, and GPA calculator to stay on top of your game.',
-    ),
-  ];
+  static const _pageCount = 4;
+
+  List<_OnboardingPage> _buildPages(AppLocalizations l10n) => [
+        _OnboardingPage(
+          icon: Icons.school,
+          color: AppColors.primary,
+          title: l10n.onbTitle1,
+          subtitle: l10n.onbDesc1,
+        ),
+        _OnboardingPage(
+          icon: Icons.sticky_note_2,
+          color: AppColors.orange,
+          title: l10n.onbTitle2,
+          subtitle: l10n.onbDesc2,
+        ),
+        _OnboardingPage(
+          icon: Icons.timer,
+          color: AppColors.green,
+          title: l10n.onbTitle3,
+          subtitle: l10n.onbDesc3,
+        ),
+        _OnboardingPage(
+          icon: Icons.insights,
+          color: AppColors.purple,
+          title: l10n.onbTitle4,
+          subtitle: l10n.onbDesc4,
+        ),
+      ];
 
   @override
   void dispose() {
@@ -54,20 +56,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
+    final pages = _buildPages(l10n);
+    final isLast = _currentPage == _pageCount - 1;
 
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            // Skip button
+            // Skip button (son sayfada gereksiz; yer tutucu ile hizalama korunur)
             Align(
               alignment: Alignment.topRight,
               child: TextButton(
-                onPressed: _complete,
+                onPressed: isLast ? null : _complete,
                 child: Text(
                   l10n.skip,
                   style: TextStyle(
-                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                    color: isLast
+                        ? Colors.transparent
+                        : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -77,10 +83,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Expanded(
               child: PageView.builder(
                 controller: _controller,
-                itemCount: _pages.length,
+                itemCount: _pageCount,
                 onPageChanged: (i) => setState(() => _currentPage = i),
                 itemBuilder: (context, index) {
-                  final page = _pages[index];
+                  final page = pages[index];
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 40),
                     child: Column(
@@ -137,7 +143,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   // Dots
                   Row(
-                    children: List.generate(_pages.length, (i) {
+                    children: List.generate(_pageCount, (i) {
                       return AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         margin: const EdgeInsets.only(right: 8),
@@ -154,7 +160,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   // Next / Get Started button
                   GestureDetector(
                     onTap: () {
-                      if (_currentPage == _pages.length - 1) {
+                      if (_currentPage == _pageCount - 1) {
                         _complete();
                       } else {
                         _controller.nextPage(
@@ -166,7 +172,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       padding: EdgeInsets.symmetric(
-                        horizontal: _currentPage == _pages.length - 1 ? 32 : 20,
+                        horizontal: _currentPage == _pageCount - 1 ? 32 : 20,
                         vertical: 16,
                       ),
                       decoration: BoxDecoration(
@@ -184,14 +190,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            _currentPage == _pages.length - 1 ? l10n.getStarted : l10n.nextLabel,
+                            _currentPage == _pageCount - 1 ? l10n.getStarted : l10n.nextLabel,
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
                               fontSize: 16,
                             ),
                           ),
-                          if (_currentPage == _pages.length - 1) ...[
+                          if (_currentPage == _pageCount - 1) ...[
                             const SizedBox(width: 8),
                             const Icon(Icons.arrow_forward, color: Colors.white, size: 20),
                           ],

@@ -1098,7 +1098,7 @@ abstract class AppLocalizations {
   /// No description provided for @addYourFirstCourse.
   ///
   /// In en, this message translates to:
-  /// **'Tap + to add your first course and start tracking!'**
+  /// **'Add your first course to start tracking!'**
   String get addYourFirstCourse;
 
   /// No description provided for @editProfile.
@@ -4520,6 +4520,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Password changed. Your encrypted cloud backup is still locked with your old password; if you remember it, enter it when restoring.'**
   String get passwordChangedE2EWarning;
+
+  /// No description provided for @onbTitle1.
+  ///
+  /// In en, this message translates to:
+  /// **'Track Your Courses'**
+  String get onbTitle1;
+
+  /// No description provided for @onbDesc1.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize your schedule, track attendance, and never miss a class again.'**
+  String get onbDesc1;
+
+  /// No description provided for @onbTitle2.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Notes'**
+  String get onbTitle2;
+
+  /// No description provided for @onbDesc2.
+  ///
+  /// In en, this message translates to:
+  /// **'Take text notes, scan documents with OCR, record audio — all in one place.'**
+  String get onbDesc2;
+
+  /// No description provided for @onbTitle3.
+  ///
+  /// In en, this message translates to:
+  /// **'Study Timer'**
+  String get onbTitle3;
+
+  /// No description provided for @onbDesc3.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the Pomodoro technique to stay focused. Track your study time and progress.'**
+  String get onbDesc3;
+
+  /// No description provided for @onbTitle4.
+  ///
+  /// In en, this message translates to:
+  /// **'Insights & GPA'**
+  String get onbTitle4;
+
+  /// No description provided for @onbDesc4.
+  ///
+  /// In en, this message translates to:
+  /// **'See your grades, statistics, and GPA calculator to stay on top of your game.'**
+  String get onbDesc4;
+
+  /// No description provided for @moodleFeatureAssignmentsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Never miss a due date'**
+  String get moodleFeatureAssignmentsDesc;
+
+  /// No description provided for @moodleFeatureGradesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'See all your grades in one place'**
+  String get moodleFeatureGradesDesc;
+
+  /// No description provided for @moodleFeatureAnnouncementsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'See instructor posts instantly'**
+  String get moodleFeatureAnnouncementsDesc;
+
+  /// No description provided for @moodleFeatureMultiAccountDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect more than one university'**
+  String get moodleFeatureMultiAccountDesc;
+
+  /// No description provided for @statCourses.
+  ///
+  /// In en, this message translates to:
+  /// **'Courses'**
+  String get statCourses;
+
+  /// No description provided for @statDueSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Due soon'**
+  String get statDueSoon;
+
+  /// No description provided for @statAtRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'At risk'**
+  String get statAtRisk;
+
+  /// No description provided for @scanNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Notes'**
+  String get scanNotes;
+
+  /// No description provided for @ocrImport.
+  ///
+  /// In en, this message translates to:
+  /// **'OCR import'**
+  String get ocrImport;
+
+  /// No description provided for @kvkkConsentReset.
+  ///
+  /// In en, this message translates to:
+  /// **'KVKK consent reset — please reopen the app'**
+  String get kvkkConsentReset;
+
+  /// No description provided for @end.
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get end;
+
+  /// No description provided for @securityEncryption.
+  ///
+  /// In en, this message translates to:
+  /// **'Security & Encryption'**
+  String get securityEncryption;
+
+  /// No description provided for @dailyProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Progress'**
+  String get dailyProgress;
+
+  /// No description provided for @noAbsenceLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'No absence limit set'**
+  String get noAbsenceLimit;
+
+  /// No description provided for @badgeExam.
+  ///
+  /// In en, this message translates to:
+  /// **'EXAM'**
+  String get badgeExam;
+
+  /// No description provided for @badgeBehind.
+  ///
+  /// In en, this message translates to:
+  /// **'BEHIND'**
+  String get badgeBehind;
+
+  /// No description provided for @badgeAbsence.
+  ///
+  /// In en, this message translates to:
+  /// **'ABSENCE'**
+  String get badgeAbsence;
+
+  /// No description provided for @percentComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% complete'**
+  String percentComplete(Object percent);
+
+  /// No description provided for @viewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View Details'**
+  String get viewDetails;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// No description provided for @hintEnterEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email'**
+  String get hintEnterEmail;
+
+  /// No description provided for @hintEnterPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get hintEnterPassword;
+
+  /// No description provided for @hintEnterName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your full name'**
+  String get hintEnterName;
+
+  /// No description provided for @hintConfirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter your password'**
+  String get hintConfirmPassword;
+
+  /// No description provided for @navWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get navWeek;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

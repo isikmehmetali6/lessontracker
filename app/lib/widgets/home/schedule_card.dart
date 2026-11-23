@@ -1,3 +1,4 @@
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:lesson_tracker/core/theme/app_colors.dart';
 import 'package:lesson_tracker/models/course.dart';
@@ -229,7 +230,7 @@ class ScheduleCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'No absence limit set',
+                      AppLocalizations.of(context)!.noAbsenceLimit,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,

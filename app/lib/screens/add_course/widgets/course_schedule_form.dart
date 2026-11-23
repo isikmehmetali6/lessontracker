@@ -168,7 +168,7 @@ class CourseScheduleForm extends StatelessWidget {
                   Row(
                     children: [
                       _TimePickerField(
-                        label: 'Start',
+                        label: AppLocalizations.of(context)!.start,
                         time: item.startTime,
                         isDark: isDark,
                         onTap: () async {
@@ -191,7 +191,7 @@ class CourseScheduleForm extends StatelessWidget {
                       Icon(Icons.arrow_forward, size: 20, color: isDark ? Colors.grey.shade600 : Colors.grey.shade400),
                       const SizedBox(width: 12),
                       _TimePickerField(
-                        label: 'End',
+                        label: AppLocalizations.of(context)!.end,
                         time: item.endTime,
                         isDark: isDark,
                         onTap: () async {
