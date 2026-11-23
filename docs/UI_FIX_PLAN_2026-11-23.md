@@ -13,7 +13,7 @@
 | U2 | Ana ekran geri oku `SystemNavigator.pop()` | Kaldırılır |
 | U3 | Varsayılan dil sabit `en`; ~30 sabit metin | Kayıtlı tercih yoksa cihaz dili (desteklenirse); onboarding, Moodle, sayaçlar, kartlar, form ipuçları l10n'e taşınır |
 | U4 | Giriş/kayıt şifre alanı "New Password"; ipucu "Enter your {label}" | `password` anahtarı; her alan için ayrı ipucu anahtarı |
-| U5 | "Priority Focus" tüm dersleri gösteriyor | Yalnız sınavı ≤7 gün, geride (<%50) veya devamsızlık riski (≥%70) olan dersler |
+| U5 | "Priority Focus" tüm dersleri gösteriyor | Tüm derslerin gösterilmesi bilinçli ürün kararı (kod yorumu) → korunur; dikkat gerektirenler (sınav ≤7 gün, geride <%50, devamsızlık ≥%70) başa sıralanır ve etiketlenir |
 | U6 | "At Risk"/"Deadlines" sayaçları etiketlerle çelişiyor | Risk = U5 kümesi; Deadlines = 7 gün içindeki teslimler + sınavlar |
 | U7 | Örnek veride çakışma, notlar yanlış derslerde, kırık görsel | Linear Algebra Sal/Per; notlar ders adına göre eşlenir; dosyasız görsel notu yerine metin notu |
 | U8 | "Spring Semester" sabit | Dersin alt başlığı gösterilir; yoksa yalnız hoca |

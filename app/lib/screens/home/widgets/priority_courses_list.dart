@@ -17,8 +17,11 @@ class PriorityCoursesList extends StatelessWidget {
 
     final courses = context.select<CourseProvider, List<Course>>((provider) {
       if (provider.uniqueCourses.isEmpty) return [];
-      // Kullanıcının isteği: priority focus listesi tüm dersleri göstersin
-      return provider.uniqueCourses;
+      // Ürün kararı: liste tüm dersleri gösterir; dikkat gerektirenler
+      // (sınav, geride, devamsızlık riski) başa sıralanır.
+      final sorted = List<Course>.of(provider.uniqueCourses)
+        ..sort((a, b) => a.attentionRank.compareTo(b.attentionRank));
+      return sorted;
     });
 
     if (courses.isEmpty) {

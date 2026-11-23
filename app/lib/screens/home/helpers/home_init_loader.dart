@@ -79,9 +79,11 @@ Future<void> runHomeInit({
     if (!hasSeenSampleData) {
       await courseProvider.addSampleData();
       if (!isMounted()) return;
-      await noteProvider.addSampleNotes(
-        courseProvider.courses.map((c) => c.id).toList(),
-      );
+      final byName = {for (final c in courseProvider.courses) c.name: c.id};
+      await noteProvider.addSampleNotes([
+        for (final name in const ['Biology', 'History', 'Mathematics'])
+          if (byName[name] != null) byName[name]!,
+      ]);
       await prefs.setBool('has_seen_sample_data', true);
     }
   }

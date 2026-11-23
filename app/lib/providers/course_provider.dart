@@ -978,9 +978,9 @@ class CourseProvider extends ChangeNotifier {
         name: 'Linear Algebra',
         subtitle: 'Chapter 4: Matrices',
         professor: 'Dr. Miller',
-        location: 'Room 302',
+        location: 'Room 204',
         color: AppColors.blue,
-        scheduleDays: [0, 2, 4], // Mon, Wed, Fri
+        scheduleDays: [1, 3], // Tue, Thu (Mathematics ile çakışmasın)
         startTime: const TimeOfDay(hour: 10, minute: 0),
         endTime: const TimeOfDay(hour: 11, minute: 30),
         progress: 55.0,

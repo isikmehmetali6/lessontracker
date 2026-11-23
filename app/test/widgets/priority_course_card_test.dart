@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:lesson_tracker/models/course.dart';
 import 'package:lesson_tracker/widgets/home/priority_course_card.dart';
 
@@ -23,6 +24,8 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: PriorityCourseCard(
               course: mockCourse,
@@ -37,7 +40,7 @@ void main() {
       // Verify text elements
       expect(find.text('Database Systems'), findsOneWidget);
       expect(find.text('BEHIND'), findsOneWidget); 
-      expect(find.text('0% Complete'), findsOneWidget); 
+      expect(find.text('0% complete'), findsOneWidget); 
 
       // Tap card
       await tester.tap(find.byType(PriorityCourseCard));

@@ -34,16 +34,6 @@ class HomeHeader extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
-                    IconButton(
-                      icon: Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-                      ),
-                      onPressed: () {
-                        SystemNavigator.pop();
-                      },
-                    ),
-                    const SizedBox(width: 4),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
