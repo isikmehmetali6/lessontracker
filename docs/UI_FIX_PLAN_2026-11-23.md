@@ -3,7 +3,7 @@
 - **Kaynak:** 23.11.2026 uçtan uca UI testi (Chrome, 390×844, açık/koyu tema, 33 ekran görüntüsü) + kod doğrulaması
 - **Dal:** `fix/ui-audit-2026-11` (`feat/auth-deep-links` üzerine)
 - **Kurallar:** [`REFACTORING_PLAN.md`](REFACTORING_PLAN.md) §2.0 (constructor injection, `provider`), metinler 4 dilde `l10n/*.arb` + `flutter gen-l10n`
-- **Durum:** 🚧 Uygulanıyor
+- **Durum:** 🚧 Kısmen uygulandı — commit 1–3 tamam (U2–U8, U13, U14 kısmen); kalan: U1, U9–U12, U15–U19
 
 ## Bulgular → Karar
 

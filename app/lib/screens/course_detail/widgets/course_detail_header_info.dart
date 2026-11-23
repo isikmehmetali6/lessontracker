@@ -35,7 +35,12 @@ class CourseDetailHeaderInfo extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                '${AppLocalizations.of(context)!.semesterDefault} • ${course.professor ?? AppLocalizations.of(context)!.noProfessor}',
+                // Dönem bilgisi tutulmuyor; sabit "Spring Semester" yerine dersin
+                // alt başlığı ve hocası gösterilir.
+                [
+                  if (course.subtitle?.isNotEmpty ?? false) course.subtitle!,
+                  course.professor ?? AppLocalizations.of(context)!.noProfessor,
+                ].join(' • '),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
