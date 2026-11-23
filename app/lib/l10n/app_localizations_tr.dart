@@ -517,7 +517,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get noCourses => 'Henüz ders yok';
 
   @override
-  String get addYourFirstCourse => 'İlk dersini eklemek için + butonuna dokun!';
+  String get addYourFirstCourse => 'Takibe başlamak için ilk dersini ekle!';
 
   @override
   String get editProfile => 'Profili Düzenle';
@@ -1073,19 +1073,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get daySun => 'Paz';
 
   @override
-  String get dayM => 'P';
+  String get dayM => 'Pt';
 
   @override
-  String get dayT => 'S';
+  String get dayT => 'Sa';
 
   @override
-  String get dayW => 'Ç';
+  String get dayW => 'Ça';
 
   @override
-  String get dayTh => 'P';
+  String get dayTh => 'Pe';
 
   @override
-  String get dayF => 'C';
+  String get dayF => 'Cu';
 
   @override
   String get daySa => 'Ct';
@@ -2272,4 +2272,148 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get moodleInsecureUrlWarning => 'Bu bağlantı şifresiz (http). Moodle token\'ınız ağda açıkta kalabilir.';
+
+  @override
+  String get sendResetLink => 'Sıfırlama linki gönder';
+
+  @override
+  String get resetLinkSentTitle => 'E-postanı kontrol et';
+
+  @override
+  String resetLinkSentDesc(Object email) {
+    return '$email adresine şifre sıfırlama linki gönderdik. Yeni şifre belirlemek için linki bu cihazda aç. Spam klasörünü de kontrol et.';
+  }
+
+  @override
+  String get setNewPasswordTitle => 'Yeni şifre belirle';
+
+  @override
+  String get setNewPasswordDesc => 'Hesabın için yeni bir şifre seç.';
+
+  @override
+  String get passwordChangedE2EWarning => 'Şifre değiştirildi. Şifreli bulut yedeğin hâlâ eski şifrenle kilitli; hatırlıyorsan geri yüklerken eski şifreni gir.';
+
+  @override
+  String get onbTitle1 => 'Derslerini Takip Et';
+
+  @override
+  String get onbDesc1 => 'Ders programını düzenle, devamsızlığını takip et ve hiçbir dersi kaçırma.';
+
+  @override
+  String get onbTitle2 => 'Akıllı Notlar';
+
+  @override
+  String get onbDesc2 => 'Metin notu al, belgeleri OCR ile tara, ses kaydet — hepsi tek yerde.';
+
+  @override
+  String get onbTitle3 => 'Çalışma Zamanlayıcısı';
+
+  @override
+  String get onbDesc3 => 'Odaklanmak için Pomodoro tekniğini kullan. Çalışma süreni ve ilerlemeni takip et.';
+
+  @override
+  String get onbTitle4 => 'İstatistikler ve Not Ortalaması';
+
+  @override
+  String get onbDesc4 => 'Notlarını, istatistiklerini ve ortalama hesaplayıcıyı tek yerde gör.';
+
+  @override
+  String get moodleFeatureAssignmentsDesc => 'Son teslim tarihlerini kaçırma';
+
+  @override
+  String get moodleFeatureGradesDesc => 'Tüm sınav sonuçlarını tek yerde gör';
+
+  @override
+  String get moodleFeatureAnnouncementsDesc => 'Hocalarının paylaşımlarını anında gör';
+
+  @override
+  String get moodleFeatureMultiAccountDesc => 'Birden fazla üniversite desteği';
+
+  @override
+  String get statCourses => 'Ders';
+
+  @override
+  String get statDueSoon => 'Yaklaşan';
+
+  @override
+  String get statAtRisk => 'Riskli';
+
+  @override
+  String get scanNotes => 'Not Tara';
+
+  @override
+  String get ocrImport => 'OCR ile aktar';
+
+  @override
+  String get kvkkConsentReset => 'KVKK onayı sıfırlandı — uygulamayı yeniden açın';
+
+  @override
+  String get end => 'Bitiş';
+
+  @override
+  String get securityEncryption => 'Güvenlik ve Şifreleme';
+
+  @override
+  String get dailyProgress => 'Günlük İlerleme';
+
+  @override
+  String get noAbsenceLimit => 'Devamsızlık sınırı yok';
+
+  @override
+  String get badgeExam => 'SINAV';
+
+  @override
+  String get badgeBehind => 'GERİDE';
+
+  @override
+  String get badgeAbsence => 'DEVAMSIZLIK';
+
+  @override
+  String percentComplete(Object percent) {
+    return '%$percent tamamlandı';
+  }
+
+  @override
+  String get viewDetails => 'Detayları Gör';
+
+  @override
+  String get password => 'Şifre';
+
+  @override
+  String get hintEnterEmail => 'E-posta adresini gir';
+
+  @override
+  String get hintEnterPassword => 'Şifreni gir';
+
+  @override
+  String get hintEnterName => 'Adını ve soyadını gir';
+
+  @override
+  String get hintConfirmPassword => 'Şifreni tekrar gir';
+
+  @override
+  String get navWeek => 'Hafta';
+
+  @override
+  String get guestUpgradeTitle => 'Giriş yap veya hesap oluştur';
+
+  @override
+  String get guestUpgradeBody => 'Bu cihazdaki derslerin ve notların korunur. Giriş yaptıktan sonra yedeklemek için Ayarlar\'dan Bulut Yedeği\'ni aç.';
+
+  @override
+  String get exitGuestMode => 'Misafir modundan çık';
+
+  @override
+  String get exitGuestModeWarning => 'Bu işlem bu cihazdaki tüm dersleri ve notları siler. Saklamak istiyorsan bunun yerine giriş yap veya hesap oluştur.';
+
+  @override
+  String get webDemoBanner => 'Web demosu: sayfayı yenileyince veya kapatınca verilerin kaydedilmez. Saklamak için mobil uygulamayı kullan.';
+
+  @override
+  String scheduleAbsences(Object count, Object limit) {
+    return 'Devamsızlık: $count / $limit';
+  }
+
+  @override
+  String get startTimeLabel => 'Başlangıç';
 }

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_colors.dart';
@@ -60,9 +62,9 @@ class _KvkkOnboardingFlowState extends State<KvkkOnboardingFlow> {
     await prefs.remove('consent_cloud_backup');
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('KVKK onayı sıfırlandı - uygulamayı yeniden açın'),
-          duration: Duration(seconds: 3),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.kvkkConsentReset),
+          duration: const Duration(seconds: 3),
         ),
       );
     }
@@ -96,6 +98,8 @@ class _KvkkOnboardingFlowState extends State<KvkkOnboardingFlow> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Geliştirici aracı — yalnızca debug derlemede görünür.
+                  if (kDebugMode)
                   TextButton(
                     onPressed: _resetConsent,
                     style: TextButton.styleFrom(
@@ -116,7 +120,7 @@ class _KvkkOnboardingFlowState extends State<KvkkOnboardingFlow> {
                           ? AppColors.textSecondaryDark
                           : AppColors.textSecondaryLight,
                     ),
-                    child: const Text('Atla'),
+                    child: Text(AppLocalizations.of(context)!.skip),
                   ),
                 ],
               ),

@@ -282,22 +282,22 @@ class _MoodleHubScreenState extends State<MoodleHubScreen>
               _FeatureRow(
                 icon: Icons.assignment_rounded,
                 title: l10n.moodleFeatureAssignments,
-                subtitle: 'Son teslim tarihlerini kaçırma',
+                subtitle: l10n.moodleFeatureAssignmentsDesc,
               ),
               _FeatureRow(
                 icon: Icons.grade_rounded,
                 title: l10n.moodleFeatureGrades,
-                subtitle: 'Tüm sınav sonuçlarını tek yerde gör',
+                subtitle: l10n.moodleFeatureGradesDesc,
               ),
               _FeatureRow(
                 icon: Icons.notifications_rounded,
                 title: l10n.moodleFeatureAnnouncements,
-                subtitle: 'Hocalarının paylaşımlarını anında gör',
+                subtitle: l10n.moodleFeatureAnnouncementsDesc,
               ),
               _FeatureRow(
                 icon: Icons.people_rounded,
                 title: l10n.moodleFeatureMultiAccount,
-                subtitle: 'Birden fazla üniversite desteği',
+                subtitle: l10n.moodleFeatureMultiAccountDesc,
               ),
               const SizedBox(height: 32),
               SizedBox(

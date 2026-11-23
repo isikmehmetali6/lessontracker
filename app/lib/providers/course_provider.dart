@@ -34,12 +34,18 @@ class CourseProvider extends ChangeNotifier {
     FileRepository? fileRepo,
     NotificationService? notificationService,
     CourseFileService? courseFileService,
+    GradeProvider? gradeProvider,
+    AttendanceProvider? attendanceProvider,
   })  : _courseRepo = courseRepo ?? CourseRepository(),
         _absenceRepo = absenceRepo ?? AbsenceRepository(),
         _gradeRepo = gradeRepo ?? GradeRepository(),
         _fileRepo = fileRepo ?? FileRepository(),
         _notificationService = notificationService ?? NotificationService(),
-        _fileService = courseFileService ?? CourseFileService() {
+        _fileService = courseFileService ?? CourseFileService(),
+        _grades = gradeProvider ??
+            GradeProvider(gradeRepo: gradeRepo ?? GradeRepository()),
+        _attendance = attendanceProvider ??
+            AttendanceProvider(absenceRepo: absenceRepo ?? AbsenceRepository()) {
     _absenceBusSub = AbsenceChangeBus.instance.stream.listen(_onAbsenceChanged);
   }
 
@@ -49,6 +55,11 @@ class CourseProvider extends ChangeNotifier {
   final GradeRepository _gradeRepo;
   final FileRepository _fileRepo;
   final NotificationService _notificationService;
+
+  /// Puan ve devamsızlık CRUD'u bu tek örneklere devredilir (önceden her
+  /// çağrıda yenisi oluşturuluyor, hiç dispose edilmiyordu — UI_FIX_PLAN U17).
+  final GradeProvider _grades;
+  final AttendanceProvider _attendance;
   final _uuid = const Uuid();
   StreamSubscription<String>? _absenceBusSub;
 
@@ -571,7 +582,7 @@ class CourseProvider extends ChangeNotifier {
     final course = _courses[courseIndex];
     final newDate = date;
 
-    await AttendanceProvider(absenceRepo: _absenceRepo).addAbsenceAt(
+    await _attendance.addAbsenceAt(
       courseId,
       newDate,
       reason: reason,
@@ -601,7 +612,7 @@ class CourseProvider extends ChangeNotifier {
 
     final course = _courses[courseIndex];
 
-    await AttendanceProvider(absenceRepo: _absenceRepo).removeAbsenceById(
+    await _attendance.removeAbsenceById(
       courseId,
       absenceId,
     );
@@ -633,8 +644,7 @@ class CourseProvider extends ChangeNotifier {
     String absenceId,
     String reason,
   ) async {
-    await AttendanceProvider(absenceRepo: _absenceRepo)
-        .updateAbsenceReasonById(courseId, absenceId, reason);
+    await _attendance.updateAbsenceReasonById(courseId, absenceId, reason);
     notifyListeners();
   }
 
@@ -711,7 +721,7 @@ class CourseProvider extends ChangeNotifier {
     _warning = null;
     try {
       final currentTotal = await getTotalWeight(courseId);
-      final gradeProvider = GradeProvider(gradeRepo: _gradeRepo, uuid: _uuid);
+      final gradeProvider = _grades;
       // DB'ye yazılan nesnenin kendisi döndürülür (B13: önceden farklı id'li
       // ikinci bir Grade oluşturuluyordu).
       final grade = await gradeProvider.addGrade(
@@ -737,7 +747,7 @@ class CourseProvider extends ChangeNotifier {
   Future<bool> updateGrade(Grade grade) async {
     _error = null;
     try {
-      await GradeProvider(gradeRepo: _gradeRepo).updateGrade(grade);
+      await _grades.updateGrade(grade);
       notifyListeners();
       return true;
     } catch (e) {
@@ -750,7 +760,7 @@ class CourseProvider extends ChangeNotifier {
   /// Puan sil (facade).
   Future<bool> deleteGrade(String gradeId) async {
     try {
-      await GradeProvider(gradeRepo: _gradeRepo).deleteGrade(gradeId);
+      await _grades.deleteGrade(gradeId);
       notifyListeners();
       return true;
     } catch (e) {
@@ -978,9 +988,9 @@ class CourseProvider extends ChangeNotifier {
         name: 'Linear Algebra',
         subtitle: 'Chapter 4: Matrices',
         professor: 'Dr. Miller',
-        location: 'Room 302',
+        location: 'Room 204',
         color: AppColors.blue,
-        scheduleDays: [0, 2, 4], // Mon, Wed, Fri
+        scheduleDays: [1, 3], // Tue, Thu (Mathematics ile çakışmasın)
         startTime: const TimeOfDay(hour: 10, minute: 0),
         endTime: const TimeOfDay(hour: 11, minute: 30),
         progress: 55.0,
@@ -1010,6 +1020,8 @@ class CourseProvider extends ChangeNotifier {
   @override
   void dispose() {
     _absenceBusSub?.cancel();
+    _grades.dispose();
+    _attendance.dispose();
     _notificationService.cancelAllNotifications();
     super.dispose();
   }

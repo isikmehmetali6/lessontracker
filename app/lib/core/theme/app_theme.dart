@@ -57,6 +57,21 @@ class AppTheme {
       // Text
       textTheme: _textTheme(AppColors.textPrimaryLight, AppColors.textSecondaryLight),
       
+      // Switch — Material 3 varsayılanı temayla uyumsuz kalın çerçeve çiziyordu
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? Colors.white
+              : Colors.grey.shade400,
+        ),
+        trackColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? AppColors.primary
+              : Colors.grey.shade300,
+        ),
+        trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+      ),
+
       // Button
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -183,6 +198,21 @@ class AppTheme {
       // Text
       textTheme: _textTheme(AppColors.textPrimaryDark, AppColors.textSecondaryDark),
       
+      // Switch — Material 3 varsayılanı temayla uyumsuz kalın çerçeve çiziyordu
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? Colors.white
+              : Colors.grey.shade500,
+        ),
+        trackColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? AppColors.primary
+              : Colors.grey.shade800,
+        ),
+        trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+      ),
+
       // Button
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(

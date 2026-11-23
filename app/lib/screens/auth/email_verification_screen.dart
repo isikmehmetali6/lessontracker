@@ -4,8 +4,13 @@ import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/auth_provider.dart';
 
+/// Kayıttan sonra (ya da onaylanmamış hesapla giriş denenince) gösterilir.
+/// "Confirm email" açıkken bu noktada oturum yoktur; bu yüzden ekran
+/// oturuma değil, verilen [email] adresine dayanır.
 class EmailVerificationScreen extends StatefulWidget {
-  const EmailVerificationScreen({super.key});
+  const EmailVerificationScreen({super.key, required this.email});
+
+  final String email;
 
   @override
   State<EmailVerificationScreen> createState() =>
@@ -16,24 +21,16 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   bool _isResending = false;
   bool _emailSent = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _checkVerification();
-  }
-
-  Future<void> _checkVerification() async {
-    final auth = context.read<AuthProvider>();
-    final isVerified = await auth.refreshUser();
-    if (isVerified && mounted) {
-      Navigator.of(context).popUntil((route) => route.isFirst);
-    }
+  /// Onaydan sonra kullanıcı giriş ekranında e-posta ve şifresiyle girer.
+  void _backToLogin() {
+    context.read<AuthProvider>().clearError();
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   Future<void> _resendVerificationEmail() async {
     setState(() => _isResending = true);
     final auth = context.read<AuthProvider>();
-    final success = await auth.sendVerificationEmail();
+    final success = await auth.resendConfirmation(widget.email);
     if (mounted) {
       setState(() {
         _isResending = false;
@@ -58,8 +55,6 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final auth = context.watch<AuthProvider>();
-    final user = auth.user;
 
     return Scaffold(
       backgroundColor: isDark
@@ -97,7 +92,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                user?.email ?? '',
+                widget.email,
                 style: TextStyle(
                   fontSize: 16,
                   color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
@@ -199,24 +194,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
               const SizedBox(height: 16),
               Center(
                 child: TextButton(
-                  onPressed: () async {
-                    await auth.signOut();
-                  },
-                  child: Text(
-                    l10n.signOut,
-                    style: TextStyle(
-                      color: isDark
-                          ? Colors.grey.shade500
-                          : Colors.grey.shade500,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Center(
-                child: TextButton(
-                  onPressed: _checkVerification,
+                  onPressed: _backToLogin,
                   child: Text(
                     l10n.iVerifiedMyEmail,
                     style: TextStyle(

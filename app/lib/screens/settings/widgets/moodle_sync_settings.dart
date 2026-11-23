@@ -77,7 +77,6 @@ class _MoodleSyncSettingsState extends State<MoodleSyncSettings> {
           : Switch(
               value: _isEnabled,
               onChanged: _toggle,
-              activeThumbColor: AppColors.primary,
             ),
     );
   }

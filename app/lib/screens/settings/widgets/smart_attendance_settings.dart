@@ -169,7 +169,6 @@ class _SmartAttendanceSettingsState extends State<SmartAttendanceSettings> {
           trailing: Switch(
             value: _isEnabled,
             onChanged: _toggleSmartAttendance,
-            activeThumbColor: AppColors.primary,
           ),
         ),
       ],

@@ -517,7 +517,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get noCourses => 'Aún no hay cursos';
 
   @override
-  String get addYourFirstCourse => '¡Toca + para añadir tu primer curso y empezar a organizarte!';
+  String get addYourFirstCourse => '¡Añade tu primer curso para empezar!';
 
   @override
   String get editProfile => 'Editar Perfil';
@@ -2272,4 +2272,148 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get moodleInsecureUrlWarning => 'Esta conexión no está cifrada (http). Tu token de Moodle podría quedar expuesto en la red.';
+
+  @override
+  String get sendResetLink => 'Enviar enlace de restablecimiento';
+
+  @override
+  String get resetLinkSentTitle => 'Revisa tu correo';
+
+  @override
+  String resetLinkSentDesc(Object email) {
+    return 'Enviamos un enlace de restablecimiento a $email. Ábrelo en este dispositivo para establecer una nueva contraseña. Revisa también la carpeta de spam.';
+  }
+
+  @override
+  String get setNewPasswordTitle => 'Establece una nueva contraseña';
+
+  @override
+  String get setNewPasswordDesc => 'Elige una nueva contraseña para tu cuenta.';
+
+  @override
+  String get passwordChangedE2EWarning => 'Contraseña cambiada. Tu copia cifrada en la nube sigue bloqueada con tu contraseña anterior; si la recuerdas, introdúcela al restaurar.';
+
+  @override
+  String get onbTitle1 => 'Sigue tus cursos';
+
+  @override
+  String get onbDesc1 => 'Organiza tu horario, controla tu asistencia y no vuelvas a perder una clase.';
+
+  @override
+  String get onbTitle2 => 'Notas inteligentes';
+
+  @override
+  String get onbDesc2 => 'Toma notas, escanea documentos con OCR y graba audio, todo en un solo lugar.';
+
+  @override
+  String get onbTitle3 => 'Temporizador de estudio';
+
+  @override
+  String get onbDesc3 => 'Usa la técnica Pomodoro para concentrarte. Controla tu tiempo de estudio y tu progreso.';
+
+  @override
+  String get onbTitle4 => 'Estadísticas y promedio';
+
+  @override
+  String get onbDesc4 => 'Consulta tus notas, estadísticas y la calculadora de promedio.';
+
+  @override
+  String get moodleFeatureAssignmentsDesc => 'No te pierdas ninguna entrega';
+
+  @override
+  String get moodleFeatureGradesDesc => 'Todas tus notas en un solo lugar';
+
+  @override
+  String get moodleFeatureAnnouncementsDesc => 'Ve al instante lo que publican tus profesores';
+
+  @override
+  String get moodleFeatureMultiAccountDesc => 'Conecta más de una universidad';
+
+  @override
+  String get statCourses => 'Cursos';
+
+  @override
+  String get statDueSoon => 'Próximas';
+
+  @override
+  String get statAtRisk => 'En riesgo';
+
+  @override
+  String get scanNotes => 'Escanear notas';
+
+  @override
+  String get ocrImport => 'Importar con OCR';
+
+  @override
+  String get kvkkConsentReset => 'Consentimiento KVKK restablecido: vuelve a abrir la app';
+
+  @override
+  String get end => 'Fin';
+
+  @override
+  String get securityEncryption => 'Seguridad y cifrado';
+
+  @override
+  String get dailyProgress => 'Progreso diario';
+
+  @override
+  String get noAbsenceLimit => 'Sin límite de faltas';
+
+  @override
+  String get badgeExam => 'EXAMEN';
+
+  @override
+  String get badgeBehind => 'ATRASADO';
+
+  @override
+  String get badgeAbsence => 'FALTAS';
+
+  @override
+  String percentComplete(Object percent) {
+    return '$percent% completado';
+  }
+
+  @override
+  String get viewDetails => 'Ver detalles';
+
+  @override
+  String get password => 'Contraseña';
+
+  @override
+  String get hintEnterEmail => 'Introduce tu correo';
+
+  @override
+  String get hintEnterPassword => 'Introduce tu contraseña';
+
+  @override
+  String get hintEnterName => 'Introduce tu nombre completo';
+
+  @override
+  String get hintConfirmPassword => 'Repite tu contraseña';
+
+  @override
+  String get navWeek => 'Semana';
+
+  @override
+  String get guestUpgradeTitle => 'Inicia sesión o crea una cuenta';
+
+  @override
+  String get guestUpgradeBody => 'Tus cursos y notas de este dispositivo se conservan. Tras iniciar sesión, activa la copia en la nube en Ajustes.';
+
+  @override
+  String get exitGuestMode => 'Salir del modo invitado';
+
+  @override
+  String get exitGuestModeWarning => 'Esto borra todos los cursos y notas de este dispositivo. Para conservarlos, inicia sesión o crea una cuenta.';
+
+  @override
+  String get webDemoBanner => 'Demo web: tus datos no se guardan al recargar o cerrar la página. Usa la app móvil para conservarlos.';
+
+  @override
+  String scheduleAbsences(Object count, Object limit) {
+    return 'Faltas: $count / $limit';
+  }
+
+  @override
+  String get startTimeLabel => 'Inicio';
 }

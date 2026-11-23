@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:lesson_tracker/models/note.dart';
 import 'package:lesson_tracker/widgets/course/note_cards.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +24,8 @@ void main() {
         ChangeNotifierProvider<ThemeProvider>(
           create: (_) => ThemeProvider(),
           child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
               body: SingleChildScrollView(
                 child: Padding(
@@ -66,6 +69,8 @@ void main() {
         ChangeNotifierProvider<ThemeProvider>(
           create: (_) => ThemeProvider(),
           child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
               body: SingleChildScrollView(
                 child: Padding(
@@ -109,6 +114,8 @@ void main() {
         ChangeNotifierProvider<ThemeProvider>(
           create: (_) => ThemeProvider(),
           child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
               body: SingleChildScrollView(
                 child: Padding(
@@ -147,6 +154,8 @@ void main() {
         ChangeNotifierProvider<ThemeProvider>(
           create: (_) => ThemeProvider(),
           child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
               body: SingleChildScrollView(
                 child: Padding(

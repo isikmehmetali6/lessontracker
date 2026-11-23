@@ -261,6 +261,28 @@ class E2EKeyService {
     await _storeLocally(unwrapped.key, uid);
   }
 
+  /// Şifre e-postayla sıfırlandığında eski şifre bilinmez; bu cihazda yerel
+  /// anahtar varsa bulut kaydı onunla yeni şifreye yeniden sarılır.
+  /// Yerel anahtar yoksa (ya da bulutta anahtar kaydı yoksa) `false` döner.
+  Future<bool> rewrapWithNewPassword(String newPassword) async {
+    if (_currentUserId() == null) return false;
+    final localKey = await getLocalKey();
+    if (localKey == null) return false;
+
+    final keyDoc = await _cloud.get(_systemCollection, _keyDocId);
+    if (keyDoc == null) return false;
+
+    final rewrapped = await _wrap(localKey, newPassword);
+    final keyVersion = (keyDoc.data['keyVersion'] as num?)?.toInt() ?? 1;
+    await _cloud.upsert(_systemCollection, _keyDocId, {
+      ...keyDoc.data,
+      ...rewrapped,
+      'lastKeyChange': DateTime.now().toUtc().toIso8601String(),
+      'keyVersion': keyVersion + 1,
+    });
+    return true;
+  }
+
   Future<void> deleteKey() async {
     if (_currentUserId() != null) {
       try {

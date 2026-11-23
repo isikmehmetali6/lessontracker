@@ -45,6 +45,17 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Supabase Auth e-posta linkleri (kayıt onayı, şifre sıfırlama,
+                 e-posta değişikliği): lessontracker://auth-callback -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="lessontracker" android:host="auth-callback"/>
+            </intent-filter>
+            <!-- Linkleri supabase_flutter (app_links) işler; Flutter'ın kendi
+                 router'ı bunları sayfa yolu sanıp hata vermesin. -->
+            <meta-data android:name="flutter_deeplinking_enabled" android:value="false"/>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

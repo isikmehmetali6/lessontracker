@@ -173,15 +173,19 @@ class AbsenceTrackerCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            _getStatusMessage(context, remaining),
-            style: TextStyle(
-              color: statusColor,
-              fontWeight: FontWeight.w500,
-              fontSize: 14,
+          // Halka zaten "N kaldı" gösteriyor; metin yalnızca hak bittiğinde
+          // ya da aşıldığında ek bilgi verir.
+          if (remaining <= 0) ...[
+            const SizedBox(height: 16),
+            Text(
+              _getStatusMessage(context, remaining),
+              style: TextStyle(
+                color: statusColor,
+                fontWeight: FontWeight.w500,
+                fontSize: 14,
+              ),
             ),
-          ),
+          ],
           if (_buildPredictionWarning(context, remaining) != null)
             _buildPredictionWarning(context, remaining)!,
           if (course.absenceDates.isNotEmpty)

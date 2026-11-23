@@ -89,6 +89,7 @@ class SettingsAboutSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isGuest = context.select<AuthProvider, bool>((a) => a.isGuest);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
 
@@ -162,6 +163,7 @@ class SettingsAboutSection extends StatelessWidget {
                   );
                 },
               ),
+              if (!isGuest) ...[
               SettingsDivider(isDark: isDark),
               SettingsTile(
                 icon: Icons.delete_forever,
@@ -172,11 +174,14 @@ class SettingsAboutSection extends StatelessWidget {
                 titleColor: AppColors.red,
                 onTap: () => _showDeleteAccountDialog(context),
               ),
+              ],
               SettingsDivider(isDark: isDark),
               SettingsTile(
                 icon: Icons.logout,
                 iconColor: AppColors.red,
-                title: AppLocalizations.of(context)!.signOut,
+                title: isGuest
+                    ? AppLocalizations.of(context)!.exitGuestMode
+                    : AppLocalizations.of(context)!.signOut,
                 isDark: isDark,
                 titleColor: AppColors.red,
                 onTap: () {
@@ -188,7 +193,7 @@ class SettingsAboutSection extends StatelessWidget {
                           ? AppColors.surfaceDark
                           : Colors.white,
                       title: Text(
-                        loc.signOut,
+                        isGuest ? loc.exitGuestMode : loc.signOut,
                         style: TextStyle(
                           color: isDark
                               ? AppColors.textPrimaryDark
@@ -196,7 +201,9 @@ class SettingsAboutSection extends StatelessWidget {
                         ),
                       ),
                       content: Text(
-                        loc.signOutConfirmation,
+                        isGuest
+                            ? loc.exitGuestModeWarning
+                            : loc.signOutConfirmation,
                         style: TextStyle(
                           color: isDark
                               ? AppColors.textSecondaryDark
@@ -217,7 +224,7 @@ class SettingsAboutSection extends StatelessWidget {
                             ).popUntil((route) => route.isFirst);
                           },
                           child: Text(
-                            loc.signOut,
+                            isGuest ? loc.exitGuestMode : loc.signOut,
                             style: const TextStyle(color: AppColors.red),
                           ),
                         ),

@@ -48,6 +48,23 @@ abstract class Course with _$Course {
   /// Geri mi kalınmış?
   bool get isBehind => progress < 50.0 && status == 'active';
 
+  /// Devamsızlık sınırının %70'ine ulaşıldı mı?
+  bool get isAbsenceAtRisk =>
+      absenceLimit > 0 && currentAbsences / absenceLimit >= 0.7;
+
+  /// Ana ekranda "riskli" sayılan ders: sınavı ≤7 gün, geride (<%50) ya da
+  /// devamsızlık riski. Sayaç, etiket ve sıralama bu tek tanımı kullanır.
+  bool get needsAttention => hasUpcomingExam || isBehind || isAbsenceAtRisk;
+
+  /// Sıralama önceliği (küçük = önce): sınav, geride, devamsızlık, diğer.
+  int get attentionRank => hasUpcomingExam
+      ? 0
+      : isBehind
+          ? 1
+          : isAbsenceAtRisk
+              ? 2
+              : 3;
+
   /// Sınav yaklaşıyor mu?
   bool get hasUpcomingExam {
     if (nextExamDate == null) return false;

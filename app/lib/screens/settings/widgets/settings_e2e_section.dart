@@ -113,7 +113,7 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'Security & Encryption',
+                  AppLocalizations.of(context)!.securityEncryption,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -201,7 +201,7 @@ class _SettingsE2ESectionState extends State<SettingsE2ESection> {
       trailing: Switch(
         value: _isBiometricEnabled,
         onChanged: _biometricAvailable ? _toggleBiometric : null,
-        activeThumbColor: AppColors.blue,
+        activeTrackColor: AppColors.blue,
       ),
     );
   }

@@ -57,6 +57,7 @@ class AbsenceRepository {
       'date': date.toIso8601String(),
       'reason': reason,
     }, conflictAlgorithm: ConflictAlgorithm.replace);
+    await AutoSyncService().markChanged('absences', courseId);
     AutoSyncService().triggerBackup();
   }
 
@@ -88,6 +89,7 @@ class AbsenceRepository {
       }
     });
     // Bulut devamsızlık kaydı backup'ta yerel durumdan yeniden yazılır.
+    await AutoSyncService().markChanged('absences', courseId);
     AutoSyncService().triggerBackup();
   }
 
@@ -151,7 +153,11 @@ class AbsenceRepository {
       return;
     }
     final db = await _dbHelper.database;
+    final courseId = await _courseIdOf(id);
     await db.delete('absences', where: 'id = ?', whereArgs: [id]);
+    if (courseId != null) {
+      await AutoSyncService().markChanged('absences', courseId);
+    }
     AutoSyncService().triggerBackup();
   }
 
@@ -170,6 +176,24 @@ class AbsenceRepository {
       where: 'id = ?',
       whereArgs: [id],
     );
+    final courseId = await _courseIdOf(id);
+    if (courseId != null) {
+      await AutoSyncService().markChanged('absences', courseId);
+    }
     AutoSyncService().triggerBackup();
+  }
+
+  /// Bulut devamsızlık kaydı ders başına tutulduğu için değişiklik derse
+  /// yazılır.
+  Future<String?> _courseIdOf(String absenceId) async {
+    final db = await _dbHelper.database;
+    final rows = await db.query(
+      'absences',
+      columns: ['courseId'],
+      where: 'id = ?',
+      whereArgs: [absenceId],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : rows.first['courseId'] as String;
   }
 }

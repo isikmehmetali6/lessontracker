@@ -37,6 +37,7 @@ class PlannerEventRepository {
 
     final db = await _dbHelper.database;
     await db.insert('planner_events', event.toMap());
+    await AutoSyncService().markChanged('planner_events', event.id);
     AutoSyncService().triggerBackup();
   }
 
@@ -50,6 +51,7 @@ class PlannerEventRepository {
       where: 'id = ?',
       whereArgs: [event.id],
     );
+    await AutoSyncService().markChanged('planner_events', event.id);
     AutoSyncService().triggerBackup();
   }
 

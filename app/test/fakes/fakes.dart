@@ -14,6 +14,9 @@ class FakeCloudRecordsService extends Fake implements CloudRecordsService {
   /// collection → id → record
   final Map<String, Map<String, CloudRecord>> store = {};
 
+  /// Her upsert edilen kayıt: "koleksiyon/id".
+  final List<String> upsertLog = [];
+
   Map<String, CloudRecord> _col(String c) => store.putIfAbsent(c, () => {});
 
   @override
@@ -30,6 +33,7 @@ class FakeCloudRecordsService extends Fake implements CloudRecordsService {
   @override
   Future<void> upsertMany(String collection, List<CloudRecord> records) async {
     for (final r in records) {
+      upsertLog.add('$collection/${r.id}');
       _col(collection)[r.id] = CloudRecord(
         id: r.id,
         courseId: r.courseId,

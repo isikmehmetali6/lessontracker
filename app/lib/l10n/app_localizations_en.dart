@@ -517,7 +517,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noCourses => 'No courses yet';
 
   @override
-  String get addYourFirstCourse => 'Tap + to add your first course and start tracking!';
+  String get addYourFirstCourse => 'Add your first course to start tracking!';
 
   @override
   String get editProfile => 'Edit Profile';
@@ -2272,4 +2272,148 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get moodleInsecureUrlWarning => 'This connection is not encrypted (http). Your Moodle token may be exposed on the network.';
+
+  @override
+  String get sendResetLink => 'Send reset link';
+
+  @override
+  String get resetLinkSentTitle => 'Check your email';
+
+  @override
+  String resetLinkSentDesc(Object email) {
+    return 'We sent a password reset link to $email. Open it on this device to set a new password. Check your spam folder too.';
+  }
+
+  @override
+  String get setNewPasswordTitle => 'Set a new password';
+
+  @override
+  String get setNewPasswordDesc => 'Choose a new password for your account.';
+
+  @override
+  String get passwordChangedE2EWarning => 'Password changed. Your encrypted cloud backup is still locked with your old password; if you remember it, enter it when restoring.';
+
+  @override
+  String get onbTitle1 => 'Track Your Courses';
+
+  @override
+  String get onbDesc1 => 'Organize your schedule, track attendance, and never miss a class again.';
+
+  @override
+  String get onbTitle2 => 'Smart Notes';
+
+  @override
+  String get onbDesc2 => 'Take text notes, scan documents with OCR, record audio — all in one place.';
+
+  @override
+  String get onbTitle3 => 'Study Timer';
+
+  @override
+  String get onbDesc3 => 'Use the Pomodoro technique to stay focused. Track your study time and progress.';
+
+  @override
+  String get onbTitle4 => 'Insights & GPA';
+
+  @override
+  String get onbDesc4 => 'See your grades, statistics, and GPA calculator to stay on top of your game.';
+
+  @override
+  String get moodleFeatureAssignmentsDesc => 'Never miss a due date';
+
+  @override
+  String get moodleFeatureGradesDesc => 'See all your grades in one place';
+
+  @override
+  String get moodleFeatureAnnouncementsDesc => 'See instructor posts instantly';
+
+  @override
+  String get moodleFeatureMultiAccountDesc => 'Connect more than one university';
+
+  @override
+  String get statCourses => 'Courses';
+
+  @override
+  String get statDueSoon => 'Due soon';
+
+  @override
+  String get statAtRisk => 'At risk';
+
+  @override
+  String get scanNotes => 'Scan Notes';
+
+  @override
+  String get ocrImport => 'OCR import';
+
+  @override
+  String get kvkkConsentReset => 'KVKK consent reset — please reopen the app';
+
+  @override
+  String get end => 'End';
+
+  @override
+  String get securityEncryption => 'Security & Encryption';
+
+  @override
+  String get dailyProgress => 'Daily Progress';
+
+  @override
+  String get noAbsenceLimit => 'No absence limit set';
+
+  @override
+  String get badgeExam => 'EXAM';
+
+  @override
+  String get badgeBehind => 'BEHIND';
+
+  @override
+  String get badgeAbsence => 'ABSENCE';
+
+  @override
+  String percentComplete(Object percent) {
+    return '$percent% complete';
+  }
+
+  @override
+  String get viewDetails => 'View Details';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get hintEnterEmail => 'Enter your email';
+
+  @override
+  String get hintEnterPassword => 'Enter your password';
+
+  @override
+  String get hintEnterName => 'Enter your full name';
+
+  @override
+  String get hintConfirmPassword => 'Re-enter your password';
+
+  @override
+  String get navWeek => 'Week';
+
+  @override
+  String get guestUpgradeTitle => 'Sign in or create an account';
+
+  @override
+  String get guestUpgradeBody => 'Your courses and notes on this device will be kept. After signing in, turn on Cloud Backup in Settings to back them up.';
+
+  @override
+  String get exitGuestMode => 'Exit guest mode';
+
+  @override
+  String get exitGuestModeWarning => 'This deletes all courses and notes stored on this device. To keep them, sign in or create an account instead.';
+
+  @override
+  String get webDemoBanner => 'Web demo: your data is not saved when you reload or close the page. Use the mobile app to keep it.';
+
+  @override
+  String scheduleAbsences(Object count, Object limit) {
+    return 'Absences: $count / $limit';
+  }
+
+  @override
+  String get startTimeLabel => 'Start';
 }

@@ -53,6 +53,7 @@ class FileRepository {
       file.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    await AutoSyncService().markChanged('course_files', file.id);
     AutoSyncService().triggerBackup();
   }
 
@@ -140,5 +141,19 @@ class FileRepository {
     final db = await _dbHelper.database;
     final result = await db.rawQuery('SELECT COUNT(*) FROM course_files');
     return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  Future<CourseFile?> getFileById(String id) async {
+    if (_dbHelper.isWeb) {
+      return _filesInMemory.where((f) => f.id == id).firstOrNull;
+    }
+    final db = await _dbHelper.database;
+    final maps = await db.query(
+      'course_files',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    return maps.isEmpty ? null : CourseFile.fromMap(maps.first);
   }
 }

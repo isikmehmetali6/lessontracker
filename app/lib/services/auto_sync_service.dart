@@ -68,8 +68,8 @@ class AutoSyncService {
 
       if (!await syncService.isCloudBackupEnabled()) return;
 
-      debugPrint('AutoSync: Triggering backup after data change...');
-      await syncService.backupData();
+      debugPrint('AutoSync: Backing up changed records...');
+      await syncService.backupChanges();
       debugPrint('AutoSync: Backup complete.');
     } catch (e) {
       debugPrint('AutoSync: Error during backup: $e');
@@ -77,6 +77,10 @@ class AutoSyncService {
       _isSyncing = false;
     }
   }
+
+  /// Eklenen/güncellenen kaydı artımlı yedek için işaretler (UI_FIX_PLAN U16).
+  Future<void> markChanged(String tableName, String recordId) =>
+      recordPendingChange(tableName, recordId, 'upsert');
 
   /// Silmeyi kuyruğa ekler. [payload] buluttaki ilgili dosya yollarını
   /// (`cloudPath`, `thumbnailCloudPath`) taşır; yerel satır silindikten

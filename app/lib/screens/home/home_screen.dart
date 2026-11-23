@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -10,6 +11,7 @@ import '../settings/settings_screen.dart';
 import 'widgets/home_content.dart';
 import 'widgets/home_bottom_nav.dart';
 import 'widgets/offline_banner.dart';
+import 'widgets/web_demo_banner.dart';
 import 'helpers/home_init_loader.dart';
 import 'helpers/quick_capture_ocr.dart';
 import '../../widgets/course/course_selection_sheet.dart';
@@ -62,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: Column(
           children: [
+            if (kIsWeb) const WebDemoBanner(),
             if (_isOffline)
               const OfflineBanner(),
             Expanded(

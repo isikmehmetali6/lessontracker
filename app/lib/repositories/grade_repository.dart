@@ -50,6 +50,7 @@ class GradeRepository {
       grade.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    await AutoSyncService().markChanged('grades', grade.id);
     AutoSyncService().triggerBackup();
   }
 
@@ -85,6 +86,7 @@ class GradeRepository {
       where: 'id = ?',
       whereArgs: [grade.id],
     );
+    await AutoSyncService().markChanged('grades', grade.id);
     AutoSyncService().triggerBackup();
   }
 
@@ -95,5 +97,15 @@ class GradeRepository {
     final db = await _dbHelper.database;
     final result = await db.rawQuery('SELECT COUNT(*) FROM grades');
     return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  Future<Grade?> getGradeById(String id) async {
+    if (_dbHelper.isWeb) {
+      return _gradesInMemory.where((g) => g.id == id).firstOrNull;
+    }
+    final db = await _dbHelper.database;
+    final maps =
+        await db.query('grades', where: 'id = ?', whereArgs: [id], limit: 1);
+    return maps.isEmpty ? null : Grade.fromMap(maps.first);
   }
 }

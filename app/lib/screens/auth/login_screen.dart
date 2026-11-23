@@ -1,3 +1,4 @@
+import 'widgets/auth_form_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
@@ -122,6 +123,18 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ),
+                        if (provider.needsEmailConfirmation)
+                          TextButton(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => EmailVerificationScreen(
+                                  email: _emailController.text.trim(),
+                                ),
+                              ),
+                            ),
+                            child: Text(l10n.resendVerification),
+                          ),
                       ],
                     ),
                   ),
@@ -130,6 +143,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 _buildTextField(
                   controller: _emailController,
                   label: l10n.emailAddress,
+                  hint: l10n.hintEnterEmail,
                   icon: Icons.email_outlined,
                   isDark: isDark,
                   keyboardType: TextInputType.emailAddress,
@@ -148,7 +162,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Password Field
                 _buildTextField(
                   controller: _passwordController,
-                  label: l10n.newPassword,
+                  label: l10n.password,
+                  hint: l10n.hintEnterPassword,
                   icon: Icons.lock_outline,
                   isDark: isDark,
                   isPassword: true,
@@ -319,20 +334,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isSubmitting = true);
     try {
-      final success = await provider.signIn(
+      // Başarılı girişte AuthWrapper ana ekrana geçer. Onaysız hesap
+      // sunucuda reddedilir; hata kutusu onay e-postasını tekrar gönderme
+      // seçeneği sunar (provider.needsEmailConfirmation).
+      await provider.signIn(
         _emailController.text.trim(),
         _passwordController.text,
       );
-      if (success && mounted) {
-        // Refresh to check email verification
-        await provider.refreshUser();
-        if (!provider.isEmailVerified && mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const EmailVerificationScreen()),
-          );
-        }
-      }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
@@ -509,80 +517,24 @@ class _LoginScreenState extends State<LoginScreen> {
     required String label,
     required IconData icon,
     required bool isDark,
+    String? hint,
     bool isPassword = false,
     bool isPasswordVisible = false,
     VoidCallback? onPasswordToggle,
     String? Function(String?)? validator,
     TextInputType? keyboardType,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: isDark
-                ? AppColors.textSecondaryDark
-                : AppColors.textSecondaryLight,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
-            ),
-            boxShadow: [
-              if (!isDark)
-                BoxShadow(
-                  color: Colors.grey.shade100,
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-            ],
-          ),
-          child: TextFormField(
-            controller: controller,
-            obscureText: isPassword && !isPasswordVisible,
-            keyboardType: keyboardType,
-            validator: validator,
-            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
-            decoration: InputDecoration(
-              prefixIcon: Icon(
-                icon,
-                color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
-              ),
-              suffixIcon: isPassword
-                  ? IconButton(
-                      icon: Icon(
-                        isPasswordVisible
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                        color: isDark
-                            ? Colors.grey.shade600
-                            : Colors.grey.shade400,
-                      ),
-                      onPressed: onPasswordToggle,
-                    )
-                  : null,
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
-              ),
-              hintText: 'Enter your $label',
-              hintStyle: TextStyle(
-                color: isDark ? Colors.grey.shade700 : Colors.grey.shade400,
-              ),
-              errorStyle: const TextStyle(fontSize: 12),
-            ),
-          ),
-        ),
-      ],
+    return AuthTextField(
+      controller: controller,
+      label: label,
+      hint: hint,
+      icon: icon,
+      isDark: isDark,
+      isPassword: isPassword,
+      isPasswordVisible: isPasswordVisible,
+      onPasswordToggle: onPasswordToggle,
+      validator: validator,
+      keyboardType: keyboardType,
     );
   }
 }

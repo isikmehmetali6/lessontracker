@@ -1,10 +1,18 @@
+import 'dart:ui' show PlatformDispatcher;
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LanguageProvider extends ChangeNotifier {
-  Locale _locale = const Locale('en');
-
   static const _supportedLocales = ['en', 'tr', 'es', 'de'];
+
+  /// Kayıtlı tercih yoksa cihaz dili (destekleniyorsa), değilse İngilizce.
+  static Locale deviceDefault([Locale? device]) {
+    final code = (device ?? PlatformDispatcher.instance.locale).languageCode;
+    return Locale(_supportedLocales.contains(code) ? code : 'en');
+  }
+
+  Locale _locale = deviceDefault();
 
   Locale get locale => _locale;
 
@@ -33,9 +41,11 @@ class LanguageProvider extends ChangeNotifier {
     await prefs.setString('language_code', _locale.languageCode);
   }
 
-  void clearLocale() {
-    _locale = const Locale('en');
-    _saveLocale();
+  /// Kullanıcı tercihini siler; uygulama yeniden cihaz dilini izler.
+  Future<void> clearLocale() async {
+    _locale = deviceDefault();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('language_code');
     notifyListeners();
   }
 }

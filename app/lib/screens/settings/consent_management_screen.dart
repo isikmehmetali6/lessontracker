@@ -341,7 +341,7 @@ class _ConsentManagementScreenState extends State<ConsentManagementScreen> {
                       Switch(
                         value: value,
                         onChanged: (v) => onChanged(v),
-                        activeThumbColor: iconColor,
+                        activeTrackColor: iconColor,
                       ),
                     ],
                   ),

@@ -116,6 +116,8 @@ class SyncService {
 
   static const String _keyCloudBackupEnabled = 'cloud_backup_enabled';
   static const String _keyLastOrphanCleanup = 'last_orphan_cleanup_timestamp';
+  static const String _keyLastBackup = 'last_backup_timestamp';
+  static const String _keyForceFullBackup = 'force_full_backup';
 
   /// Kayıtların tutulduğu koleksiyonlar (system/uploads hariç).
   static const List<String> dataCollections = [
@@ -263,6 +265,10 @@ class SyncService {
 
     _reportProgress('Fetching local data...', 0.1);
 
+    // Tam yedek kuyruktaki tüm "upsert"leri kapsar; başladığı andaki en
+    // büyük satır no'suna kadar olanlar sonunda temizlenir.
+    final queueMark = await _maxUpsertQueueId();
+
     final courses = await _courseRepo.getAllCoursesForSync();
     final notes = await _noteRepo.getAllNotesForSync();
     final deadlines = await _deadlineRepo.getAllDeadlines();
@@ -349,13 +355,17 @@ class SyncService {
     );
 
     _reportProgress('Backing up absences...', 0.9);
-    await _backupAbsences(courses);
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(
-      'last_backup_timestamp',
-      DateTime.now().millisecondsSinceEpoch,
+    final cloudAbsenceIds =
+        (await _cloud.getAll('absences')).map((r) => r.id).toSet();
+    await _backupAbsencesFor(
+      courses.map((c) => c.id),
+      onlyDeleteIfIn: cloudAbsenceIds,
     );
+
+    await _clearUpsertQueue(upTo: queueMark);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_keyLastBackup, DateTime.now().millisecondsSinceEpoch);
+    await prefs.remove(_keyForceFullBackup);
 
     _reportProgress('Backup Completed!', 1.0);
 
@@ -424,22 +434,23 @@ class SyncService {
 
   /// Ders başına tek kayıt: `{courseId, items: [{id, date, reason}]}`.
   /// Yerelde devamsızlığı kalmayan dersin bulut kaydı silinir.
-  Future<void> _backupAbsences(List<Course> courses) async {
-    final cloudIds =
-        (await _cloud.getAll('absences')).map((r) => r.id).toSet();
-    final records = <CloudRecord>[];
+  /// [onlyDeleteIfIn] verilirse yalnızca bu kümede olan kayıtlar silinir
+  /// (tam yedekte gereksiz silme isteklerini önler).
+  Future<void> _backupAbsencesFor(
+    Iterable<String> courseIds, {
+    Set<String>? onlyDeleteIfIn,
+  }) async {
     final plains = <Map<String, dynamic>>[];
-
-    for (final course in courses) {
-      final rows = await _absenceRepo.getAbsencesWithReasonByCourse(course.id);
+    for (final courseId in courseIds.toSet()) {
+      final rows = await _absenceRepo.getAbsencesWithReasonByCourse(courseId);
       if (rows.isEmpty) {
-        if (cloudIds.contains(course.id)) {
-          await _withRetry(() => _cloud.delete('absences', course.id), 3);
+        if (onlyDeleteIfIn == null || onlyDeleteIfIn.contains(courseId)) {
+          await _withRetry(() => _cloud.delete('absences', courseId), 3);
         }
         continue;
       }
       plains.add({
-        'courseId': course.id,
+        'courseId': courseId,
         'items': rows
             .map(
               (r) => {
@@ -453,14 +464,17 @@ class SyncService {
             .toList(),
       });
     }
+    if (plains.isEmpty) return;
 
     final sealed = await _crypto.sealAll(plains);
-    for (var i = 0; i < plains.length; i++) {
-      final courseId = plains[i]['courseId'] as String;
-      records.add(
-        CloudRecord(id: courseId, courseId: courseId, data: sealed[i]),
-      );
-    }
+    final records = [
+      for (var i = 0; i < plains.length; i++)
+        CloudRecord(
+          id: plains[i]['courseId'] as String,
+          courseId: plains[i]['courseId'] as String,
+          data: sealed[i],
+        ),
+    ];
     for (var i = 0; i < records.length; i += _kBatchChunkSize) {
       final chunk = records.sublist(
         i,
@@ -468,6 +482,133 @@ class SyncService {
       );
       await _withRetry(() => _cloud.upsertMany('absences', chunk), 3);
     }
+  }
+
+  // ==================== ARTIMLI YEDEK ====================
+
+  /// Yalnızca son yedekten beri eklenen/güncellenen kayıtları gönderir
+  /// (repository'ler `AutoSyncService.markChanged` ile işaretler). Hiç tam
+  /// yedek alınmamışsa ya da tam yedek istendiyse [backupData]'ya düşer.
+  /// UI_FIX_PLAN U16.
+  Future<void> backupChanges() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getInt(_keyLastBackup) == null ||
+        (prefs.getBool(_keyForceFullBackup) ?? false)) {
+      await backupData();
+      return;
+    }
+    if (!_isSignedIn()) throw Exception('User not logged in');
+    if (!await isCloudBackupEnabled()) {
+      throw Exception('Cloud backup is disabled. Please enable it in Settings.');
+    }
+    if (!await _checkConnectivity()) {
+      throw Exception('No internet connection.');
+    }
+    if (!await _crypto.isReady) throw RecordCryptoKeyMissing();
+
+    final db = await DatabaseHelper().database;
+    final rows = await db.query(
+      'pending_changes',
+      columns: ['id', 'tableName', 'recordId'],
+      where: 'operation = ? AND synced = 0',
+      whereArgs: ['upsert'],
+    );
+    if (rows.isEmpty) return;
+    final queueMark =
+        rows.map((r) => r['id'] as int).reduce((a, b) => a > b ? a : b);
+
+    final ids = <String, Set<String>>{};
+    for (final r in rows) {
+      ids.putIfAbsent(r['tableName'] as String, () => {}).add(
+            r['recordId'] as String,
+          );
+    }
+
+    Future<List<T>> load<T>(
+      String table,
+      Future<T?> Function(String id) get,
+    ) async {
+      final out = <T>[];
+      for (final id in ids[table] ?? const <String>{}) {
+        final item = await get(id); // silinmiş kayıtlar atlanır
+        if (item != null) out.add(item);
+      }
+      return out;
+    }
+
+    await _commitInChunks<Course>(
+      items: await load('courses', _courseRepo.getCourseById),
+      collection: 'courses',
+      toMap: (c) => c.toMap(),
+      getId: (c) => c.id,
+    );
+    await _commitInChunks<Deadline>(
+      items: await load('deadlines', _deadlineRepo.getDeadlineById),
+      collection: 'deadlines',
+      toMap: (d) => d.toMap(),
+      getId: (d) => d.id,
+      getCourseId: (d) => d.courseId,
+    );
+    await _commitInChunks<PlannerEvent>(
+      items: await load('planner_events', _plannerEventRepo.getEventById),
+      collection: 'planner_events',
+      toMap: (e) => e.toMap(),
+      getId: (e) => e.id,
+    );
+    await _commitInChunks<Grade>(
+      items: await load('grades', _gradeRepo.getGradeById),
+      collection: 'grades',
+      toMap: (g) => g.toMap(),
+      getId: (g) => g.id,
+      getCourseId: (g) => g.courseId,
+    );
+
+    final e2eEnabled = await _keyService.isE2EEnabled();
+    final notes = <Note>[];
+    for (final n in await load('notes', _noteRepo.getNoteById)) {
+      notes.add(e2eEnabled ? await _uploadNoteAttachments(n) : n);
+    }
+    await _commitInChunks<Note>(
+      items: notes,
+      collection: 'notes',
+      toMap: (n) => n.toMap(),
+      getId: (n) => n.id,
+      getCourseId: (n) => n.courseId,
+    );
+    final files = <CourseFile>[];
+    for (final f in await load('course_files', _fileRepo.getFileById)) {
+      files.add(e2eEnabled ? await _uploadCourseFile(f) : f);
+    }
+    await _commitInChunks<CourseFile>(
+      items: files,
+      collection: 'files',
+      toMap: (f) => f.toMap(),
+      getId: (f) => f.id,
+      getCourseId: (f) => f.courseId,
+    );
+
+    await _backupAbsencesFor(ids['absences'] ?? const <String>{});
+
+    await _clearUpsertQueue(upTo: queueMark);
+    await prefs.setInt(_keyLastBackup, DateTime.now().millisecondsSinceEpoch);
+  }
+
+  Future<int?> _maxUpsertQueueId() async {
+    final db = await DatabaseHelper().database;
+    final r = await db.rawQuery(
+      "SELECT MAX(id) AS m FROM pending_changes WHERE operation = 'upsert'",
+    );
+    return r.first['m'] as int?;
+  }
+
+  Future<void> _clearUpsertQueue({int? upTo}) async {
+    if (upTo == null) return;
+    final db = await DatabaseHelper().database;
+    await db.delete(
+      'pending_changes',
+      where: 'operation = ? AND id <= ?',
+      whereArgs: ['upsert', upTo],
+    );
   }
 
   // ==================== RESTORE ====================
@@ -492,6 +633,7 @@ class SyncService {
 
     var skipped = 0;
     var hasLegacy = false;
+    final queueMarkBefore = await _maxUpsertQueueId() ?? 0;
 
     Future<Map<String, dynamic>?> open(CloudRecord doc) async {
       if (!RecordCrypto.isCurrent(doc.data)) hasLegacy = true;
@@ -625,8 +767,20 @@ class SyncService {
 
     _reportProgress('Restore Completed!', 1.0);
 
-    // Legacy kayıtları v2'ye taşımak için backup (ayar açıksa).
-    if (hasLegacy) AutoSyncService().triggerBackup();
+    // Restore'un kendi eklemeleri buluttakinin aynısı; tekrar yüklenmesin.
+    final db = await DatabaseHelper().database;
+    await db.delete(
+      'pending_changes',
+      where: 'operation = ? AND id > ?',
+      whereArgs: ['upsert', queueMarkBefore],
+    );
+
+    // Legacy kayıtları v2'ye taşımak için bir sonraki yedek tam olmalı.
+    if (hasLegacy) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_keyForceFullBackup, true);
+      AutoSyncService().triggerBackup();
+    }
 
     return RestoreResult(skippedRecords: skipped);
   }

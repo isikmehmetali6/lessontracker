@@ -1,3 +1,4 @@
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lesson_tracker/core/theme/app_colors.dart';
@@ -8,23 +9,24 @@ class HomeStatsSummary extends StatelessWidget {
   const HomeStatsSummary({super.key});
 
   @override
-  Widget build(BuildContext context) {    final isDark = Theme.of(context).brightness == Brightness.dark;
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return Consumer2<CourseProvider, DeadlineProvider>(
       builder: (context, courseProvider, deadlineProvider, _) {
-        final courses = courseProvider.courses;
         final uniqueCourses = courseProvider.uniqueCourses;
 
-        // Count absence risks across all individual schedules
-        final atRiskCount = courses.where((c) {
-          return c.absenceLimit > 0 &&
-              (c.currentAbsences / c.absenceLimit) >= 0.7;
-        }).length;
+        // "Riskli" = ana ekrandaki etiketlerle aynı kural (Course.needsAttention)
+        final atRiskCount =
+            uniqueCourses.where((c) => c.needsAttention).length;
 
+        // Yaklaşan = 7 gün içindeki teslimler + sınavlar
+        final now = DateTime.now();
         final upcomingDeadlines = deadlineProvider.deadlines.where((d) {
-          final now = DateTime.now();
-          return d.date.isAfter(now) && d.date.difference(now).inDays <= 7;
-        }).length;
+              return d.date.isAfter(now) && d.date.difference(now).inDays <= 7;
+            }).length +
+            uniqueCourses.where((c) => c.hasUpcomingExam).length;
 
         // Simple stats row
         return Container(
@@ -35,7 +37,7 @@ class HomeStatsSummary extends StatelessWidget {
               Expanded(
                 child: _buildStatItem(
                   context,
-                  label: 'Courses',
+                  label: l10n.statCourses,
                   value: uniqueCourses.length.toString(),
                   icon: Icons.book,
                   color: AppColors.blue,
@@ -47,7 +49,7 @@ class HomeStatsSummary extends StatelessWidget {
               Expanded(
                 child: _buildStatItem(
                   context,
-                  label: 'Deadlines',
+                  label: l10n.statDueSoon,
                   value: upcomingDeadlines.toString(),
                   icon: Icons.access_time,
                   color: AppColors.orange,
@@ -59,7 +61,7 @@ class HomeStatsSummary extends StatelessWidget {
               Expanded(
                 child: _buildStatItem(
                   context,
-                  label: 'At Risk',
+                  label: l10n.statAtRisk,
                   value: atRiskCount.toString(),
                   icon: Icons.warning_amber_rounded,
                   color: atRiskCount > 0 ? AppColors.red : AppColors.green,

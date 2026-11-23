@@ -1,3 +1,4 @@
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:lesson_tracker/core/theme/app_colors.dart';
 import 'package:lesson_tracker/models/course.dart';
@@ -9,10 +10,11 @@ class PriorityCourseCard extends StatelessWidget {
   const PriorityCourseCard({super.key, required this.course, this.onTap});  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     // Determine background color based on priority
     Color bgColor;
-    if (course.hasUpcomingExam || course.isBehind) {
+    if (course.needsAttention) {
       bgColor = AppColors.red.withValues(alpha: isDark ? 0.3 : 0.8);
     } else {
       bgColor = course.color.withValues(alpha: isDark ? 0.2 : 0.7);
@@ -21,7 +23,7 @@ class PriorityCourseCard extends StatelessWidget {
     Color textColor;
     Color secondaryTextColor;
     if (isDark) {
-      textColor = course.hasUpcomingExam || course.isBehind
+      textColor = course.needsAttention
           ? Colors.white
           : (course.color.computeLuminance() > 0.5
                 ? Colors.black
@@ -32,11 +34,16 @@ class PriorityCourseCard extends StatelessWidget {
       secondaryTextColor = Colors.white70;
     }
 
-    final semanticLabel = course.hasUpcomingExam
-        ? '${course.name}, exam upcoming, ${course.progress.round()}% complete'
-        : course.isBehind
-            ? '${course.name}, behind schedule, ${course.progress.round()}% complete'
-            : '${course.name}, ${course.progress.round()}% complete';
+    final semanticLabel = [
+      course.name,
+      if (course.hasUpcomingExam)
+        l10n.badgeExam
+      else if (course.isBehind)
+        l10n.badgeBehind
+      else if (course.isAbsenceAtRisk)
+        l10n.badgeAbsence,
+      l10n.percentComplete(course.progress.round()),
+    ].join(', ');
 
     return Semantics(
       button: onTap != null,
@@ -100,8 +107,8 @@ class PriorityCourseCard extends StatelessWidget {
                     color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text(
-                    'EXAM',
+                  child: Text(
+                    l10n.badgeExam,
                             style: TextStyle(
                               color: AppColors.red,
                               fontSize: 10,
@@ -109,7 +116,7 @@ class PriorityCourseCard extends StatelessWidget {
                             ),
                           ),
                         )
-                      else if (course.isBehind)
+                      else if (course.isBehind || course.isAbsenceAtRisk)
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -119,8 +126,8 @@ class PriorityCourseCard extends StatelessWidget {
                     color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text(
-                    'BEHIND',
+                  child: Text(
+                    course.isBehind ? l10n.badgeBehind : l10n.badgeAbsence,
                             style: TextStyle(
                               color: AppColors.red,
                               fontSize: 10,
@@ -144,7 +151,7 @@ class PriorityCourseCard extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        '${course.progress.round()}% Complete',
+                        l10n.percentComplete(course.progress.round()),
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,

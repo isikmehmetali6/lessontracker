@@ -56,17 +56,9 @@ class HomeBottomNav extends StatelessWidget {
                 Expanded(
                   child: _HomeNavItem(
                     icon: Icons.view_week,
-                    label: AppLocalizations.of(context)?.weeklySchedule ?? 'Schedule',
+                    label: AppLocalizations.of(context)?.navWeek ?? 'Week',
                     isSelected: currentIndex == 2,
                     onTap: () => onTabSelected(2),
-                  ),
-                ),
-                Expanded(
-                  child: _HomeNavItem(
-                    icon: Icons.settings,
-                    label: AppLocalizations.of(context)?.settingsParams ?? 'Settings',
-                    isSelected: currentIndex == 3,
-                    onTap: () => onTabSelected(3),
                   ),
                 ),
                 Expanded(
@@ -78,6 +70,15 @@ class HomeBottomNav extends StatelessWidget {
                       badgeCount: moodle.unreadCount,
                       onTap: () => onTabSelected(4),
                     ),
+                  ),
+                ),
+                // Ayarlar en sonda (görsel sıra; IndexedStack indeksleri aynı)
+                Expanded(
+                  child: _HomeNavItem(
+                    icon: Icons.settings,
+                    label: AppLocalizations.of(context)?.settingsParams ?? 'Settings',
+                    isSelected: currentIndex == 3,
+                    onTap: () => onTabSelected(3),
                   ),
                 ),
               ],

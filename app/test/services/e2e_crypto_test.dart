@@ -177,6 +177,29 @@ void main() {
       expect(await service.getLocalKey(), key);
     });
 
+    test('e-postayla şifre sıfırlamada yerel anahtar yeni şifreye sarılır', () async {
+      await service.initializeUserKey('unutulan');
+      final key = await service.getLocalKey();
+
+      // Eski şifre bilinmeden, yerel anahtarla yeniden sarma
+      expect(await service.rewrapWithNewPassword('yeni-şifre'), isTrue);
+
+      storage.clear();
+      service.clearCache();
+      expect(await service.loadKeyFromCloud('unutulan'), isFalse);
+      expect(await service.loadKeyFromCloud('yeni-şifre'), isTrue);
+      expect(await service.getLocalKey(), key);
+    });
+
+    test('yerel anahtar yoksa yeniden sarma yapılmaz', () async {
+      await service.initializeUserKey('eski');
+      storage.clear();
+      service.clearCache();
+      expect(await service.rewrapWithNewPassword('yeni'), isFalse);
+      // Bulut kaydı değişmedi: eski şifre hâlâ açar
+      expect(await service.loadKeyFromCloud('eski'), isTrue);
+    });
+
     test('başka kullanıcının yerel anahtarı kullanılmaz (B20)', () async {
       await service.initializeUserKey('p');
       expect(await service.hasLocalKey(), isTrue);

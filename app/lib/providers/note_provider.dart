@@ -487,14 +487,19 @@ class NoteProvider extends ChangeNotifier {
   }
 
   /// Örnek notlar ekle
+  /// Örnek notlar. [courseIds] sırası: Biyoloji, Tarih, Matematik (eksikse
+  /// ilk derse düşer). Görseli olmayan notlar OCR/görsel tipinde
+  /// oluşturulmaz; aksi halde kartta kırık görsel çıkıyordu.
   Future<void> addSampleNotes(List<String> courseIds) async {
     if (courseIds.isEmpty) return;
+    String course(int i) => i < courseIds.length ? courseIds[i] : courseIds[0];
+    final biology = course(0), history = course(1), math = course(2);
 
     final sampleNotes = [
       Note(
         id: _uuid.v4(),
-        courseId: courseIds[0],
-        type: NoteType.ocr,
+        courseId: biology,
+        type: NoteType.text,
         title: 'Chapter 4 Summary',
         content:
             'Key concepts on cellular respiration and mitochondrial functions...',
@@ -502,15 +507,16 @@ class NoteProvider extends ChangeNotifier {
       ),
       Note(
         id: _uuid.v4(),
-        courseId: courseIds.length > 1 ? courseIds[1] : courseIds[0],
-        type: NoteType.audio,
-        title: 'Lecture Audio',
-        audioDuration: 765, // 12:45
+        courseId: history,
+        type: NoteType.text,
+        title: 'Lecture Notes',
+        content:
+            'Causes of the Industrial Revolution: steam power, textile mills, urbanisation.',
         tags: ['history', 'lecture'],
       ),
       Note(
         id: _uuid.v4(),
-        courseId: courseIds[0],
+        courseId: math,
         type: NoteType.text,
         title: 'Study Group Notes',
         content:
@@ -519,9 +525,9 @@ class NoteProvider extends ChangeNotifier {
       ),
       Note(
         id: _uuid.v4(),
-        courseId: courseIds[0],
-        type: NoteType.ocr,
-        title: 'Whiteboard Scan',
+        courseId: math,
+        type: NoteType.text,
+        title: 'Whiteboard Formulas',
         content: '∫ x² dx = x³/3 + C. Remember to apply the power rule...',
         tags: ['calculus', 'formulas'],
       ),

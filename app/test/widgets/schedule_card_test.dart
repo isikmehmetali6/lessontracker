@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:lesson_tracker/models/course.dart';
 import 'package:lesson_tracker/widgets/home/schedule_card.dart';
 import 'package:provider/provider.dart';
@@ -28,6 +29,8 @@ void main() {
             return provider;
           },
           child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
               body: ScheduleCard(
                 course: mockCourse,
@@ -68,6 +71,8 @@ void main() {
             return provider;
           },
           child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
               body: ScheduleCard(
                 course: mockCourse,

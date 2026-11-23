@@ -80,8 +80,10 @@ supabase secrets unset EMAIL_USER EMAIL_PASS EMAIL_FROM
 
 - **Email provider:** Açık. "Confirm email" açıksa kullanıcı onay bağlantısına tıklamadan giriş yapamaz. Bu durumda E2E anahtarı kayıt anında değil, ilk girişte üretilir.
 - **Minimum password length:** 6 (uygulamadaki mesajla uyumlu).
-- **Şifre sıfırlama:** `resetPasswordForEmail` bir bağlantı gönderir. Kullanıcının yeni şifre belirleyebilmesi için ya bir deep link (`redirectTo` + uygulamada `passwordRecovery` olayını dinleyen bir ekran) ya da **Site URL** altında barındırılan bir şifre sıfırlama sayfası gerekir. Bu adım henüz uygulanmadı.
-- **SMTP:** Supabase'in yerleşik e-posta servisi saatlik düşük bir limitle gelir. Canlı ortamda **Custom SMTP** tanımlanmalıdır.
+- **URL Configuration (Authentication → URL Configuration):** **Site URL** = `lessontracker://auth-callback`, **Redirect URLs** listesine `lessontracker://auth-callback` eklenmeli. Bu adres iOS `CFBundleURLTypes` ve Android intent-filter ile uygulamayı açar; `supabase_flutter` linki yakalayıp oturuma çevirir. Kayıt onayı, şifre sıfırlama ve e-posta değişikliği çağrıları bu adresi `redirectTo` / `emailRedirectTo` olarak gönderir (`SupabaseBackend.authRedirectUrl`).
+- **Şifre sıfırlama:** Giriş ekranı → "Şifremi unuttum" e-posta ile link gönderir. Link uygulamada açılınca `passwordRecovery` olayı gelir ve `ResetPasswordScreen` yeni şifreyi alır. Bu cihazda E2E anahtarı varsa buluttaki sarılmış anahtar yeni şifreye yeniden sarılır; yoksa şifreli bulut yedeği eski şifreyle kilitli kalır (kullanıcı uyarılır). PKCE kullanıldığı için link, isteğin yapıldığı cihazda açılmalıdır.
+- **Config push uyarısı:** `supabase config push` tüm yapılandırmayı gönderir; SMTP şifresi API'den maskelendiği için çekilen dosyada yer almaz ve push SMTP ayarlarını bozabilir. Auth ayarlarını panelden değiştirin.
+- **SMTP:** Custom SMTP açık — Gmail (`smtp.gmail.com:465`, gönderen `lessontracker88@gmail.com`, uygulama şifresi), e-posta limiti saatte 30. Gmail günlük ~500 alıcı sınırı uygular; kullanıcı sayısı artınca alan adlı bir servis (Resend, SES vb.) önerilir.
 
 ## Firebase'den veri taşıma
 

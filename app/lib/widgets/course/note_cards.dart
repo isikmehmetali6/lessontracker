@@ -1,3 +1,4 @@
+import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
@@ -500,7 +501,7 @@ class CourseNoteCard extends StatelessWidget {
                           icon: Icon(Icons.text_snippet_outlined, size: 16,
                               color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
                           label: Text(
-                            'View Details',
+                            AppLocalizations.of(context)!.viewDetails,
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 13,

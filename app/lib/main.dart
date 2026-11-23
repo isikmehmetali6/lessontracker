@@ -27,6 +27,7 @@ import 'package:workmanager/workmanager.dart';
 
 import 'screens/home/home_screen.dart';
 import 'screens/auth/login_screen.dart';
+import 'screens/auth/reset_password_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'screens/onboarding/kvkk_flow.dart';
 
@@ -187,8 +188,9 @@ class _AuthWrapperState extends State<AuthWrapper> {
   Future<void> _checkKvkkConsent() async {
     if (_showOnboarding || _isLocked) return;
 
-    final user = context.read<AuthProvider>().user;
-    if (user == null) return;
+    // Misafirler de kamera, mikrofon ve konum kullanır; KVKK açık rızası
+    // onlardan da alınmalı (UI_FIX_PLAN U18).
+    if (!context.read<AuthProvider>().isAuthenticated) return;
 
     final prefs = await SharedPreferences.getInstance();
     final kvkkConsent = prefs.getInt('kvkk_consent_timestamp');
@@ -215,15 +217,34 @@ class _AuthWrapperState extends State<AuthWrapper> {
         () async => context.read<MoodleProvider>().clearAll(),
       );
 
+      // Oturum içinde giriş yapıldığında (misafir veya hesap) da KVKK
+      // kontrolü çalışsın. Önceki "context.watch" hilesi didChangeDependencies
+      // içinde tetiklenmediği için kontrol yalnızca açılışta yapılıyordu.
+      _authProvider = authProvider;
+      authProvider.addListener(_onAuthChanged);
+
       if (authProvider.isAuthenticated) {
         _checkKvkkConsent();
       }
-    } else if (_initChecked && !_showOnboarding && !_isLocked) {
-      final auth = context.watch<AuthProvider>();
-      if (auth.isAuthenticated && !_showKvkk) {
-        _checkKvkkConsent();
-      }
     }
+  }
+
+  AuthProvider? _authProvider;
+
+  void _onAuthChanged() {
+    final auth = _authProvider;
+    if (auth == null || !mounted) return;
+    if (!auth.isAuthenticated) {
+      if (_showKvkk) setState(() => _showKvkk = false);
+      return;
+    }
+    if (_initChecked && !_showKvkk) _checkKvkkConsent();
+  }
+
+  @override
+  void dispose() {
+    _authProvider?.removeListener(_onAuthChanged);
+    super.dispose();
   }
 
   @override
@@ -249,11 +270,19 @@ class _AuthWrapperState extends State<AuthWrapper> {
     // Auth check
     return Consumer<AuthProvider>(
       builder: (context, auth, _) {
+        // Şifre sıfırlama linkiyle gelindi: üstte açık kalan ekranları
+        // (ör. PasswordRecoveryScreen) kapatıp yeni şifre ekranını göster.
+        if (auth.isPasswordRecovery) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            }
+          });
+          return const ResetPasswordScreen();
+        }
         if (auth.isAuthenticated) {
-          // TODO: Enable email verification check after SMTP settings are configured
-          // if (!auth.isEmailVerified) {
-          //   return EmailVerificationScreen();
-          // }
+          // E-posta onayı sunucuda zorunlu ("Confirm email" açık): onaysız
+          // hesap oturum açamaz, ayrıca kontrol gerekmez.
           if (_showKvkk) {
             return KvkkOnboardingFlow(
               onComplete: () => setState(() => _showKvkk = false),

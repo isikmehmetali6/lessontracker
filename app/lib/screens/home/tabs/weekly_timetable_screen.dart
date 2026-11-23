@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lesson_tracker/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../models/course.dart';
 import '../../../providers/course_provider.dart';
 import '../../course_detail/course_detail_screen.dart';
+import 'timetable_layout.dart';
 
 class WeeklyTimetableScreen extends StatefulWidget {
   const WeeklyTimetableScreen({super.key});
@@ -212,22 +214,33 @@ class _WeeklyTimetableScreenState extends State<WeeklyTimetableScreen> {
                                   _buildCurrentTimeIndicator(columnWidth),
 
                                   // Courses
-                                  ...courses.expand((course) {
-                                    return course.scheduleDays.map((dayIndex) {
-                                      // Calculate Position
+                                  // Courses — aynı gün çakışanlar yan yana şeritlere
+                                  ...List.generate(7, (dayIndex) {
+                                    final slots = [
+                                      for (final course in courses)
+                                        if (course.scheduleDays.contains(dayIndex))
+                                          TimetableSlot<Course>(
+                                            item: course,
+                                            startMinutes: course.startTime.hour * 60 + course.startTime.minute,
+                                            endMinutes: course.endTime.hour * 60 + course.endTime.minute,
+                                          ),
+                                    ];
+                                    return layoutDay(slots).map((placement) {
+                                      final course = placement.slot.item;
                                       final startMinutes = (course.startTime.hour - _startHour) * 60 + course.startTime.minute;
-                                      final durationMinutes = (course.endTime.hour * 60 + course.endTime.minute) - (course.startTime.hour * 60 + course.startTime.minute);
-                                      
+                                      final durationMinutes = placement.slot.endMinutes - placement.slot.startMinutes;
+
                                       final top = (startMinutes / 60) * _hourHeight;
                                       final height = (durationMinutes / 60) * _hourHeight;
-                                      final left = dayIndex * columnWidth;
+                                      final laneWidth = columnWidth / placement.laneCount;
+                                      final left = dayIndex * columnWidth + placement.lane * laneWidth;
 
                                       if (top < 0) return const SizedBox(); // Before start time
 
                                       return Positioned(
                                         top: top,
                                         left: left + 2, // padding
-                                        width: columnWidth - 4,
+                                        width: laneWidth - 4,
                                         height: height,
                                         child: GestureDetector(
                                           onTap: () {
@@ -255,7 +268,9 @@ class _WeeklyTimetableScreenState extends State<WeeklyTimetableScreen> {
                                               children: [
                                                 Text(
                                                   course.name,
-                                                  maxLines: 2, // Allow wrapping
+                                                  // Dar sütunda kelime ortadan bölünmesin
+                                                  maxLines: 1,
+                                                  softWrap: false,
                                                   overflow: TextOverflow.ellipsis,
                                                   style: const TextStyle(
                                                     color: Colors.white,
@@ -282,7 +297,7 @@ class _WeeklyTimetableScreenState extends State<WeeklyTimetableScreen> {
                                         ),
                                       );
                                     });
-                                  }),
+                                  }).expand((blocks) => blocks),
                                 ],
                               ),
                             );

@@ -1,3 +1,4 @@
+import 'widgets/auth_form_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
@@ -124,6 +125,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 _buildTextField(
                   controller: _nameController,
                   label: l10n.fullName,
+                  hint: l10n.hintEnterName,
                   icon: Icons.person_outline,
                   isDark: isDark,
                   validator: (value) {
@@ -142,6 +144,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 _buildTextField(
                   controller: _emailController,
                   label: l10n.emailAddress,
+                  hint: l10n.hintEnterEmail,
                   icon: Icons.email_outlined,
                   isDark: isDark,
                   keyboardType: TextInputType.emailAddress,
@@ -160,7 +163,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 // Password Field
                 _buildTextField(
                   controller: _passwordController,
-                  label: l10n.newPassword,
+                  label: l10n.password,
+                  hint: l10n.hintEnterPassword,
                   icon: Icons.lock_outline,
                   isDark: isDark,
                   isPassword: true,
@@ -183,6 +187,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 _buildTextField(
                   controller: _confirmPasswordController,
                   label: AppLocalizations.of(context)!.confirmPassword,
+                  hint: AppLocalizations.of(context)!.hintConfirmPassword,
                   icon: Icons.lock_outline,
                   isDark: isDark,
                   isPassword: true,
@@ -286,7 +291,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
       if (success) {
         if (!mounted) return;
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const EmailVerificationScreen()),
+          MaterialPageRoute(
+            builder: (_) => EmailVerificationScreen(
+              email: _emailController.text.trim(),
+            ),
+          ),
           (route) => route.isFirst,
         );
       }
@@ -300,80 +309,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
     required String label,
     required IconData icon,
     required bool isDark,
+    String? hint,
     bool isPassword = false,
     bool isPasswordVisible = false,
     VoidCallback? onPasswordToggle,
     String? Function(String?)? validator,
     TextInputType? keyboardType,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: isDark
-                ? AppColors.textSecondaryDark
-                : AppColors.textSecondaryLight,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
-            ),
-            boxShadow: [
-              if (!isDark)
-                BoxShadow(
-                  color: Colors.grey.shade100,
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-            ],
-          ),
-          child: TextFormField(
-            controller: controller,
-            obscureText: isPassword && !isPasswordVisible,
-            keyboardType: keyboardType,
-            validator: validator,
-            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
-            decoration: InputDecoration(
-              prefixIcon: Icon(
-                icon,
-                color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
-              ),
-              suffixIcon: isPassword
-                  ? IconButton(
-                      icon: Icon(
-                        isPasswordVisible
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                        color: isDark
-                            ? Colors.grey.shade600
-                            : Colors.grey.shade400,
-                      ),
-                      onPressed: onPasswordToggle,
-                    )
-                  : null,
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
-              ),
-              hintText: 'Enter your $label',
-              hintStyle: TextStyle(
-                color: isDark ? Colors.grey.shade700 : Colors.grey.shade400,
-              ),
-              errorStyle: const TextStyle(fontSize: 12),
-            ),
-          ),
-        ),
-      ],
+    return AuthTextField(
+      controller: controller,
+      label: label,
+      hint: hint,
+      icon: icon,
+      isDark: isDark,
+      isPassword: isPassword,
+      isPasswordVisible: isPasswordVisible,
+      onPasswordToggle: onPasswordToggle,
+      validator: validator,
+      keyboardType: keyboardType,
     );
   }
 }
