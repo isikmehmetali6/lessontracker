@@ -291,7 +291,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
       if (success) {
         if (!mounted) return;
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const EmailVerificationScreen()),
+          MaterialPageRoute(
+            builder: (_) => EmailVerificationScreen(
+              email: _emailController.text.trim(),
+            ),
+          ),
           (route) => route.isFirst,
         );
       }

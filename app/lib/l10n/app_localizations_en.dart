@@ -2393,4 +2393,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navWeek => 'Week';
+
+  @override
+  String get guestUpgradeTitle => 'Sign in or create an account';
+
+  @override
+  String get guestUpgradeBody => 'Your courses and notes on this device will be kept. After signing in, turn on Cloud Backup in Settings to back them up.';
+
+  @override
+  String get exitGuestMode => 'Exit guest mode';
+
+  @override
+  String get exitGuestModeWarning => 'This deletes all courses and notes stored on this device. To keep them, sign in or create an account instead.';
 }

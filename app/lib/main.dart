@@ -188,8 +188,9 @@ class _AuthWrapperState extends State<AuthWrapper> {
   Future<void> _checkKvkkConsent() async {
     if (_showOnboarding || _isLocked) return;
 
-    final user = context.read<AuthProvider>().user;
-    if (user == null) return;
+    // Misafirler de kamera, mikrofon ve konum kullanır; KVKK açık rızası
+    // onlardan da alınmalı (UI_FIX_PLAN U18).
+    if (!context.read<AuthProvider>().isAuthenticated) return;
 
     final prefs = await SharedPreferences.getInstance();
     final kvkkConsent = prefs.getInt('kvkk_consent_timestamp');

@@ -27,7 +27,7 @@
 | U16 | Her değişiklik tüm veriyi yeniden yüklüyor | Değişen kayıt takibi (`pending_changes` `upsert`); backup yalnız değişenleri gönderir, ilk/elle yedek tam |
 | U17 | CourseProvider her işlemde yeni Grade/AttendanceProvider | Tek örnek, constructor injection |
 | U18 | Misafir KVKK akışını görmüyor | KVKK kontrolü misafiri de kapsar |
-| U19 | `EmailVerificationScreen` erişilemez | Girişte "e-posta onaylanmadı" hatasında "Onay e-postasını tekrar gönder"; ekran kaldırılır |
+| U19 | `EmailVerificationScreen` oturum gerektiriyordu (kayıttan sonra oturum yok → "tekrar gönder" çalışmıyordu) | Ekran e-posta adresiyle çalışır (`resendConfirmation(email)`); girişte "e-posta onaylanmadı" hatasında bu ekrana giden "tekrar gönder" seçeneği. Ekran kaldırılmadı — kayıttan sonra kullanılıyor |
 
 ## Commit sırası
 1. i18n + form metinleri (U3, U4, U14-etiket)

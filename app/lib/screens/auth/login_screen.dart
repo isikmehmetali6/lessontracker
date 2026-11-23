@@ -123,6 +123,18 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ),
+                        if (provider.needsEmailConfirmation)
+                          TextButton(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => EmailVerificationScreen(
+                                  email: _emailController.text.trim(),
+                                ),
+                              ),
+                            ),
+                            child: Text(l10n.resendVerification),
+                          ),
                       ],
                     ),
                   ),
@@ -322,20 +334,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isSubmitting = true);
     try {
-      final success = await provider.signIn(
+      // Başarılı girişte AuthWrapper ana ekrana geçer. Onaysız hesap
+      // sunucuda reddedilir; hata kutusu onay e-postasını tekrar gönderme
+      // seçeneği sunar (provider.needsEmailConfirmation).
+      await provider.signIn(
         _emailController.text.trim(),
         _passwordController.text,
       );
-      if (success && mounted) {
-        // Refresh to check email verification
-        await provider.refreshUser();
-        if (!provider.isEmailVerified && mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const EmailVerificationScreen()),
-          );
-        }
-      }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }

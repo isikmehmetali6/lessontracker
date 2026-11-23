@@ -850,5 +850,9 @@
     "hintEnterPassword": "Introduce tu contraseña",
     "hintEnterName": "Introduce tu nombre completo",
     "hintConfirmPassword": "Repite tu contraseña",
-    "navWeek": "Semana"
+    "navWeek": "Semana",
+    "guestUpgradeTitle": "Inicia sesión o crea una cuenta",
+    "guestUpgradeBody": "Tus cursos y notas de este dispositivo se conservan. Tras iniciar sesión, activa la copia en la nube en Ajustes.",
+    "exitGuestMode": "Salir del modo invitado",
+    "exitGuestModeWarning": "Esto borra todos los cursos y notas de este dispositivo. Para conservarlos, inicia sesión o crea una cuenta."
 }

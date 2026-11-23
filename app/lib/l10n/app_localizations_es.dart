@@ -2393,4 +2393,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get navWeek => 'Semana';
+
+  @override
+  String get guestUpgradeTitle => 'Inicia sesión o crea una cuenta';
+
+  @override
+  String get guestUpgradeBody => 'Tus cursos y notas de este dispositivo se conservan. Tras iniciar sesión, activa la copia en la nube en Ajustes.';
+
+  @override
+  String get exitGuestMode => 'Salir del modo invitado';
+
+  @override
+  String get exitGuestModeWarning => 'Esto borra todos los cursos y notas de este dispositivo. Para conservarlos, inicia sesión o crea una cuenta.';
 }

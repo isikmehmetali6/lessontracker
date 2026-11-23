@@ -41,6 +41,10 @@ class SettingsProfileSection extends StatelessWidget {
 
         return GestureDetector(
           onTap: () {
+            if (auth.isGuest) {
+              _showGuestUpgradeDialog(context, auth);
+              return;
+            }
             if (user != null && !auth.isGuest) {
               showModalBottomSheet(
                 context: context,
@@ -129,6 +133,33 @@ class SettingsProfileSection extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  /// Misafir → hesap: yerel veri silinmeden giriş ekranına dönülür
+  /// (UI_FIX_PLAN U1). Önceki tek yol "Çıkış"tı ve tüm veriyi siliyordu.
+  void _showGuestUpgradeDialog(BuildContext context, AuthProvider auth) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.guestUpgradeTitle),
+        content: Text(l10n.guestUpgradeBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.of(context).popUntil((route) => route.isFirst);
+              auth.leaveGuestMode();
+            },
+            child: Text(l10n.continueAction),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -2393,4 +2393,16 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get navWeek => 'Woche';
+
+  @override
+  String get guestUpgradeTitle => 'Anmelden oder Konto erstellen';
+
+  @override
+  String get guestUpgradeBody => 'Deine Kurse und Notizen auf diesem Gerät bleiben erhalten. Aktiviere nach der Anmeldung das Cloud-Backup in den Einstellungen.';
+
+  @override
+  String get exitGuestMode => 'Gastmodus beenden';
+
+  @override
+  String get exitGuestModeWarning => 'Dabei werden alle Kurse und Notizen auf diesem Gerät gelöscht. Um sie zu behalten, melde dich stattdessen an oder erstelle ein Konto.';
 }

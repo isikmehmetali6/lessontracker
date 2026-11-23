@@ -4718,6 +4718,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Week'**
   String get navWeek;
+
+  /// No description provided for @guestUpgradeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in or create an account'**
+  String get guestUpgradeTitle;
+
+  /// No description provided for @guestUpgradeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your courses and notes on this device will be kept. After signing in, turn on Cloud Backup in Settings to back them up.'**
+  String get guestUpgradeBody;
+
+  /// No description provided for @exitGuestMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit guest mode'**
+  String get exitGuestMode;
+
+  /// No description provided for @exitGuestModeWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This deletes all courses and notes stored on this device. To keep them, sign in or create an account instead.'**
+  String get exitGuestModeWarning;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

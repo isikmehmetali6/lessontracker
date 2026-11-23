@@ -842,5 +842,9 @@
     "hintEnterPassword": "Passwort eingeben",
     "hintEnterName": "Vollständigen Namen eingeben",
     "hintConfirmPassword": "Passwort wiederholen",
-    "navWeek": "Woche"
+    "navWeek": "Woche",
+    "guestUpgradeTitle": "Anmelden oder Konto erstellen",
+    "guestUpgradeBody": "Deine Kurse und Notizen auf diesem Gerät bleiben erhalten. Aktiviere nach der Anmeldung das Cloud-Backup in den Einstellungen.",
+    "exitGuestMode": "Gastmodus beenden",
+    "exitGuestModeWarning": "Dabei werden alle Kurse und Notizen auf diesem Gerät gelöscht. Um sie zu behalten, melde dich stattdessen an oder erstelle ein Konto."
 }

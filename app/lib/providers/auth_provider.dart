@@ -24,6 +24,12 @@ class AuthProvider extends ChangeNotifier {
   bool get isGuest => _isGuest;
   bool get isEmailVerified => _user?.emailVerified ?? false;
 
+  bool _needsEmailConfirmation = false;
+
+  /// Son giriş denemesi "e-posta onaylanmadı" ile reddedildi; giriş ekranı
+  /// onay e-postasını tekrar gönderme seçeneği sunar.
+  bool get needsEmailConfirmation => _needsEmailConfirmation;
+
   bool _isPasswordRecovery = false;
 
   /// Kullanıcı şifre sıfırlama linkiyle uygulamaya döndü; yeni şifre
@@ -100,6 +106,22 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Misafir modundan giriş/kayıt ekranına geçer. [signOut]'un aksine yerel
+  /// veriyi **silmez**: misafirin dersleri ve notları giriş yaptıktan sonra
+  /// hesapta kalır (bulut yedeği açılınca yüklenir).
+  Future<void> leaveGuestMode() async {
+    if (!_isGuest) return;
+    _isGuest = false;
+    _error = null;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_keyIsGuest);
+    } catch (e) {
+      debugPrint('Error clearing guest flag: $e');
+    }
+    notifyListeners();
+  }
+
   /// Hata mesajını temizle — ekran geçişlerinde çağır
   void clearError() {
     if (_error != null) {
@@ -146,9 +168,12 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Email doğrulama emaili gönder
-  Future<bool> sendVerificationEmail() async {
-    if (_user == null) {
-      _error = 'No user logged in.';
+  /// Kayıt onay e-postasını yeniden gönderir. "Confirm email" açıkken kayıt
+  /// sonrası oturum oluşmadığı için oturumdaki kullanıcıya değil, verilen
+  /// adrese gönderilir.
+  Future<bool> resendConfirmation(String email) async {
+    if (_auth == null || email.trim().isEmpty) {
+      _error = 'Authentication service unavailable.';
       notifyListeners();
       return false;
     }
@@ -157,13 +182,9 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final email = _user!.email;
-      if (_auth == null || email == null) {
-        throw Exception('Authentication service unavailable.');
-      }
       await _auth!.resend(
         type: OtpType.signup,
-        email: email,
+        email: email.trim(),
         emailRedirectTo: SupabaseBackend.authRedirectUrl,
       );
       _isLoading = false;
@@ -171,16 +192,14 @@ class AuthProvider extends ChangeNotifier {
       return true;
     } on AuthException catch (e) {
       _error = _mapAuthError(e);
-      _isLoading = false;
-      notifyListeners();
-      return false;
     } catch (e) {
       _error = e.toString();
-      _isLoading = false;
-      notifyListeners();
-      return false;
     }
+    _isLoading = false;
+    notifyListeners();
+    return false;
   }
+
 
   /// Kullanıcı bilgilerini yenile (email verified durumu için)
   Future<bool> refreshUser() async {
@@ -204,6 +223,7 @@ class AuthProvider extends ChangeNotifier {
     }
     _isLoading = true;
     _error = null;
+    _needsEmailConfirmation = false;
     notifyListeners();
 
     try {
@@ -244,6 +264,7 @@ class AuthProvider extends ChangeNotifier {
       return true;
     } on AuthException catch (e) {
       debugPrint('SignIn Auth Error: ${e.code} - ${e.message}');
+      _needsEmailConfirmation = e.code == 'email_not_confirmed';
       _error = _mapAuthError(e);
       _isLoading = false;
       notifyListeners();

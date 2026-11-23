@@ -2393,4 +2393,16 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get navWeek => 'Hafta';
+
+  @override
+  String get guestUpgradeTitle => 'Giriş yap veya hesap oluştur';
+
+  @override
+  String get guestUpgradeBody => 'Bu cihazdaki derslerin ve notların korunur. Giriş yaptıktan sonra yedeklemek için Ayarlar\'dan Bulut Yedeği\'ni aç.';
+
+  @override
+  String get exitGuestMode => 'Misafir modundan çık';
+
+  @override
+  String get exitGuestModeWarning => 'Bu işlem bu cihazdaki tüm dersleri ve notları siler. Saklamak istiyorsan bunun yerine giriş yap veya hesap oluştur.';
 }
