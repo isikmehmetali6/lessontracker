@@ -2416,4 +2416,60 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get startTimeLabel => 'Başlangıç';
+
+  @override
+  String ocrDefaultTitle(Object date) {
+    return 'Tarama $date';
+  }
+
+  @override
+  String get ocrNoText => 'Fotoğrafta metin bulunamadı. Daha iyi ışıkta, kamerayı sayfaya dik tutarak tekrar dene.';
+
+  @override
+  String get ocrUnavailable => 'Metin tanıma burada kullanılamıyor. Gerçek bir iPhone veya Android telefonda çalışır.';
+
+  @override
+  String get ocrFailed => 'Metin tanıma başarısız oldu. Lütfen tekrar dene.';
+
+  @override
+  String get ocrSourceTitle => 'Metni nereden tarayalım?';
+
+  @override
+  String get ocrSourceCamera => 'Fotoğraf çek';
+
+  @override
+  String get ocrSourceGallery => 'Galeriden seç';
+
+  @override
+  String get ocrNoteBadge => 'OCR tarama';
+
+  @override
+  String get photoBadge => 'Fotoğraf';
+
+  @override
+  String get copyText => 'Metni kopyala';
+
+  @override
+  String get textCopied => 'Metin kopyalandı';
+
+  @override
+  String get captureConsentTitle => 'Ders İçeriği Kaydı';
+
+  @override
+  String get captureConsentBody => 'Ders içeriğini kaydetmek için öğretim görevlisinden sözlü izin aldığınızı beyan eder misiniz?';
+
+  @override
+  String get captureConsentLegal => '5846 Sayılı FSK ve KVKK kapsamında içerikler kişisel kullanım amacıyla kaydedilmektedir.';
+
+  @override
+  String get captureConsentKvkkCamera => 'Bu onayla notların için kamera ve fotoğraf kullanımına KVKK kapsamında açık rıza vermiş olursun.';
+
+  @override
+  String get captureConsentKvkkOcr => 'Fotoğraflar metin tanıma için cihazında işlenir. Bu onayla kamera kullanımı ve metin tanıma için KVKK kapsamında açık rıza vermiş olursun.';
+
+  @override
+  String get captureConsentKvkkAudio => 'Bu onayla notların için ses kaydına KVKK kapsamında açık rıza vermiş olursun.';
+
+  @override
+  String get captureConsentAccept => 'İzin Aldım';
 }

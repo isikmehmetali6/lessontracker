@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show PlatformException;
+import 'package:flutter/services.dart'
+    show MissingPluginException, PlatformException;
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
 /// OCR Servisi - Google ML Kit ile metin tanıma
@@ -28,6 +29,7 @@ class OcrService {
           blocks: [],
           success: false,
           error: 'Image file not found at path: $imagePath',
+          errorCode: OcrErrorCode.failed,
         );
       }
 
@@ -63,9 +65,19 @@ class OcrService {
         fullText: '',
         blocks: [],
         success: false,
-        error: e.code == 'UNAVAILABLE'
-            ? 'OCR is not available on the iOS simulator. Use a physical device.'
-            : e.toString(),
+        error: e.toString(),
+        errorCode: e.code == 'UNAVAILABLE'
+            ? OcrErrorCode.unavailable
+            : OcrErrorCode.failed,
+      );
+    } on MissingPluginException catch (e) {
+      // Eklentisi olmayan platform (web, masaüstü)
+      return OcrResult(
+        fullText: '',
+        blocks: [],
+        success: false,
+        error: e.toString(),
+        errorCode: OcrErrorCode.unavailable,
       );
     } catch (e) {
       return OcrResult(
@@ -73,6 +85,7 @@ class OcrService {
         blocks: [],
         success: false,
         error: e.toString(),
+        errorCode: OcrErrorCode.failed,
       );
     }
   }
@@ -89,18 +102,32 @@ class OcrService {
   }
 }
 
+/// OCR hatasının türü — UI bunu çeviriye eşler (metin göstermez).
+enum OcrErrorCode {
+  /// Bu platformda ML Kit yok (iOS simülatörü, web, masaüstü).
+  unavailable,
+
+  /// Tanıma çalıştı ama fotoğrafta metin bulunamadı.
+  noText,
+
+  /// Diğer hatalar.
+  failed,
+}
+
 /// OCR sonucu
 class OcrResult {
   final String fullText;
   final List<OcrBlock> blocks;
   final bool success;
   final String? error;
+  final OcrErrorCode? errorCode;
 
   OcrResult({
     required this.fullText,
     required this.blocks,
     required this.success,
     this.error,
+    this.errorCode,
   });
 
   bool get isEmpty => fullText.trim().isEmpty;

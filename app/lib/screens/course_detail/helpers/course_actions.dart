@@ -3,15 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lesson_tracker/core/utils/consent_utils.dart';
-import 'package:lesson_tracker/l10n/app_localizations.dart';
 import 'package:lesson_tracker/models/course.dart';
 import 'package:lesson_tracker/models/note.dart';
 import 'package:lesson_tracker/providers/course_provider.dart';
 import 'package:lesson_tracker/providers/note_provider.dart';
 import 'package:lesson_tracker/screens/course_detail/handwriting_canvas_screen.dart';
 import 'package:lesson_tracker/screens/note_detail/note_detail_screen.dart';
+import 'package:lesson_tracker/screens/shared/ocr_capture_flow.dart';
 
 /// Capture/OCR actions extracted from CourseDetailScreen per plan
 /// 3.1.2 ('actions helper: capture/OCR/image note'). The host is
@@ -98,48 +97,13 @@ class CourseActions {
     }
   }
 
+  /// Ders detayındaki OCR düğmesi — ortak [runOcrCapture] akışı.
   Future<void> captureOcr(Course course) async {
-    final consent = await ConsentUtils.showContentCaptureConsentDialog(context);
-    if (consent != true || !isMounted()) return;
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(
-      'ocr_consent_timestamp',
-      DateTime.now().millisecondsSinceEpoch,
+    await runOcrCapture(
+      context: context,
+      courseId: course.id,
+      imagePicker: _imagePicker,
     );
-
-    try {
-      final XFile? image = await _imagePicker.pickImage(
-        source: ImageSource.camera,
-        maxWidth: 1920,
-        maxHeight: 1920,
-        imageQuality: 85,
-      );
-      if (image == null || !isMounted()) return;
-      if (!context.mounted) return;
-      showSnack(AppLocalizations.of(context)!.processingOcr);
-
-      final note = await context.read<NoteProvider>().addOcrNote(
-            courseId: course.id,
-            imageFile: File(image.path),
-            courseName: course.name,
-            userName: 'User',
-          );
-      if (!isMounted()) return;
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      if (note != null) {
-        showSnack(AppLocalizations.of(context)!.ocrNoteSaved);
-      } else {
-        handleError(
-          context.read<NoteProvider>().error ?? 'OCR failed',
-        );
-      }
-    } catch (e) {
-      if (isMounted()) {
-        handleError(e, customMessage: 'OCR failed: $e');
-      }
-    }
   }
 
   Future<void> showNoteDetail(Note note) async {

@@ -164,7 +164,17 @@ class NoteProvider extends ChangeNotifier {
     }
   }
 
-  /// OCR notu ekle (resimden metin çıkar)
+  OcrErrorCode? _ocrErrorCode;
+
+  /// Son [addOcrNote] çağrısı neden not oluşturmadı (UI çeviriye eşler).
+  OcrErrorCode? get ocrErrorCode => _ocrErrorCode;
+
+  /// OCR notu ekle (resimden metin çıkar).
+  ///
+  /// Metin bulunamazsa ya da tanıma başarısız olursa not **oluşturulmaz**,
+  /// kaydedilen fotoğraf silinir ve [ocrErrorCode] ayarlanır
+  /// (docs/OCR_FIX_PLAN_2026-11-23.md O1, O5). [customTitle] UI'dan
+  /// çevrilmiş varsayılan başlıkla gelir.
   Future<Note?> addOcrNote({
     required String courseId,
     required File imageFile,
@@ -173,41 +183,48 @@ class NoteProvider extends ChangeNotifier {
     String? courseName,
     String userName = 'User',
   }) async {
+    _error = null;
+    _ocrErrorCode = null;
     if (kIsWeb) {
-      _error = 'OCR notes are not supported on web';
+      _ocrErrorCode = OcrErrorCode.unavailable;
+      _error = 'OCR is not supported on web';
+      notifyListeners();
       return null;
     }
-    _error = null;
     _isProcessingOcr = true;
     notifyListeners();
 
+    String? imagePath;
+    var keepImage = false;
     try {
-      File imageToSave = imageFile;
-
-      final imagePath = await _fileService.saveImage(imageToSave);
+      imagePath = await _fileService.saveImage(imageFile);
 
       final resolvedPath = await _fileService.resolveFilePath(imagePath);
       if (resolvedPath == null) {
+        _ocrErrorCode = OcrErrorCode.failed;
         _error = 'Saved image file could not be found';
         return null;
       }
 
       final ocrResult = await _ocr.recognizeText(resolvedPath);
-
       if (!ocrResult.success) {
-        _error = ocrResult.error ?? 'OCR işlemi başarısız';
+        _ocrErrorCode = ocrResult.errorCode ?? OcrErrorCode.failed;
+        _error = ocrResult.error ?? 'OCR failed';
+        return null;
+      }
+      if (!ocrResult.hasText) {
+        _ocrErrorCode = OcrErrorCode.noText;
+        _error = 'No text found in image';
         return null;
       }
 
-      final title =
-          customTitle ?? 'Scan ${DateTime.now().day}/${DateTime.now().month}';
-
+      final now = DateTime.now();
       final note = Note(
         id: _uuid.v4(),
         courseId: courseId,
         type: NoteType.ocr,
-        title: title,
-        content: ocrResult.fullText,
+        title: customTitle ?? 'Scan ${now.day}/${now.month}',
+        content: ocrResult.fullText.trim(),
         filePath: imagePath,
         thumbnailPath: imagePath,
         tags: tags ?? [],
@@ -218,14 +235,18 @@ class NoteProvider extends ChangeNotifier {
         attachedFile: File(resolvedPath),
         thumbnail: File(resolvedPath),
       );
+      keepImage = true;
       await loadNotes();
       await loadCourseNotes(courseId);
       return note;
     } catch (e) {
+      _ocrErrorCode ??= OcrErrorCode.failed;
       _error = e.toString();
-      notifyListeners();
       return null;
     } finally {
+      if (!keepImage && imagePath != null) {
+        await _fileService.deleteFile(imagePath);
+      }
       _isProcessingOcr = false;
       notifyListeners();
     }

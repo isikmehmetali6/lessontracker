@@ -2416,4 +2416,60 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get startTimeLabel => 'Start';
+
+  @override
+  String ocrDefaultTitle(Object date) {
+    return 'Scan $date';
+  }
+
+  @override
+  String get ocrNoText => 'No text was found in the photo. Try better light and hold the camera straight over the page.';
+
+  @override
+  String get ocrUnavailable => 'Text recognition isn\'t available here. It works on a physical iPhone or Android phone.';
+
+  @override
+  String get ocrFailed => 'Text recognition failed. Please try again.';
+
+  @override
+  String get ocrSourceTitle => 'Scan text from';
+
+  @override
+  String get ocrSourceCamera => 'Take a photo';
+
+  @override
+  String get ocrSourceGallery => 'Choose from gallery';
+
+  @override
+  String get ocrNoteBadge => 'OCR scan';
+
+  @override
+  String get photoBadge => 'Photo';
+
+  @override
+  String get copyText => 'Copy text';
+
+  @override
+  String get textCopied => 'Text copied';
+
+  @override
+  String get captureConsentTitle => 'Lecture content capture';
+
+  @override
+  String get captureConsentBody => 'Do you confirm that you have the lecturer\'s verbal permission to record this lecture content?';
+
+  @override
+  String get captureConsentLegal => 'Under Law No. 5846 (FSK) and KVKK, content is recorded for personal use only.';
+
+  @override
+  String get captureConsentKvkkCamera => 'This also gives your explicit consent (KVKK) to use the camera and photos for your notes.';
+
+  @override
+  String get captureConsentKvkkOcr => 'Photos are processed on your device to recognize text. This also gives your explicit consent (KVKK) for camera use and text recognition.';
+
+  @override
+  String get captureConsentKvkkAudio => 'This also gives your explicit consent (KVKK) to record audio for your notes.';
+
+  @override
+  String get captureConsentAccept => 'I have permission';
 }

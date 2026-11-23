@@ -2416,4 +2416,60 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get startTimeLabel => 'Beginn';
+
+  @override
+  String ocrDefaultTitle(Object date) {
+    return 'Scan $date';
+  }
+
+  @override
+  String get ocrNoText => 'Im Foto wurde kein Text gefunden. Versuche es mit besserem Licht und halte die Kamera gerade über die Seite.';
+
+  @override
+  String get ocrUnavailable => 'Texterkennung ist hier nicht verfügbar. Sie funktioniert auf einem echten iPhone oder Android-Gerät.';
+
+  @override
+  String get ocrFailed => 'Texterkennung fehlgeschlagen. Bitte versuche es erneut.';
+
+  @override
+  String get ocrSourceTitle => 'Text scannen aus';
+
+  @override
+  String get ocrSourceCamera => 'Foto aufnehmen';
+
+  @override
+  String get ocrSourceGallery => 'Aus Galerie wählen';
+
+  @override
+  String get ocrNoteBadge => 'OCR-Scan';
+
+  @override
+  String get photoBadge => 'Foto';
+
+  @override
+  String get copyText => 'Text kopieren';
+
+  @override
+  String get textCopied => 'Text kopiert';
+
+  @override
+  String get captureConsentTitle => 'Aufnahme von Vorlesungsinhalten';
+
+  @override
+  String get captureConsentBody => 'Bestätigst du, dass du die mündliche Erlaubnis der Lehrkraft hast, diese Inhalte aufzunehmen?';
+
+  @override
+  String get captureConsentLegal => 'Gemäß Gesetz Nr. 5846 (FSK) und KVKK werden Inhalte nur für den persönlichen Gebrauch aufgenommen.';
+
+  @override
+  String get captureConsentKvkkCamera => 'Damit erteilst du auch deine ausdrückliche Einwilligung (KVKK) zur Nutzung von Kamera und Fotos für deine Notizen.';
+
+  @override
+  String get captureConsentKvkkOcr => 'Fotos werden zur Texterkennung auf deinem Gerät verarbeitet. Damit erteilst du auch deine ausdrückliche Einwilligung (KVKK) für Kamera und Texterkennung.';
+
+  @override
+  String get captureConsentKvkkAudio => 'Damit erteilst du auch deine ausdrückliche Einwilligung (KVKK) zu Audioaufnahmen für deine Notizen.';
+
+  @override
+  String get captureConsentAccept => 'Ich habe die Erlaubnis';
 }
