@@ -2405,4 +2405,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get exitGuestModeWarning => 'Bu işlem bu cihazdaki tüm dersleri ve notları siler. Saklamak istiyorsan bunun yerine giriş yap veya hesap oluştur.';
+
+  @override
+  String get webDemoBanner => 'Web demosu: sayfayı yenileyince veya kapatınca verilerin kaydedilmez. Saklamak için mobil uygulamayı kullan.';
 }

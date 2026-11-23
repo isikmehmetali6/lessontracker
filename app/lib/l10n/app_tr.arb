@@ -833,5 +833,6 @@
     "guestUpgradeTitle": "Giriş yap veya hesap oluştur",
     "guestUpgradeBody": "Bu cihazdaki derslerin ve notların korunur. Giriş yaptıktan sonra yedeklemek için Ayarlar'dan Bulut Yedeği'ni aç.",
     "exitGuestMode": "Misafir modundan çık",
-    "exitGuestModeWarning": "Bu işlem bu cihazdaki tüm dersleri ve notları siler. Saklamak istiyorsan bunun yerine giriş yap veya hesap oluştur."
+    "exitGuestModeWarning": "Bu işlem bu cihazdaki tüm dersleri ve notları siler. Saklamak istiyorsan bunun yerine giriş yap veya hesap oluştur.",
+    "webDemoBanner": "Web demosu: sayfayı yenileyince veya kapatınca verilerin kaydedilmez. Saklamak için mobil uygulamayı kullan."
 }

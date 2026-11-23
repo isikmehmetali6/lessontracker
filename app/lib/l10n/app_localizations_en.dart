@@ -2405,4 +2405,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exitGuestModeWarning => 'This deletes all courses and notes stored on this device. To keep them, sign in or create an account instead.';
+
+  @override
+  String get webDemoBanner => 'Web demo: your data is not saved when you reload or close the page. Use the mobile app to keep it.';
 }

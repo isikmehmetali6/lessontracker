@@ -2405,4 +2405,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get exitGuestModeWarning => 'Dabei werden alle Kurse und Notizen auf diesem Gerät gelöscht. Um sie zu behalten, melde dich stattdessen an oder erstelle ein Konto.';
+
+  @override
+  String get webDemoBanner => 'Web-Demo: Deine Daten werden beim Neuladen oder Schließen nicht gespeichert. Nutze die mobile App, um sie zu behalten.';
 }

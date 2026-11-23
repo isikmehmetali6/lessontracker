@@ -4742,6 +4742,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This deletes all courses and notes stored on this device. To keep them, sign in or create an account instead.'**
   String get exitGuestModeWarning;
+
+  /// No description provided for @webDemoBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Web demo: your data is not saved when you reload or close the page. Use the mobile app to keep it.'**
+  String get webDemoBanner;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
