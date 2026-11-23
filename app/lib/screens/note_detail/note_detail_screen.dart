@@ -55,6 +55,18 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     return path.toLowerCase().endsWith('.pdf') ? path : null;
   }
 
+  Future<void> _copyContent() async {
+    await Clipboard.setData(ClipboardData(text: _contentController.text));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.textCopied),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -183,6 +195,17 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                   ],
 
                   // Content
+                  if (_contentController.text.isNotEmpty && !_isEditing)
+                    // OCR'dan çıkan metni başka yere aktarabilmek için
+                    // (docs/OCR_FIX_PLAN_2026-11-23.md O6)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: _copyContent,
+                        icon: const Icon(Icons.copy_rounded, size: 18),
+                        label: Text(AppLocalizations.of(context)!.copyText),
+                      ),
+                    ),
                   if (_contentController.text.isNotEmpty || _isEditing) ...[
                     Container(
                       width: double.infinity,

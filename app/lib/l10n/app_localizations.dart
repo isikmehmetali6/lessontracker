@@ -4760,6 +4760,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start'**
   String get startTimeLabel;
+
+  /// No description provided for @ocrDefaultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan {date}'**
+  String ocrDefaultTitle(Object date);
+
+  /// No description provided for @ocrNoText.
+  ///
+  /// In en, this message translates to:
+  /// **'No text was found in the photo. Try better light and hold the camera straight over the page.'**
+  String get ocrNoText;
+
+  /// No description provided for @ocrUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Text recognition isn\'t available here. It works on a physical iPhone or Android phone.'**
+  String get ocrUnavailable;
+
+  /// No description provided for @ocrFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Text recognition failed. Please try again.'**
+  String get ocrFailed;
+
+  /// No description provided for @ocrSourceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan text from'**
+  String get ocrSourceTitle;
+
+  /// No description provided for @ocrSourceCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get ocrSourceCamera;
+
+  /// No description provided for @ocrSourceGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get ocrSourceGallery;
+
+  /// No description provided for @ocrNoteBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'OCR scan'**
+  String get ocrNoteBadge;
+
+  /// No description provided for @photoBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get photoBadge;
+
+  /// No description provided for @copyText.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy text'**
+  String get copyText;
+
+  /// No description provided for @textCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Text copied'**
+  String get textCopied;
+
+  /// No description provided for @captureConsentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lecture content capture'**
+  String get captureConsentTitle;
+
+  /// No description provided for @captureConsentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you confirm that you have the lecturer\'s verbal permission to record this lecture content?'**
+  String get captureConsentBody;
+
+  /// No description provided for @captureConsentLegal.
+  ///
+  /// In en, this message translates to:
+  /// **'Under Law No. 5846 (FSK) and KVKK, content is recorded for personal use only.'**
+  String get captureConsentLegal;
+
+  /// No description provided for @captureConsentKvkkCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'This also gives your explicit consent (KVKK) to use the camera and photos for your notes.'**
+  String get captureConsentKvkkCamera;
+
+  /// No description provided for @captureConsentKvkkOcr.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos are processed on your device to recognize text. This also gives your explicit consent (KVKK) for camera use and text recognition.'**
+  String get captureConsentKvkkOcr;
+
+  /// No description provided for @captureConsentKvkkAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'This also gives your explicit consent (KVKK) to record audio for your notes.'**
+  String get captureConsentKvkkAudio;
+
+  /// No description provided for @captureConsentAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'I have permission'**
+  String get captureConsentAccept;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -597,7 +597,9 @@ class CourseNoteCard extends StatelessWidget {
                                   top: 12,
                                   left: 12,
                                   child: _buildTypeBadge(
-                                    note.isOcr ? 'OCR Scan' : 'Photo',
+                                    note.isOcr
+                                        ? AppLocalizations.of(context)!.ocrNoteBadge
+                                        : AppLocalizations.of(context)!.photoBadge,
                                     note.isOcr ? Icons.document_scanner_rounded : Icons.camera_alt_rounded,
                                     Colors.white,
                                     true,

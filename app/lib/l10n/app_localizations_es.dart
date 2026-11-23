@@ -2416,4 +2416,60 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get startTimeLabel => 'Inicio';
+
+  @override
+  String ocrDefaultTitle(Object date) {
+    return 'Escaneo $date';
+  }
+
+  @override
+  String get ocrNoText => 'No se encontró texto en la foto. Prueba con mejor luz y sostén la cámara recta sobre la página.';
+
+  @override
+  String get ocrUnavailable => 'El reconocimiento de texto no está disponible aquí. Funciona en un iPhone o Android físico.';
+
+  @override
+  String get ocrFailed => 'El reconocimiento de texto falló. Inténtalo de nuevo.';
+
+  @override
+  String get ocrSourceTitle => 'Escanear texto desde';
+
+  @override
+  String get ocrSourceCamera => 'Hacer una foto';
+
+  @override
+  String get ocrSourceGallery => 'Elegir de la galería';
+
+  @override
+  String get ocrNoteBadge => 'Escaneo OCR';
+
+  @override
+  String get photoBadge => 'Foto';
+
+  @override
+  String get copyText => 'Copiar texto';
+
+  @override
+  String get textCopied => 'Texto copiado';
+
+  @override
+  String get captureConsentTitle => 'Captura de contenido de clase';
+
+  @override
+  String get captureConsentBody => '¿Confirmas que tienes el permiso verbal del profesor para registrar este contenido?';
+
+  @override
+  String get captureConsentLegal => 'Según la Ley n.º 5846 (FSK) y la KVKK, el contenido se registra solo para uso personal.';
+
+  @override
+  String get captureConsentKvkkCamera => 'Con esto también das tu consentimiento explícito (KVKK) para usar la cámara y las fotos en tus notas.';
+
+  @override
+  String get captureConsentKvkkOcr => 'Las fotos se procesan en tu dispositivo para reconocer texto. Con esto también das tu consentimiento explícito (KVKK) para la cámara y el reconocimiento de texto.';
+
+  @override
+  String get captureConsentKvkkAudio => 'Con esto también das tu consentimiento explícito (KVKK) para grabar audio en tus notas.';
+
+  @override
+  String get captureConsentAccept => 'Tengo permiso';
 }
